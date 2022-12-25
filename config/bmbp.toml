@@ -1,0 +1,20 @@
+[bmbp]
+[bmbp.app]
+code = "bmbp"
+name = "Bmbp低代码平台"
+title = "Bmbp低代码平台"
+login = "Bmbp低代码平台"
+copy_right = "Bmbp低代码平台 版权信息"
+[bmbp.server]
+host = ""
+port = 6666
+[bmbp.ds]
+driver = "postgres"
+host = "127.0.0.1"
+port = 5432
+database = "bmbp"
+schema = "public"
+user = "bmbp"
+password = "zgk0130!"
+ignore_case = true
+

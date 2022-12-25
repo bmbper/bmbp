@@ -1,0 +1,15 @@
+[package]
+name = "bmbp_orm_ins"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bmbp_orm = { path = "../bmbp_orm" }
+bmbp_vars = { path = "../bmbp_vars" }
+bmbp_types = { path = "../bmbp_types" }
+once_cell = "1"
+async-once-cell = "0.4"
+async_static = "0.1"
+async-lock = "2"

@@ -1,0 +1,16 @@
+[package]
+name = "bmbp_macro"
+version = "0.1.0"
+edition = "2021"
+[lib]
+proc-macro = true
+[dependencies]
+
+bmbp_types = { path = "../bmbp_types" }
+
+# 宏语法解析器
+syn = "1"
+quote = "1"
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
