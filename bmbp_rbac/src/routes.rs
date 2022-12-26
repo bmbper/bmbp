@@ -64,20 +64,25 @@ fn build_v1_organ_router() -> Router {
 
 fn build_v1_user_router() -> Router {
     let mut router = Router::new();
-    router = router.route("info", get(find_user_info_by_params));
-    router = router.route("info/id/:id", get(find_user_info_by_id));
+    router = router.route("/info", get(find_user_info_by_params));
+    router = router.route("/info/id/:id", get(find_user_info_by_id));
     let v1_router = Router::new().nest("/user", router);
     v1_router
 }
 
 fn build_v1_role_router() -> Router {
-    let router = Router::new();
+    let mut router = Router::new();
+    router = router
+        .route("/info", get(find_role_info_by_params))
+        .route("/info/id/:id", get(find_role_info_by_id))
+        .route("/save", post(save_role_info));
     let v1_router = Router::new().nest("/role", router);
     v1_router
 }
 
 fn build_v1_menu_router() -> Router {
-    let router = Router::new();
+    let mut router = Router::new();
+    router = router.route("/tree", post(query_menu_tree));
     let v1_router = Router::new().nest("/menu", router);
     v1_router
 }
