@@ -3,8 +3,10 @@ use axum::{
     Router,
 };
 
+use crate::menu::query_menu_tree;
 use crate::organ::*;
-use crate::user::find_user_info_by_id;
+use crate::role::*;
+use crate::user::*;
 
 pub fn build_rbac_router() -> Router {
     tracing::info!("初始化权限管理模块路由......");
@@ -75,7 +77,7 @@ fn build_v1_role_router() -> Router {
     router = router
         .route("/info", get(find_role_info_by_params))
         .route("/info/id/:id", get(find_role_info_by_id))
-        .route("/save", post(save_role_info));
+        .route("/save", post(save_role));
     let v1_router = Router::new().nest("/role", router);
     v1_router
 }

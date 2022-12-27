@@ -9,7 +9,7 @@ pub struct OrganService();
 
 impl OrganService {
     pub async fn find_tree_data(params: &QueryParam) -> BmbpResp<Vec<BmbpOrganVo>> {
-        let rows = Self::find_grid_data(params);
+        let rows = Self::find_grid_data(params).await?;
         let tree_organ = TreeBuilder::build(rows);
         Ok(tree_organ)
     }

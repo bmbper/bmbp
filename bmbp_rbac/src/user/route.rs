@@ -11,7 +11,7 @@ pub async fn find_user_info_by_id(Path(id): Path<String>) -> BmbpResp<impl IntoR
     Ok(resp)
 }
 
-pub async fn query_user_info_by_params(Json(value): Json<Value>) -> BmbpResp<impl IntoResponse> {
+pub async fn find_user_info_by_params(Json(value): Json<Value>) -> BmbpResp<impl IntoResponse> {
     tracing::info!("{:#?}", value);
     let resp = RespVo::<Value>::default();
     Ok(resp)

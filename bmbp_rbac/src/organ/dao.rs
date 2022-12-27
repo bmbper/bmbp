@@ -28,7 +28,7 @@ impl OrganDao {
         let vo_list = BmbpORM.await.find_list(orm_sql).await?;
         let vo_str = serde_json::to_string(&vo_list).unwrap();
         let organ_list: Vec<BmbpOrganVo> = serde_json::from_str(&vo_str).unwrap();
-        Ok(tree_organ)
+        Ok(organ_list)
     }
 
     pub async fn find_page_data(params: &QueryParam) -> BmbpResp<Vec<BmbpOrganVo>> {
