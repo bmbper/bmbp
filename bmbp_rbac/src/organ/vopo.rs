@@ -45,6 +45,25 @@ impl QueryParam {
 // 分页查询参数
 pub type PageQueryParam = PageReqVo<QueryParam>;
 
+// 组织树
+const BMBP_RBAC_ORGAN: &str = "BMBP_RBAC_ORGAN";
+// 单位分组明细
+const BMBP_RBAC_ORGAN_UNITS: &str = "BMBP_RBAC_ORGAN_UNITS";
+// 单位明细
+const BMBP_RBAC_ORGAN_UNIT: &str = "BMBP_RBAC_ORGAN_UNIT";
+// 部门明细
+const BMBP_RBAC_ORGAN_DEPT: &str = "BMBP_RBAC_ORGAN_DEPT";
+// 岗位明细
+const BMBP_RBAC_ORGAN_POST: &str = "BMBP_RBAC_ORGAN_POST";
+// 人员明细
+const BMBP_RBAC_ORGAN_USER: &str = "BMBP_RBAC_ORGAN_USER";
+// 虚拟组织树
+const BMBP_RBAC_ORGAN_VIRTUAL: &str = "BMBP_RBAC_ORGAN_VIRTUAL";
+// 岗位分管明细
+const BMBP_RBAC_ORGAN_POST_MANAGER: &str = "BMBP_RBAC_ORGAN_POST_MANAGER";
+// 岗位分管明细
+const BMBP_RBAC_ORGAN_USER_POST: &str = "BMBP_RBAC_ORGAN_USER_POST";
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum BmbpOrganType {
@@ -130,56 +149,74 @@ impl TreeNode<BmbpOrganVo> for BmbpOrganVo {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use bmbp_types::BaseVoPo;
-    use bmbp_util::TreeBuilder;
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
+pub struct BmbpOrganUnitsVo {
+    organ_id: String,
+    #[serde(flatten)]
+    base: BaseVoPo,
+}
 
-    use crate::organ::vopo::BmbpOrganType;
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
+pub struct BmbpOrganUnitVo {
+    organ_id: String,
+    #[serde(flatten)]
+    base: BaseVoPo,
+}
 
-    use super::BmbpOrganVo;
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
+pub struct BmbpOrganDeptVo {
+    organ_id: String,
+    #[serde(flatten)]
+    base: BaseVoPo,
+}
 
-    #[test]
-    fn test_tree() {
-        let mut organ_vec: Vec<BmbpOrganVo> = vec![];
-        let root = BmbpOrganVo {
-            organ_id: "1100".to_string(),
-            parent_organ_id: "11".to_string(),
-            organ_title: "1100".to_string(),
-            organ_path: "11/1100".to_string(),
-            organ_data_id: "11".to_string(),
-            organ_type: BmbpOrganType::Units,
-            children: vec![],
-            base: BaseVoPo::default(),
-        };
-        organ_vec.push(root);
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
+pub struct BmbpOrganPostVo {
+    organ_id: String,
+    #[serde(flatten)]
+    base: BaseVoPo,
+}
 
-        let root2 = BmbpOrganVo {
-            organ_id: "1200".to_string(),
-            parent_organ_id: "11".to_string(),
-            organ_title: "1200".to_string(),
-            organ_path: "11/1200".to_string(),
-            organ_data_id: "11".to_string(),
-            organ_type: BmbpOrganType::Units,
-            children: vec![],
-            base: BaseVoPo::default(),
-        };
-        //  organ_vec.push(root2);
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
+pub struct BmbpOrganUserVo {
+    organ_id: String,
+    #[serde(flatten)]
+    base: BaseVoPo,
+}
 
-        let child1 = BmbpOrganVo {
-            organ_id: "110011".to_string(),
-            parent_organ_id: "1100".to_string(),
-            organ_title: "110011".to_string(),
-            organ_path: "11/1100/110011".to_string(),
-            organ_data_id: "1100".to_string(),
-            organ_type: BmbpOrganType::Unit,
-            children: vec![],
-            base: BaseVoPo::default(),
-        };
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
+pub struct BmbpOrganPostManagerVo {
+    organ_id: String,
+    #[serde(flatten)]
+    base: BaseVoPo,
+}
 
-        // organ_vec.push(child1);
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
+pub struct BmbpOrganUserPostVo {
+    organ_id: String,
+    #[serde(flatten)]
+    base: BaseVoPo,
+}
 
-        let organ_tree = TreeBuilder::build::<BmbpOrganVo>(organ_vec);
-        println!("{}", serde_json::to_string_pretty(&organ_tree).unwrap());
-    }
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
+pub struct BmbpOrganVirtualVo {
+    organ_id: String,
+    #[serde(flatten)]
+    base: BaseVoPo,
 }
