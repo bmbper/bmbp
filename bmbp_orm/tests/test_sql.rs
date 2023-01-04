@@ -1,6 +1,6 @@
-use bmbp_orm::{OrmSQL, SQL};
+use bmbp_orm::{DynamicSQL, OrmSQL};
 
 #[test]
 fn test_query_sql() {
-    SQL::query();
+    DynamicSQL::query();
 }

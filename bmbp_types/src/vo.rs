@@ -258,6 +258,8 @@ pub trait TreeNode<T> {
     fn set_children(&mut self, children: Vec<T>);
 }
 
+pub const ROOT_TREE_NODE: &str = "0";
+
 pub trait BaseOrmVoPo {
     fn get_base_vo(&self) -> &BaseVoPo;
     fn get_mut_base_vo(&mut self) -> &mut BaseVoPo;

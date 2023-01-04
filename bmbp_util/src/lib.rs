@@ -1,7 +1,13 @@
+pub use date::date_time_now;
+pub use id::simple_uuid;
+pub use id::simple_uuid_upper;
+pub use id::uuid;
+pub use id::uuid_upper;
 pub use tree::TreeBuilder;
 
 pub mod crypto;
-pub mod id;
+mod date;
+mod id;
 pub mod number;
 pub mod string;
 mod tree;

@@ -8,8 +8,8 @@ pub use dml::InsertSQL;
 pub use dml::UpdateSQL;
 pub use dql::QuerySQL;
 pub use orm::OrmSQL;
-pub use param::SQLParam;
-pub use sql::SQL;
+pub use param::DynamicSQLParam;
+pub use sql::DynamicSQL;
 
 mod ddl;
 mod dml;

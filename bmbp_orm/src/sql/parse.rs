@@ -2,48 +2,48 @@ use serde_json::Value;
 
 use bmbp_types::{BmbpError, BmbpResp};
 
-use crate::{DeleteSQL, InsertSQL, OrmSQL, QuerySQL, UpdateSQL};
+use crate::{DeleteSQL, DynamicSQL, InsertSQL, OrmSQL, QuerySQL, UpdateSQL};
 
 use super::{
     dql::{
         ColumnFieldInner, CstFieldInner, JoinTable, OrderField, QueryFilter, SelectField, Table,
     },
-    DdlSQL, SQLParam,
+    DdlSQL, DynamicSQLParam,
 };
 
 /// build_orm_sql
 pub fn parse_orm_sql(orm_sql: &mut OrmSQL) -> BmbpResp<()> {
-    if let Some(sql_build) = orm_sql.orm_sql() {
-        let (sql, params) = match sql_build {
-            crate::SQL::Query(query_sql) => parse_orm_query_sql(query_sql, orm_sql.orm_params()),
-            crate::SQL::Insert(insert_sql) => {
-                parse_orm_insert_sql(insert_sql, orm_sql.orm_params())
-            }
-            crate::SQL::Update(update_sql) => {
-                parse_orm_update_sql(update_sql, orm_sql.orm_params())
-            }
-            crate::SQL::Delete(delete_sql) => {
-                parse_orm_delete_sql(delete_sql, orm_sql.orm_params())
-            }
-            crate::SQL::DDL(ddl_sql) => parse_orm_ddl_sql(ddl_sql, orm_sql.orm_params()),
-        }?;
-        orm_sql.set_sql(sql).set_params(params);
-        Ok(())
-    } else {
-        Err(BmbpError::orm("未配置SQL构建器".to_string()))
-    }
+    let sql_build = orm_sql.get_dynamic_sql();
+    let (sql, params) = match sql_build {
+        crate::DynamicSQL::Query(query_sql) => {
+            parse_orm_query_sql(&query_sql, orm_sql.get_dynamic_params())
+        }
+        crate::DynamicSQL::Insert(insert_sql) => {
+            parse_orm_insert_sql(&insert_sql, orm_sql.get_dynamic_params())
+        }
+        crate::DynamicSQL::Update(update_sql) => {
+            parse_orm_update_sql(&update_sql, orm_sql.get_dynamic_params())
+        }
+        crate::DynamicSQL::Delete(delete_sql) => {
+            parse_orm_delete_sql(&delete_sql, orm_sql.get_dynamic_params())
+        }
+        crate::DynamicSQL::DDL(ddl_sql) => parse_orm_ddl_sql(ddl_sql, orm_sql.get_dynamic_params()),
+        _ => Ok(("".to_string(), vec![])),
+    }?;
+    orm_sql.set_raw_sql(sql).set_raw_sql_params(params);
+    Ok(())
 }
 
 fn parse_orm_query_sql(
     query_sql: &QuerySQL,
-    orm_prams: Option<&SQLParam>,
+    orm_prams: &DynamicSQLParam,
 ) -> BmbpResp<(String, Vec<Value>)> {
     parse_orm_query_inner(query_sql, orm_prams)
 }
 
 fn parse_orm_query_inner(
     query_sql: &QuerySQL,
-    orm_prams: Option<&SQLParam>,
+    orm_prams: &DynamicSQLParam,
 ) -> BmbpResp<(String, Vec<Value>)> {
     let select_filed = parse_orm_query_innner_field(query_sql.get_select());
     let from_table = parse_orm_query_inner_table(query_sql.get_table());
@@ -186,28 +186,28 @@ fn parse_join_table(join_table: &JoinTable) -> String {
 
 fn parse_orm_insert_sql(
     insert_sql: &InsertSQL,
-    orm_prams: Option<&SQLParam>,
+    orm_prams: &DynamicSQLParam,
 ) -> BmbpResp<(String, Vec<Value>)> {
     Ok(("".to_string(), vec![]))
 }
 
 fn parse_orm_update_sql(
     update_sql: &UpdateSQL,
-    orm_prams: Option<&SQLParam>,
+    orm_prams: &DynamicSQLParam,
 ) -> BmbpResp<(String, Vec<Value>)> {
     Ok(("".to_string(), vec![]))
 }
 
 fn parse_orm_delete_sql(
     delete_sql: &DeleteSQL,
-    orm_prams: Option<&SQLParam>,
+    orm_prams: &DynamicSQLParam,
 ) -> BmbpResp<(String, Vec<Value>)> {
     Ok(("".to_string(), vec![]))
 }
 
 fn parse_orm_ddl_sql(
     ddl_sql: &DdlSQL,
-    orm_prams: Option<&SQLParam>,
+    orm_prams: &DynamicSQLParam,
 ) -> BmbpResp<(String, Vec<Value>)> {
     Ok(("".to_string(), vec![]))
 }

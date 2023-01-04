@@ -5,7 +5,6 @@ use std::{
     vec,
 };
 
-use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use time::OffsetDateTime;
 use tokio::sync::{Mutex, RwLock};
@@ -133,7 +132,7 @@ impl ConnInner {
         Ok(vec_vo)
     }
 
-    pub async fn find_one(&self, mut orm_sql: OrmSQL) -> BmbpResp<Map<String, Value>> {
+    pub async fn find_one(&self, mut orm_sql: OrmSQL) -> BmbpResp<Option<Map<String, Value>>> {
         let (sql, params) = orm_sql.to_orm_sql()?;
         let vo = self.inner().write().await.find_one(sql, params).await?;
         Ok(vo)

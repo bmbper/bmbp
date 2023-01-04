@@ -44,7 +44,7 @@ impl Orm {
         vec_vo
     }
 
-    pub async fn find_one(&self, mut orm_sql: OrmSQL) -> BmbpResp<Map<String, Value>> {
+    pub async fn find_one(&self, mut orm_sql: OrmSQL) -> BmbpResp<Option<Map<String, Value>>> {
         let conn = self.pool.get_conn().await?;
         let vo = conn.find_one(orm_sql).await;
         conn.release().await;

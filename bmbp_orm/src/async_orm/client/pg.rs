@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::{
     borrow::BorrowMut,
     sync::{Arc, Weak},
@@ -7,12 +6,11 @@ use std::{
 use async_trait::async_trait;
 use serde_json::{Map, Value};
 use tokio::sync::{Mutex, RwLock};
-use tokio_postgres::types::Type;
 use tokio_postgres::{connect, types::ToSql, Client, NoTls, Row};
 
 use bmbp_types::{BmbpError, BmbpResp, PageInner};
-use bmbp_util::id;
 use bmbp_util::string::BmbpStringUtil;
+use bmbp_util::uuid;
 
 use crate::{
     async_orm::{conn::BmbpConn, pool::BmbpConnectionPool},
@@ -40,7 +38,7 @@ impl BmbpPgConnect {
                     }
                 });
                 let conn = BmbpPgConnect {
-                    id: id::uuid(),
+                    id: uuid(),
                     data_source: ds.clone(),
                     pool: Weak::new(),
                     client: Mutex::new(client),
@@ -123,9 +121,13 @@ impl BmbpConn for BmbpPgConnect {
         }
     }
 
-    async fn find_one(&mut self, sql: String, params: &[Value]) -> BmbpResp<Map<String, Value>> {
+    async fn find_one(
+        &mut self,
+        sql: String,
+        params: &[Value],
+    ) -> BmbpResp<Option<Map<String, Value>>> {
         tracing::info!("执行Postgresql\nSQL:  {}\n参数:  {:#?}", sql, params);
-        Ok(Map::new())
+        Ok(None)
     }
 
     async fn insert(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {

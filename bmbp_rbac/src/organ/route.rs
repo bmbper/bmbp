@@ -8,6 +8,9 @@ use serde_json::Value;
 use bmbp_types::{err::BmbpResp, PageInner, RespVo};
 
 use crate::organ::service::OrganService;
+use crate::organ::vopo::{
+    BmbpOrganDeptVo, BmbpOrganPersonVo, BmbpOrganPostVo, BmbpOrganUnitVo, BmbpOrganUnitsVo,
+};
 
 use super::vopo::{BmbpOrganVo, PageQueryParam, QueryParam};
 
@@ -79,9 +82,55 @@ pub async fn query_organ_info_by_params(Json(value): Json<Value>) -> BmbpResp<im
     Ok(resp)
 }
 
-pub async fn save_organ(Json(value): Json<Value>) -> BmbpResp<impl IntoResponse> {
+pub async fn save_organ(Json(mut value): Json<BmbpOrganVo>) -> BmbpResp<impl IntoResponse> {
     tracing::info!("{:#?}", value);
-    let resp = RespVo::<Value>::default();
+    let organ_data = OrganService::save_organ(&mut value).await?;
+    let resp = RespVo::<BmbpOrganVo>::ok_data(organ_data);
+    Ok(resp)
+}
+
+pub async fn save_organ_units(
+    Json(mut value): Json<BmbpOrganUnitsVo>,
+) -> BmbpResp<impl IntoResponse> {
+    tracing::info!("{:#?}", value);
+    let organ_data = OrganService::save_organ_units(&mut value).await?;
+    let resp = RespVo::<BmbpOrganUnitsVo>::ok_data(organ_data);
+    Ok(resp)
+}
+
+pub async fn save_organ_unit(
+    Json(mut value): Json<BmbpOrganUnitVo>,
+) -> BmbpResp<impl IntoResponse> {
+    tracing::info!("{:#?}", value);
+    let organ_data = OrganService::save_organ_unit(&mut value).await?;
+    let resp = RespVo::<BmbpOrganUnitVo>::ok_data(organ_data);
+    Ok(resp)
+}
+
+pub async fn save_organ_dept(
+    Json(mut value): Json<BmbpOrganDeptVo>,
+) -> BmbpResp<impl IntoResponse> {
+    tracing::info!("{:#?}", value);
+    let organ_data = OrganService::save_organ_dept(&mut value).await?;
+    let resp = RespVo::<BmbpOrganDeptVo>::ok_data(organ_data);
+    Ok(resp)
+}
+
+pub async fn save_organ_post(
+    Json(mut value): Json<BmbpOrganPostVo>,
+) -> BmbpResp<impl IntoResponse> {
+    tracing::info!("{:#?}", value);
+    let organ_data = OrganService::save_organ_post(&mut value).await?;
+    let resp = RespVo::<BmbpOrganPostVo>::ok_data(organ_data);
+    Ok(resp)
+}
+
+pub async fn save_organ_person(
+    Json(mut value): Json<BmbpOrganPersonVo>,
+) -> BmbpResp<impl IntoResponse> {
+    tracing::info!("{:#?}", value);
+    let organ_data = OrganService::save_organ_person(&mut value).await?;
+    let resp = RespVo::<BmbpOrganPersonVo>::ok_data(organ_data);
     Ok(resp)
 }
 

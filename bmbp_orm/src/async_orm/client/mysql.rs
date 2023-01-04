@@ -7,7 +7,7 @@ use async_trait::async_trait;
 use tokio::sync::RwLock;
 
 use bmbp_types::BmbpResp;
-use bmbp_util::id;
+use bmbp_util::uuid;
 
 use crate::{
     async_orm::{conn::BmbpConn, pool::BmbpConnectionPool},
@@ -25,7 +25,7 @@ impl BmbpMysqlConnect {
         ds: Arc<BmbpDataSource>,
     ) -> BmbpResp<RwLock<Box<dyn BmbpConn + Send + Sync + 'static>>> {
         let con = BmbpMysqlConnect {
-            id: id::uuid(),
+            id: uuid(),
             data_source: ds.clone(),
             pool: Weak::new(),
         };

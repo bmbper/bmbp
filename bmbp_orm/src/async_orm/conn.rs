@@ -9,6 +9,7 @@ use crate::BmbpDataSource;
 
 use super::pool::BmbpConnectionPool;
 
+#[warn(where_clauses_object_safety)]
 #[async_trait]
 pub trait BmbpConn {
     /// id 获取数据库连接ID
@@ -41,8 +42,12 @@ pub trait BmbpConn {
         Ok(vec![])
     }
 
-    async fn find_one(&mut self, _sql: String, _params: &[Value]) -> BmbpResp<Map<String, Value>> {
-        Ok(Map::new())
+    async fn find_one(
+        &mut self,
+        _sql: String,
+        _params: &[Value],
+    ) -> BmbpResp<Option<Map<String, Value>>> {
+        Ok(None)
     }
 
     async fn insert(&mut self, _sql: String, _params: &[Value]) -> BmbpResp<usize> {

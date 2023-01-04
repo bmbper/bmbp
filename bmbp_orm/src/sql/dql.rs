@@ -1,7 +1,6 @@
-use case_style::{
-    formats::{camel, CamelCase},
-    CaseStyle,
-};
+use std::collections::HashMap;
+
+use case_style::{formats::camel, CaseStyle};
 use serde_json::{Number, Value};
 
 #[derive(Clone)]
@@ -11,6 +10,7 @@ pub struct QuerySQL {
     filter: Option<QueryFilter>,
     order: Vec<OrderField>,
     group: Vec<SelectField>,
+    params: HashMap<String, Value>,
 }
 
 impl QuerySQL {
@@ -21,6 +21,7 @@ impl QuerySQL {
             filter: None,
             order: vec![],
             group: vec![],
+            params: HashMap::new(),
         }
     }
 
@@ -156,13 +157,19 @@ impl QuerySQL {
         self
     }
 
-    pub fn filter(&mut self, filter: SimpleFilterInner) -> &mut Self {
-        self.filter = Some(QueryFilter::Simple(filter));
-        self
+    pub fn filter(&mut self) -> &mut QueryFilter {
+        if self.filter.is_none() {
+            self.filter = Some(QueryFilter::simple());
+        }
+        self.filter.as_mut().unwrap()
     }
+}
 
-    pub fn filter_complex(&mut self, filter: ComplexFilterInner) -> &mut Self {
-        self.filter = Some(QueryFilter::Complex(filter));
+impl QuerySQL {
+    pub fn eq_value(&mut self, field: String, value: Value) -> &mut Self {
+        let position = self.params.len() + 1;
+        let position_key = format!("${}", position);
+        self.params.insert(position_key.clone(), value);
         self
     }
 }
@@ -419,12 +426,19 @@ pub enum QueryFilter {
 }
 
 impl QueryFilter {
-    pub fn simple() -> SimpleFilterInner {
-        SimpleFilterInner::and()
+    pub fn simple() -> QueryFilter {
+        QueryFilter::Simple(SimpleFilterInner::and())
     }
 
-    pub fn simple_or() -> SimpleFilterInner {
-        SimpleFilterInner::or()
+    pub fn as_simple(&mut self) -> Option<&mut SimpleFilterInner> {
+        match self {
+            QueryFilter::Complex(_) => None,
+            QueryFilter::Simple(simple) => Some(simple),
+        }
+    }
+
+    pub fn simple_or() -> QueryFilter {
+        QueryFilter::Simple(SimpleFilterInner::or())
     }
 
     pub fn simple_express(express: String) -> SimpleFilterInner {
