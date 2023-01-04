@@ -29,8 +29,18 @@ impl OrganSql {
         for item in orm_column {
             query_sql.select(item.clone());
         }
-
         query_sql.from("bmbp_rbac_organ".to_string());
+
+        // query_sql.s_eq_field("organId".to_string());
+        // query_sql.s_eq_column("organId".to_string());
+        // query_sql.s_eq_field_alias("organId".to_string(),"name".to_string());
+        // query_sql.s_eq_column_alias("organ_id".to_string(),"name".to_sql());
+        //
+        // query_sql.p_eq_field_string("organId".to_string(), "1".to_string());
+        // query_sql.p_eq_column_string("organId".to_string(), "2".to_string());
+        //
+        // query_sql.r_eq_field_string("organId".to_string(), "1".to_string());
+        // query_sql.r_eq_column_string("organId".to_string(), "2".to_string());
 
         Ok(bmbp_sql)
     }
