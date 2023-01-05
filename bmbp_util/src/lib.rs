@@ -3,13 +3,14 @@ pub use id::simple_uuid;
 pub use id::simple_uuid_upper;
 pub use id::uuid;
 pub use id::uuid_upper;
+pub use string::*;
 pub use tree::TreeBuilder;
 
 pub mod crypto;
 mod date;
 mod id;
 pub mod number;
-pub mod string;
+mod string;
 mod tree;
 pub mod url;
 

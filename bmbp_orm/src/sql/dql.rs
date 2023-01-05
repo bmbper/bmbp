@@ -1,5 +1,7 @@
+use std::any::{type_name, Any};
 use std::collections::HashMap;
 
+use bmbp_util::{camel_to_snake, snake_to_camel};
 use case_style::{formats::camel, CaseStyle};
 use serde_json::{Number, Value};
 
@@ -10,7 +12,6 @@ pub struct QuerySQL {
     filter: Option<QueryFilter>,
     order: Vec<OrderField>,
     group: Vec<SelectField>,
-    params: HashMap<String, Value>,
 }
 
 impl QuerySQL {
@@ -21,10 +22,8 @@ impl QuerySQL {
             filter: None,
             order: vec![],
             group: vec![],
-            params: HashMap::new(),
         }
     }
-
     pub fn simple_filter() -> SimpleFilterInner {
         SimpleFilterInner {
             typ: FilterType::AND,
@@ -46,7 +45,6 @@ impl QuerySQL {
             express: Some(express),
         }
     }
-
     pub fn complex_filter() -> ComplexFilterInner {
         ComplexFilterInner {
             typ: FilterType::AND,
@@ -71,26 +69,22 @@ impl QuerySQL {
 }
 
 impl QuerySQL {
-    fn set_filter(&mut self, filter: QueryFilter) -> &mut Self {
+    pub fn set_filter(&mut self, filter: QueryFilter) -> &mut Self {
         self.filter = Some(filter);
         self
+    }
+    pub fn get_filter(&self) -> Option<&QueryFilter> {
+        self.filter.as_ref()
     }
     pub fn get_select(&self) -> &[SelectField] {
         self.select.as_slice()
     }
-
-    pub fn get_filter(&self) -> Option<&QueryFilter> {
-        self.filter.as_ref()
-    }
-
     pub fn get_table(&self) -> &[Table] {
         self.table.as_slice()
     }
-
     pub fn get_order(&self) -> &[OrderField] {
         self.order.as_slice()
     }
-
     pub fn get_group(&self) -> &[SelectField] {
         &self.group.as_slice()
     }
@@ -165,11 +159,69 @@ impl QuerySQL {
     }
 }
 
+/// 简易查询过虑器
 impl QuerySQL {
-    pub fn eq_value(&mut self, field: String, value: Value) -> &mut Self {
-        let position = self.params.len() + 1;
-        let position_key = format!("${}", position);
-        self.params.insert(position_key.clone(), value);
+    // 简易SQL
+    pub fn simple_filter_inner(&mut self) -> &mut SimpleFilterInner {
+        if self.filter.is_none() || self.filter.as_ref().unwrap().is_complex() {
+            self.filter = Some(QueryFilter::simple());
+        }
+        self.filter.as_mut().unwrap().as_simple().unwrap()
+    }
+
+    pub fn s_f_eq(&mut self, filed: String) -> &mut Self {
+        self.simple_filter_inner().s_f_eq(filed);
+        self
+    }
+    pub fn s_c_eq(&mut self, column: String) -> &mut Self {
+        self.simple_filter_inner().s_c_eq(column);
+        self
+    }
+    pub fn s_f_eq_as(&mut self, field: String, value_as: String) -> &mut Self {
+        self.simple_filter_inner().s_f_eq_as(field, value_as);
+        self
+    }
+    pub fn s_c_eq_as(&mut self, column: String, value_as: String) -> &mut Self {
+        self.simple_filter_inner().s_c_eq_as(column, value_as);
+        self
+    }
+
+    pub fn r_f_eq_string(&mut self, field: String, value: String) -> &mut Self {
+        self.simple_filter_inner().r_f_eq_string(field, value);
+        self
+    }
+
+    pub fn r_c_eq_string(&mut self, column: String, value: String) -> &mut Self {
+        self.simple_filter_inner().r_f_eq_string(column, value);
+        self
+    }
+
+    pub fn r_f_eq_bool(&mut self, field: String, value: bool) -> &mut Self {
+        self.simple_filter_inner().r_f_eq_bool(field, value);
+        self
+    }
+
+    pub fn r_c_eq_bool(&mut self, column: String, value: bool) -> &mut Self {
+        self.simple_filter_inner().r_c_eq_bool(column, value);
+        self
+    }
+
+    pub fn r_f_eq_isize(&mut self, field: String, value: isize) -> &mut Self {
+        self.simple_filter_inner().r_f_eq_isize(field, value);
+        self
+    }
+
+    pub fn r_c_eq_isize(&mut self, column: String, value: isize) -> &mut Self {
+        self.simple_filter_inner().r_c_eq_isize(column, value);
+        self
+    }
+    pub fn r_f_eq_f64(&mut self, field: String, value: f64) -> &mut Self {
+        self.simple_filter_inner().r_f_eq_f64(field, value);
+        self
+    }
+
+    pub fn r_c_eq_f64(&mut self, column: String, value: f64) -> &mut Self {
+        self.simple_filter_inner().r_c_eq_f64(column, value);
         self
     }
 }
@@ -429,32 +481,45 @@ impl QueryFilter {
     pub fn simple() -> QueryFilter {
         QueryFilter::Simple(SimpleFilterInner::and())
     }
-
-    pub fn as_simple(&mut self) -> Option<&mut SimpleFilterInner> {
-        match self {
-            QueryFilter::Complex(_) => None,
-            QueryFilter::Simple(simple) => Some(simple),
-        }
-    }
-
     pub fn simple_or() -> QueryFilter {
         QueryFilter::Simple(SimpleFilterInner::or())
     }
-
     pub fn simple_express(express: String) -> SimpleFilterInner {
         SimpleFilterInner::express(express)
     }
-
     pub fn complex() -> ComplexFilterInner {
         ComplexFilterInner::and()
     }
-
     pub fn complex_or() -> ComplexFilterInner {
         ComplexFilterInner::or()
     }
-
     pub fn complex_express(express: String) -> ComplexFilterInner {
         ComplexFilterInner::express(express)
+    }
+
+    pub fn as_simple(&mut self) -> Option<&mut SimpleFilterInner> {
+        match self {
+            QueryFilter::Simple(simple) => Some(simple),
+            QueryFilter::Complex(_) => None,
+        }
+    }
+    pub fn is_simple(&mut self) -> bool {
+        match self {
+            QueryFilter::Simple(_) => true,
+            QueryFilter::Complex(_) => false,
+        }
+    }
+    pub fn as_complex(&mut self) -> Option<&mut ComplexFilterInner> {
+        match self {
+            QueryFilter::Simple(_) => None,
+            QueryFilter::Complex(complex) => Some(complex),
+        }
+    }
+    pub fn is_complex(&self) -> bool {
+        match self {
+            QueryFilter::Simple(_) => false,
+            QueryFilter::Complex(_) => true,
+        }
     }
 }
 
@@ -521,198 +586,97 @@ impl SimpleFilterInner {
 }
 
 impl SimpleFilterInner {
-    pub fn eq_str(&mut self, field: String, value: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_str(CompareType::EQ, field, value));
+    pub fn s_f_eq(&mut self, field: String) -> &mut Self {
+        self.cmp.push(FilterField::s_f_cmp(CompareType::EQ, field));
         self
     }
-    pub fn eq_int(&mut self, field: String, value: isize) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_int(CompareType::EQ, field, value));
+
+    pub fn s_c_eq(&mut self, column: String) -> &mut Self {
+        self.cmp.push(FilterField::s_c_cmp(CompareType::EQ, column));
         self
     }
-    pub fn eq_f64(&mut self, field: String, value: f64) -> &mut Self {
+
+    pub fn s_f_eq_as(&mut self, field: String, value_as: String) -> &mut Self {
         self.cmp
-            .push(FilterField::cmp_f64(CompareType::EQ, field, value));
+            .push(FilterField::s_f_cmp_as(CompareType::EQ, field, value_as));
         self
     }
-    pub fn eq_script(&mut self, field: String) -> &mut Self {
+
+    pub fn s_c_eq_as(&mut self, column: String, value_as: String) -> &mut Self {
         self.cmp
-            .push(FilterField::cmp_script(CompareType::EQ, field));
+            .push(FilterField::s_c_cmp_as(CompareType::EQ, column, value_as));
         self
     }
-    pub fn eq_raw_script(&mut self, field: String) -> &mut Self {
+
+    pub fn r_f_eq_string(&mut self, field: String, value: String) -> &mut Self {
         self.cmp
-            .push(FilterField::cmp_raw_script(CompareType::EQ, field));
+            .push(FilterField::r_f_cmp_string(CompareType::EQ, field, value));
         self
     }
-    pub fn eq_script_camcal(&mut self, field: String) -> &mut Self {
+
+    pub fn r_c_eq_string(&mut self, column: String, value: String) -> &mut Self {
         self.cmp
-            .push(FilterField::cmp_script_camcal(CompareType::EQ, field));
+            .push(FilterField::r_c_cmp_string(CompareType::EQ, column, value));
         self
     }
-    pub fn eq_raw_script_camcal(&mut self, field: String) -> &mut Self {
+
+    pub fn r_f_eq_bool(&mut self, field: String, value: bool) -> &mut Self {
         self.cmp
-            .push(FilterField::cmp_raw_script_camcal(CompareType::EQ, field));
+            .push(FilterField::r_f_cmp_bool(CompareType::EQ, field, value));
         self
     }
-    pub fn eq_script_as(&mut self, field: String, alias: String) -> &mut Self {
+
+    pub fn r_c_eq_bool(&mut self, column: String, value: bool) -> &mut Self {
         self.cmp
-            .push(FilterField::cmp_script_as(CompareType::EQ, field, alias));
+            .push(FilterField::r_c_cmp_bool(CompareType::EQ, column, value));
         self
     }
-    pub fn eq_raw_script_as(&mut self, field: String, alias: String) -> &mut Self {
-        self.cmp.push(FilterField::cmp_raw_script_as(
+
+    pub fn r_f_eq_isize(&mut self, field: String, value: isize) -> &mut Self {
+        let number_value = Value::Number(Number::from(value));
+        self.cmp.push(FilterField::r_f_cmp_value(
             CompareType::EQ,
             field,
-            alias,
+            number_value,
+        ));
+        self
+    }
+
+    pub fn r_c_eq_isize(&mut self, column: String, value: isize) -> &mut Self {
+        let number_value = Value::Number(Number::from(value));
+        self.cmp.push(FilterField::r_c_cmp_value(
+            CompareType::EQ,
+            column,
+            number_value,
+        ));
+        self
+    }
+    pub fn r_f_eq_f64(&mut self, field: String, value: f64) -> &mut Self {
+        let number_value = Value::Number(Number::from_f64(value).unwrap());
+        self.cmp.push(FilterField::r_f_cmp_value(
+            CompareType::EQ,
+            field,
+            number_value,
+        ));
+        self
+    }
+
+    pub fn r_c_eq_f64(&mut self, column: String, value: f64) -> &mut Self {
+        let number_value = Value::Number(Number::from_f64(value).unwrap());
+        self.cmp.push(FilterField::r_c_cmp_value(
+            CompareType::EQ,
+            column,
+            number_value,
         ));
         self
     }
 }
 
-impl SimpleFilterInner {
-    pub fn neq_str(&mut self, field: String, value: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_str(CompareType::NEQ, field, value));
-        self
-    }
-    pub fn neq_int(&mut self, field: String, value: isize) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_int(CompareType::NEQ, field, value));
-        self
-    }
-    pub fn neq_f64(&mut self, field: String, value: f64) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_f64(CompareType::NEQ, field, value));
-        self
-    }
-    pub fn neq_script(&mut self, field: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_script(CompareType::NEQ, field));
-        self
-    }
-    pub fn neq_raw_script(&mut self, field: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_raw_script(CompareType::NEQ, field));
-        self
-    }
-    pub fn neq_script_camcal(&mut self, field: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_script_camcal(CompareType::NEQ, field));
-        self
-    }
-    pub fn neq_raw_script_camcal(&mut self, field: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_raw_script_camcal(CompareType::NEQ, field));
-        self
-    }
-    pub fn neq_script_as(&mut self, field: String, alias: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_script_as(CompareType::NEQ, field, alias));
-        self
-    }
-    pub fn neq_raw_script_as(&mut self, field: String, alias: String) -> &mut Self {
-        self.cmp.push(FilterField::cmp_raw_script_as(
-            CompareType::NEQ,
-            field,
-            alias,
-        ));
-        self
-    }
-}
+impl SimpleFilterInner {}
 
-impl SimpleFilterInner {
-    pub fn like_str(&mut self, field: String, value: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_str(CompareType::LK, field, value));
-        self
-    }
-    pub fn like_script(&mut self, field: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_script(CompareType::LK, field));
-        self
-    }
-    pub fn like_raw_script(&mut self, field: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_raw_script(CompareType::LK, field));
-        self
-    }
-    pub fn like_script_camcal(&mut self, field: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_script_camcal(CompareType::LK, field));
-        self
-    }
-    pub fn like_raw_script_camcal(&mut self, field: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_raw_script_camcal(CompareType::LK, field));
-        self
-    }
-    pub fn like_script_as(&mut self, field: String, alias: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_script_as(CompareType::LK, field, alias));
-        self
-    }
-    pub fn like_raw_script_as(&mut self, field: String, alias: String) -> &mut Self {
-        self.cmp.push(FilterField::cmp_raw_script_as(
-            CompareType::LK,
-            field,
-            alias,
-        ));
-        self
-    }
-}
+impl SimpleFilterInner {}
 
-impl SimpleFilterInner {
-    pub fn gt_str(&mut self, field: String, value: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_str(CompareType::GT, field, value));
-        self
-    }
-    pub fn gt_int(&mut self, field: String, value: isize) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_int(CompareType::GT, field, value));
-        self
-    }
-    pub fn gt_f64(&mut self, field: String, value: f64) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_f64(CompareType::GT, field, value));
-        self
-    }
-    pub fn gt_script(&mut self, field: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_script(CompareType::GT, field));
-        self
-    }
-    pub fn gt_raw_script(&mut self, field: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_raw_script(CompareType::GT, field));
-        self
-    }
-    pub fn gt_script_camcal(&mut self, field: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_script_camcal(CompareType::GT, field));
-        self
-    }
-    pub fn gt_raw_script_camcal(&mut self, field: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_raw_script_camcal(CompareType::GT, field));
-        self
-    }
-    pub fn gt_script_as(&mut self, field: String, alias: String) -> &mut Self {
-        self.cmp
-            .push(FilterField::cmp_script_as(CompareType::GT, field, alias));
-        self
-    }
-    pub fn gt_raw_script_as(&mut self, field: String, alias: String) -> &mut Self {
-        self.cmp.push(FilterField::cmp_raw_script_as(
-            CompareType::GT,
-            field,
-            alias,
-        ));
-        self
-    }
-}
+impl SimpleFilterInner {}
 
 #[derive(Clone)]
 pub enum FilterType {
@@ -768,91 +732,119 @@ pub enum CompareType {
 }
 
 #[derive(Clone)]
+pub enum FilterValueType {
+    SCRIPT,
+    POSITION,
+    VALUE,
+}
+
+#[derive(Clone)]
 struct FilterField {
     cp: CompareType,
-    field: CompareField,
+    column: CompareField,
     value: Value,
+    value_type: FilterValueType,
 }
 
 impl FilterField {
-    pub fn cmp_str(cp: CompareType, field: String, value: String) -> FilterField {
+    pub fn s_f_cmp(cmp_type: CompareType, field: String) -> FilterField {
+        let column = camel_to_snake(field.clone());
         FilterField {
-            cp,
-            field: CompareField::new(field),
-            value: Value::String(value),
+            cp: cmp_type,
+            column: CompareField::Column(column),
+            value: Value::String(field),
+            value_type: FilterValueType::SCRIPT,
         }
     }
-    pub fn cmp_int(cp: CompareType, field: String, value: isize) -> FilterField {
+    pub fn s_c_cmp(cmp_type: CompareType, column: String) -> FilterField {
+        let field = snake_to_camel(column.clone());
         FilterField {
-            cp,
-            field: CompareField::new(field),
-            value: Value::Number(Number::from(value)),
-        }
-    }
-    pub fn cmp_f64(cp: CompareType, field: String, value: f64) -> FilterField {
-        FilterField {
-            cp,
-            field: CompareField::new(field),
-            value: Value::Number(Number::from_f64(value).unwrap()),
+            cp: cmp_type,
+            column: CompareField::Column(column),
+            value: Value::String(field),
+            value_type: FilterValueType::SCRIPT,
         }
     }
 
-    pub fn cmp_script(cp: CompareType, field: String) -> FilterField {
-        Self::cmp_script_as(cp, field.clone(), field)
-    }
-    pub fn cmp_raw_script(cp: CompareType, field: String) -> FilterField {
-        Self::cmp_raw_script_as(cp, field.clone(), field)
-    }
-
-    pub fn cmp_script_camcal(cp: CompareType, field: String) -> FilterField {
-        let camel_field = CaseStyle::from_snakecase(field.clone()).to_camelcase();
-        Self::cmp_script_as(cp, field, camel_field)
-    }
-    pub fn cmp_raw_script_camcal(cp: CompareType, field: String) -> FilterField {
-        let camel_field = CaseStyle::from_snakecase(field.clone()).to_camelcase();
-        Self::cmp_raw_script_as(cp, field, camel_field)
-    }
-
-    pub fn cmp_script_as(cp: CompareType, field: String, alias: String) -> FilterField {
-        let value = match cp {
-            CompareType::LK | CompareType::NLK => {
-                format!("'%#{{{}}}%'", alias)
-            }
-            CompareType::RLK | CompareType::NRLK => {
-                format!("'%#{{{}}}'", alias)
-            }
-            CompareType::LLK | CompareType::NLLK => {
-                format!("'#{{{}}}%'", alias)
-            }
-            _ => {
-                format!("#{{{}}}", alias)
-            }
-        };
+    pub fn s_f_cmp_as(cmp_type: CompareType, field: String, value_as: String) -> FilterField {
+        let column = camel_to_snake(field.clone());
         FilterField {
-            cp,
-            field: CompareField::new(field),
-            value: Value::String(value),
+            cp: cmp_type,
+            column: CompareField::Column(column),
+            value: Value::String(value_as),
+            value_type: FilterValueType::SCRIPT,
         }
     }
-    pub fn cmp_raw_script_as(cp: CompareType, field: String, alias: String) -> FilterField {
-        let value = match cp {
-            CompareType::LK | CompareType::NLK => {
-                format!("'%${{{}}}%'", alias)
-            }
-            CompareType::RLK | CompareType::NRLK => {
-                format!("'%${{{}}}'", alias)
-            }
-            CompareType::LLK | CompareType::NLLK => {
-                format!("'${{{}}}%'", alias)
-            }
-            _ => {
-                format!("${{{}}}", alias)
-            }
-        };
+    pub fn s_c_cmp_as(cmp_type: CompareType, column: String, value_as: String) -> FilterField {
         FilterField {
-            cp,
-            field: CompareField::new(field),
+            cp: cmp_type,
+            column: CompareField::Column(column),
+            value: Value::String(value_as),
+            value_type: FilterValueType::SCRIPT,
+        }
+    }
+
+    pub fn r_f_cmp_string(cmp_type: CompareType, field: String, value: String) -> FilterField {
+        let column = camel_to_snake(field);
+        FilterField {
+            cp: cmp_type,
+            column: CompareField::Column(column),
             value: Value::String(value),
+            value_type: FilterValueType::VALUE,
+        }
+    }
+
+    pub fn r_c_cmp_string(cmp_type: CompareType, column: String, value: String) -> FilterField {
+        FilterField {
+            cp: cmp_type,
+            column: CompareField::Column(column),
+            value: Value::String(value),
+            value_type: FilterValueType::VALUE,
+        }
+    }
+    pub fn r_f_cmp_bool(cmp_type: CompareType, field: String, value: bool) -> FilterField {
+        let column = camel_to_snake(field);
+        FilterField {
+            cp: cmp_type,
+            column: CompareField::Column(column),
+            value: Value::Bool(value),
+            value_type: FilterValueType::VALUE,
+        }
+    }
+
+    pub fn r_c_cmp_bool(cmp_type: CompareType, column: String, value: bool) -> FilterField {
+        FilterField {
+            cp: cmp_type,
+            column: CompareField::Column(column),
+            value: Value::Bool(value),
+            value_type: FilterValueType::VALUE,
+        }
+    }
+    pub fn r_f_cmp_value(cmp_type: CompareType, field: String, value: Value) -> FilterField {
+        let column = camel_to_snake(field);
+        FilterField {
+            cp: cmp_type,
+            column: CompareField::Column(column),
+            value,
+            value_type: FilterValueType::VALUE,
+        }
+    }
+
+    pub fn r_c_cmp_value(cmp_type: CompareType, column: String, value: Value) -> FilterField {
+        FilterField {
+            cp: cmp_type,
+            column: CompareField::Column(column),
+            value,
+            value_type: FilterValueType::VALUE,
+        }
+    }
+
+    pub fn r_c_cmp(cmp_type: CompareType, column: String, value: String) -> FilterField {
+        FilterField {
+            cp: cmp_type,
+            column: CompareField::Column(column),
+            value: Value::String(value),
+            value_type: FilterValueType::VALUE,
         }
     }
 }

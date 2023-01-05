@@ -9,7 +9,6 @@ use tokio::sync::{Mutex, RwLock};
 use tokio_postgres::{connect, types::ToSql, Client, NoTls, Row};
 
 use bmbp_types::{BmbpError, BmbpResp, PageInner};
-use bmbp_util::string::BmbpStringUtil;
 use bmbp_util::uuid;
 
 use crate::{
@@ -186,7 +185,6 @@ fn to_json_value(row: &Row) -> Map<String, Value> {
     for column in columns {
         let col_name = column.name();
         let col_type = column.type_().name();
-        let props = BmbpStringUtil::snake_to_camel(col_name.clone().to_string());
         let mut props_value = Value::Null;
         match col_type {
             "varchar" => {
@@ -199,7 +197,7 @@ fn to_json_value(row: &Row) -> Map<String, Value> {
             }
             _ => {}
         }
-        map.insert(props, props_value);
+        map.insert(col_name.to_string(), props_value);
     }
     map
 }

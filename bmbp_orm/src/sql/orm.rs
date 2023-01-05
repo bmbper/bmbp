@@ -82,28 +82,22 @@ impl OrmSQL {
         self.raw_sql = raw_sql;
         self
     }
-
     pub fn set_raw_sql_params(&mut self, raw_sql_params: Vec<Value>) -> &mut Self {
         self.raw_sql_params = raw_sql_params;
         self
     }
-
     pub fn as_query_mut(&mut self) -> BmbpResp<&mut QuerySQL> {
         self.dynamic_sql.as_query_mut()
     }
-
     pub fn as_insert_mut(&mut self) -> BmbpResp<&mut InsertSQL> {
         self.dynamic_sql.as_insert_mut()
     }
-
     pub fn as_update_mut(&mut self) -> BmbpResp<&mut UpdateSQL> {
         self.dynamic_sql.as_update_mut()
     }
-
     pub fn as_delete_mut(&mut self) -> BmbpResp<&mut DeleteSQL> {
         self.dynamic_sql.as_delete_mut()
     }
-
     pub fn is_query(&self) -> bool {
         self.dynamic_sql.is_query()
     }
