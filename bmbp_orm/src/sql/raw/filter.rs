@@ -56,7 +56,7 @@ impl<'a> RawFilterBuilder<'a> {
                         Value::Null
                     }
                 };
-                let p = self.raw_values.borrow().len();
+                let p = self.raw_values.borrow().len() + 1;
                 self.raw_values.borrow_mut().push(raw_value);
                 Ok(format!("${}", p))
             }

@@ -84,6 +84,18 @@ impl Default for BmbpOrganType {
     }
 }
 
+impl ToString for BmbpOrganType {
+    fn to_string(&self) -> String {
+        match self {
+            BmbpOrganType::Unit => "unit".to_string(),
+            BmbpOrganType::Units => "units".to_string(),
+            BmbpOrganType::Dept => "dept".to_string(),
+            BmbpOrganType::Post => "post".to_string(),
+            BmbpOrganType::Person => "person".to_string(),
+        }
+    }
+}
+
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]

@@ -130,8 +130,21 @@ impl BmbpConn for BmbpPgConnect {
     }
 
     async fn insert(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
-        tracing::info!("执行Postgresql\n SQL:{} \n 参数:{:#?}", sql, params);
-        Ok(0)
+        let pg_params = to_pg_prams(params);
+        let pg_params_ref = pg_params
+            .iter()
+            .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
+            .collect::<Vec<&(dyn ToSql + Sync)>>();
+        let insert_rs = self
+            .client
+            .lock()
+            .await
+            .execute(sql.as_str(), pg_params_ref.as_slice())
+            .await;
+        match insert_rs {
+            Ok(row_count) => Ok(row_count as usize),
+            Err(err) => Err(BmbpError::orm(err.to_string())),
+        }
     }
     async fn update(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
         tracing::info!("执行Postgresql\n SQL:{} \n 参数:{:#?}", sql, params);

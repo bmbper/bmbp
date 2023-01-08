@@ -22,6 +22,6 @@ pub async fn build_conn(
         "postgres" => BmbpPgConnect::new(ds).await,
         "mysql" => BmbpMysqlConnect::new(ds).await,
         "sqlite" => BmbpSqliteConnect::new(ds).await,
-        _ => BmbpSqliteConnect::new(ds).await,
+        _ => BmbpPgConnect::new(ds).await,
     }
 }

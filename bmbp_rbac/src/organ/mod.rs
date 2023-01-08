@@ -17,6 +17,7 @@ mod tests {
 
     #[tokio::test]
     async fn save_organ() {
+        tracing_subscriber::fmt().init();
         let mut params = BmbpOrganVo::new();
         params.set_organ_title("中国简竹集团".to_string());
         params.set_organ_type(BmbpOrganType::Unit);
@@ -25,7 +26,7 @@ mod tests {
         match organ_rs {
             Ok(organ) => {
                 println!("organ:{:#?}", organ);
-                assert!(organ.get_r_id().is_empty(), "{}", false)
+                assert!(!organ.get_r_id().is_empty(), "{}", true)
             }
             Err(e) => {
                 println!("err:{:#?}", e);

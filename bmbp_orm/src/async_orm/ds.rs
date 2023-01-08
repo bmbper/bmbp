@@ -122,4 +122,11 @@ impl BmbpDataSource {
         self.pool_config = pool_config;
         self
     }
+
+    pub fn valid(&mut self) -> bool {
+        if self.driver.is_empty() {
+            return false;
+        }
+        true
+    }
 }

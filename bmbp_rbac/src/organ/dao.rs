@@ -49,15 +49,85 @@ impl OrganSql {
 
     pub fn insert_organ(params: &BmbpOrganVo) -> BmbpResp<BmbpOrmSQL> {
         let mut orm_sql = BmbpOrmSQL::insert();
-        let insert_sql = orm_sql.as_insert_mut().unwrap();
+        let insert_sql = orm_sql.as_insert_mut()?;
         insert_sql.insert_into(BMBP_RBAC_ORGAN.to_string());
+        let organ_fields = BmbpOrganVo::orm_fields();
+        for field in organ_fields.as_slice() {
+            insert_sql.c_insert(field.clone());
+        }
+        Self::build_organ_params(&mut orm_sql, params);
         Ok(orm_sql)
     }
 
     pub fn update_organ(params: &BmbpOrganVo) -> BmbpResp<BmbpOrmSQL> {
         let mut orm_sql = BmbpOrmSQL::update();
-
+        Self::build_organ_params(&mut orm_sql, params);
         Ok(orm_sql)
+    }
+
+    pub fn build_organ_params(orm_sql: &mut BmbpOrmSQL, params: &BmbpOrganVo) {
+        let organ_params = orm_sql.get_mut_dynamic_params();
+        organ_params.add_k_param(
+            "organId".to_string(),
+            Value::String(params.get_organ_id().clone()),
+        );
+        organ_params.add_k_param(
+            "parentOrganId".to_string(),
+            Value::String(params.get_parent_organ_id().clone()),
+        );
+        organ_params.add_k_param(
+            "organTitle".to_string(),
+            Value::String(params.get_organ_title().clone()),
+        );
+        organ_params.add_k_param(
+            "organPath".to_string(),
+            Value::String(params.get_organ_path().clone()),
+        );
+        organ_params.add_k_param(
+            "organDataId".to_string(),
+            Value::String(params.get_organ_data_id().clone()),
+        );
+        organ_params.add_k_param(
+            "organType".to_string(),
+            Value::String(params.get_organ_type().to_string()),
+        );
+        organ_params.add_k_param("rId".to_string(), Value::String(params.get_r_id().clone()));
+        organ_params.add_k_param(
+            "rLevel".to_string(),
+            Value::String(params.get_r_level().clone()),
+        );
+        organ_params.add_k_param(
+            "rFlag".to_string(),
+            Value::String(params.get_r_flag().clone()),
+        );
+        organ_params.add_k_param(
+            "rCreateTime".to_string(),
+            Value::String(params.get_r_create_time().clone()),
+        );
+        organ_params.add_k_param(
+            "rCreateUser".to_string(),
+            Value::String(params.get_r_create_user().clone()),
+        );
+        organ_params.add_k_param(
+            "rUpdateTime".to_string(),
+            Value::String(params.get_r_update_time().clone()),
+        );
+        organ_params.add_k_param(
+            "rUpdateUser".to_string(),
+            Value::String(params.get_r_update_user().clone()),
+        );
+        organ_params.add_k_param(
+            "rOwnerOrg".to_string(),
+            Value::String(params.get_r_owner_org().clone()),
+        );
+        organ_params.add_k_param(
+            "rOwnerUser".to_string(),
+            Value::String(params.get_r_owner_user().clone()),
+        );
+        organ_params.add_k_param(
+            "rSign".to_string(),
+            Value::String(params.get_r_sign().clone()),
+        );
     }
 }
 
@@ -93,7 +163,6 @@ impl OrganDao {
     }
     pub async fn insert_organ(params: &BmbpOrganVo) -> BmbpResp<usize> {
         let insert_sql = OrganSql::insert_organ(params)?;
-
         let row_count = BmbpORM.await.insert(insert_sql).await?;
         Ok(row_count)
     }

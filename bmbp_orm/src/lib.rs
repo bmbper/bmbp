@@ -1,3 +1,5 @@
+extern crate core;
+
 pub use async_orm::BmbpDataSource;
 pub use async_orm::Orm;
 pub use sql::DeleteSQL;

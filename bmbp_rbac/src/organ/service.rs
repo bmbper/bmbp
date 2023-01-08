@@ -77,6 +77,10 @@ impl OrganService {
             return Err(BmbpError::api_service("组织机构名称不能为空！".to_string()));
         }
 
+        if params.get_organ_id().is_empty() {
+            params.set_organ_id(uuid_upper());
+        }
+
         if params.get_parent_organ_id().is_empty() {
             params.set_parent_organ_id(ROOT_TREE_NODE.to_string());
         }

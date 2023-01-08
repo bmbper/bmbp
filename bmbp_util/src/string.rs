@@ -1,42 +1,18 @@
 /// BmbpStringUtil 字符串工具类
 
 pub fn snake_to_camel(snake_string: String) -> String {
-    let snake_char_vec: Vec<char> = snake_string.to_ascii_lowercase().chars().collect();
-    let mut camel_char_vec: Vec<char> = Vec::new();
-    let mut is_to_upper: bool = false;
-    for ch in snake_char_vec {
-        if ch == '_' {
-            is_to_upper = true;
-            continue;
-        }
-        if is_to_upper {
-            camel_char_vec.push(ch.to_ascii_uppercase());
-            is_to_upper = false;
-        } else {
-            camel_char_vec.push(ch);
-        }
-    }
-    return camel_char_vec.iter().collect();
+    case_style::CaseStyle::from_snakecase(snake_string).to_camelcase()
 }
 pub fn camel_to_snake(camel_string: String) -> String {
-    let camel_char_vec: Vec<char> = camel_string.chars().collect();
-    let mut snake_char_vec: Vec<char> = Vec::new();
-    for ch in camel_char_vec {
-        if ch == '_' {
-            continue;
-        }
-        if ch != ch.to_ascii_lowercase() {
-            snake_char_vec.push('_');
-            snake_char_vec.push(ch.to_ascii_lowercase())
-        } else {
-            snake_char_vec.push(ch);
-        }
-    }
-    return snake_char_vec.iter().collect();
+    case_style::CaseStyle::from_camelcase(camel_string)
+        .to_snakecase()
+        .to_string()
 }
-
 pub fn camel_to_snake_upper(camel_string: String) -> String {
-    camel_to_snake(camel_string).to_uppercase()
+    case_style::CaseStyle::from_camelcase(camel_string)
+        .to_snakecase()
+        .to_string()
+        .to_uppercase()
 }
 pub fn zero_fill_left(number: i32, len: i32) -> String {
     return char_fill_left('0', number, len);

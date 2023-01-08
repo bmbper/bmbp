@@ -50,8 +50,8 @@ pub trait BmbpConn {
         Ok(None)
     }
 
-    async fn insert(&mut self, _sql: String, _params: &[Value]) -> BmbpResp<usize> {
-        Ok(0)
+    async fn insert(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
+        Ok(1)
     }
     async fn update(&mut self, _sql: String, _params: &[Value]) -> BmbpResp<usize> {
         Ok(0)
