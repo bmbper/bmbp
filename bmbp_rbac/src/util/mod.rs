@@ -1,12 +1,12 @@
 use bmbp_types::vo::BaseOrmVoPo;
-use bmbp_util::{date_time_now, uuid_upper};
+use bmbp_util::{date_time_now, simple_uuid_upper, uuid_upper};
 
 pub fn append_create_vo<T>(vo: &mut T)
 where
     T: BaseOrmVoPo,
 {
     let now_time = date_time_now();
-    vo.set_r_id(uuid_upper())
+    vo.set_r_id(simple_uuid_upper())
         .set_r_flag("0".to_string())
         .set_r_level("0".to_string())
         .set_r_owner_org("0".to_string())

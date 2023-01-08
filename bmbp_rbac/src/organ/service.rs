@@ -1,6 +1,6 @@
 use bmbp_types::vo::{BaseOrmVoPo, BmbpApiQueryParam};
 use bmbp_types::{BmbpError, BmbpResp, ROOT_TREE_NODE};
-use bmbp_util::{uuid_upper, TreeBuilder};
+use bmbp_util::{simple_uuid_upper, uuid_upper, TreeBuilder};
 
 use crate::organ::dao::OrganDao;
 use crate::organ::save_organ;
@@ -78,7 +78,7 @@ impl OrganService {
         }
 
         if params.get_organ_id().is_empty() {
-            params.set_organ_id(uuid_upper());
+            params.set_organ_id(simple_uuid_upper());
         }
 
         if params.get_parent_organ_id().is_empty() {
@@ -86,7 +86,7 @@ impl OrganService {
         }
 
         if params.get_organ_data_id().is_empty() {
-            params.set_organ_data_id(uuid_upper());
+            params.set_organ_data_id(simple_uuid_upper());
         }
 
         if params.get_parent_organ_id().eq(&ROOT_TREE_NODE.to_string()) {
