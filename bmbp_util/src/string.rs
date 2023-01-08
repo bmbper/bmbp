@@ -34,6 +34,10 @@ pub fn camel_to_snake(camel_string: String) -> String {
     }
     return snake_char_vec.iter().collect();
 }
+
+pub fn camel_to_snake_upper(camel_string: String) -> String {
+    camel_to_snake(camel_string).to_uppercase()
+}
 pub fn zero_fill_left(number: i32, len: i32) -> String {
     return char_fill_left('0', number, len);
 }

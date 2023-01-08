@@ -49,7 +49,8 @@ impl OrganSql {
 
     pub fn insert_organ(params: &BmbpOrganVo) -> BmbpResp<BmbpOrmSQL> {
         let mut orm_sql = BmbpOrmSQL::insert();
-
+        let insert_sql = orm_sql.as_insert_mut().unwrap();
+        insert_sql.insert_into(BMBP_RBAC_ORGAN.to_string());
         Ok(orm_sql)
     }
 
@@ -92,6 +93,7 @@ impl OrganDao {
     }
     pub async fn insert_organ(params: &BmbpOrganVo) -> BmbpResp<usize> {
         let insert_sql = OrganSql::insert_organ(params)?;
+
         let row_count = BmbpORM.await.insert(insert_sql).await?;
         Ok(row_count)
     }
