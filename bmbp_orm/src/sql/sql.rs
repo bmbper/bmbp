@@ -5,7 +5,7 @@ use super::{
     dml::{DeleteSQL, InsertSQL, UpdateSQL},
     dql::QuerySQL,
 };
-
+#[derive(Clone)]
 pub enum DynamicSQL {
     Query(QuerySQL),
     Insert(InsertSQL),

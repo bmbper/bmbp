@@ -27,21 +27,21 @@ impl QuerySQL {
     pub fn simple_filter() -> SimpleFilterInner {
         SimpleFilterInner {
             typ: FilterType::AND,
-            cmp: vec![],
+            fields: vec![],
             express: None,
         }
     }
     pub fn simple_filter_or() -> SimpleFilterInner {
         SimpleFilterInner {
             typ: FilterType::OR,
-            cmp: vec![],
+            fields: vec![],
             express: None,
         }
     }
     pub fn simple_filter_express(express: String) -> SimpleFilterInner {
         SimpleFilterInner {
             typ: FilterType::Express,
-            cmp: vec![],
+            fields: vec![],
             express: Some(express),
         }
     }
@@ -91,6 +91,20 @@ impl QuerySQL {
 }
 
 impl QuerySQL {
+    // select_c_as_df 默认返回列別名
+    pub fn select_c_as_df(&mut self, column: String) -> &mut Self {
+        let alias = snake_to_camel(column.clone());
+        self.select
+            .push(SelectField::COLUMN(ColumnFieldInner::new_as(column, alias)));
+        self
+    }
+
+    pub fn select_c_as(&mut self, column: String, alias: String) -> &mut Self {
+        self.select
+            .push(SelectField::COLUMN(ColumnFieldInner::new_as(column, alias)));
+        self
+    }
+
     pub fn select(&mut self, field: String) -> &mut Self {
         self.select
             .push(SelectField::COLUMN(ColumnFieldInner::new(field)));
@@ -285,7 +299,7 @@ impl ColumnFieldInner {
     pub fn new(field: String) -> Self {
         ColumnFieldInner {
             tag: None,
-            field: field,
+            field,
             alias: "".to_string(),
             table_alias: "".to_string(),
         }
@@ -294,8 +308,8 @@ impl ColumnFieldInner {
     pub fn new_as(field: String, alias: String) -> Self {
         ColumnFieldInner {
             tag: None,
-            field: field,
-            alias: alias,
+            field,
+            alias,
             table_alias: "".to_string(),
         }
     }
@@ -348,7 +362,7 @@ impl CstFieldInner {
     pub fn new(field: String) -> Self {
         CstFieldInner {
             tag: None,
-            field: field,
+            field,
             alias: "".to_string(),
         }
     }
@@ -380,11 +394,11 @@ impl CstFieldInner {
         self.tag.as_ref()
     }
 
-    pub fn filed(&self) -> &String {
+    pub fn get_filed(&self) -> &String {
         &self.field
     }
 
-    pub fn alias(&self) -> &String {
+    pub fn get_alias(&self) -> &String {
         &self.alias
     }
 }
@@ -557,7 +571,7 @@ impl ComplexFilterInner {
 #[derive(Clone)]
 pub struct SimpleFilterInner {
     typ: FilterType,
-    cmp: Vec<FilterField>,
+    fields: Vec<FilterField>,
     express: Option<String>,
 }
 
@@ -565,76 +579,119 @@ impl SimpleFilterInner {
     pub fn and() -> Self {
         SimpleFilterInner {
             typ: FilterType::AND,
-            cmp: vec![],
+            fields: vec![],
             express: None,
         }
     }
     pub fn or() -> Self {
         SimpleFilterInner {
             typ: FilterType::OR,
-            cmp: vec![],
+            fields: vec![],
             express: None,
         }
     }
     pub fn express(express: String) -> Self {
         SimpleFilterInner {
             typ: FilterType::Express,
-            cmp: vec![],
+            fields: vec![],
             express: Some(express),
         }
     }
 }
 
 impl SimpleFilterInner {
+    pub fn get_filter_type(&self) -> &FilterType {
+        &self.typ
+    }
+
+    pub fn set_filter_type(&mut self, filter_type: FilterType) -> &mut Self {
+        self.typ = filter_type;
+        self
+    }
+
+    pub fn get_field_slice(&self) -> &[FilterField] {
+        self.fields.as_slice()
+    }
+
+    pub fn get_mut_field_slice(&mut self) -> &mut [FilterField] {
+        self.fields.as_mut_slice()
+    }
+
+    pub fn set_fields(&mut self, fields: Vec<FilterField>) -> &mut Self {
+        self.fields = fields;
+        self
+    }
+
+    pub fn set_express(&mut self, express: String) -> &mut Self {
+        self.express = Some(express);
+        self
+    }
+
+    pub fn get_express(&self) -> Option<&String> {
+        self.express.as_ref()
+    }
+
+    pub fn get_raw_express(&self) -> String {
+        if self.express.is_none() {
+            "".to_string()
+        } else {
+            self.express.as_ref().unwrap().clone()
+        }
+    }
+}
+
+impl SimpleFilterInner {
     pub fn s_f_eq(&mut self, field: String) -> &mut Self {
-        self.cmp.push(FilterField::s_f_cmp(CompareType::EQ, field));
+        self.fields
+            .push(FilterField::s_f_cmp(CompareType::EQ, field));
         self
     }
 
     pub fn s_c_eq(&mut self, column: String) -> &mut Self {
-        self.cmp.push(FilterField::s_c_cmp(CompareType::EQ, column));
+        self.fields
+            .push(FilterField::s_c_cmp(CompareType::EQ, column));
         self
     }
 
     pub fn s_f_eq_as(&mut self, field: String, value_as: String) -> &mut Self {
-        self.cmp
+        self.fields
             .push(FilterField::s_f_cmp_as(CompareType::EQ, field, value_as));
         self
     }
 
     pub fn s_c_eq_as(&mut self, column: String, value_as: String) -> &mut Self {
-        self.cmp
+        self.fields
             .push(FilterField::s_c_cmp_as(CompareType::EQ, column, value_as));
         self
     }
 
     pub fn r_f_eq_string(&mut self, field: String, value: String) -> &mut Self {
-        self.cmp
+        self.fields
             .push(FilterField::r_f_cmp_string(CompareType::EQ, field, value));
         self
     }
 
     pub fn r_c_eq_string(&mut self, column: String, value: String) -> &mut Self {
-        self.cmp
+        self.fields
             .push(FilterField::r_c_cmp_string(CompareType::EQ, column, value));
         self
     }
 
     pub fn r_f_eq_bool(&mut self, field: String, value: bool) -> &mut Self {
-        self.cmp
+        self.fields
             .push(FilterField::r_f_cmp_bool(CompareType::EQ, field, value));
         self
     }
 
     pub fn r_c_eq_bool(&mut self, column: String, value: bool) -> &mut Self {
-        self.cmp
+        self.fields
             .push(FilterField::r_c_cmp_bool(CompareType::EQ, column, value));
         self
     }
 
     pub fn r_f_eq_isize(&mut self, field: String, value: isize) -> &mut Self {
         let number_value = Value::Number(Number::from(value));
-        self.cmp.push(FilterField::r_f_cmp_value(
+        self.fields.push(FilterField::r_f_cmp_value(
             CompareType::EQ,
             field,
             number_value,
@@ -644,7 +701,7 @@ impl SimpleFilterInner {
 
     pub fn r_c_eq_isize(&mut self, column: String, value: isize) -> &mut Self {
         let number_value = Value::Number(Number::from(value));
-        self.cmp.push(FilterField::r_c_cmp_value(
+        self.fields.push(FilterField::r_c_cmp_value(
             CompareType::EQ,
             column,
             number_value,
@@ -653,7 +710,7 @@ impl SimpleFilterInner {
     }
     pub fn r_f_eq_f64(&mut self, field: String, value: f64) -> &mut Self {
         let number_value = Value::Number(Number::from_f64(value).unwrap());
-        self.cmp.push(FilterField::r_f_cmp_value(
+        self.fields.push(FilterField::r_f_cmp_value(
             CompareType::EQ,
             field,
             number_value,
@@ -663,7 +720,7 @@ impl SimpleFilterInner {
 
     pub fn r_c_eq_f64(&mut self, column: String, value: f64) -> &mut Self {
         let number_value = Value::Number(Number::from_f64(value).unwrap());
-        self.cmp.push(FilterField::r_c_cmp_value(
+        self.fields.push(FilterField::r_c_cmp_value(
             CompareType::EQ,
             column,
             number_value,
@@ -683,6 +740,16 @@ pub enum FilterType {
     AND,
     OR,
     Express,
+}
+
+impl ToString for FilterType {
+    fn to_string(&self) -> String {
+        match self {
+            FilterType::AND => "AND".to_string(),
+            FilterType::OR => "OR".to_string(),
+            FilterType::Express => "EXPRESS".to_string(),
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -739,11 +806,26 @@ pub enum FilterValueType {
 }
 
 #[derive(Clone)]
-struct FilterField {
+pub struct FilterField {
     cp: CompareType,
     column: CompareField,
     value: Value,
     value_type: FilterValueType,
+}
+
+impl FilterField {
+    pub fn get_cp(&self) -> &CompareType {
+        &self.cp
+    }
+    pub fn get_column(&self) -> &CompareField {
+        &self.column
+    }
+    pub fn get_value(&self) -> &Value {
+        &self.value
+    }
+    pub fn get_value_type(&self) -> &FilterValueType {
+        &self.value_type
+    }
 }
 
 impl FilterField {
@@ -850,7 +932,7 @@ impl FilterField {
 }
 
 #[derive(Clone)]
-enum CompareField {
+pub enum CompareField {
     Column(String),
     Func(FuncCompareFieldInner),
     Query(QueryCompareFiledInner),
@@ -874,23 +956,32 @@ pub enum OrderType {
     Desc,
 }
 
+impl ToString for OrderType {
+    fn to_string(&self) -> String {
+        match self {
+            OrderType::Asc => "ASC".to_string(),
+            OrderType::Desc => "DESC".to_string(),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct OrderField {
     field: String,
-    otype: OrderType,
+    order_type: OrderType,
 }
 
 impl OrderField {
     pub fn asc(field: String) -> Self {
         OrderField {
             field,
-            otype: OrderType::Asc,
+            order_type: OrderType::Asc,
         }
     }
     pub fn desc(field: String) -> Self {
         OrderField {
             field,
-            otype: OrderType::Desc,
+            order_type: OrderType::Desc,
         }
     }
     pub fn desc_vec(field: Vec<String>) -> Vec<Self> {
@@ -904,14 +995,14 @@ impl OrderField {
     pub fn asc_filed(field: SelectField) -> Self {
         OrderField {
             field: field.to_field(),
-            otype: OrderType::Asc,
+            order_type: OrderType::Asc,
         }
     }
 
     pub fn desc_filed(field: SelectField) -> Self {
         OrderField {
             field: field.to_field(),
-            otype: OrderType::Desc,
+            order_type: OrderType::Desc,
         }
     }
 
@@ -920,5 +1011,22 @@ impl OrderField {
     }
     pub fn desc_filed_vec(field: Vec<SelectField>) -> Vec<Self> {
         vec![]
+    }
+}
+
+impl OrderField {
+    pub fn get_field(&self) -> &String {
+        &self.field
+    }
+    pub fn set_field(&mut self, field: String) -> &mut Self {
+        self.field = field;
+        self
+    }
+    pub fn get_order_type(&self) -> &OrderType {
+        &self.order_type
+    }
+    pub fn set_order_type(&mut self, order_type: OrderType) -> &mut Self {
+        self.order_type = order_type;
+        self
     }
 }

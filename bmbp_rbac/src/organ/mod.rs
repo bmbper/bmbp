@@ -24,9 +24,11 @@ mod tests {
         let organ_rs = OrganService::save_organ(&mut params).await;
         match organ_rs {
             Ok(organ) => {
+                println!("organ:{:#?}", organ);
                 assert!(organ.get_r_id().is_empty(), "{}", false)
             }
             Err(e) => {
+                println!("err:{:#?}", e);
                 assert!(e.to_string().is_empty(), "{}", true)
             }
         }

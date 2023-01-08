@@ -121,50 +121,50 @@ impl ConnInner {
 
 impl ConnInner {
     pub async fn find_page(&self, mut orm_sql: OrmSQL) -> BmbpResp<PageInner<Map<String, Value>>> {
-        let (sql, params) = orm_sql.to_orm_sql()?;
+        let (sql, params) = orm_sql.to_raw_sql_params()?;
         let page = self.inner().write().await.find_page(sql, params).await?;
         Ok(page)
     }
 
     pub async fn find_list(&self, mut orm_sql: OrmSQL) -> BmbpResp<Vec<Map<String, Value>>> {
-        let (sql, params) = orm_sql.to_orm_sql()?;
+        let (sql, params) = orm_sql.to_raw_sql_params()?;
         let vec_vo = self.inner().write().await.find_list(sql, params).await?;
         Ok(vec_vo)
     }
 
     pub async fn find_one(&self, mut orm_sql: OrmSQL) -> BmbpResp<Option<Map<String, Value>>> {
-        let (sql, params) = orm_sql.to_orm_sql()?;
+        let (sql, params) = orm_sql.to_raw_sql_params()?;
         let vo = self.inner().write().await.find_one(sql, params).await?;
         Ok(vo)
     }
     pub async fn insert(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
-        let (sql, params) = orm_sql.to_orm_sql()?;
+        let (sql, params) = orm_sql.to_raw_sql_params()?;
         let row_count = self.inner().write().await.insert(sql, params).await?;
         Ok(row_count)
     }
     pub async fn update(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
-        let (sql, params) = orm_sql.to_orm_sql()?;
+        let (sql, params) = orm_sql.to_raw_sql_params()?;
         let row_count = self.inner().write().await.update(sql, params).await?;
         Ok(row_count)
     }
     pub async fn delete(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
-        let (sql, params) = orm_sql.to_orm_sql()?;
+        let (sql, params) = orm_sql.to_raw_sql_params()?;
         let row_count = self.inner().write().await.delete(sql, params).await?;
         Ok(row_count)
     }
 
     pub async fn execute(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
-        let (sql, params) = orm_sql.to_orm_sql()?;
+        let (sql, params) = orm_sql.to_raw_sql_params()?;
         let row_count = self.inner().write().await.execute(sql, params).await?;
         Ok(row_count)
     }
     pub async fn execute_dml(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
-        let (sql, params) = orm_sql.to_orm_sql()?;
+        let (sql, params) = orm_sql.to_raw_sql_params()?;
         let row_count = self.inner().write().await.execute_dml(sql, params).await?;
         Ok(row_count)
     }
     pub async fn execute_ddl(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
-        let (sql, params) = orm_sql.to_orm_sql()?;
+        let (sql, params) = orm_sql.to_raw_sql_params()?;
         let row_count = self.inner().write().await.execute_ddl(sql, params).await?;
         Ok(row_count)
     }

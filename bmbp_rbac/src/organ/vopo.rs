@@ -50,23 +50,23 @@ impl QueryParam {
 pub type PageQueryParam = PageReqVo<QueryParam>;
 
 // 组织树
-const BMBP_RBAC_ORGAN: &str = "BMBP_RBAC_ORGAN";
+pub const BMBP_RBAC_ORGAN: &str = "BMBP_RBAC_ORGAN";
 // 单位分组明细
-const BMBP_RBAC_ORGAN_UNITS: &str = "BMBP_RBAC_ORGAN_UNITS";
+pub const BMBP_RBAC_ORGAN_UNITS: &str = "BMBP_RBAC_ORGAN_UNITS";
 // 单位明细
-const BMBP_RBAC_ORGAN_UNIT: &str = "BMBP_RBAC_ORGAN_UNIT";
+pub const BMBP_RBAC_ORGAN_UNIT: &str = "BMBP_RBAC_ORGAN_UNIT";
 // 部门明细
-const BMBP_RBAC_ORGAN_DEPT: &str = "BMBP_RBAC_ORGAN_DEPT";
+pub const BMBP_RBAC_ORGAN_DEPT: &str = "BMBP_RBAC_ORGAN_DEPT";
 // 岗位明细
-const BMBP_RBAC_ORGAN_POST: &str = "BMBP_RBAC_ORGAN_POST";
+pub const BMBP_RBAC_ORGAN_POST: &str = "BMBP_RBAC_ORGAN_POST";
 // 人员明细
-const BMBP_RBAC_ORGAN_PERSON: &str = "BMBP_RBAC_ORGAN_PERSON";
+pub const BMBP_RBAC_ORGAN_PERSON: &str = "BMBP_RBAC_ORGAN_PERSON";
 // 虚拟组织树
-const BMBP_RBAC_ORGAN_VIRTUAL: &str = "BMBP_RBAC_ORGAN_VIRTUAL";
+pub const BMBP_RBAC_ORGAN_VIRTUAL: &str = "BMBP_RBAC_ORGAN_VIRTUAL";
 // 岗位分管明细
-const BMBP_RBAC_ORGAN_POST_MANAGER: &str = "BMBP_RBAC_ORGAN_POST_MANAGER";
+pub const BMBP_RBAC_ORGAN_POST_MANAGER: &str = "BMBP_RBAC_ORGAN_POST_MANAGER";
 // 岗位分管明细
-const BMBP_RBAC_ORGAN_USER_POST: &str = "BMBP_RBAC_ORGAN_USER_POST";
+pub const BMBP_RBAC_ORGAN_USER_POST: &str = "BMBP_RBAC_ORGAN_USER_POST";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

@@ -33,11 +33,28 @@ impl OrganService {
         Self::append_organ_vo(params).await?;
         if params.get_r_id().is_empty() {
             append_create_vo::<BmbpOrganVo>(params);
+            Self::insert_organ(params).await?;
         } else {
             append_update_vo::<BmbpOrganVo>(params);
+            Self::update_organ(params).await?;
         }
         Ok(params.clone())
     }
+
+    pub async fn insert_organ(params: &mut BmbpOrganVo) -> BmbpResp<()> {
+        let row_count = OrganDao::insert_organ(params).await?;
+        if row_count != 1 {
+            return Err(BmbpError::api_service(
+                "新增组织机构失败，记录为0条".to_string(),
+            ));
+        }
+        Ok(())
+    }
+    pub async fn update_organ(params: &mut BmbpOrganVo) -> BmbpResp<()> {
+        OrganDao::update_organ(params).await?;
+        Ok(())
+    }
+
     pub async fn save_organ_units(params: &mut BmbpOrganUnitsVo) -> BmbpResp<BmbpOrganUnitsVo> {
         Ok(params.clone())
     }

@@ -2,8 +2,9 @@ use serde_json::Value;
 
 use super::dql::{QueryFilter, Table};
 
+#[derive(Clone)]
 pub struct InsertSQL {
-    field: Vec<InsOrUpdField<Value>>,
+    field: Vec<DmlField>,
     table: Vec<Table>,
 }
 
@@ -16,8 +17,9 @@ impl InsertSQL {
     }
 }
 
+#[derive(Clone)]
 pub struct UpdateSQL {
-    field: Vec<InsOrUpdField<Value>>,
+    field: Vec<DmlField>,
     table: Vec<Table>,
     filter: Option<QueryFilter>,
 }
@@ -31,7 +33,7 @@ impl UpdateSQL {
         }
     }
 }
-
+#[derive(Clone)]
 pub struct DeleteSQL {
     table: Vec<Table>,
     filter: Option<QueryFilter>,
@@ -46,7 +48,14 @@ impl DeleteSQL {
     }
 }
 
-pub struct InsOrUpdField<Value> {
+#[derive(Clone)]
+pub enum DMLFieldValueType {
+    SCRIPT,
+    VALUE,
+}
+
+#[derive(Clone)]
+pub struct DmlField {
     field: String,
-    value: Option<Value>,
+    value: Value,
 }
