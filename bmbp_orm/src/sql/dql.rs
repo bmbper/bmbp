@@ -1,9 +1,6 @@
-use std::any::{type_name, Any};
-use std::collections::HashMap;
+use serde_json::{Number, Value};
 
 use bmbp_util::{camel_to_snake, snake_to_camel};
-use case_style::{formats::camel, CaseStyle};
-use serde_json::{Number, Value};
 
 #[derive(Clone)]
 pub struct QuerySQL {
@@ -798,19 +795,107 @@ pub enum CompareType {
     NINSQL(QuerySQL),
 }
 
+impl ToString for CompareType {
+    fn to_string(&self) -> String {
+        match self {
+            CompareType::EQ => "=".to_string(),
+            CompareType::NEQ => "!=".to_string(),
+            CompareType::GT => ">".to_string(),
+            CompareType::GET => ">=".to_string(),
+            CompareType::LT => "<".to_string(),
+            CompareType::LET => "<=".to_string(),
+            CompareType::LK => "LIKE".to_string(),
+            CompareType::NLK => "NOT LIKE".to_string(),
+            CompareType::RLK => "LIKE".to_string(),
+            CompareType::NRLK => "NOT LIKE".to_string(),
+            CompareType::LLK => "LIKE".to_string(),
+            CompareType::NLLK => "NOT LIKE".to_string(),
+            CompareType::ISN => "IS NULL".to_string(),
+            CompareType::ISNN => "IS NOT NULL".to_string(),
+            CompareType::LIMIT => "LIMIT".to_string(),
+            CompareType::OFFSET => "OFFSET".to_string(),
+            CompareType::EX(_) => "EXISTS".to_string(),
+            CompareType::NEX(_) => "NOT EXISTS".to_string(),
+            CompareType::IN => "IN".to_string(),
+            CompareType::NIN => "NOT IN".to_string(),
+            CompareType::INSQL(_) => "IN".to_string(),
+            CompareType::NINSQL(_) => "NOT IN".to_string(),
+        }
+    }
+}
+
+impl CompareType {
+    pub fn is_simple(&self) -> bool {
+        match self {
+            CompareType::LK
+            | CompareType::NLK
+            | CompareType::RLK
+            | CompareType::NRLK
+            | CompareType::LLK
+            | CompareType::NLLK
+            | CompareType::IN
+            | CompareType::NIN
+            | CompareType::INSQL(_)
+            | CompareType::NINSQL(_)
+            | CompareType::EX(_)
+            | CompareType::NEX(_) => false,
+            _ => true,
+        }
+    }
+
+    pub fn is_null(&self) -> bool {
+        match self {
+            CompareType::ISN | CompareType::ISNN => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_like(&self) -> bool {
+        match self {
+            CompareType::LK
+            | CompareType::NLK
+            | CompareType::RLK
+            | CompareType::NRLK
+            | CompareType::LLK
+            | CompareType::NLLK => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_in(&self) -> bool {
+        match self {
+            CompareType::IN | CompareType::NIN => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_in_sql(&self) -> bool {
+        match self {
+            CompareType::INSQL(_) | CompareType::NINSQL(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_exists(&self) -> bool {
+        match self {
+            CompareType::EX(_) | CompareType::NEX(_) => true,
+            _ => false,
+        }
+    }
+}
+
 #[derive(Clone)]
-pub enum FilterValueType {
-    SCRIPT,
-    POSITION,
-    VALUE,
+pub enum FilterValue {
+    SCRIPT(String),
+    POSITION(usize),
+    VALUE(Value),
 }
 
 #[derive(Clone)]
 pub struct FilterField {
     cp: CompareType,
     column: CompareField,
-    value: Value,
-    value_type: FilterValueType,
+    value: FilterValue,
 }
 
 impl FilterField {
@@ -820,11 +905,8 @@ impl FilterField {
     pub fn get_column(&self) -> &CompareField {
         &self.column
     }
-    pub fn get_value(&self) -> &Value {
+    pub fn get_value(&self) -> &FilterValue {
         &self.value
-    }
-    pub fn get_value_type(&self) -> &FilterValueType {
-        &self.value_type
     }
 }
 
@@ -834,8 +916,7 @@ impl FilterField {
         FilterField {
             cp: cmp_type,
             column: CompareField::Column(column),
-            value: Value::String(field),
-            value_type: FilterValueType::SCRIPT,
+            value: FilterValue::SCRIPT(field),
         }
     }
     pub fn s_c_cmp(cmp_type: CompareType, column: String) -> FilterField {
@@ -843,8 +924,7 @@ impl FilterField {
         FilterField {
             cp: cmp_type,
             column: CompareField::Column(column),
-            value: Value::String(field),
-            value_type: FilterValueType::SCRIPT,
+            value: FilterValue::SCRIPT(field),
         }
     }
 
@@ -853,16 +933,14 @@ impl FilterField {
         FilterField {
             cp: cmp_type,
             column: CompareField::Column(column),
-            value: Value::String(value_as),
-            value_type: FilterValueType::SCRIPT,
+            value: FilterValue::SCRIPT(value_as),
         }
     }
     pub fn s_c_cmp_as(cmp_type: CompareType, column: String, value_as: String) -> FilterField {
         FilterField {
             cp: cmp_type,
             column: CompareField::Column(column),
-            value: Value::String(value_as),
-            value_type: FilterValueType::SCRIPT,
+            value: FilterValue::SCRIPT(value_as),
         }
     }
 
@@ -871,8 +949,7 @@ impl FilterField {
         FilterField {
             cp: cmp_type,
             column: CompareField::Column(column),
-            value: Value::String(value),
-            value_type: FilterValueType::VALUE,
+            value: FilterValue::VALUE(Value::String(value)),
         }
     }
 
@@ -880,8 +957,7 @@ impl FilterField {
         FilterField {
             cp: cmp_type,
             column: CompareField::Column(column),
-            value: Value::String(value),
-            value_type: FilterValueType::VALUE,
+            value: FilterValue::VALUE(Value::String(value)),
         }
     }
     pub fn r_f_cmp_bool(cmp_type: CompareType, field: String, value: bool) -> FilterField {
@@ -889,8 +965,7 @@ impl FilterField {
         FilterField {
             cp: cmp_type,
             column: CompareField::Column(column),
-            value: Value::Bool(value),
-            value_type: FilterValueType::VALUE,
+            value: FilterValue::VALUE(Value::Bool(value)),
         }
     }
 
@@ -898,8 +973,7 @@ impl FilterField {
         FilterField {
             cp: cmp_type,
             column: CompareField::Column(column),
-            value: Value::Bool(value),
-            value_type: FilterValueType::VALUE,
+            value: FilterValue::VALUE(Value::Bool(value)),
         }
     }
     pub fn r_f_cmp_value(cmp_type: CompareType, field: String, value: Value) -> FilterField {
@@ -907,8 +981,7 @@ impl FilterField {
         FilterField {
             cp: cmp_type,
             column: CompareField::Column(column),
-            value,
-            value_type: FilterValueType::VALUE,
+            value: FilterValue::VALUE(value),
         }
     }
 
@@ -916,8 +989,7 @@ impl FilterField {
         FilterField {
             cp: cmp_type,
             column: CompareField::Column(column),
-            value,
-            value_type: FilterValueType::VALUE,
+            value: FilterValue::VALUE(value),
         }
     }
 
@@ -925,8 +997,7 @@ impl FilterField {
         FilterField {
             cp: cmp_type,
             column: CompareField::Column(column),
-            value: Value::String(value),
-            value_type: FilterValueType::VALUE,
+            value: FilterValue::VALUE(Value::String(value)),
         }
     }
 }

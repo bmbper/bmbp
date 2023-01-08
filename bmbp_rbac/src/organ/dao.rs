@@ -12,7 +12,7 @@ use super::vopo::{BmbpOrganVo, QueryParam};
 pub struct OrganSql();
 
 impl OrganSql {
-    pub fn list_sql(prams: &QueryParam) -> BmbpResp<BmbpOrmSQL> {
+    pub fn find_list_sql(prams: &QueryParam) -> BmbpResp<BmbpOrmSQL> {
         let mut orm_sql = BmbpOrmSQL::query();
         let query_sql = orm_sql.as_query_mut()?;
         let orm_column = BmbpOrganVo::orm_fields();
@@ -40,11 +40,23 @@ impl OrganSql {
 
         // append params
         let params = bmbp_sql.get_mut_dynamic_params();
-        params.add_param(
+        params.add_k_param(
             "organId".to_string(),
             Value::String(query_params.get_organ_id().to_string()),
         );
         Ok(bmbp_sql)
+    }
+
+    pub fn insert_organ(params: &BmbpOrganVo) -> BmbpResp<BmbpOrmSQL> {
+        let mut orm_sql = BmbpOrmSQL::insert();
+
+        Ok(orm_sql)
+    }
+
+    pub fn update_organ(params: &BmbpOrganVo) -> BmbpResp<BmbpOrmSQL> {
+        let mut orm_sql = BmbpOrmSQL::update();
+
+        Ok(orm_sql)
     }
 }
 
@@ -52,7 +64,7 @@ pub struct OrganDao();
 
 impl OrganDao {
     pub async fn find_grid_data(params: &QueryParam) -> BmbpResp<Vec<BmbpOrganVo>> {
-        let orm_sql = OrganSql::list_sql(params)?;
+        let orm_sql = OrganSql::find_list_sql(params)?;
         let vo_list = BmbpORM.await.find_list(orm_sql).await?;
         let vo_str = serde_json::to_string(&vo_list).unwrap();
         let organ_list: Vec<BmbpOrganVo> = serde_json::from_str(&vo_str).unwrap();
@@ -60,7 +72,7 @@ impl OrganDao {
     }
 
     pub async fn find_page_data(params: &QueryParam) -> BmbpResp<Vec<BmbpOrganVo>> {
-        let orm_sql = OrganSql::list_sql(params)?;
+        let orm_sql = OrganSql::find_list_sql(params)?;
         let vo_list = BmbpORM.await.find_list(orm_sql).await?;
         let vo_str = serde_json::to_string(&vo_list).unwrap();
         let organ_list: Vec<BmbpOrganVo> = serde_json::from_str(&vo_str).unwrap();
@@ -79,9 +91,13 @@ impl OrganDao {
         }
     }
     pub async fn insert_organ(params: &BmbpOrganVo) -> BmbpResp<usize> {
-        Ok(0)
+        let insert_sql = OrganSql::insert_organ(params)?;
+        let row_count = BmbpORM.await.insert(insert_sql).await?;
+        Ok(row_count)
     }
-    pub async fn update_organ(params: &BmbpOrganVo) -> BmbpResp<()> {
-        Ok(())
+    pub async fn update_organ(params: &BmbpOrganVo) -> BmbpResp<usize> {
+        let update_sql = OrganSql::update_organ(params)?;
+        let row_count = BmbpORM.await.update(update_sql).await?;
+        Ok(row_count)
     }
 }

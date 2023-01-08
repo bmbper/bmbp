@@ -1,47 +1,58 @@
+use std::borrow::Borrow;
 use std::collections::HashMap;
 
 use serde_json::Value;
 
 pub struct DynamicSQLParam {
-    params: HashMap<String, Value>,
-    param_keys: Vec<String>,
+    k_params: HashMap<String, Value>,
+    p_params: Vec<Value>,
 }
 
 impl DynamicSQLParam {
     pub fn new() -> DynamicSQLParam {
         DynamicSQLParam {
-            params: HashMap::new(),
-            param_keys: vec![],
+            k_params: HashMap::new(),
+            p_params: vec![],
         }
     }
-    pub fn to_sql_params(&self) -> Vec<Value> {
-        let mut params_vec = vec![];
-        for key in &self.param_keys {
-            if let Some(value) = self.params.get(key.as_str()) {
-                params_vec.push(value.clone());
-            } else {
-                params_vec.push(Value::Null)
-            }
-        }
-        params_vec
+    pub fn set_k_params(&mut self, params: HashMap<String, Value>) -> &mut Self {
+        self.k_params = params;
+        self
     }
-    pub fn set_params(&mut self, params: HashMap<String, Value>) -> &mut Self {
-        self.params = params;
+    pub fn get_k_params(&self) -> &HashMap<String, Value> {
+        self.k_params.borrow()
+    }
+    pub fn set_p_params(&mut self, params: Vec<Value>) -> &mut Self {
+        self.p_params = params;
+        self
+    }
+    pub fn get_p_params(&self) -> &[Value] {
+        self.p_params.as_slice()
+    }
+    pub fn extend_k_params(&mut self, params: HashMap<String, Value>) -> &mut Self {
+        self.k_params.extend(params);
         self
     }
 
-    pub fn set_keys(&mut self, keys: Vec<String>) -> &mut Self {
-        self.param_keys = keys;
+    pub fn extend_p_params(&mut self, params: Vec<Value>) -> &mut Self {
+        self.p_params.extend_from_slice(params.as_slice());
         self
     }
 
-    pub fn add_keys(&mut self, key: String) -> &mut Self {
-        self.param_keys.push(key);
+    pub fn add_k_param(&mut self, key: String, param: Value) -> &mut Self {
+        self.k_params.insert(key, param);
         self
     }
 
-    pub fn add_param(&mut self, key: String, value: Value) -> &mut Self {
-        self.params.insert(key, value);
+    pub fn add_p_param(&mut self, param: Value) -> &mut Self {
+        self.p_params.push(param);
         self
+    }
+
+    pub fn get_k_value(&self, key: String) -> Option<&Value> {
+        self.get_k_params().get(key.as_str())
+    }
+    pub fn get_p_value(&self, position: usize) -> Option<&Value> {
+        self.get_p_params().get(position)
     }
 }
