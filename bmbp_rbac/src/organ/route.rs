@@ -71,19 +71,17 @@ pub async fn query_organ_info_by_id(Path(id): Path<String>) -> BmbpResp<impl Int
 pub async fn query_organ_info_by_path(
     Path((field_name, field_value)): Path<(String, String)>,
 ) -> BmbpResp<impl IntoResponse> {
-    tracing::info!("{}:{}", field_name, field_value);
     let resp = RespVo::<Value>::default();
     Ok(resp)
 }
 
 pub async fn query_organ_info_by_params(Json(value): Json<Value>) -> BmbpResp<impl IntoResponse> {
-    tracing::info!("{:#?}", value);
     let resp = RespVo::<Value>::default();
     Ok(resp)
 }
 
 pub async fn save_organ(Json(mut value): Json<BmbpOrganVo>) -> BmbpResp<impl IntoResponse> {
-    tracing::info!("{:#?}", value);
+    tracing::info!("保存组织机构【{}】信息", value.get_organ_title().clone());
     let organ_data = OrganService::save_organ(&mut value).await?;
     let resp = RespVo::<BmbpOrganVo>::ok_data(organ_data);
     Ok(resp)
@@ -101,7 +99,7 @@ pub async fn save_organ_units(
 pub async fn save_organ_unit(
     Json(mut value): Json<BmbpOrganUnitVo>,
 ) -> BmbpResp<impl IntoResponse> {
-    tracing::info!("{:#?}", value);
+    tracing::info!("保存单位信息{:#?}", value);
     let organ_data = OrganService::save_organ_unit(&mut value).await?;
     let resp = RespVo::<BmbpOrganUnitVo>::ok_data(organ_data);
     Ok(resp)

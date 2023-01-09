@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::{
     borrow::BorrowMut,
     sync::{Arc, Weak},
@@ -126,7 +127,26 @@ impl BmbpConn for BmbpPgConnect {
         params: &[Value],
     ) -> BmbpResp<Option<Map<String, Value>>> {
         tracing::info!("执行Postgresql\nSQL:  {}\n参数:  {:#?}", sql, params);
-        Ok(None)
+        tracing::info!("执行Postgresql\n SQL:{} \n 参数:{:#?}", sql, params);
+        let pg_params = to_pg_prams(params);
+        let pg_params_ref = pg_params
+            .iter()
+            .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
+            .collect::<Vec<&(dyn ToSql + Sync)>>();
+        let rows_rs = self
+            .client
+            .lock()
+            .await
+            .query_one(sql.as_str(), pg_params_ref.as_slice())
+            .await;
+        match rows_rs {
+            Ok(row) => Ok(Some(to_json_value(&row))),
+            Err(err) => {
+                let err_msg = err.to_string();
+                tracing::error!("{}", err_msg);
+                Err(BmbpError::orm(err_msg))
+            }
+        }
     }
 
     async fn insert(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {

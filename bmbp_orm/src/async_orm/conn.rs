@@ -44,8 +44,8 @@ pub trait BmbpConn {
 
     async fn find_one(
         &mut self,
-        _sql: String,
-        _params: &[Value],
+        sql: String,
+        params: &[Value],
     ) -> BmbpResp<Option<Map<String, Value>>> {
         Ok(None)
     }

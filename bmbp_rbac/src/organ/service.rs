@@ -89,21 +89,18 @@ impl OrganService {
             params.set_organ_data_id(simple_uuid_upper());
         }
 
-        if params.get_parent_organ_id().eq(&ROOT_TREE_NODE.to_string()) {
-            params.set_organ_path("/".to_string());
+        let mut query_params = QueryParam::default();
+        query_params.set_organ_id(params.get_parent_organ_id().clone());
+        if let Some(parent_node) =
+            OrganService::find_organ_info_by_organ_id(&mut query_params).await?
+        {
+            let new_path =
+                parent_node.get_organ_path().to_string() + "/" + params.get_organ_title().as_str();
+            params.set_organ_path(new_path);
         } else {
-            let mut query_params = QueryParam::default();
-            query_params.set_organ_id(params.get_parent_organ_id().clone());
-            if let Some(parent_node) =
-                OrganService::find_organ_info_by_organ_id(&mut query_params).await?
-            {
-                let new_path =
-                    parent_node.get_organ_path().to_string() + params.get_organ_title().as_str();
-                params.set_organ_path(new_path);
-            } else {
-                let new_path = "/".to_string() + params.get_organ_title().as_str();
-                params.set_organ_path(new_path);
-            }
+            let new_path = "/".to_string() + params.get_organ_title().as_str();
+            params.set_organ_path(new_path);
+            params.set_parent_organ_id(ROOT_TREE_NODE.to_string());
         }
         Ok(())
     }

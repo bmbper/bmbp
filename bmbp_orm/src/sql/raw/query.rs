@@ -22,12 +22,15 @@ impl<'a> RawQueryBuilder<'a> {
         let query_from = self.build_query_from(self.get_query().get_table())?;
         raw_sql_parts.push(query_from);
         let (query_filter, raw_sql_params) = self.build_filter(self.get_query().get_filter())?;
-        raw_sql_parts.push(query_filter);
+        if !query_filter.is_empty() {
+            raw_sql_parts.push(format!("WHERE {}", query_filter));
+        }
+
         let query_group_by = self.build_query_group_by(self.get_query().get_group())?;
         raw_sql_parts.push(query_group_by);
         let query_order_by = self.build_query_order_by(self.get_query().get_order())?;
         raw_sql_parts.push(query_order_by);
-        Ok((raw_sql_parts.join(" \n"), raw_sql_params))
+        Ok((raw_sql_parts.join(" "), raw_sql_params))
     }
     fn build_query_select(&self, fields: &[SelectField]) -> BmbpResp<String> {
         let mut select_vec = vec![];
