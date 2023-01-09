@@ -12,7 +12,7 @@ use super::vopo::{BmbpOrganVo, QueryParam};
 pub struct OrganSql();
 
 impl OrganSql {
-    pub fn find_list_sql(prams: &QueryParam) -> BmbpResp<BmbpOrmSQL> {
+    pub fn find_list_sql(params: &QueryParam) -> BmbpResp<BmbpOrmSQL> {
         let mut orm_sql = BmbpOrmSQL::query();
         let query_sql = orm_sql.as_query_mut()?;
         let orm_column = BmbpOrganVo::orm_fields();
@@ -20,6 +20,10 @@ impl OrganSql {
             query_sql.select_c_as_df(item.clone());
         }
         query_sql.from(BMBP_RBAC_ORGAN.to_string());
+        if !params.get_organ_path().is_empty() {
+            query_sql.s_f_rlk("organPath".to_string());
+        }
+
         Ok(orm_sql)
     }
 

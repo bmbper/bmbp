@@ -1,10 +1,9 @@
 use bmbp_types::BmbpResp;
 use serde_json::Value;
-use std::borrow::BorrowMut;
 use std::cell::RefCell;
 
 use crate::sql::dql::{
-    CompareField, FilterField, FilterValue, FuncCompareFieldInner, QueryCompareFiledInner,
+    CompareField, FilterField, FilterValue, FuncCompareFieldInner, QueryComparefieldInner,
 };
 use crate::sql::DynamicSQLParam;
 
@@ -91,7 +90,7 @@ impl<'a> RawFilterBuilder<'a> {
     fn build_filter_func(&self, _field: &FuncCompareFieldInner) -> BmbpResp<String> {
         Ok("".to_string())
     }
-    fn build_filter_query(&self, _field: &QueryCompareFiledInner) -> BmbpResp<String> {
+    fn build_filter_query(&self, _field: &QueryComparefieldInner) -> BmbpResp<String> {
         Ok("".to_string())
     }
 }

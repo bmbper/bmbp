@@ -180,8 +180,8 @@ impl QuerySQL {
         self.filter.as_mut().unwrap().as_simple().unwrap()
     }
 
-    pub fn s_f_eq(&mut self, filed: String) -> &mut Self {
-        self.simple_filter_inner().s_f_eq(filed);
+    pub fn s_f_eq(&mut self, field: String) -> &mut Self {
+        self.simple_filter_inner().s_f_eq(field);
         self
     }
     pub fn s_c_eq(&mut self, column: String) -> &mut Self {
@@ -233,6 +233,13 @@ impl QuerySQL {
 
     pub fn r_c_eq_f64(&mut self, column: String, value: f64) -> &mut Self {
         self.simple_filter_inner().r_c_eq_f64(column, value);
+        self
+    }
+}
+
+impl QuerySQL {
+    pub fn s_f_rlk(&mut self, field: String) -> &mut Self {
+        self.simple_filter_inner().s_f_rlk(field);
         self
     }
 }
@@ -391,7 +398,7 @@ impl CstFieldInner {
         self.tag.as_ref()
     }
 
-    pub fn get_filed(&self) -> &String {
+    pub fn get_field(&self) -> &String {
         &self.field
     }
 
@@ -726,6 +733,15 @@ impl SimpleFilterInner {
     }
 }
 
+// like
+impl SimpleFilterInner {
+    pub(crate) fn s_f_rlk(&mut self, field: String) -> &mut Self {
+        self.fields
+            .push(FilterField::s_f_cmp(CompareType::RLK, field));
+        self
+    }
+}
+
 impl SimpleFilterInner {}
 
 impl SimpleFilterInner {}
@@ -1006,7 +1022,7 @@ impl FilterField {
 pub enum CompareField {
     Column(String),
     Func(FuncCompareFieldInner),
-    Query(QueryCompareFiledInner),
+    Query(QueryComparefieldInner),
 }
 
 impl CompareField {
@@ -1019,7 +1035,7 @@ impl CompareField {
 pub struct FuncCompareFieldInner {}
 
 #[derive(Clone)]
-pub struct QueryCompareFiledInner {}
+pub struct QueryComparefieldInner {}
 
 #[derive(Clone)]
 pub enum OrderType {
@@ -1063,24 +1079,24 @@ impl OrderField {
         vec![]
     }
 
-    pub fn asc_filed(field: SelectField) -> Self {
+    pub fn asc_field(field: SelectField) -> Self {
         OrderField {
             field: field.to_field(),
             order_type: OrderType::Asc,
         }
     }
 
-    pub fn desc_filed(field: SelectField) -> Self {
+    pub fn desc_field(field: SelectField) -> Self {
         OrderField {
             field: field.to_field(),
             order_type: OrderType::Desc,
         }
     }
 
-    pub fn asc_filed_vec(field: Vec<SelectField>) -> Vec<Self> {
+    pub fn asc_field_vec(field: Vec<SelectField>) -> Vec<Self> {
         vec![]
     }
-    pub fn desc_filed_vec(field: Vec<SelectField>) -> Vec<Self> {
+    pub fn desc_field_vec(field: Vec<SelectField>) -> Vec<Self> {
         vec![]
     }
 }

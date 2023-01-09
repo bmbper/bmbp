@@ -14,6 +14,33 @@ use super::vopo::{BmbpOrganVo, QueryParam};
 pub struct OrganService();
 
 impl OrganService {
+    pub(crate) async fn find_tree_data_by_parent_id(
+        params: &mut QueryParam,
+    ) -> BmbpResp<Vec<BmbpOrganVo>> {
+        params.set_organ_id(params.get_parent_organ_id().clone());
+        Self::find_tree_data_by_node_id(params).await
+    }
+
+    pub(crate) async fn find_tree_data_by_node_id(
+        mut query_params: &mut QueryParam,
+    ) -> BmbpResp<Vec<BmbpOrganVo>> {
+        if let Some(parent_node) = OrganService::find_organ_info_by_organ_id(query_params).await? {
+            let mut new_query_params = QueryParam::default();
+            new_query_params.set_organ_path(parent_node.get_organ_path().clone());
+            Self::find_tree_data_by_path(&mut new_query_params).await
+        } else {
+            return Ok(vec![]);
+        }
+    }
+
+    pub(crate) async fn find_tree_data_by_path(params: &QueryParam) -> BmbpResp<Vec<BmbpOrganVo>> {
+        let rows = Self::find_grid_data(params).await?;
+        let tree_organ = TreeBuilder::build(rows);
+        Ok(tree_organ)
+    }
+}
+
+impl OrganService {
     pub async fn find_tree_data(params: &QueryParam) -> BmbpResp<Vec<BmbpOrganVo>> {
         let rows = Self::find_grid_data(params).await?;
         let tree_organ = TreeBuilder::build(rows);

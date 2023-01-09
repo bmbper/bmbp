@@ -174,7 +174,7 @@ impl<'a> RawQueryBuilder<'a> {
     }
 
     fn build_query_select_cst_field(&self, cst_field: &CstFieldInner) -> String {
-        if cst_field.get_filed().is_empty() {
+        if cst_field.get_field().is_empty() {
             return "".to_string();
         }
 
@@ -185,7 +185,7 @@ impl<'a> RawQueryBuilder<'a> {
             raw_select = select_tag.unwrap().to_string() + " ";
         }
 
-        let select_field = cst_field.get_filed();
+        let select_field = cst_field.get_field();
         raw_select = raw_select + db_const_escape(select_field).as_str();
 
         let select_alias = cst_field.get_alias();

@@ -41,8 +41,21 @@ impl QueryParam {
         self
     }
 
+    pub fn get_r_id(&self) -> &String {
+        &self.organ_id
+    }
     pub fn get_organ_id(&self) -> &String {
         &self.organ_id
+    }
+    pub fn get_parent_organ_id(&self) -> &String {
+        &self.parent_organ_id
+    }
+
+    pub fn get_organ_title(&self) -> &String {
+        &self.organ_title
+    }
+    pub fn get_organ_path(&self) -> &String {
+        &self.organ_path
     }
 }
 

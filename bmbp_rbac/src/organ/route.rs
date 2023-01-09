@@ -25,7 +25,7 @@ pub async fn query_organ_tree(Json(param): Json<QueryParam>) -> BmbpResp<RespVo<
 pub async fn query_organ_tree_by_parent_id(Path(id): Path<String>) -> BmbpResp<impl IntoResponse> {
     let mut param = QueryParam::default();
     param.set_parent_organ_id(id);
-    let organ_tree_data = OrganService::find_tree_data(&param).await?;
+    let organ_tree_data = OrganService::find_tree_data_by_parent_id(&mut param).await?;
     let resp = RespVo::<Vec<BmbpOrganVo>>::ok_data(organ_tree_data);
     Ok(resp)
 }
@@ -33,7 +33,7 @@ pub async fn query_organ_tree_by_parent_id(Path(id): Path<String>) -> BmbpResp<i
 pub async fn query_organ_tree_by_node_id(Path(id): Path<String>) -> BmbpResp<impl IntoResponse> {
     let mut param = QueryParam::default();
     param.set_organ_id(id);
-    let organ_tree_data = OrganService::find_tree_data(&param).await?;
+    let organ_tree_data = OrganService::find_tree_data_by_node_id(&mut param).await?;
     let resp = RespVo::<Vec<BmbpOrganVo>>::ok_data(organ_tree_data);
     Ok(resp)
 }
@@ -41,7 +41,7 @@ pub async fn query_organ_tree_by_node_id(Path(id): Path<String>) -> BmbpResp<imp
 pub async fn query_organ_tree_by_path(Path(path): Path<String>) -> BmbpResp<impl IntoResponse> {
     let mut param = QueryParam::default();
     param.set_organ_path(path);
-    let organ_tree_data = OrganService::find_tree_data(&param).await?;
+    let organ_tree_data = OrganService::find_tree_data_by_path(&param).await?;
     let resp = RespVo::<Vec<BmbpOrganVo>>::ok_data(organ_tree_data);
     Ok(resp)
 }
