@@ -120,9 +120,19 @@ impl ConnInner {
 }
 
 impl ConnInner {
-    pub async fn find_page(&self, mut orm_sql: OrmSQL) -> BmbpResp<PageInner<Map<String, Value>>> {
+    pub async fn find_page(
+        &self,
+        mut orm_sql: OrmSQL,
+        page_no: &usize,
+        page_size: &usize,
+    ) -> BmbpResp<PageInner<Map<String, Value>>> {
         let (sql, params) = orm_sql.to_raw_sql_params()?;
-        let page = self.inner().write().await.find_page(sql, params).await?;
+        let page = self
+            .inner()
+            .write()
+            .await
+            .find_page(sql, params, page_no, page_size)
+            .await?;
         Ok(page)
     }
 

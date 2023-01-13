@@ -1,10 +1,11 @@
 use axum::extract::Query;
 use serde_json::Value;
+use std::borrow::Borrow;
 
-use crate::organ::vopo::BMBP_RBAC_ORGAN;
+use crate::organ::vopo::{PageQueryParam, BMBP_RBAC_ORGAN};
 use bmbp_orm_ins::{BmbpORM, BmbpOrmSQL};
 use bmbp_types::vo::BaseOrmVoPo;
-use bmbp_types::BmbpResp;
+use bmbp_types::{BmbpResp, PageInner};
 use bmbp_util::TreeBuilder;
 
 use super::vopo::{BmbpOrganVo, QueryParam};
@@ -12,43 +13,62 @@ use super::vopo::{BmbpOrganVo, QueryParam};
 pub struct OrganSql();
 
 impl OrganSql {
-    pub fn find_list_sql(params: &QueryParam) -> BmbpResp<BmbpOrmSQL> {
+    pub fn find_organ_base_sql(query_params: &QueryParam) -> BmbpResp<BmbpOrmSQL> {
         let mut orm_sql = BmbpOrmSQL::query();
-        let query_sql = orm_sql.as_query_mut()?;
-        let orm_column = BmbpOrganVo::orm_fields();
-        for item in orm_column {
-            query_sql.select_c_as_df(item.clone());
+        let organ_table_columns = BmbpOrganVo::orm_fields();
+        for item in organ_table_columns {
+            orm_sql.as_query_mut()?.select_column(item.clone());
         }
-        query_sql.from(BMBP_RBAC_ORGAN.to_string());
-        if !params.get_organ_path().is_empty() {
-            query_sql.s_f_rlk("organPath".to_string());
+        orm_sql.as_query_mut()?.from(BMBP_RBAC_ORGAN.to_string());
+
+        if !query_params.get_organ_id().is_empty() {
+            orm_sql.as_query_mut()?.s_f_eq("organId".to_string());
+            orm_sql.get_mut_dynamic_params().add_k_param(
+                "organId".to_string(),
+                Value::String(query_params.get_organ_id().to_string()),
+            );
+        }
+        if !query_params.get_r_id().is_empty() {
+            orm_sql.as_query_mut()?.s_f_eq("rId".to_string());
+            orm_sql.get_mut_dynamic_params().add_k_param(
+                "rId".to_string(),
+                Value::String(query_params.get_r_id().to_string()),
+            );
         }
 
         Ok(orm_sql)
     }
 
-    pub fn find_one_organ_by_organ_id_sql(query_params: &QueryParam) -> BmbpResp<BmbpOrmSQL> {
-        let mut bmbp_sql = BmbpOrmSQL::query();
-
-        let query_sql = bmbp_sql.as_query_mut()?;
-
-        // append select field
-        let orm_column = BmbpOrganVo::orm_fields();
-        for item in orm_column {
-            query_sql.select_c_as_df(item.clone());
+    pub fn find_organ_list_sql(query_params: &QueryParam) -> BmbpResp<BmbpOrmSQL> {
+        let mut orm_sql = Self::find_organ_base_sql(query_params)?;
+        if !query_params.get_organ_title().is_empty() {
+            orm_sql.as_query_mut()?.s_f_lk("organTitle".to_string());
+            orm_sql.get_mut_dynamic_params().add_k_param(
+                "organTitle".to_string(),
+                Value::String(query_params.get_organ_title().to_string()),
+            );
         }
-        // append table
-        query_sql.from(BMBP_RBAC_ORGAN.to_string());
-        // append filter
-        query_sql.s_f_eq("organId".to_string());
+        if !query_params.get_organ_path().is_empty() {
+            orm_sql.as_query_mut()?.s_f_llk("organPath".to_string());
+            orm_sql.get_mut_dynamic_params().add_k_param(
+                "organPath".to_string(),
+                Value::String(query_params.get_organ_path().to_string()),
+            );
+        }
 
-        // append params
-        let params = bmbp_sql.get_mut_dynamic_params();
-        params.add_k_param(
-            "organId".to_string(),
-            Value::String(query_params.get_organ_id().to_string()),
-        );
-        Ok(bmbp_sql)
+        if !query_params.get_parent_organ_id().is_empty() {
+            orm_sql.as_query_mut()?.s_f_eq("parentOrganId".to_string());
+            orm_sql.get_mut_dynamic_params().add_k_param(
+                "parentOrganId".to_string(),
+                Value::String(query_params.get_parent_organ_id().to_string()),
+            );
+        }
+
+        Ok(orm_sql)
+    }
+
+    pub fn find_organ_info_sql(query_params: &QueryParam) -> BmbpResp<BmbpOrmSQL> {
+        Self::find_organ_base_sql(query_params)
     }
 
     pub fn insert_organ(params: &BmbpOrganVo) -> BmbpResp<BmbpOrmSQL> {
@@ -138,25 +158,47 @@ impl OrganSql {
 pub struct OrganDao();
 
 impl OrganDao {
-    pub async fn find_grid_data(params: &QueryParam) -> BmbpResp<Vec<BmbpOrganVo>> {
-        let orm_sql = OrganSql::find_list_sql(params)?;
+    pub async fn find_organ_list(params: &QueryParam) -> BmbpResp<Vec<BmbpOrganVo>> {
+        let orm_sql = OrganSql::find_organ_list_sql(params)?;
         let vo_list = BmbpORM.await.find_list(orm_sql).await?;
         let vo_str = serde_json::to_string(&vo_list).unwrap();
         let organ_list: Vec<BmbpOrganVo> = serde_json::from_str(&vo_str).unwrap();
         Ok(organ_list)
     }
 
-    pub async fn find_page_data(params: &QueryParam) -> BmbpResp<Vec<BmbpOrganVo>> {
-        let orm_sql = OrganSql::find_list_sql(params)?;
-        let vo_list = BmbpORM.await.find_list(orm_sql).await?;
-        let vo_str = serde_json::to_string(&vo_list).unwrap();
-        let organ_list: Vec<BmbpOrganVo> = serde_json::from_str(&vo_str).unwrap();
-        let tree_organ = TreeBuilder::build(organ_list);
-        Ok(tree_organ)
+    pub async fn find_organ_page(
+        page_params: &mut PageQueryParam,
+    ) -> BmbpResp<PageInner<BmbpOrganVo>> {
+        tracing::info!("组织机构数据服务-调用分页查询");
+        let mut raw_params = &QueryParam::default();
+        if let Some(temp_params) = page_params.get_page_param() {
+            raw_params = temp_params;
+        }
+        let orm_sql = OrganSql::find_organ_list_sql(raw_params)?;
+        let page_no = if page_params.get_page_no() > 0 {
+            page_params.get_page_no().clone()
+        } else {
+            1
+        };
+
+        let page_size = if page_params.get_page_size() > 0 {
+            page_params.get_page_size().clone()
+        } else {
+            10
+        };
+
+        let page_inner = BmbpORM
+            .await
+            .find_page(orm_sql, &page_no, &page_size)
+            .await?;
+        let vo_str = serde_json::to_string(&page_inner).unwrap();
+        let organ_page: PageInner<BmbpOrganVo> = serde_json::from_str(&vo_str).unwrap();
+        Ok(organ_page)
     }
 
-    pub async fn find_one_by_organ_id(params: &QueryParam) -> BmbpResp<Option<BmbpOrganVo>> {
-        let orm_sql = OrganSql::find_one_organ_by_organ_id_sql(params)?;
+    pub async fn find_organ_info(params: &QueryParam) -> BmbpResp<Option<BmbpOrganVo>> {
+        tracing::info!("调用组织数据库接口服务-查询组织详情");
+        let orm_sql = OrganSql::find_organ_info_sql(params)?;
         if let Some(vo) = BmbpORM.await.find_one(orm_sql).await? {
             let vo_str = serde_json::to_string(&vo).unwrap();
             let organ: BmbpOrganVo = serde_json::from_str(&vo_str).unwrap();
@@ -165,6 +207,7 @@ impl OrganDao {
             Ok(None)
         }
     }
+
     pub async fn insert_organ(params: &BmbpOrganVo) -> BmbpResp<usize> {
         let insert_sql = OrganSql::insert_organ(params)?;
         let row_count = BmbpORM.await.insert(insert_sql).await?;

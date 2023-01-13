@@ -28,8 +28,10 @@ pub trait BmbpConn {
 
     async fn find_page(
         &mut self,
-        _sql: String,
-        _params: &[Value],
+        sql: String,
+        params: &[Value],
+        page_no: &usize,
+        page_size: &usize,
     ) -> BmbpResp<PageInner<Map<String, Value>>> {
         Ok(PageInner::default())
     }

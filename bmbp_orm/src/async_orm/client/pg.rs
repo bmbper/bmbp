@@ -86,9 +86,43 @@ impl BmbpConn for BmbpPgConnect {
         &mut self,
         sql: String,
         params: &[Value],
+        page_no: &usize,
+        page_size: &usize,
     ) -> BmbpResp<PageInner<Map<String, Value>>> {
-        tracing::info!("执行Postgresql\n SQL:{} \n 参数:{:#?}", sql, params);
-        Ok(PageInner::default())
+        let pg_params = to_pg_prams(params);
+        let pg_params_ref = pg_params
+            .iter()
+            .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
+            .collect::<Vec<&(dyn ToSql + Sync)>>();
+        let mut page_inner = PageInner::new();
+        page_inner.set_page_no(page_no.clone());
+        page_inner.set_page_size(page_size.clone());
+
+        let count_sql = format!("SELECT COUNT(1) AS count FROM ({}) AS t1", &sql);
+        tracing::info!("执行全部记录数查询SQL:{}", &count_sql);
+        let count_params = pg_params_ref.as_slice();
+        let count_rs = self
+            .client
+            .lock()
+            .await
+            .query_one(count_sql.as_str(), count_params)
+            .await;
+        let err = match count_rs {
+            Ok(row) => {
+                let total_count: i64 = row.get("count");
+                page_inner.set_total(total_count as usize);
+                None
+            }
+            Err(err) => Some(Err(BmbpError::orm(err.to_string()))),
+        };
+        if err.is_some() {
+            return err.unwrap();
+        }
+
+        let page_sql = format!(" {} LIMIT {} OFFSET {}", &sql, page_size, page_no);
+        let list_data = self.find_list(page_sql, params).await?;
+        page_inner.set_data(list_data);
+        Ok(page_inner)
     }
 
     async fn find_list(
@@ -96,7 +130,7 @@ impl BmbpConn for BmbpPgConnect {
         sql: String,
         params: &[Value],
     ) -> BmbpResp<Vec<Map<String, Value>>> {
-        tracing::info!("执行Postgresql\n SQL:{} \n 参数:{:#?}", sql, params);
+        tracing::info!("执行列表SQL:{}", &sql);
         let pg_params = to_pg_prams(params);
         let pg_params_ref = pg_params
             .iter()
@@ -126,8 +160,7 @@ impl BmbpConn for BmbpPgConnect {
         sql: String,
         params: &[Value],
     ) -> BmbpResp<Option<Map<String, Value>>> {
-        tracing::info!("执行Postgresql\nSQL:  {}\n参数:  {:#?}", sql, params);
-        tracing::info!("执行Postgresql\n SQL:{} \n 参数:{:#?}", sql, params);
+        tracing::info!("执行明细查询SQL:{}", &sql);
         let pg_params = to_pg_prams(params);
         let pg_params_ref = pg_params
             .iter()
@@ -150,6 +183,7 @@ impl BmbpConn for BmbpPgConnect {
     }
 
     async fn insert(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
+        tracing::info!("执行新增SQL:{}", &sql);
         let pg_params = to_pg_prams(params);
         let pg_params_ref = pg_params
             .iter()
@@ -167,25 +201,25 @@ impl BmbpConn for BmbpPgConnect {
         }
     }
     async fn update(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
-        tracing::info!("执行Postgresql\n SQL:{} \n 参数:{:#?}", sql, params);
+        tracing::info!("执行更新SQL:{}", &sql);
         Ok(0)
     }
     async fn delete(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
-        tracing::info!("执行Postgresql\n SQL:{} \n 参数:{:#?}", sql, params);
+        tracing::info!("执行删除SQL:{}", &sql);
         Ok(0)
     }
     async fn execute(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
-        tracing::info!("执行Postgresql\n SQL:{} \n 参数:{:#?}", sql, params);
+        tracing::info!("执行 SQL:{}", &sql);
         Ok(0)
     }
 
     async fn execute_ddl(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
-        tracing::info!("执行Postgresql\n SQL:{} \n 参数:{:#?}", sql, params);
+        tracing::info!("执行DDL SQL:{}", &sql);
         Ok(0)
     }
 
     async fn execute_dml(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
-        tracing::info!("执行Postgresql\n SQL:{} \n 参数:{:#?}", sql, params);
+        tracing::info!("执行DML SQL:{}", &sql);
         Ok(0)
     }
 }

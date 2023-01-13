@@ -30,9 +30,14 @@ impl Orm {
 
 /// 原生接口,根据BmbpOrmValue进行操作
 impl Orm {
-    pub async fn find_page(&self, mut orm_sql: OrmSQL) -> BmbpResp<PageInner<Map<String, Value>>> {
+    pub async fn find_page(
+        &self,
+        mut orm_sql: OrmSQL,
+        page_no: &usize,
+        page_size: &usize,
+    ) -> BmbpResp<PageInner<Map<String, Value>>> {
         let conn = self.pool.get_conn().await?;
-        let page = conn.find_page(orm_sql).await;
+        let page = conn.find_page(orm_sql, page_no, page_size).await;
         conn.release().await;
         page
     }

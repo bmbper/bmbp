@@ -31,12 +31,11 @@ fn build_v1_router() -> Router {
 
 fn build_v1_organ_router() -> Router {
     let router = Router::new()
-        .route("/tree", post(query_organ_tree))
-        .route("/tree/parent/:id", post(query_organ_tree_by_parent_id))
-        .route("/tree/node/:id", post(query_organ_tree_by_node_id))
-        .route("/tree/path/:path", post(query_organ_tree_by_path))
-        .route("/tree/:field_name/:field_value", post(query_organ_tree))
-        .route("/page", post(query_organ_page))
+        .route("/tree", post(find_organ_tree))
+        .route("/tree/parent/:id", post(find_organ_tree_by_parent))
+        .route("/tree/node/:id", post(find_organ_tree_by_node))
+        .route("/tree/path", post(find_organ_tree_by_node_path))
+        .route("/page", post(find_organ_page))
         .route("/grid", post(query_organ_grid))
         .route("/grid/:field_name/:field_value", post(query_organ_grid))
         .route("/info", post(query_organ_info_by_params))

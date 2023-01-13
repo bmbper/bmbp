@@ -3,7 +3,8 @@ use serde_json::Value;
 use std::cell::RefCell;
 
 use crate::sql::dql::{
-    CompareField, FilterField, FilterValue, FuncCompareFieldInner, QueryComparefieldInner,
+    CompareField, CompareType, FilterField, FilterValue, FuncCompareFieldInner,
+    QueryComparefieldInner,
 };
 use crate::sql::DynamicSQLParam;
 
@@ -35,6 +36,14 @@ impl<'a> RawFilterBuilder<'a> {
 
         if field.get_cp().is_simple() {
             let p_value = self.build_filter_simple_field_value(field.get_value())?;
+            self.raw_fields
+                .borrow_mut()
+                .push(format!(" {} {} {}", column, cmp, p_value));
+            return Ok(());
+        }
+
+        if field.get_cp().is_like() {
+            let p_value = self.build_filter_like_field_value(field.get_cp(), field.get_value())?;
             self.raw_fields
                 .borrow_mut()
                 .push(format!(" {} {} {}", column, cmp, p_value));
@@ -80,6 +89,51 @@ impl<'a> RawFilterBuilder<'a> {
         }
     }
 
+    fn build_filter_like_field_value(
+        &self,
+        cmp: &CompareType,
+        v_type: &FilterValue,
+    ) -> BmbpResp<String> {
+        let value = match v_type {
+            FilterValue::SCRIPT(field_key) => {
+                let k_value = self.get_params().get_k_value(field_key.clone());
+                let raw_value = {
+                    if let Some(rv) = k_value {
+                        rv.clone()
+                    } else {
+                        Value::Null
+                    }
+                };
+                raw_value
+            }
+            FilterValue::POSITION(position) => {
+                let p_value = self.get_params().get_p_value(position.clone());
+                let raw_value = {
+                    if let Some(rv) = p_value {
+                        rv.clone()
+                    } else {
+                        Value::Null
+                    }
+                };
+                raw_value
+            }
+            FilterValue::VALUE(v) => v.clone(),
+        };
+
+        let value_string = self.value_to_string(&value);
+
+        let raw_value = match cmp {
+            CompareType::LK | CompareType::NLK => Value::String(format!("%{}%", value_string)),
+            CompareType::RLK | CompareType::NRLK => Value::String(format!("%{}", value_string)),
+            CompareType::LLK | CompareType::NLLK => Value::String(format!("{}%", value_string)),
+            _ => value,
+        };
+
+        let p = self.raw_values.borrow().len() + 1;
+        self.raw_values.borrow_mut().push(raw_value);
+        Ok(format!("${}", p))
+    }
+
     fn build_filter_column(&self, field: &CompareField) -> BmbpResp<String> {
         match field {
             CompareField::Column(column) => Ok(column.clone()),
@@ -92,6 +146,17 @@ impl<'a> RawFilterBuilder<'a> {
     }
     fn build_filter_query(&self, _field: &QueryComparefieldInner) -> BmbpResp<String> {
         Ok("".to_string())
+    }
+
+    fn value_to_string(&self, v: &Value) -> String {
+        match v {
+            Value::Null => "".to_string(),
+            Value::Bool(v) => v.to_string(),
+            Value::Number(v) => v.to_string(),
+            Value::String(v) => v.to_string(),
+            Value::Array(v) => serde_json::to_string(&v).unwrap(),
+            Value::Object(v) => serde_json::to_string(&v).unwrap(),
+        }
     }
 }
 

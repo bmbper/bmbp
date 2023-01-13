@@ -14,42 +14,47 @@ use crate::organ::vopo::{
 
 use super::vopo::{BmbpOrganVo, PageQueryParam, QueryParam};
 
-///  query_organ_tree 查询组织机构树型数据
-pub async fn query_organ_tree(Json(param): Json<QueryParam>) -> BmbpResp<RespVo<Vec<BmbpOrganVo>>> {
+pub async fn find_organ_tree(Json(param): Json<QueryParam>) -> BmbpResp<RespVo<Vec<BmbpOrganVo>>> {
     tracing::info!("查询组织机构树");
-    let organ_tree_data = OrganService::find_tree_data(&param).await?;
+    let organ_tree_data = OrganService::find_organ_tree(&param).await?;
     let resp = RespVo::<Vec<BmbpOrganVo>>::ok_data(organ_tree_data);
     Ok(resp)
 }
 
-pub async fn query_organ_tree_by_parent_id(Path(id): Path<String>) -> BmbpResp<impl IntoResponse> {
-    let mut param = QueryParam::default();
-    param.set_parent_organ_id(id);
-    let organ_tree_data = OrganService::find_tree_data_by_parent_id(&mut param).await?;
+pub async fn find_organ_tree_by_parent(Path(id): Path<String>) -> BmbpResp<impl IntoResponse> {
+    tracing::info!("根据上级查询组织类型....");
+    let mut query_param = QueryParam::default();
+    query_param.set_parent_organ_id(id);
+    let organ_tree_data = OrganService::find_organ_tree_by_parent(&mut query_param).await?;
     let resp = RespVo::<Vec<BmbpOrganVo>>::ok_data(organ_tree_data);
     Ok(resp)
 }
 
-pub async fn query_organ_tree_by_node_id(Path(id): Path<String>) -> BmbpResp<impl IntoResponse> {
+pub async fn find_organ_tree_by_node(Path(id): Path<String>) -> BmbpResp<impl IntoResponse> {
     let mut param = QueryParam::default();
     param.set_organ_id(id);
-    let organ_tree_data = OrganService::find_tree_data_by_node_id(&mut param).await?;
+    let organ_tree_data = OrganService::find_organ_tree_by_organ_id(&mut param).await?;
     let resp = RespVo::<Vec<BmbpOrganVo>>::ok_data(organ_tree_data);
     Ok(resp)
 }
 
-pub async fn query_organ_tree_by_path(Path(path): Path<String>) -> BmbpResp<impl IntoResponse> {
-    let mut param = QueryParam::default();
-    param.set_organ_path(path);
-    let organ_tree_data = OrganService::find_tree_data_by_path(&param).await?;
+pub async fn find_organ_tree_by_node_path(
+    Json(mut param): Json<QueryParam>,
+) -> BmbpResp<impl IntoResponse> {
+    if param.get_organ_path().is_empty() {
+        return Ok(RespVo::fail_msg("请传入组织路径".to_string()));
+    }
+    let organ_tree_data = OrganService::find_organ_tree_by_organ_path(&param).await?;
     let resp = RespVo::<Vec<BmbpOrganVo>>::ok_data(organ_tree_data);
     Ok(resp)
 }
 
-///  query_organ_page 查询组织机构分页数据
-pub async fn query_organ_page(Json(param): Json<PageQueryParam>) -> BmbpResp<impl IntoResponse> {
-    tracing::info!("{:#?}", param);
-    let resp = RespVo::<PageInner<Value>>::default();
+pub async fn find_organ_page(
+    Json(mut query_params): Json<PageQueryParam>,
+) -> BmbpResp<impl IntoResponse> {
+    tracing::info!("组织机构列表-分页查询");
+    let page_inner = OrganService::find_organ_page(&mut query_params).await?;
+    let resp = RespVo::<PageInner<BmbpOrganVo>>::ok_data(page_inner);
     Ok(resp)
 }
 
@@ -57,7 +62,7 @@ pub async fn query_organ_page(Json(param): Json<PageQueryParam>) -> BmbpResp<imp
 pub async fn query_organ_grid(Json(param): Json<QueryParam>) -> BmbpResp<impl IntoResponse> {
     let mut param = QueryParam::default();
     param.set_organ_path("".to_string());
-    let organ_tree_data = OrganService::find_grid_data(&param).await?;
+    let organ_tree_data = OrganService::find_organ_list(&param).await?;
     let resp = RespVo::<Vec<BmbpOrganVo>>::ok_data(organ_tree_data);
     Ok(resp)
 }

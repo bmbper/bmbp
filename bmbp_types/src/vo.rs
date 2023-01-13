@@ -34,13 +34,13 @@ where
     pub fn new() -> Self {
         BmbpApiQueryParam::default()
     }
-    pub fn page_no(&self) -> usize {
+    pub fn get_page_no(&self) -> usize {
         self.page_no.clone()
     }
-    pub fn page_size(&self) -> usize {
+    pub fn get_page_size(&self) -> usize {
         self.page_size.clone()
     }
-    pub fn page_param(&self) -> Option<&T> {
+    pub fn get_page_param(&self) -> Option<&T> {
         self.page_param.as_ref()
     }
     pub fn set_page_no(&mut self, page_no: usize) {

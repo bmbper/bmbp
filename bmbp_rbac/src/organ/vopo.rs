@@ -42,7 +42,7 @@ impl QueryParam {
     }
 
     pub fn get_r_id(&self) -> &String {
-        &self.organ_id
+        &self.r_id
     }
     pub fn get_organ_id(&self) -> &String {
         &self.organ_id

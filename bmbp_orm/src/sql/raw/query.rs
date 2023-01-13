@@ -114,7 +114,7 @@ impl<'a> RawQueryBuilder<'a> {
         let filter_type = simple.get_filter_type();
         match filter_type {
             FilterType::AND | FilterType::OR => Ok((
-                raw_filter_field.join(filter_type.to_string().as_str()),
+                raw_filter_field.join(format!(" {} ", filter_type.to_string()).as_str()),
                 raw_params,
             )),
             FilterType::Express => {

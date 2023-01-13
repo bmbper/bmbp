@@ -88,30 +88,41 @@ impl QuerySQL {
 }
 
 impl QuerySQL {
-    // select_c_as_df 默认返回列別名
-    pub fn select_c_as_df(&mut self, column: String) -> &mut Self {
-        let alias = snake_to_camel(column.clone());
-        self.select
-            .push(SelectField::COLUMN(ColumnFieldInner::new_as(column, alias)));
-        self
+    pub fn select_field(&mut self, field: String) -> &mut Self {
+        let column = camel_to_snake(field.clone());
+        self.select_column_as(column, field)
     }
 
-    pub fn select_c_as(&mut self, column: String, alias: String) -> &mut Self {
+    pub fn select_column(&mut self, column: String) -> &mut Self {
+        let alias = snake_to_camel(column.clone());
+        self.select_column_as(column, alias)
+    }
+
+    pub fn raw_select(&mut self, field: String) -> &mut Self {
+        self.select_column_as(field.clone(), field)
+    }
+
+    pub fn select_field_as(&mut self, field: String, alias: String) -> &mut Self {
+        let column = camel_to_snake(field.clone());
+        self.select_column_as(column, alias)
+    }
+
+    pub fn select_column_as(&mut self, column: String, alias: String) -> &mut Self {
         self.select
             .push(SelectField::COLUMN(ColumnFieldInner::new_as(column, alias)));
         self
     }
 
     pub fn select(&mut self, field: String) -> &mut Self {
-        self.select
-            .push(SelectField::COLUMN(ColumnFieldInner::new(field)));
-        self
+        self.select_field(field)
     }
 
     pub fn select_as(&mut self, field: String, alias: String) -> &mut Self {
-        self.select
-            .push(SelectField::COLUMN(ColumnFieldInner::new_as(field, alias)));
+        self.select_field_as(field, alias)
+    }
 
+    pub fn add_select(&mut self, select_field: SelectField) -> &mut Self {
+        self.select.push(select_field);
         self
     }
 
@@ -130,13 +141,23 @@ impl QuerySQL {
         self
     }
 
-    pub fn order_asc(&mut self, field: String) -> &mut Self {
-        self.order.push(OrderField::asc(field));
+    pub fn order_field_asc(&mut self, field: String) -> &mut Self {
+        let column = camel_to_snake(field.clone());
+        self.order_column_asc(column)
+    }
+
+    pub fn order_field_desc(&mut self, field: String) -> &mut Self {
+        let column = camel_to_snake(field.clone());
+        self.order_column_desc(column)
+    }
+
+    pub fn order_column_asc(&mut self, column: String) -> &mut Self {
+        self.order.push(OrderField::asc(column));
         self
     }
 
-    pub fn order_desc(&mut self, field: String) -> &mut Self {
-        self.order.push(OrderField::desc(field));
+    pub fn order_column_desc(&mut self, column: String) -> &mut Self {
+        self.order.push(OrderField::desc(column));
         self
     }
 
@@ -238,8 +259,16 @@ impl QuerySQL {
 }
 
 impl QuerySQL {
+    pub fn s_f_lk(&mut self, field: String) -> &mut Self {
+        self.simple_filter_inner().s_f_lk(field);
+        self
+    }
     pub fn s_f_rlk(&mut self, field: String) -> &mut Self {
         self.simple_filter_inner().s_f_rlk(field);
+        self
+    }
+    pub fn s_f_llk(&mut self, field: String) -> &mut Self {
+        self.simple_filter_inner().s_f_llk(field);
         self
     }
 }
@@ -733,8 +762,19 @@ impl SimpleFilterInner {
     }
 }
 
-// like
+// LIKE
 impl SimpleFilterInner {
+    pub(crate) fn s_f_lk(&mut self, field: String) -> &mut Self {
+        self.fields
+            .push(FilterField::s_f_cmp(CompareType::LK, field));
+        self
+    }
+    pub(crate) fn s_f_llk(&mut self, field: String) -> &mut Self {
+        self.fields
+            .push(FilterField::s_f_cmp(CompareType::LLK, field));
+        self
+    }
+
     pub(crate) fn s_f_rlk(&mut self, field: String) -> &mut Self {
         self.fields
             .push(FilterField::s_f_cmp(CompareType::RLK, field));
