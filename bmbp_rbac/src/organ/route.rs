@@ -58,10 +58,8 @@ pub async fn find_organ_page(
     Ok(resp)
 }
 
-///  query_organ_grid 查询组织机构分页数据
-pub async fn query_organ_grid(Json(param): Json<QueryParam>) -> BmbpResp<impl IntoResponse> {
-    let mut param = QueryParam::default();
-    param.set_organ_path("".to_string());
+pub async fn query_organ_grid(Json(mut param): Json<QueryParam>) -> BmbpResp<impl IntoResponse> {
+    tracing::info!("组织机构列表-查询");
     let organ_tree_data = OrganService::find_organ_list(&param).await?;
     let resp = RespVo::<Vec<BmbpOrganVo>>::ok_data(organ_tree_data);
     Ok(resp)

@@ -159,6 +159,7 @@ pub struct OrganDao();
 
 impl OrganDao {
     pub async fn find_organ_list(params: &QueryParam) -> BmbpResp<Vec<BmbpOrganVo>> {
+        tracing::info!("组织机构数据服务-调用列表查询");
         let orm_sql = OrganSql::find_organ_list_sql(params)?;
         let vo_list = BmbpORM.await.find_list(orm_sql).await?;
         let vo_str = serde_json::to_string(&vo_list).unwrap();
