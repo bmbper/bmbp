@@ -18,6 +18,9 @@ pub struct QueryParam {
 
 #[allow(dead_code)]
 impl QueryParam {
+    pub fn new() -> Self {
+        QueryParam::default()
+    }
     pub fn set_r_id(&mut self, r_id: String) -> &mut Self {
         self.r_id = r_id;
         self

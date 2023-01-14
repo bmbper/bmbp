@@ -188,6 +188,14 @@ where
         }
     }
 
+    pub fn ok_option(data: Option<T>) -> Self {
+        BmbpApiResponseVo {
+            code: RespStatus::SUCCESS,
+            msg: "请求访问成功".to_string(),
+            data,
+        }
+    }
+
     pub fn fail() -> Self {
         BmbpApiResponseVo {
             code: RespStatus::ERROR,

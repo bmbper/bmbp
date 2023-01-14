@@ -40,7 +40,7 @@ impl OrganService {
             return Ok(vec![]);
         }
 
-        if let Some(parent_node) = OrganService::find_organ_info_by_organ_id(query_params).await? {
+        if let Some(parent_node) = OrganService::find_organ_info(query_params).await? {
             let mut new_query_params = QueryParam::default();
             new_query_params.set_organ_path(parent_node.get_organ_path().clone());
             Self::find_organ_tree_by_organ_path(&mut new_query_params).await
@@ -74,7 +74,7 @@ impl OrganService {
         OrganDao::find_organ_list(params).await
     }
 
-    pub async fn find_organ_info_by_organ_id(params: &QueryParam) -> BmbpResp<Option<BmbpOrganVo>> {
+    pub async fn find_organ_info(params: &QueryParam) -> BmbpResp<Option<BmbpOrganVo>> {
         tracing::info!("调用组织服务-查询组织详情-根据当前节点");
         let organ: Option<BmbpOrganVo> = OrganDao::find_organ_info(params).await?;
         Ok(organ)
@@ -142,9 +142,7 @@ impl OrganService {
 
         let mut query_params = QueryParam::default();
         query_params.set_organ_id(params.get_parent_organ_id().clone());
-        if let Some(parent_node) =
-            OrganService::find_organ_info_by_organ_id(&mut query_params).await?
-        {
+        if let Some(parent_node) = OrganService::find_organ_info(&mut query_params).await? {
             let new_path =
                 parent_node.get_organ_path().to_string() + "/" + params.get_organ_title().as_str();
             params.set_organ_path(new_path);

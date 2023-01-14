@@ -169,10 +169,16 @@ impl BmbpConn for BmbpPgConnect {
             .client
             .lock()
             .await
-            .query_one(sql.as_str(), pg_params_ref.as_slice())
+            .query_opt(sql.as_str(), pg_params_ref.as_slice())
             .await;
         match rows_rs {
-            Ok(row) => Ok(Some(to_json_value(&row))),
+            Ok(row_opt) => {
+                if let Some(row) = row_opt {
+                    Ok(Some(to_json_value(&row)))
+                } else {
+                    Ok(None)
+                }
+            }
             Err(err) => {
                 let err_msg = err.to_string();
                 tracing::error!("{}", err_msg);

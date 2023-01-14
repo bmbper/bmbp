@@ -65,24 +65,26 @@ pub async fn query_organ_grid(Json(param): Json<QueryParam>) -> BmbpResp<impl In
     Ok(resp)
 }
 
-pub async fn query_organ_info_by_id(Path(id): Path<String>) -> BmbpResp<impl IntoResponse> {
-    tracing::info!("{}", id);
-    let resp = RespVo::<Value>::default();
-    Ok(resp)
-}
-
-#[allow(unused)]
-pub async fn query_organ_info_by_path(
-    Path((field_name, field_value)): Path<(String, String)>,
+pub async fn query_organ_info_by_params(
+    Json(param): Json<QueryParam>,
 ) -> BmbpResp<impl IntoResponse> {
-    let resp = RespVo::<Value>::default();
-    Ok(resp)
+    tracing::info!("组织机构详情-查询");
+    let data = OrganService::find_organ_info(&param).await?;
+    Ok(RespVo::<BmbpOrganVo>::ok_option(data))
 }
 
-#[allow(unused)]
-pub async fn query_organ_info_by_params(Json(value): Json<Value>) -> BmbpResp<impl IntoResponse> {
-    let resp = RespVo::<Value>::default();
-    Ok(resp)
+pub async fn query_organ_info_by_r_id(Path(id): Path<String>) -> BmbpResp<impl IntoResponse> {
+    tracing::info!("组织机构详情-查询记录ID[{}]", id);
+    let mut params = QueryParam::new();
+    params.set_r_id(id);
+    query_organ_info_by_params(Json(params)).await
+}
+
+pub async fn query_organ_info_by_organ_id(Path(id): Path<String>) -> BmbpResp<impl IntoResponse> {
+    tracing::info!("组织机构详情-查询组织ID[{}]", id);
+    let mut params = QueryParam::new();
+    params.set_organ_id(id);
+    query_organ_info_by_params(Json(params)).await
 }
 
 pub async fn save_organ(Json(mut value): Json<BmbpOrganVo>) -> BmbpResp<impl IntoResponse> {

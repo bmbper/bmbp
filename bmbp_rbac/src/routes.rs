@@ -37,15 +37,14 @@ fn build_v1_organ_router() -> Router {
         .route("/tree/path", post(find_organ_tree_by_node_path))
         .route("/page", post(find_organ_page))
         .route("/grid", post(query_organ_grid))
-        .route("/grid/:field_name/:field_value", post(query_organ_grid))
         .route("/info", post(query_organ_info_by_params))
         .route(
-            "/info/:field_name/:field_value",
-            get(query_organ_info_by_path).post(query_organ_info_by_path),
+            "/info/id/:id",
+            get(query_organ_info_by_r_id).post(query_organ_info_by_r_id),
         )
         .route(
-            "/info/id/:id",
-            get(query_organ_info_by_id).post(query_organ_info_by_id),
+            "/info/organ/:id",
+            get(query_organ_info_by_organ_id).post(query_organ_info_by_organ_id),
         )
         .route("/save", post(save_organ))
         .route("/save/units", post(save_organ_units))
