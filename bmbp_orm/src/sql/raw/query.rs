@@ -1,3 +1,7 @@
+use serde_json::Value;
+
+use bmbp_types::BmbpResp;
+
 use crate::sql::dql::{
     ColumnFieldInner, ComplexFilterInner, CstFieldInner, FilterField, FilterType, JoinTable,
     OrderField, QueryFilter, SelectField, SimpleFilterInner, Table,
@@ -6,14 +10,12 @@ use crate::sql::raw::filter::RawFilterBuilder;
 use crate::sql::util::{db_alias_escape, db_const_escape, db_escape};
 use crate::sql::DynamicSQLParam;
 use crate::QuerySQL;
-use bmbp_types::BmbpResp;
-use serde_json::Value;
 
 pub struct RawQueryBuilder<'a> {
     query: &'a QuerySQL,
     params: &'a DynamicSQLParam,
 }
-
+#[allow(dead_code)]
 impl<'a> RawQueryBuilder<'a> {
     pub(crate) fn build(&self) -> BmbpResp<(String, Vec<Value>)> {
         let mut raw_sql_parts = vec![];
@@ -32,6 +34,7 @@ impl<'a> RawQueryBuilder<'a> {
         raw_sql_parts.push(query_order_by);
         Ok((raw_sql_parts.join(" "), raw_sql_params))
     }
+    #[allow(unused)]
     fn build_query_select(&self, fields: &[SelectField]) -> BmbpResp<String> {
         let mut select_vec = vec![];
         for field in fields {
@@ -75,7 +78,7 @@ impl<'a> RawQueryBuilder<'a> {
             Ok(" FROM ".to_string() + raw_table_vec.join(",").as_str())
         }
     }
-
+    #[allow(unused)]
     fn build_query_group_by(&self, fields: &[SelectField]) -> BmbpResp<String> {
         Ok("".to_string())
     }
@@ -133,15 +136,15 @@ impl<'a> RawQueryBuilder<'a> {
         if fields.is_empty() {
             return Ok((vec![], vec![]));
         }
-        let mut filter_build = RawFilterBuilder::new(fields, self.get_params());
+        let filter_build = RawFilterBuilder::new(fields, self.get_params());
         filter_build.build_filter()?;
         Ok((filter_build.get_raw_fields(), filter_build.get_raw_values()))
     }
-
+    #[allow(unused)]
     fn build_simple_filter_express(&self, express: String, fields: &[String]) -> BmbpResp<String> {
         Ok("".to_string())
     }
-
+    #[allow(unused)]
     fn build_complex_filter(&self, complex: &ComplexFilterInner) -> BmbpResp<(String, Vec<Value>)> {
         Ok(("".to_string(), vec![]))
     }

@@ -2,6 +2,7 @@ use serde_json::{Number, Value};
 
 use bmbp_util::{camel_to_snake, snake_to_camel};
 
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct QuerySQL {
     select: Vec<SelectField>,
@@ -10,7 +11,7 @@ pub struct QuerySQL {
     order: Vec<OrderField>,
     group: Vec<SelectField>,
 }
-
+#[allow(dead_code)]
 impl QuerySQL {
     pub fn new() -> QuerySQL {
         QuerySQL {
@@ -64,7 +65,7 @@ impl QuerySQL {
         }
     }
 }
-
+#[allow(dead_code)]
 impl QuerySQL {
     pub fn set_filter(&mut self, filter: QueryFilter) -> &mut Self {
         self.filter = Some(filter);
@@ -87,6 +88,7 @@ impl QuerySQL {
     }
 }
 
+#[allow(dead_code)]
 impl QuerySQL {
     pub fn select_field(&mut self, field: String) -> &mut Self {
         let column = camel_to_snake(field.clone());
@@ -192,6 +194,7 @@ impl QuerySQL {
 }
 
 /// 简易查询过虑器
+#[allow(dead_code)]
 impl QuerySQL {
     // 简易SQL
     pub fn simple_filter_inner(&mut self) -> &mut SimpleFilterInner {
@@ -258,6 +261,7 @@ impl QuerySQL {
     }
 }
 
+#[allow(dead_code)]
 impl QuerySQL {
     pub fn s_f_lk(&mut self, field: String) -> &mut Self {
         self.simple_filter_inner().s_f_lk(field);
@@ -273,6 +277,7 @@ impl QuerySQL {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Clone)]
 pub enum SelectField {
     COLUMN(ColumnFieldInner),
@@ -281,7 +286,7 @@ pub enum SelectField {
     EXPRESS(ExpressFieldInner),
     SQL(SqlSelectFieldInner),
 }
-
+#[allow(dead_code)]
 impl SelectField {
     pub fn to_field(&self) -> String {
         "".to_string()
@@ -320,6 +325,7 @@ impl ToString for SelectType {
 }
 
 /// ColumnFieldInner  返回列
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct ColumnFieldInner {
     table_alias: String,
@@ -328,6 +334,7 @@ pub struct ColumnFieldInner {
     alias: String,
 }
 
+#[allow(dead_code)]
 impl ColumnFieldInner {
     pub fn new(field: String) -> Self {
         ColumnFieldInner {
@@ -384,13 +391,14 @@ impl ColumnFieldInner {
 }
 
 /// ConstFieldInner 常量列
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct CstFieldInner {
     tag: Option<SelectType>,
     field: String,
     alias: String,
 }
-
+#[allow(dead_code)]
 impl CstFieldInner {
     pub fn new(field: String) -> Self {
         CstFieldInner {
@@ -437,6 +445,7 @@ impl CstFieldInner {
 }
 
 /// FuncFieldInner 简单函数列
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct FuncFieldInner {
     typ: Option<SelectType>,
@@ -446,6 +455,7 @@ pub struct FuncFieldInner {
 }
 
 /// ExpressFieldInner 表达式组合列
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct ExpressFieldInner {
     typ: Option<SelectType>,
@@ -454,13 +464,14 @@ pub struct ExpressFieldInner {
 }
 
 /// SqlSelectFieldInner 查询返回SQL子语句
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct SqlSelectFieldInner {
     typ: Option<SelectType>,
     field: QuerySQL,
     alias: String,
 }
-
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct Table {
     name: String,
@@ -468,6 +479,7 @@ pub struct Table {
     join: Option<JoinTable>,
 }
 
+#[allow(dead_code)]
 impl Table {
     pub fn new(table: String) -> Self {
         Table {
@@ -510,6 +522,7 @@ impl Table {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct JoinTable {
     select: Vec<SelectField>,
@@ -517,7 +530,7 @@ pub struct JoinTable {
     alias: String,
     filter: QueryFilter,
 }
-
+#[allow(dead_code)]
 #[derive(Clone)]
 pub enum QueryFilter {
     Complex(ComplexFilterInner),
@@ -570,6 +583,7 @@ impl QueryFilter {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct ComplexFilterInner {
     typ: FilterType,
@@ -577,6 +591,7 @@ pub struct ComplexFilterInner {
     express: Option<String>,
 }
 
+#[allow(dead_code)]
 impl ComplexFilterInner {
     pub fn and() -> Self {
         ComplexFilterInner {
@@ -805,6 +820,7 @@ impl ToString for FilterType {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Clone)]
 pub enum CompareType {
     EQ,
@@ -1111,12 +1127,26 @@ impl OrderField {
             order_type: OrderType::Desc,
         }
     }
-    pub fn desc_vec(field: Vec<String>) -> Vec<Self> {
-        vec![]
+    pub fn desc_vec(fields: Vec<String>) -> Vec<Self> {
+        let mut order_vec = vec![];
+        for field in fields.as_slice() {
+            order_vec.push(OrderField {
+                field: field.clone(),
+                order_type: OrderType::Desc,
+            })
+        }
+        order_vec
     }
 
-    pub fn asc_vec(field: Vec<String>) -> Vec<Self> {
-        vec![]
+    pub fn asc_vec(fields: Vec<String>) -> Vec<Self> {
+        let mut order_vec = vec![];
+        for field in fields.as_slice() {
+            order_vec.push(OrderField {
+                field: field.clone(),
+                order_type: OrderType::Asc,
+            })
+        }
+        order_vec
     }
 
     pub fn asc_field(field: SelectField) -> Self {
@@ -1133,11 +1163,25 @@ impl OrderField {
         }
     }
 
-    pub fn asc_field_vec(field: Vec<SelectField>) -> Vec<Self> {
-        vec![]
+    pub fn asc_field_vec(fields: Vec<SelectField>) -> Vec<Self> {
+        let mut order_vec = vec![];
+        for field in fields.as_slice() {
+            order_vec.push(OrderField {
+                field: field.to_field(),
+                order_type: OrderType::Asc,
+            })
+        }
+        order_vec
     }
-    pub fn desc_field_vec(field: Vec<SelectField>) -> Vec<Self> {
-        vec![]
+    pub fn desc_field_vec(fields: Vec<SelectField>) -> Vec<Self> {
+        let mut order_vec = vec![];
+        for field in fields.as_slice() {
+            order_vec.push(OrderField {
+                field: field.to_field(),
+                order_type: OrderType::Desc,
+            })
+        }
+        order_vec
     }
 }
 

@@ -1,9 +1,13 @@
-use crate::sql::DynamicSQLParam;
-use crate::{InsertSQL, UpdateSQL};
-use bmbp_types::BmbpResp;
-use serde_json::Value;
 use std::cell::RefCell;
 
+use serde_json::Value;
+
+use bmbp_types::BmbpResp;
+
+use crate::sql::DynamicSQLParam;
+use crate::UpdateSQL;
+
+#[allow(dead_code)]
 pub struct RawUpdateBuilder<'a> {
     update: &'a UpdateSQL,
     params: &'a DynamicSQLParam,

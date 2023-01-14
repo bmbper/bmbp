@@ -4,7 +4,7 @@ use proc_macro::TokenStream;
 
 use quote::format_ident;
 use quote::quote;
-use syn::{DataStruct, DeriveInput, Field, Fields, Type, TypeInfer};
+use syn::{DeriveInput, Fields};
 
 #[proc_macro_derive(Orm)]
 pub fn bmbp_orm(input: TokenStream) -> TokenStream {
@@ -24,9 +24,9 @@ fn impl_bmbp_orm_macro(ast: &mut DeriveInput) -> TokenStream {
                     let named_field_ident = name_field.ident.as_ref().unwrap();
                     // 属性名称
                     vo_field_vec.push(named_field_ident.to_string());
-                    let ty = &name_field.ty;
+                    let _ty = &name_field.ty;
                     let attrs = name_field.attrs.as_slice();
-                    for attr in attrs {}
+                    for _attr in attrs {}
                 }
             }
             _ => {}

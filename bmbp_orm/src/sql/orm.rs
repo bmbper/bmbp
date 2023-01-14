@@ -1,15 +1,11 @@
-use crate::sql::dql::{
-    ColumnFieldInner, ComplexFilterInner, CstFieldInner, FilterField, FilterType, JoinTable,
-    OrderField, QueryFilter, SelectField, SimpleFilterInner, Table,
-};
+use serde_json::Value;
+
 use crate::sql::raw::{
-    RawDDLBuilder, RawDeleteBuilder, RawFilterBuilder, RawInsertBuilder, RawQueryBuilder,
-    RawUpdateBuilder,
+    RawDDLBuilder, RawDeleteBuilder, RawInsertBuilder, RawQueryBuilder, RawUpdateBuilder,
 };
 use crate::sql::DdlSQL;
 use crate::{DeleteSQL, InsertSQL, QuerySQL, UpdateSQL};
 use bmbp_types::BmbpResp;
-use serde_json::Value;
 
 use super::{param::DynamicSQLParam, sql::DynamicSQL};
 
@@ -129,14 +125,14 @@ impl OrmSQL {
 }
 
 impl OrmSQL {
-    pub fn to_raw_sql_params(&mut self) -> BmbpResp<(String, &[Value])> {
-        self.build_raw_sql_params()?;
+    pub fn get_raw_orm(&mut self) -> BmbpResp<(String, &[Value])> {
+        self.build_raw_orm()?;
         Ok((self.raw_sql.clone(), self.raw_sql_params.as_slice()))
     }
 }
 
 impl OrmSQL {
-    fn build_raw_sql_params(&mut self) -> BmbpResp<()> {
+    fn build_raw_orm(&mut self) -> BmbpResp<()> {
         let (raw_sql, raw_params) = match self.get_dynamic_sql() {
             DynamicSQL::Query(query) => self.build_query(query)?,
             DynamicSQL::Insert(insert) => self.build_insert(insert)?,

@@ -11,7 +11,7 @@ pub struct UserQueryParam {
     user_code: String,
     user_name: String,
 }
-
+#[allow(dead_code)]
 pub type UserPageQueryParam = PageReqVo<UserQueryParam>;
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]

@@ -8,6 +8,7 @@ use crate::{BmbpDataSource, OrmSQL};
 
 use super::pool::BmbpConnectionPool;
 
+#[allow(dead_code)]
 pub struct Orm {
     data_source: Arc<BmbpDataSource>,
     pool: Arc<BmbpConnectionPool>,
@@ -28,11 +29,10 @@ impl Orm {
     }
 }
 
-/// 原生接口,根据BmbpOrmValue进行操作
 impl Orm {
     pub async fn find_page(
         &self,
-        mut orm_sql: OrmSQL,
+        orm_sql: OrmSQL,
         page_no: &usize,
         page_size: &usize,
     ) -> BmbpResp<PageInner<Map<String, Value>>> {
@@ -42,55 +42,55 @@ impl Orm {
         page
     }
 
-    pub async fn find_list(&self, mut orm_sql: OrmSQL) -> BmbpResp<Vec<Map<String, Value>>> {
+    pub async fn find_list(&self, orm_sql: OrmSQL) -> BmbpResp<Vec<Map<String, Value>>> {
         let conn = self.pool.get_conn().await?;
         let vec_vo = conn.find_list(orm_sql).await;
         conn.release().await;
         vec_vo
     }
 
-    pub async fn find_one(&self, mut orm_sql: OrmSQL) -> BmbpResp<Option<Map<String, Value>>> {
+    pub async fn find_one(&self, orm_sql: OrmSQL) -> BmbpResp<Option<Map<String, Value>>> {
         let conn = self.pool.get_conn().await?;
         let vo = conn.find_one(orm_sql).await;
         conn.release().await;
         vo
     }
 
-    pub async fn delete(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
+    pub async fn delete(&self, orm_sql: OrmSQL) -> BmbpResp<usize> {
         let conn = self.pool.get_conn().await?;
         let row_count = conn.delete(orm_sql).await;
         conn.release().await;
         row_count
     }
 
-    pub async fn insert(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
+    pub async fn insert(&self, orm_sql: OrmSQL) -> BmbpResp<usize> {
         let conn = self.pool.get_conn().await?;
         let row_count = conn.insert(orm_sql).await;
         conn.release().await;
         row_count
     }
 
-    pub async fn update(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
+    pub async fn update(&self, orm_sql: OrmSQL) -> BmbpResp<usize> {
         let conn = self.pool.get_conn().await?;
         let row_count = conn.update(orm_sql).await;
         conn.release().await;
         row_count
     }
 
-    pub async fn execute(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
+    pub async fn execute(&self, orm_sql: OrmSQL) -> BmbpResp<usize> {
         let conn = self.pool.get_conn().await?;
         let row_count = conn.execute(orm_sql).await;
         conn.release().await;
         row_count
     }
 
-    pub async fn execute_ddl(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
+    pub async fn execute_ddl(&self, orm_sql: OrmSQL) -> BmbpResp<usize> {
         let conn = self.pool.get_conn().await?;
         let row_count = conn.execute_ddl(orm_sql).await;
         conn.release().await;
         row_count
     }
-    pub async fn execute_dml(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
+    pub async fn execute_dml(&self, orm_sql: OrmSQL) -> BmbpResp<usize> {
         let conn = self.pool.get_conn().await?;
         let row_count = conn.execute_dml(orm_sql).await;
         conn.release().await;

@@ -4,9 +4,10 @@ use std::{
 };
 
 use async_trait::async_trait;
+use serde_json::{Map, Value};
 use tokio::sync::RwLock;
 
-use bmbp_types::BmbpResp;
+use bmbp_types::{BmbpResp, PageInner};
 use bmbp_util::uuid;
 
 use crate::{
@@ -33,6 +34,7 @@ impl BmbpMysqlConnect {
     }
 }
 
+#[allow(dead_code)]
 #[async_trait]
 impl BmbpConn for BmbpMysqlConnect {
     fn id(&self) -> String {
@@ -51,5 +53,55 @@ impl BmbpConn for BmbpMysqlConnect {
 
     fn data_source(&self) -> Arc<BmbpDataSource> {
         self.data_source.clone()
+    }
+    #[allow(unused)]
+    async fn find_page(
+        &mut self,
+        sql: String,
+        params: &[Value],
+        page_no: &usize,
+        page_size: &usize,
+    ) -> BmbpResp<PageInner<Map<String, Value>>> {
+        Ok(PageInner::default())
+    }
+    #[allow(unused)]
+    async fn find_list(
+        &mut self,
+        sql: String,
+        params: &[Value],
+    ) -> BmbpResp<Vec<Map<String, Value>>> {
+        Ok(vec![])
+    }
+    #[allow(unused)]
+    async fn find_one(
+        &mut self,
+        sql: String,
+        params: &[Value],
+    ) -> BmbpResp<Option<Map<String, Value>>> {
+        Ok(None)
+    }
+    #[allow(unused)]
+    async fn insert(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
+        Ok(1)
+    }
+    #[allow(unused)]
+    async fn update(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
+        Ok(0)
+    }
+    #[allow(unused)]
+    async fn delete(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
+        Ok(0)
+    }
+    #[allow(unused)]
+    async fn execute(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
+        Ok(0)
+    }
+    #[allow(unused)]
+    async fn execute_ddl(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
+        Ok(0)
+    }
+    #[allow(unused)]
+    async fn execute_dml(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
+        Ok(0)
     }
 }

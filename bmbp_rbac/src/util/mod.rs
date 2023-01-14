@@ -1,5 +1,5 @@
 use bmbp_types::vo::BaseOrmVoPo;
-use bmbp_util::{date_time_now, simple_uuid_upper, uuid_upper};
+use bmbp_util::{date_time_now, simple_uuid_upper};
 
 pub fn append_create_vo<T>(vo: &mut T)
 where

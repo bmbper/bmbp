@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use bmbp_types::vo::BaseOrmVoPo;
 use bmbp_types::{BaseVoPo, PageReqVo, TreeNode};
 
+#[allow(dead_code)]
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
@@ -15,6 +16,7 @@ pub struct QueryParam {
     organ_type: String,
 }
 
+#[allow(dead_code)]
 impl QueryParam {
     pub fn set_r_id(&mut self, r_id: String) -> &mut Self {
         self.r_id = r_id;
@@ -60,27 +62,38 @@ impl QueryParam {
 }
 
 // 分页查询参数
+#[allow(dead_code)]
 pub type PageQueryParam = PageReqVo<QueryParam>;
 
 // 组织树
+#[allow(dead_code)]
 pub const BMBP_RBAC_ORGAN: &str = "BMBP_RBAC_ORGAN";
 // 单位分组明细
+#[allow(dead_code)]
 pub const BMBP_RBAC_ORGAN_UNITS: &str = "BMBP_RBAC_ORGAN_UNITS";
 // 单位明细
+#[allow(dead_code)]
 pub const BMBP_RBAC_ORGAN_UNIT: &str = "BMBP_RBAC_ORGAN_UNIT";
 // 部门明细
+#[allow(dead_code)]
 pub const BMBP_RBAC_ORGAN_DEPT: &str = "BMBP_RBAC_ORGAN_DEPT";
 // 岗位明细
+#[allow(dead_code)]
 pub const BMBP_RBAC_ORGAN_POST: &str = "BMBP_RBAC_ORGAN_POST";
 // 人员明细
+#[allow(dead_code)]
 pub const BMBP_RBAC_ORGAN_PERSON: &str = "BMBP_RBAC_ORGAN_PERSON";
 // 虚拟组织树
+#[allow(dead_code)]
 pub const BMBP_RBAC_ORGAN_VIRTUAL: &str = "BMBP_RBAC_ORGAN_VIRTUAL";
 // 岗位分管明细
+#[allow(dead_code)]
 pub const BMBP_RBAC_ORGAN_POST_MANAGER: &str = "BMBP_RBAC_ORGAN_POST_MANAGER";
 // 岗位分管明细
+#[allow(dead_code)]
 pub const BMBP_RBAC_ORGAN_USER_POST: &str = "BMBP_RBAC_ORGAN_USER_POST";
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum BmbpOrganType {
@@ -109,6 +122,7 @@ impl ToString for BmbpOrganType {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
@@ -124,6 +138,7 @@ pub struct BmbpOrganVo {
     base: BaseVoPo,
 }
 
+#[allow(dead_code)]
 impl BaseOrmVoPo for BmbpOrganVo {
     fn get_base_vo(&self) -> &BaseVoPo {
         &self.base
@@ -146,6 +161,7 @@ impl BaseOrmVoPo for BmbpOrganVo {
     }
 }
 
+#[allow(dead_code)]
 impl BmbpOrganVo {
     pub fn new() -> Self {
         BmbpOrganVo::default()
@@ -198,7 +214,7 @@ impl BmbpOrganVo {
         &self.organ_type
     }
 }
-
+#[allow(dead_code)]
 impl TreeNode<BmbpOrganVo> for BmbpOrganVo {
     fn node_id(&self) -> &String {
         &self.organ_id
@@ -223,6 +239,7 @@ impl TreeNode<BmbpOrganVo> for BmbpOrganVo {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
@@ -233,12 +250,14 @@ pub struct BmbpOrganUnitsVo {
     base: BaseVoPo,
 }
 
+#[allow(dead_code)]
 impl BmbpOrganUnitsVo {
     pub fn new() -> Self {
         BmbpOrganUnitsVo::default()
     }
 }
 
+#[allow(dead_code)]
 impl BmbpOrganUnitsVo {
     pub fn organ_id(&self) -> &String {
         &self.organ_id
@@ -256,6 +275,7 @@ impl BmbpOrganUnitsVo {
     }
 }
 
+#[allow(dead_code)]
 impl BaseOrmVoPo for BmbpOrganUnitsVo {
     fn get_base_vo(&self) -> &BaseVoPo {
         &self.base
@@ -273,7 +293,7 @@ impl BaseOrmVoPo for BmbpOrganUnitsVo {
         vec!["organ_id".to_string(), "units_desc".to_string()]
     }
 }
-
+#[allow(dead_code)]
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
@@ -308,6 +328,7 @@ pub struct BmbpOrganUnitVo {
     base: BaseVoPo,
 }
 
+#[allow(dead_code)]
 impl BaseOrmVoPo for BmbpOrganUnitVo {
     fn get_base_vo(&self) -> &BaseVoPo {
         &self.base
@@ -326,6 +347,7 @@ impl BaseOrmVoPo for BmbpOrganUnitVo {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
@@ -343,12 +365,14 @@ pub struct BmbpOrganUnitReportVo {
     base: BaseVoPo,
 }
 
+#[allow(dead_code)]
 impl BmbpOrganUnitReportVo {
     pub fn new() -> Self {
         BmbpOrganUnitReportVo::default()
     }
 }
 
+#[allow(dead_code)]
 impl BaseOrmVoPo for BmbpOrganUnitReportVo {
     fn get_base_vo(&self) -> &BaseVoPo {
         &self.base
@@ -373,6 +397,7 @@ impl BaseOrmVoPo for BmbpOrganUnitReportVo {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
@@ -387,6 +412,7 @@ pub struct BmbpOrganDeptVo {
     base: BaseVoPo,
 }
 
+#[allow(dead_code)]
 impl BaseOrmVoPo for BmbpOrganDeptVo {
     fn get_base_vo(&self) -> &BaseVoPo {
         &self.base
@@ -405,6 +431,7 @@ impl BaseOrmVoPo for BmbpOrganDeptVo {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
@@ -428,6 +455,7 @@ pub struct BmbpOrganPostVo {
     base: BaseVoPo,
 }
 
+#[allow(dead_code)]
 impl BaseOrmVoPo for BmbpOrganPostVo {
     fn get_base_vo(&self) -> &BaseVoPo {
         &self.base
@@ -446,6 +474,7 @@ impl BaseOrmVoPo for BmbpOrganPostVo {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
@@ -475,6 +504,7 @@ pub struct BmbpOrganPersonVo {
     base: BaseVoPo,
 }
 
+#[allow(dead_code)]
 impl BaseOrmVoPo for BmbpOrganPersonVo {
     fn get_base_vo(&self) -> &BaseVoPo {
         &self.base
@@ -493,6 +523,7 @@ impl BaseOrmVoPo for BmbpOrganPersonVo {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
@@ -529,6 +560,7 @@ pub struct BmbpOrganPersonPostVo {
     base: BaseVoPo,
 }
 
+#[allow(dead_code)]
 impl BaseOrmVoPo for BmbpOrganPersonPostVo {
     fn get_base_vo(&self) -> &BaseVoPo {
         &self.base
@@ -547,6 +579,7 @@ impl BaseOrmVoPo for BmbpOrganPersonPostVo {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]

@@ -1,11 +1,12 @@
+use serde_json::Value;
+use std::cell::{Ref, RefCell, RefMut};
+
+use bmbp_types::BmbpResp;
+
 use crate::sql::dml::{DMLFieldValue, DmlField};
 use crate::sql::dql::Table;
 use crate::sql::DynamicSQLParam;
 use crate::InsertSQL;
-use bmbp_types::BmbpResp;
-use serde_json::Value;
-use std::cell::{Ref, RefCell, RefMut};
-use std::collections::HashMap;
 
 pub struct RawInsertBuilder<'a> {
     insert: &'a InsertSQL,
@@ -14,6 +15,7 @@ pub struct RawInsertBuilder<'a> {
     raw_values: RefCell<Vec<Value>>,
 }
 
+#[allow(dead_code)]
 impl<'a> RawInsertBuilder<'a> {
     pub(crate) fn build(&self) -> BmbpResp<(String, Vec<Value>)> {
         let mut raw_insert_vec = vec![];

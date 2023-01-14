@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 #[derive(Clone)]
 pub enum DdlSQL {
     DropDataBase(DropDataBaseSQL),
@@ -19,14 +20,19 @@ pub enum DdlSQL {
     AlterTable(AlterTableSQL),
     AlterColumn(AlterColumnSQL),
 }
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct CreateDataBaseSQL {}
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct DropDataBaseSQL {}
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct CreateSchemaSQL {}
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct DropSchemaSQL {}
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct CreateTableSQL {}
 #[derive(Clone)]

@@ -3,7 +3,7 @@ use axum::Json;
 use bmbp_types::{BmbpResp, RespVo};
 
 use crate::menu::vopo::{BmbpMenuVo, MenuQueryParam};
-
+#[allow(unused)]
 pub async fn query_menu_tree(
     Json(param): Json<MenuQueryParam>,
 ) -> BmbpResp<RespVo<Vec<BmbpMenuVo>>> {

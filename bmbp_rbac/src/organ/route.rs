@@ -39,7 +39,7 @@ pub async fn find_organ_tree_by_node(Path(id): Path<String>) -> BmbpResp<impl In
 }
 
 pub async fn find_organ_tree_by_node_path(
-    Json(mut param): Json<QueryParam>,
+    Json(param): Json<QueryParam>,
 ) -> BmbpResp<impl IntoResponse> {
     if param.get_organ_path().is_empty() {
         return Ok(RespVo::fail_msg("请传入组织路径".to_string()));
@@ -58,7 +58,7 @@ pub async fn find_organ_page(
     Ok(resp)
 }
 
-pub async fn query_organ_grid(Json(mut param): Json<QueryParam>) -> BmbpResp<impl IntoResponse> {
+pub async fn query_organ_grid(Json(param): Json<QueryParam>) -> BmbpResp<impl IntoResponse> {
     tracing::info!("组织机构列表-查询");
     let organ_tree_data = OrganService::find_organ_list(&param).await?;
     let resp = RespVo::<Vec<BmbpOrganVo>>::ok_data(organ_tree_data);
@@ -71,6 +71,7 @@ pub async fn query_organ_info_by_id(Path(id): Path<String>) -> BmbpResp<impl Int
     Ok(resp)
 }
 
+#[allow(unused)]
 pub async fn query_organ_info_by_path(
     Path((field_name, field_value)): Path<(String, String)>,
 ) -> BmbpResp<impl IntoResponse> {
@@ -78,6 +79,7 @@ pub async fn query_organ_info_by_path(
     Ok(resp)
 }
 
+#[allow(unused)]
 pub async fn query_organ_info_by_params(Json(value): Json<Value>) -> BmbpResp<impl IntoResponse> {
     let resp = RespVo::<Value>::default();
     Ok(resp)

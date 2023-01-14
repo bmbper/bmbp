@@ -1,6 +1,8 @@
-use bmbp_types::BmbpResp;
-use serde_json::Value;
 use std::cell::RefCell;
+
+use serde_json::Value;
+
+use bmbp_types::BmbpResp;
 
 use crate::sql::dql::{
     CompareField, CompareType, FilterField, FilterValue, FuncCompareFieldInner,
@@ -8,21 +10,21 @@ use crate::sql::dql::{
 };
 use crate::sql::DynamicSQLParam;
 
+#[allow(dead_code)]
 pub struct RawFilterBuilder<'a> {
     fields: &'a [FilterField],
     params: &'a DynamicSQLParam,
     raw_fields: RefCell<Vec<String>>,
     raw_values: RefCell<Vec<Value>>,
 }
-
+#[allow(dead_code)]
 impl<'a> RawFilterBuilder<'a> {
-    pub(crate) fn build_filter(&self) -> BmbpResp<(Vec<String>, Vec<Value>)> {
-        let (mut raw_field_vec, mut raw_params_vec) = (vec![], vec![]);
+    pub(crate) fn build_filter(&self) -> BmbpResp<()> {
         let filter_fields = self.get_fields();
         for filter_field in filter_fields {
             self.build_filter_field(filter_field)?;
         }
-        Ok((raw_field_vec, raw_params_vec))
+        Ok(())
     }
     fn build_filter_field(&self, field: &FilterField) -> BmbpResp<()> {
         let column = self.build_filter_column(field.get_column())?;
@@ -160,6 +162,7 @@ impl<'a> RawFilterBuilder<'a> {
     }
 }
 
+#[allow(dead_code)]
 impl<'a> RawFilterBuilder<'a> {
     pub fn new(fields: &'a [FilterField], params: &'a DynamicSQLParam) -> Self {
         RawFilterBuilder {

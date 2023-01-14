@@ -3,12 +3,13 @@ use serde_json::Value;
 
 use super::dql::{QueryFilter, Table};
 
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct InsertSQL {
     field: Vec<DmlField>,
     table: Vec<Table>,
 }
-
+#[allow(dead_code)]
 impl InsertSQL {
     pub fn new() -> InsertSQL {
         InsertSQL {
@@ -65,13 +66,14 @@ impl InsertSQL {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct UpdateSQL {
     field: Vec<DmlField>,
     table: Vec<Table>,
     filter: Option<QueryFilter>,
 }
-
+#[allow(dead_code)]
 impl UpdateSQL {
     pub fn new() -> UpdateSQL {
         UpdateSQL {
@@ -81,12 +83,14 @@ impl UpdateSQL {
         }
     }
 }
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct DeleteSQL {
     table: Vec<Table>,
     filter: Option<QueryFilter>,
 }
 
+#[allow(dead_code)]
 impl DeleteSQL {
     pub fn new() -> DeleteSQL {
         DeleteSQL {
@@ -103,12 +107,14 @@ pub enum DMLFieldValue {
     VALUE(Value),
 }
 
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct DmlField {
     column: String,
     value: DMLFieldValue,
 }
 
+#[allow(dead_code)]
 impl DmlField {
     pub fn s_c_v(column: String, value: String) -> Self {
         DmlField {

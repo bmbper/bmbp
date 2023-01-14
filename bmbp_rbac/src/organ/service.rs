@@ -1,9 +1,8 @@
-use bmbp_types::vo::{BaseOrmVoPo, BmbpApiQueryParam};
+use bmbp_types::vo::BaseOrmVoPo;
 use bmbp_types::{BmbpError, BmbpResp, PageInner, ROOT_TREE_NODE};
-use bmbp_util::{simple_uuid_upper, uuid_upper, TreeBuilder};
+use bmbp_util::{simple_uuid_upper, TreeBuilder};
 
 use crate::organ::dao::OrganDao;
-use crate::organ::save_organ;
 use crate::organ::vopo::{
     BmbpOrganDeptVo, BmbpOrganPersonVo, BmbpOrganPostVo, BmbpOrganUnitVo, BmbpOrganUnitsVo,
     PageQueryParam,
@@ -34,7 +33,7 @@ impl OrganService {
     }
 
     pub(crate) async fn find_organ_tree_by_organ_id(
-        mut query_params: &mut QueryParam,
+        query_params: &mut QueryParam,
     ) -> BmbpResp<Vec<BmbpOrganVo>> {
         tracing::info!("调用组织服务-查询组织树-根据当前组织ID");
         if query_params.get_organ_id().is_empty() {
