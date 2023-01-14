@@ -4,7 +4,7 @@ use std::cell::{Ref, RefCell, RefMut};
 use bmbp_types::BmbpResp;
 
 use crate::sql::dml::{DMLFieldValue, DmlField};
-use crate::sql::dql::Table;
+use crate::sql::raw::table::TableBuilder;
 use crate::sql::DynamicSQLParam;
 use crate::InsertSQL;
 
@@ -20,7 +20,7 @@ impl<'a> RawInsertBuilder<'a> {
     pub(crate) fn build(&self) -> BmbpResp<(String, Vec<Value>)> {
         let mut raw_insert_vec = vec![];
 
-        let raw_insert_into_table = self.build_insert_table(self.get_sql().get_table())?;
+        let raw_insert_into_table = self.build_insert_table()?;
         self.build_insert_columns(self.get_sql().get_fields());
         raw_insert_vec.push(format!("INSERT INTO {}", raw_insert_into_table));
 
@@ -38,16 +38,8 @@ impl<'a> RawInsertBuilder<'a> {
 
         Ok((raw_insert_vec.join(" "), self.get_raw_values()))
     }
-    fn build_insert_table(&self, tables: &[Table]) -> BmbpResp<String> {
-        let mut raw_table_vec = vec![];
-        for table in tables {
-            let mut raw_table = table.table_name().clone();
-            if !table.table_alias().is_empty() {
-                raw_table = raw_table + " AS " + table.table_alias();
-            }
-            raw_table_vec.push(raw_table);
-        }
-        Ok(raw_table_vec.join(","))
+    fn build_insert_table(&self) -> BmbpResp<String> {
+        TableBuilder::insert(self.get_sql().get_table()).build()
     }
     fn build_insert_columns(&self, fields: &[DmlField]) {
         for field in fields {

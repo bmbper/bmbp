@@ -7,6 +7,7 @@ use crate::RespVo;
 pub enum BmbpErrorKind {
     EMPTY,
     ORM,
+    DynSQL,
     ApiService,
 }
 
@@ -16,6 +17,7 @@ impl ToString for BmbpErrorKind {
             BmbpErrorKind::EMPTY => "".to_string(),
             BmbpErrorKind::ORM => "ORM".to_string(),
             BmbpErrorKind::ApiService => "apiService".to_string(),
+            BmbpErrorKind::DynSQL => "DynSql".to_string(),
         }
     }
 }
@@ -26,6 +28,7 @@ impl BmbpErrorKind {
             BmbpErrorKind::EMPTY => "".to_string(),
             BmbpErrorKind::ORM => "ORM".to_string(),
             BmbpErrorKind::ApiService => "ApiService".to_string(),
+            BmbpErrorKind::DynSQL => "DynSQL".to_string(),
         }
     }
 }
@@ -51,6 +54,12 @@ impl BmbpError {
     pub fn api(msg: String) -> Self {
         BmbpError {
             kind: BmbpErrorKind::ApiService,
+            msg,
+        }
+    }
+    pub fn dyn_sql(msg: String) -> Self {
+        BmbpError {
+            kind: BmbpErrorKind::DynSQL,
             msg,
         }
     }

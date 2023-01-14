@@ -5,8 +5,8 @@ use serde_json::Value;
 use bmbp_types::BmbpResp;
 
 use crate::sql::dql::{
-    CompareField, CompareType, FilterField, FilterValue, FuncCompareFieldInner,
-    QueryComparefieldInner,
+    CompareField, CompareType, FilterField, FilterType, FilterValue, FuncCompareFieldInner,
+    QueryComparefieldInner, QueryFilter,
 };
 use crate::sql::DynamicSQLParam;
 
@@ -208,5 +208,92 @@ impl<'a> RawFilterBuilder<'a> {
     pub fn add_raw_value(&mut self, value: Value) -> &mut Self {
         self.raw_values.borrow_mut().push(value);
         self
+    }
+
+    pub fn extend_values(&self, value: &[Value]) -> &Self {
+        self.raw_values.borrow_mut().extend_from_slice(value);
+        self
+    }
+}
+
+pub struct RawDmlFilterBuilder<'a> {
+    filter: &'a QueryFilter,
+    params: &'a DynamicSQLParam,
+    raw_values: &'a RefCell<Vec<Value>>,
+    raw_field: RefCell<Vec<String>>,
+}
+
+impl<'a> RawDmlFilterBuilder<'a> {
+    pub fn new(
+        filter: &'a QueryFilter,
+        params: &'a DynamicSQLParam,
+        raw_values: &'a RefCell<Vec<Value>>,
+    ) -> Self {
+        let builder = RawDmlFilterBuilder {
+            filter,
+            params,
+            raw_values,
+            raw_field: RefCell::new(vec![]),
+        };
+        builder
+    }
+}
+
+impl<'a> RawDmlFilterBuilder<'a> {
+    pub fn get_filter(&self) -> &QueryFilter {
+        self.filter
+    }
+    pub fn get_params(&self) -> &DynamicSQLParam {
+        self.params
+    }
+    pub fn get_raw_values(&self) -> &RefCell<Vec<Value>> {
+        &self.raw_values
+    }
+    pub fn get_raw_field(&self) -> &RefCell<Vec<String>> {
+        &self.raw_field
+    }
+}
+
+impl<'a> RawDmlFilterBuilder<'a> {
+    pub fn build(&self) -> BmbpResp<String> {
+        // 查询字段为空
+        if self.get_filter().get_field_slice().is_empty() {
+            return Ok("".to_string());
+        }
+        self.build_filter_field()?;
+        let raw_fields_binding = self.get_raw_field().borrow();
+        let raw_field_slice = raw_fields_binding.as_slice();
+        FilterUtil::build_express(raw_field_slice, self.get_filter().get_filter_type())
+    }
+
+    pub fn build_filter_field(&self) -> BmbpResp<()> {
+        let fields = self.get_filter().get_field_slice();
+        let filter = RawFilterBuilder::new(fields, self.get_params());
+
+        // 更新VALUE
+        let mut raw_value_ref = self.get_raw_values().borrow_mut();
+        filter.extend_values(raw_value_ref.as_slice());
+        filter.build_filter()?;
+        raw_value_ref.clear();
+        raw_value_ref.extend_from_slice(filter.get_raw_values().as_slice());
+
+        // 更新字段
+        self.get_raw_field()
+            .borrow_mut()
+            .extend_from_slice(filter.get_raw_fields().as_slice());
+        Ok(())
+    }
+}
+
+pub struct FilterUtil();
+impl FilterUtil {
+    pub(crate) fn build_express<'a>(field: &'a [String], typ: &'a FilterType) -> BmbpResp<String> {
+        match typ {
+            FilterType::AND | FilterType::OR => {
+                Ok(field.join(format!(" {} ", typ.to_string()).as_str()))
+            }
+            #[allow(unused)]
+            FilterType::Express(express) => Ok("".to_string()),
+        }
     }
 }

@@ -189,47 +189,46 @@ impl BmbpConn for BmbpPgConnect {
 
     async fn insert(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
         tracing::info!("执行新增SQL:{}", &sql);
+        self.execute(sql, params).await
+    }
+    #[allow(unused)]
+    async fn update(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
+        tracing::info!("执行更新SQL:{}", &sql);
+        self.execute(sql, params).await
+    }
+    #[allow(unused)]
+    async fn delete(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
+        tracing::info!("执行删除SQL:{}", &sql);
+        self.execute(sql, params).await
+    }
+    #[allow(unused)]
+    async fn execute(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
         let pg_params = to_pg_prams(params);
         let pg_params_ref = pg_params
             .iter()
             .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
             .collect::<Vec<&(dyn ToSql + Sync)>>();
-        let insert_rs = self
+        let execute_rs = self
             .client
             .lock()
             .await
             .execute(sql.as_str(), pg_params_ref.as_slice())
             .await;
-        match insert_rs {
+        match execute_rs {
             Ok(row_count) => Ok(row_count as usize),
             Err(err) => Err(BmbpError::orm(err.to_string())),
         }
-    }
-    #[allow(unused)]
-    async fn update(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
-        tracing::info!("执行更新SQL:{}", &sql);
-        Ok(0)
-    }
-    #[allow(unused)]
-    async fn delete(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
-        tracing::info!("执行删除SQL:{}", &sql);
-        Ok(0)
-    }
-    #[allow(unused)]
-    async fn execute(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
-        tracing::info!("执行 SQL:{}", &sql);
-        Ok(0)
     }
 
     #[allow(unused)]
     async fn execute_ddl(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
         tracing::info!("执行DDL SQL:{}", &sql);
-        Ok(0)
+        self.execute(sql, params).await
     }
     #[allow(unused)]
     async fn execute_dml(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
         tracing::info!("执行DML SQL:{}", &sql);
-        Ok(0)
+        self.execute(sql, params).await
     }
 }
 

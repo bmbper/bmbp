@@ -146,7 +146,10 @@ pub async fn update_organ_parent(Json(params): Json<QueryParam>) -> BmbpResp<imp
         params.get_parent_organ_id()
     );
     let row_count = OrganService::update_organ_parent(&params).await?;
-    Ok(RespVo::<usize>::ok_data(row_count))
+    Ok(RespVo::<usize>::ok_msg_data(
+        format!("成功更新记录数:{}", row_count),
+        row_count,
+    ))
 }
 
 pub async fn update_organ(Json(value): Json<Value>) -> BmbpResp<impl IntoResponse> {

@@ -92,12 +92,14 @@ impl UpdateSQL {
         }
         self.filter.as_mut().unwrap()
     }
-
-    pub fn get_mut_simple(&mut self) -> &mut QueryFilter {
-        if self.filter.is_none() {
-            self.filter = Some(QueryFilter::new())
-        }
-        self.filter.as_mut().unwrap()
+    pub fn get_table_slice(&self) -> &[Table] {
+        self.table.as_slice()
+    }
+    pub fn get_fields(&self) -> &[DmlField] {
+        self.field.as_slice()
+    }
+    pub fn get_filter(&self) -> Option<&QueryFilter> {
+        self.filter.as_ref()
     }
 }
 
@@ -106,9 +108,11 @@ impl UpdateSQL {
         self.table.push(Table::new(table));
         self
     }
-
     pub fn set_s_f(&mut self, field: String) -> &mut Self {
-        self.get_mut_filter().s_f_eq(field);
+        self.set_s_c_as(camel_to_snake_upper(field.clone()), field)
+    }
+    pub fn set_s_c_as(&mut self, column: String, field: String) -> &mut Self {
+        self.field.push(DmlField::s_c_v(column, field));
         self
     }
 }

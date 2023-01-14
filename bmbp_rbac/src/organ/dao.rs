@@ -107,9 +107,9 @@ impl OrganSql {
 
         orm_sql
             .as_update_mut()?
-            .set_s_f("organParentId".to_string());
+            .set_s_f("parentOrganId".to_string());
         orm_sql.get_mut_dynamic_params().add_k_param(
-            "organParentId".to_string(),
+            "parentOrganId".to_string(),
             Value::String(params.get_parent_organ_id().to_string()),
         );
 

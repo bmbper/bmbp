@@ -41,9 +41,9 @@ pub trait BmbpConn {
         params: &[Value],
     ) -> BmbpResp<Option<Map<String, Value>>>;
     async fn insert(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize>;
-    async fn update(&mut self, _sql: String, _params: &[Value]) -> BmbpResp<usize>;
-    async fn delete(&mut self, _sql: String, _params: &[Value]) -> BmbpResp<usize>;
-    async fn execute(&mut self, _sql: String, _params: &[Value]) -> BmbpResp<usize>;
-    async fn execute_ddl(&mut self, _sql: String, _params: &[Value]) -> BmbpResp<usize>;
-    async fn execute_dml(&mut self, _sql: String, _params: &[Value]) -> BmbpResp<usize>;
+    async fn update(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize>;
+    async fn delete(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize>;
+    async fn execute(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize>;
+    async fn execute_ddl(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize>;
+    async fn execute_dml(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize>;
 }

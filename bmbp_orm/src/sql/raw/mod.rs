@@ -3,6 +3,7 @@ mod delete;
 mod filter;
 mod insert;
 mod query;
+mod table;
 mod update;
 
 pub use ddl::RawDDLBuilder;
