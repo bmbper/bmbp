@@ -22,48 +22,6 @@ impl QuerySQL {
             group: vec![],
         }
     }
-    pub fn simple_filter() -> SimpleFilterInner {
-        SimpleFilterInner {
-            typ: FilterType::AND,
-            fields: vec![],
-            express: None,
-        }
-    }
-    pub fn simple_filter_or() -> SimpleFilterInner {
-        SimpleFilterInner {
-            typ: FilterType::OR,
-            fields: vec![],
-            express: None,
-        }
-    }
-    pub fn simple_filter_express(express: String) -> SimpleFilterInner {
-        SimpleFilterInner {
-            typ: FilterType::Express,
-            fields: vec![],
-            express: Some(express),
-        }
-    }
-    pub fn complex_filter() -> ComplexFilterInner {
-        ComplexFilterInner {
-            typ: FilterType::AND,
-            cmp: vec![],
-            express: None,
-        }
-    }
-    pub fn complex_filter_or() -> ComplexFilterInner {
-        ComplexFilterInner {
-            typ: FilterType::OR,
-            cmp: vec![],
-            express: None,
-        }
-    }
-    pub fn complex_filter_express(express: String) -> ComplexFilterInner {
-        ComplexFilterInner {
-            typ: FilterType::Express,
-            cmp: vec![],
-            express: Some(express),
-        }
-    }
 }
 #[allow(dead_code)]
 impl QuerySQL {
@@ -187,7 +145,7 @@ impl QuerySQL {
 
     pub fn filter(&mut self) -> &mut QueryFilter {
         if self.filter.is_none() {
-            self.filter = Some(QueryFilter::simple());
+            self.filter = Some(QueryFilter::new());
         }
         self.filter.as_mut().unwrap()
     }
@@ -197,83 +155,11 @@ impl QuerySQL {
 #[allow(dead_code)]
 impl QuerySQL {
     // 简易SQL
-    pub fn simple_filter_inner(&mut self) -> &mut SimpleFilterInner {
-        if self.filter.is_none() || self.filter.as_ref().unwrap().is_complex() {
-            self.filter = Some(QueryFilter::simple());
+    pub fn get_mut_filter(&mut self) -> &mut QueryFilter {
+        if self.filter.is_none() {
+            self.filter = Some(QueryFilter::new());
         }
-        self.filter.as_mut().unwrap().as_simple().unwrap()
-    }
-
-    pub fn s_f_eq(&mut self, field: String) -> &mut Self {
-        self.simple_filter_inner().s_f_eq(field);
-        self
-    }
-    pub fn s_c_eq(&mut self, column: String) -> &mut Self {
-        self.simple_filter_inner().s_c_eq(column);
-        self
-    }
-    pub fn s_f_eq_as(&mut self, field: String, value_as: String) -> &mut Self {
-        self.simple_filter_inner().s_f_eq_as(field, value_as);
-        self
-    }
-    pub fn s_c_eq_as(&mut self, column: String, value_as: String) -> &mut Self {
-        self.simple_filter_inner().s_c_eq_as(column, value_as);
-        self
-    }
-
-    pub fn r_f_eq_string(&mut self, field: String, value: String) -> &mut Self {
-        self.simple_filter_inner().r_f_eq_string(field, value);
-        self
-    }
-
-    pub fn r_c_eq_string(&mut self, column: String, value: String) -> &mut Self {
-        self.simple_filter_inner().r_f_eq_string(column, value);
-        self
-    }
-
-    pub fn r_f_eq_bool(&mut self, field: String, value: bool) -> &mut Self {
-        self.simple_filter_inner().r_f_eq_bool(field, value);
-        self
-    }
-
-    pub fn r_c_eq_bool(&mut self, column: String, value: bool) -> &mut Self {
-        self.simple_filter_inner().r_c_eq_bool(column, value);
-        self
-    }
-
-    pub fn r_f_eq_isize(&mut self, field: String, value: isize) -> &mut Self {
-        self.simple_filter_inner().r_f_eq_isize(field, value);
-        self
-    }
-
-    pub fn r_c_eq_isize(&mut self, column: String, value: isize) -> &mut Self {
-        self.simple_filter_inner().r_c_eq_isize(column, value);
-        self
-    }
-    pub fn r_f_eq_f64(&mut self, field: String, value: f64) -> &mut Self {
-        self.simple_filter_inner().r_f_eq_f64(field, value);
-        self
-    }
-
-    pub fn r_c_eq_f64(&mut self, column: String, value: f64) -> &mut Self {
-        self.simple_filter_inner().r_c_eq_f64(column, value);
-        self
-    }
-}
-
-#[allow(dead_code)]
-impl QuerySQL {
-    pub fn s_f_lk(&mut self, field: String) -> &mut Self {
-        self.simple_filter_inner().s_f_lk(field);
-        self
-    }
-    pub fn s_f_rlk(&mut self, field: String) -> &mut Self {
-        self.simple_filter_inner().s_f_rlk(field);
-        self
-    }
-    pub fn s_f_llk(&mut self, field: String) -> &mut Self {
-        self.simple_filter_inner().s_f_llk(field);
-        self
+        self.filter.as_mut().unwrap()
     }
 }
 
@@ -532,163 +418,42 @@ pub struct JoinTable {
 }
 #[allow(dead_code)]
 #[derive(Clone)]
-pub enum QueryFilter {
-    Complex(ComplexFilterInner),
-    Simple(SimpleFilterInner),
+pub struct QueryFilter {
+    typ: FilterType,
+    fields: Vec<FilterField>,
 }
 
 impl QueryFilter {
-    pub fn simple() -> QueryFilter {
-        QueryFilter::Simple(SimpleFilterInner::and())
-    }
-    pub fn simple_or() -> QueryFilter {
-        QueryFilter::Simple(SimpleFilterInner::or())
-    }
-    pub fn simple_express(express: String) -> SimpleFilterInner {
-        SimpleFilterInner::express(express)
-    }
-    pub fn complex() -> ComplexFilterInner {
-        ComplexFilterInner::and()
-    }
-    pub fn complex_or() -> ComplexFilterInner {
-        ComplexFilterInner::or()
-    }
-    pub fn complex_express(express: String) -> ComplexFilterInner {
-        ComplexFilterInner::express(express)
-    }
-
-    pub fn as_simple(&mut self) -> Option<&mut SimpleFilterInner> {
-        match self {
-            QueryFilter::Simple(simple) => Some(simple),
-            QueryFilter::Complex(_) => None,
-        }
-    }
-    pub fn is_simple(&mut self) -> bool {
-        match self {
-            QueryFilter::Simple(_) => true,
-            QueryFilter::Complex(_) => false,
-        }
-    }
-    pub fn as_complex(&mut self) -> Option<&mut ComplexFilterInner> {
-        match self {
-            QueryFilter::Simple(_) => None,
-            QueryFilter::Complex(complex) => Some(complex),
-        }
-    }
-    pub fn is_complex(&self) -> bool {
-        match self {
-            QueryFilter::Simple(_) => false,
-            QueryFilter::Complex(_) => true,
-        }
-    }
-}
-
-#[allow(dead_code)]
-#[derive(Clone)]
-pub struct ComplexFilterInner {
-    typ: FilterType,
-    cmp: Vec<QueryFilter>,
-    express: Option<String>,
-}
-
-#[allow(dead_code)]
-impl ComplexFilterInner {
-    pub fn and() -> Self {
-        ComplexFilterInner {
-            typ: FilterType::AND,
-            cmp: vec![],
-            express: None,
-        }
-    }
-    pub fn or() -> Self {
-        ComplexFilterInner {
-            typ: FilterType::OR,
-            cmp: vec![],
-            express: None,
-        }
-    }
-    pub fn express(express: String) -> Self {
-        ComplexFilterInner {
-            typ: FilterType::Express,
-            cmp: vec![],
-            express: Some(express),
-        }
-    }
-}
-
-#[derive(Clone)]
-pub struct SimpleFilterInner {
-    typ: FilterType,
-    fields: Vec<FilterField>,
-    express: Option<String>,
-}
-
-impl SimpleFilterInner {
-    pub fn and() -> Self {
-        SimpleFilterInner {
+    pub fn new() -> QueryFilter {
+        QueryFilter {
             typ: FilterType::AND,
             fields: vec![],
-            express: None,
         }
     }
-    pub fn or() -> Self {
-        SimpleFilterInner {
+    pub fn new_or() -> QueryFilter {
+        QueryFilter {
             typ: FilterType::OR,
             fields: vec![],
-            express: None,
         }
     }
-    pub fn express(express: String) -> Self {
-        SimpleFilterInner {
-            typ: FilterType::Express,
+    pub fn new_express(express: String) -> QueryFilter {
+        QueryFilter {
+            typ: FilterType::Express(express),
             fields: vec![],
-            express: Some(express),
         }
     }
 }
 
-impl SimpleFilterInner {
+impl QueryFilter {
     pub fn get_filter_type(&self) -> &FilterType {
         &self.typ
     }
-
-    pub fn set_filter_type(&mut self, filter_type: FilterType) -> &mut Self {
-        self.typ = filter_type;
-        self
-    }
-
     pub fn get_field_slice(&self) -> &[FilterField] {
         self.fields.as_slice()
     }
-
-    pub fn get_mut_field_slice(&mut self) -> &mut [FilterField] {
-        self.fields.as_mut_slice()
-    }
-
-    pub fn set_fields(&mut self, fields: Vec<FilterField>) -> &mut Self {
-        self.fields = fields;
-        self
-    }
-
-    pub fn set_express(&mut self, express: String) -> &mut Self {
-        self.express = Some(express);
-        self
-    }
-
-    pub fn get_express(&self) -> Option<&String> {
-        self.express.as_ref()
-    }
-
-    pub fn get_raw_express(&self) -> String {
-        if self.express.is_none() {
-            "".to_string()
-        } else {
-            self.express.as_ref().unwrap().clone()
-        }
-    }
 }
 
-impl SimpleFilterInner {
+impl QueryFilter {
     pub fn s_f_eq(&mut self, field: String) -> &mut Self {
         self.fields
             .push(FilterField::s_f_cmp(CompareType::EQ, field));
@@ -778,36 +543,30 @@ impl SimpleFilterInner {
 }
 
 // LIKE
-impl SimpleFilterInner {
-    pub(crate) fn s_f_lk(&mut self, field: String) -> &mut Self {
+impl QueryFilter {
+    pub fn s_f_lk(&mut self, field: String) -> &mut Self {
         self.fields
             .push(FilterField::s_f_cmp(CompareType::LK, field));
         self
     }
-    pub(crate) fn s_f_llk(&mut self, field: String) -> &mut Self {
+    pub fn s_f_llk(&mut self, field: String) -> &mut Self {
         self.fields
             .push(FilterField::s_f_cmp(CompareType::LLK, field));
         self
     }
 
-    pub(crate) fn s_f_rlk(&mut self, field: String) -> &mut Self {
+    pub fn s_f_rlk(&mut self, field: String) -> &mut Self {
         self.fields
             .push(FilterField::s_f_cmp(CompareType::RLK, field));
         self
     }
 }
 
-impl SimpleFilterInner {}
-
-impl SimpleFilterInner {}
-
-impl SimpleFilterInner {}
-
 #[derive(Clone)]
 pub enum FilterType {
     AND,
     OR,
-    Express,
+    Express(String),
 }
 
 impl ToString for FilterType {
@@ -815,7 +574,7 @@ impl ToString for FilterType {
         match self {
             FilterType::AND => "AND".to_string(),
             FilterType::OR => "OR".to_string(),
-            FilterType::Express => "EXPRESS".to_string(),
+            FilterType::Express(_) => "EXPRESS".to_string(),
         }
     }
 }
@@ -961,6 +720,8 @@ pub enum FilterValue {
     SCRIPT(String),
     POSITION(usize),
     VALUE(Value),
+    Query(QuerySQL),
+    Filter(QueryFilter),
 }
 
 #[derive(Clone)]

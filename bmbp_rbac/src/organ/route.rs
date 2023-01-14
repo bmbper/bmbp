@@ -139,6 +139,16 @@ pub async fn save_organ_person(
     Ok(resp)
 }
 
+pub async fn update_organ_parent(Json(params): Json<QueryParam>) -> BmbpResp<impl IntoResponse> {
+    tracing::info!(
+        "更新组织上级:{}=>{}",
+        params.get_organ_id(),
+        params.get_parent_organ_id()
+    );
+    let row_count = OrganService::update_organ_parent(&params).await?;
+    Ok(RespVo::<usize>::ok_data(row_count))
+}
+
 pub async fn update_organ(Json(value): Json<Value>) -> BmbpResp<impl IntoResponse> {
     tracing::info!("{:#?}", value);
     let resp = RespVo::<Value>::default();

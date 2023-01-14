@@ -19,34 +19,45 @@ impl OrganSql {
         orm_sql.as_query_mut()?.from(BMBP_RBAC_ORGAN.to_string());
 
         if !query_params.get_organ_id().is_empty() {
-            orm_sql.as_query_mut()?.s_f_eq("organId".to_string());
+            orm_sql
+                .as_query_mut()?
+                .get_mut_filter()
+                .s_f_eq("organId".to_string());
             orm_sql.get_mut_dynamic_params().add_k_param(
                 "organId".to_string(),
                 Value::String(query_params.get_organ_id().to_string()),
             );
         }
         if !query_params.get_r_id().is_empty() {
-            orm_sql.as_query_mut()?.s_f_eq("rId".to_string());
+            orm_sql
+                .as_query_mut()?
+                .get_mut_filter()
+                .s_f_eq("rId".to_string());
             orm_sql.get_mut_dynamic_params().add_k_param(
                 "rId".to_string(),
                 Value::String(query_params.get_r_id().to_string()),
             );
         }
-
         Ok(orm_sql)
     }
 
     pub fn find_organ_list_sql(query_params: &QueryParam) -> BmbpResp<BmbpOrmSQL> {
         let mut orm_sql = Self::find_organ_base_sql(query_params)?;
         if !query_params.get_organ_title().is_empty() {
-            orm_sql.as_query_mut()?.s_f_lk("organTitle".to_string());
+            orm_sql
+                .as_query_mut()?
+                .get_mut_filter()
+                .s_f_lk("organTitle".to_string());
             orm_sql.get_mut_dynamic_params().add_k_param(
                 "organTitle".to_string(),
                 Value::String(query_params.get_organ_title().to_string()),
             );
         }
         if !query_params.get_organ_path().is_empty() {
-            orm_sql.as_query_mut()?.s_f_llk("organPath".to_string());
+            orm_sql
+                .as_query_mut()?
+                .get_mut_filter()
+                .s_f_llk("organPath".to_string());
             orm_sql.get_mut_dynamic_params().add_k_param(
                 "organPath".to_string(),
                 Value::String(query_params.get_organ_path().to_string()),
@@ -54,7 +65,10 @@ impl OrganSql {
         }
 
         if !query_params.get_parent_organ_id().is_empty() {
-            orm_sql.as_query_mut()?.s_f_eq("parentOrganId".to_string());
+            orm_sql
+                .as_query_mut()?
+                .get_mut_filter()
+                .s_f_eq("parentOrganId".to_string());
             orm_sql.get_mut_dynamic_params().add_k_param(
                 "parentOrganId".to_string(),
                 Value::String(query_params.get_parent_organ_id().to_string()),
@@ -83,6 +97,41 @@ impl OrganSql {
     pub fn update_organ(params: &BmbpOrganVo) -> BmbpResp<BmbpOrmSQL> {
         let mut orm_sql = BmbpOrmSQL::update();
         Self::build_organ_params(&mut orm_sql, params);
+        Ok(orm_sql)
+    }
+
+    pub fn update_organ_parent_sql(params: &QueryParam) -> BmbpResp<BmbpOrmSQL> {
+        let mut orm_sql = BmbpOrmSQL::update();
+
+        orm_sql.as_update_mut()?.update(BMBP_RBAC_ORGAN.to_string());
+
+        orm_sql
+            .as_update_mut()?
+            .set_s_f("organParentId".to_string());
+        orm_sql.get_mut_dynamic_params().add_k_param(
+            "organParentId".to_string(),
+            Value::String(params.get_parent_organ_id().to_string()),
+        );
+
+        if !params.get_r_id().is_empty() {
+            orm_sql
+                .as_update_mut()?
+                .get_mut_filter()
+                .s_f_eq("rId".to_string());
+            orm_sql.get_mut_dynamic_params().add_k_param(
+                "rId".to_string(),
+                Value::String(params.get_organ_id().to_string()),
+            );
+        } else if !params.get_organ_id().is_empty() {
+            orm_sql
+                .as_update_mut()?
+                .get_mut_filter()
+                .s_f_eq("organId".to_string());
+            orm_sql.get_mut_dynamic_params().add_k_param(
+                "organId".to_string(),
+                Value::String(params.get_organ_id().to_string()),
+            );
+        }
         Ok(orm_sql)
     }
 
@@ -215,5 +264,10 @@ impl OrganDao {
         let update_sql = OrganSql::update_organ(params)?;
         let row_count = BmbpORM.await.update(update_sql).await?;
         Ok(row_count)
+    }
+
+    pub(crate) async fn update_organ_parent(params: &QueryParam) -> BmbpResp<usize> {
+        let update_organ_sql = OrganSql::update_organ_parent_sql(params)?;
+        Ok(BmbpORM.await.update(update_organ_sql).await?)
     }
 }

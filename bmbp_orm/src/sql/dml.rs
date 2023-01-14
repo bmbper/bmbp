@@ -1,5 +1,6 @@
-use bmbp_util::{camel_to_snake_upper, snake_to_camel};
 use serde_json::Value;
+
+use bmbp_util::{camel_to_snake_upper, snake_to_camel};
 
 use super::dql::{QueryFilter, Table};
 
@@ -83,6 +84,35 @@ impl UpdateSQL {
         }
     }
 }
+
+impl UpdateSQL {
+    pub fn get_mut_filter(&mut self) -> &mut QueryFilter {
+        if self.filter.is_none() {
+            self.filter = Some(QueryFilter::new())
+        }
+        self.filter.as_mut().unwrap()
+    }
+
+    pub fn get_mut_simple(&mut self) -> &mut QueryFilter {
+        if self.filter.is_none() {
+            self.filter = Some(QueryFilter::new())
+        }
+        self.filter.as_mut().unwrap()
+    }
+}
+
+impl UpdateSQL {
+    pub fn update(&mut self, table: String) -> &mut Self {
+        self.table.push(Table::new(table));
+        self
+    }
+
+    pub fn set_s_f(&mut self, field: String) -> &mut Self {
+        self.get_mut_filter().s_f_eq(field);
+        self
+    }
+}
+
 #[allow(dead_code)]
 #[derive(Clone)]
 pub struct DeleteSQL {
@@ -125,14 +155,14 @@ impl DmlField {
 
     pub fn p_c_v(column: String, value: usize) -> Self {
         DmlField {
-            column: column,
+            column,
             value: DMLFieldValue::POSITION(value),
         }
     }
 
     pub fn r_c_v(column: String, value: Value) -> Self {
         DmlField {
-            column: column,
+            column,
             value: DMLFieldValue::VALUE(value),
         }
     }

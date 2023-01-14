@@ -37,25 +37,30 @@ impl<'a> RawFilterBuilder<'a> {
         }
 
         if field.get_cp().is_simple() {
-            let p_value = self.build_filter_simple_field_value(field.get_value())?;
-            self.raw_fields
-                .borrow_mut()
-                .push(format!(" {} {} {}", column, cmp, p_value));
+            let p_value = self.build_filter_field_value(field.get_value())?;
+            if !p_value.is_empty() {
+                self.raw_fields
+                    .borrow_mut()
+                    .push(format!(" {} {} {}", column, cmp, p_value));
+            }
             return Ok(());
         }
 
         if field.get_cp().is_like() {
             let p_value = self.build_filter_like_field_value(field.get_cp(), field.get_value())?;
-            self.raw_fields
-                .borrow_mut()
-                .push(format!(" {} {} {}", column, cmp, p_value));
+            if !p_value.is_empty() {
+                self.raw_fields
+                    .borrow_mut()
+                    .push(format!(" {} {} {}", column, cmp, p_value));
+            }
+
             return Ok(());
         }
 
         Ok(())
     }
 
-    fn build_filter_simple_field_value(&self, v_type: &FilterValue) -> BmbpResp<String> {
+    fn build_filter_field_value(&self, v_type: &FilterValue) -> BmbpResp<String> {
         match v_type {
             FilterValue::SCRIPT(field_key) => {
                 let k_value = self.get_params().get_k_value(field_key.clone());
@@ -88,6 +93,10 @@ impl<'a> RawFilterBuilder<'a> {
                 self.raw_values.borrow_mut().push(v.clone());
                 Ok(format!("${}", p))
             }
+            #[allow(unused)]
+            FilterValue::Filter(filter) => Ok("".to_string()),
+            #[allow(unused)]
+            FilterValue::Query(query) => Ok("".to_string()),
         }
     }
 
@@ -120,6 +129,10 @@ impl<'a> RawFilterBuilder<'a> {
                 raw_value
             }
             FilterValue::VALUE(v) => v.clone(),
+            #[allow(unused)]
+            FilterValue::Filter(filter) => Value::Null,
+            #[allow(unused)]
+            FilterValue::Query(query) => Value::Null,
         };
 
         let value_string = self.value_to_string(&value);

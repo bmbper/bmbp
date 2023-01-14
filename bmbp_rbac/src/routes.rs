@@ -57,6 +57,7 @@ fn build_v1_organ_router() -> Router {
             "/update/:field_name/:field_value",
             post(update_organ_by_path),
         )
+        .route("/update/parent", post(update_organ_parent))
         .route("/update_by_param", post(update_organ_by_param))
         .route(
             "/delete/:field_name/:field_value",

@@ -3,8 +3,8 @@ use serde_json::Value;
 use bmbp_types::BmbpResp;
 
 use crate::sql::dql::{
-    ColumnFieldInner, ComplexFilterInner, CstFieldInner, FilterField, FilterType, JoinTable,
-    OrderField, QueryFilter, SelectField, SimpleFilterInner, Table,
+    ColumnFieldInner, CstFieldInner, FilterField, FilterType, JoinTable, OrderField, QueryFilter,
+    SelectField, Table,
 };
 use crate::sql::raw::filter::RawFilterBuilder;
 use crate::sql::util::{db_alias_escape, db_const_escape, db_escape};
@@ -101,38 +101,29 @@ impl<'a> RawQueryBuilder<'a> {
         }
 
         let query_filter = filter.unwrap();
-        match query_filter {
-            QueryFilter::Complex(complex) => self.build_complex_filter(complex),
-            QueryFilter::Simple(simple) => self.build_simple_filter(simple),
-        }
-    }
 
-    fn build_simple_filter(&self, simple: &SimpleFilterInner) -> BmbpResp<(String, Vec<Value>)> {
         let (raw_filter_field, raw_params) =
-            self.build_simple_filter_field(simple.get_field_slice())?;
+            self.build_filter_field(query_filter.get_field_slice())?;
+
         if raw_filter_field.is_empty() {
             return Ok(("".to_string(), vec![]));
         }
 
-        let filter_type = simple.get_filter_type();
+        let filter_type = query_filter.get_filter_type();
         match filter_type {
             FilterType::AND | FilterType::OR => Ok((
                 raw_filter_field.join(format!(" {} ", filter_type.to_string()).as_str()),
                 raw_params,
             )),
-            FilterType::Express => {
-                let express = simple.get_raw_express();
+            FilterType::Express(express) => {
                 let raw_filter_express =
-                    self.build_simple_filter_express(express, raw_filter_field.as_slice())?;
+                    self.build_filter_express(express.clone(), raw_filter_field.as_slice())?;
                 Ok((raw_filter_express, raw_params))
             }
         }
     }
 
-    fn build_simple_filter_field(
-        &self,
-        fields: &[FilterField],
-    ) -> BmbpResp<(Vec<String>, Vec<Value>)> {
+    fn build_filter_field(&self, fields: &[FilterField]) -> BmbpResp<(Vec<String>, Vec<Value>)> {
         if fields.is_empty() {
             return Ok((vec![], vec![]));
         }
@@ -141,13 +132,10 @@ impl<'a> RawQueryBuilder<'a> {
         Ok((filter_build.get_raw_fields(), filter_build.get_raw_values()))
     }
     #[allow(unused)]
-    fn build_simple_filter_express(&self, express: String, fields: &[String]) -> BmbpResp<String> {
+    fn build_filter_express(&self, express: String, fields: &[String]) -> BmbpResp<String> {
         Ok("".to_string())
     }
-    #[allow(unused)]
-    fn build_complex_filter(&self, complex: &ComplexFilterInner) -> BmbpResp<(String, Vec<Value>)> {
-        Ok(("".to_string(), vec![]))
-    }
+
     fn build_query_select_column_field(&self, field_inner: &ColumnFieldInner) -> String {
         if field_inner.field().is_empty() {
             return "".to_string();

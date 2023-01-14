@@ -48,7 +48,7 @@ impl BmbpError {
         }
     }
 
-    pub fn api_service(msg: String) -> Self {
+    pub fn api(msg: String) -> Self {
         BmbpError {
             kind: BmbpErrorKind::ApiService,
             msg,

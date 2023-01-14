@@ -59,9 +59,6 @@ impl OrganService {
         let tree_organ = TreeBuilder::build(rows);
         Ok(tree_organ)
     }
-}
-
-impl OrganService {
     pub(crate) async fn find_organ_page(
         params: &mut PageQueryParam,
     ) -> BmbpResp<PageInner<BmbpOrganVo>> {
@@ -79,53 +76,12 @@ impl OrganService {
         let organ: Option<BmbpOrganVo> = OrganDao::find_organ_info(params).await?;
         Ok(organ)
     }
+}
 
-    pub async fn save_organ(params: &mut BmbpOrganVo) -> BmbpResp<BmbpOrganVo> {
-        Self::append_organ_vo(params).await?;
-        if params.get_r_id().is_empty() {
-            append_create_vo::<BmbpOrganVo>(params);
-            Self::insert_organ(params).await?;
-        } else {
-            append_update_vo::<BmbpOrganVo>(params);
-            Self::update_organ(params).await?;
-        }
-        Ok(params.clone())
-    }
-
-    pub async fn insert_organ(params: &mut BmbpOrganVo) -> BmbpResp<()> {
-        let row_count = OrganDao::insert_organ(params).await?;
-        if row_count != 1 {
-            return Err(BmbpError::api_service(
-                "新增组织机构失败，记录为0条".to_string(),
-            ));
-        }
-        Ok(())
-    }
-    pub async fn update_organ(params: &mut BmbpOrganVo) -> BmbpResp<()> {
-        OrganDao::update_organ(params).await?;
-        Ok(())
-    }
-
-    pub async fn save_organ_units(params: &mut BmbpOrganUnitsVo) -> BmbpResp<BmbpOrganUnitsVo> {
-        Ok(params.clone())
-    }
-    pub async fn save_organ_unit(params: &mut BmbpOrganUnitVo) -> BmbpResp<BmbpOrganUnitVo> {
-        Ok(params.clone())
-    }
-    pub async fn save_organ_dept(params: &mut BmbpOrganDeptVo) -> BmbpResp<BmbpOrganDeptVo> {
-        Ok(params.clone())
-    }
-    pub async fn save_organ_post(params: &mut BmbpOrganPostVo) -> BmbpResp<BmbpOrganPostVo> {
-        Ok(params.clone())
-    }
-
-    pub async fn save_organ_person(params: &mut BmbpOrganPersonVo) -> BmbpResp<BmbpOrganPersonVo> {
-        Ok(params.clone())
-    }
-
+impl OrganService {
     pub async fn append_organ_vo(params: &mut BmbpOrganVo) -> BmbpResp<()> {
         if params.get_organ_title().is_empty() {
-            return Err(BmbpError::api_service("组织机构名称不能为空！".to_string()));
+            return Err(BmbpError::api("组织机构名称不能为空！".to_string()));
         }
 
         if params.get_organ_id().is_empty() {
@@ -152,5 +108,70 @@ impl OrganService {
             params.set_parent_organ_id(ROOT_TREE_NODE.to_string());
         }
         Ok(())
+    }
+}
+
+impl OrganService {
+    pub async fn save_organ(params: &mut BmbpOrganVo) -> BmbpResp<BmbpOrganVo> {
+        Self::append_organ_vo(params).await?;
+        if params.get_r_id().is_empty() {
+            append_create_vo::<BmbpOrganVo>(params);
+            Self::insert_organ(params).await?;
+        } else {
+            append_update_vo::<BmbpOrganVo>(params);
+            Self::update_organ(params).await?;
+        }
+        Ok(params.clone())
+    }
+
+    pub async fn insert_organ(params: &mut BmbpOrganVo) -> BmbpResp<()> {
+        let row_count = OrganDao::insert_organ(params).await?;
+        if row_count != 1 {
+            return Err(BmbpError::api("新增组织机构失败，记录为0条".to_string()));
+        }
+        Ok(())
+    }
+    pub async fn update_organ(params: &mut BmbpOrganVo) -> BmbpResp<()> {
+        // 更新当前记录
+        OrganDao::update_organ(params).await?;
+
+        // 更新所有的子记录
+        Ok(())
+    }
+
+    pub async fn save_organ_units(params: &mut BmbpOrganUnitsVo) -> BmbpResp<BmbpOrganUnitsVo> {
+        Ok(params.clone())
+    }
+    pub async fn save_organ_unit(params: &mut BmbpOrganUnitVo) -> BmbpResp<BmbpOrganUnitVo> {
+        Ok(params.clone())
+    }
+    pub async fn save_organ_dept(params: &mut BmbpOrganDeptVo) -> BmbpResp<BmbpOrganDeptVo> {
+        Ok(params.clone())
+    }
+    pub async fn save_organ_post(params: &mut BmbpOrganPostVo) -> BmbpResp<BmbpOrganPostVo> {
+        Ok(params.clone())
+    }
+
+    pub async fn save_organ_person(params: &mut BmbpOrganPersonVo) -> BmbpResp<BmbpOrganPersonVo> {
+        Ok(params.clone())
+    }
+
+    pub(crate) async fn update_organ_parent(param: &QueryParam) -> BmbpResp<usize> {
+        // parent organ id is empty
+        if param.get_parent_organ_id().is_empty() {
+            return Err(BmbpError::api(
+                "更改组织上级时，组织上级ID不允许为空".to_string(),
+            ));
+        }
+
+        // parent organ not exits
+        if !param.get_parent_organ_id().eq(&ROOT_TREE_NODE.clone()) {
+            let mut parent_organ_params = QueryParam::new();
+            parent_organ_params.set_organ_id(param.get_parent_organ_id().clone());
+            if Self::find_organ_info(&parent_organ_params).await?.is_none() {
+                return Err(BmbpError::api("更改组织上级时，组织上级不存".to_string()));
+            }
+        }
+        OrganDao::update_organ_parent(param).await
     }
 }
