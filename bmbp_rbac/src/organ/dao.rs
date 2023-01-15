@@ -85,7 +85,7 @@ impl OrganSql {
     pub fn insert_organ(params: &BmbpOrganVo) -> BmbpResp<BmbpOrmSQL> {
         let mut orm_sql = BmbpOrmSQL::insert();
         let insert_sql = orm_sql.as_insert_mut()?;
-        insert_sql.insert_into(BMBP_RBAC_ORGAN.to_string());
+        insert_sql.target_table(BMBP_RBAC_ORGAN.to_string());
         let organ_fields = BmbpOrganVo::orm_fields();
         for field in organ_fields.as_slice() {
             insert_sql.c_insert(field.clone());
@@ -103,7 +103,9 @@ impl OrganSql {
     pub fn update_organ_parent_sql(params: &QueryParam) -> BmbpResp<BmbpOrmSQL> {
         let mut orm_sql = BmbpOrmSQL::update();
 
-        orm_sql.as_update_mut()?.update(BMBP_RBAC_ORGAN.to_string());
+        orm_sql
+            .as_update_mut()?
+            .target_table(BMBP_RBAC_ORGAN.to_string());
 
         orm_sql
             .as_update_mut()?
@@ -134,7 +136,71 @@ impl OrganSql {
         }
         Ok(orm_sql)
     }
+    fn delete_organ_sql(params: &QueryParam) -> BmbpResp<BmbpOrmSQL> {
+        let raw_r_id_vec = {
+            if !params.get_r_id().is_empty() {
+                let r_id_vec = params.get_r_id().split(",").collect();
+                r_id_vec
+            } else {
+                vec![]
+            }
+        };
+        let raw_organ_id_vec = {
+            if !params.get_organ_id().is_empty() {
+                let r_id_vec = params.get_organ_id().split(",").collect();
+                r_id_vec
+            } else {
+                vec![]
+            }
+        };
 
+        let mut orm_sql = BmbpOrmSQL::delete();
+        orm_sql
+            .as_delete_mut()?
+            .target_table(BMBP_RBAC_ORGAN.to_string());
+
+        if !raw_r_id_vec.is_empty() {
+            if raw_r_id_vec.len() == 1 {
+                orm_sql
+                    .as_update_mut()?
+                    .get_mut_filter()
+                    .s_f_eq("rId".to_string());
+                orm_sql.get_mut_dynamic_params().add_k_param(
+                    "rId".to_string(),
+                    Value::String(raw_r_id_vec.get(0).unwrap().to_string()),
+                );
+            } else {
+                orm_sql
+                    .as_update_mut()?
+                    .get_mut_filter()
+                    .s_f_in("rId".to_string());
+                orm_sql
+                    .get_mut_dynamic_params()
+                    .add_k_param("rId".to_string(), Value::from(raw_r_id_vec));
+            }
+        } else if !raw_organ_id_vec.is_empty() {
+            if raw_organ_id_vec.len() == 1 {
+                orm_sql
+                    .as_update_mut()?
+                    .get_mut_filter()
+                    .s_f_eq("organId".to_string());
+                orm_sql.get_mut_dynamic_params().add_k_param(
+                    "organId".to_string(),
+                    Value::String(raw_organ_id_vec.get(0).unwrap().to_string()),
+                );
+            } else {
+                orm_sql
+                    .as_update_mut()?
+                    .get_mut_filter()
+                    .s_f_in("organId".to_string());
+                orm_sql
+                    .get_mut_dynamic_params()
+                    .add_k_param("organId".to_string(), Value::from(raw_organ_id_vec));
+            }
+        }
+
+        Ok(orm_sql)
+    }
     pub fn build_organ_params(orm_sql: &mut BmbpOrmSQL, params: &BmbpOrganVo) {
         let organ_params = orm_sql.get_mut_dynamic_params();
         organ_params.add_k_param(
@@ -269,5 +335,10 @@ impl OrganDao {
     pub(crate) async fn update_organ_parent(params: &QueryParam) -> BmbpResp<usize> {
         let update_organ_sql = OrganSql::update_organ_parent_sql(params)?;
         Ok(BmbpORM.await.update(update_organ_sql).await?)
+    }
+
+    pub(crate) async fn delete_organ(params: &QueryParam) -> BmbpResp<usize> {
+        let delete_sql = OrganSql::delete_organ_sql(params)?;
+        Ok(BmbpORM.await.delete(delete_sql).await?)
     }
 }

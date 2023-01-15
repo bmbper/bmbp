@@ -175,3 +175,12 @@ impl OrganService {
         OrganDao::update_organ_parent(param).await
     }
 }
+
+impl OrganService {
+    pub(crate) async fn delete_organ(params: &QueryParam) -> BmbpResp<usize> {
+        if params.get_organ_id().is_empty() && params.get_r_id().is_empty() {
+            return Err(BmbpError::api("删除组织时，请指定删除凭证".to_string()));
+        }
+        OrganDao::delete_organ(params).await
+    }
+}

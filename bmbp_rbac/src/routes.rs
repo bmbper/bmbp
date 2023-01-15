@@ -59,11 +59,11 @@ fn build_v1_organ_router() -> Router {
         )
         .route("/update/parent", post(update_organ_parent))
         .route("/update_by_param", post(update_organ_by_param))
-        .route(
-            "/delete/:field_name/:field_value",
-            get(delete_organ_by_path),
-        )
-        .route("/delete", post(delete_organ_by_params));
+        .route("/delete/id/:r_id", post(delete_organ_by_id))
+        .route("/delete/node/:organ_id", post(delete_organ_by_node_id))
+        .route("/delete/batch/id", post(delete_organ_by_id_vec))
+        .route("/delete/batch/node", post(delete_organ_by_node_id_vec));
+
     let v1_router = Router::new().nest("/organ", router);
     v1_router
 }

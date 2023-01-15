@@ -562,6 +562,20 @@ impl QueryFilter {
     }
 }
 
+#[allow(dead_code)]
+impl QueryFilter {
+    pub fn s_f_in(&mut self, field: String) -> &mut Self {
+        self.fields
+            .push(FilterField::s_f_cmp(CompareType::IN, field));
+        self
+    }
+    pub fn s_f_nin(&mut self, field: String) -> &mut Self {
+        self.fields
+            .push(FilterField::s_f_cmp(CompareType::NIN, field));
+        self
+    }
+}
+
 #[derive(Clone)]
 pub enum FilterType {
     AND,

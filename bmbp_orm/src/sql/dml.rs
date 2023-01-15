@@ -27,7 +27,7 @@ impl InsertSQL {
         self.field.as_slice()
     }
 
-    pub fn insert_into(&mut self, table: String) -> &mut Self {
+    pub fn target_table(&mut self, table: String) -> &mut Self {
         self.table.push(Table::new(table));
         self
     }
@@ -104,7 +104,7 @@ impl UpdateSQL {
 }
 
 impl UpdateSQL {
-    pub fn update(&mut self, table: String) -> &mut Self {
+    pub fn target_table(&mut self, table: String) -> &mut Self {
         self.table.push(Table::new(table));
         self
     }
@@ -131,6 +131,28 @@ impl DeleteSQL {
             table: vec![],
             filter: None,
         }
+    }
+}
+
+impl DeleteSQL {
+    pub fn get_mut_filter(&mut self) -> &mut QueryFilter {
+        if self.filter.is_none() {
+            self.filter = Some(QueryFilter::new())
+        }
+        self.filter.as_mut().unwrap()
+    }
+    pub fn get_table_slice(&self) -> &[Table] {
+        self.table.as_slice()
+    }
+    pub fn get_filter(&self) -> Option<&QueryFilter> {
+        self.filter.as_ref()
+    }
+}
+
+impl DeleteSQL {
+    pub fn target_table(&mut self, table: String) -> &mut Self {
+        self.table.push(Table::new(table));
+        self
     }
 }
 

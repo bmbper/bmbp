@@ -163,8 +163,6 @@ pub async fn update_organ_by_path(
     Json(value): Json<Value>,
 ) -> BmbpResp<impl IntoResponse> {
     tracing::info!("{:#?}", value);
-    tracing::info!("{}：{}", field_name, field_value);
-
     let resp = RespVo::<Value>::default();
     Ok(resp)
 }
@@ -174,21 +172,52 @@ pub async fn update_organ_by_param(
     Json(value): Json<Value>,
 ) -> BmbpResp<impl IntoResponse> {
     tracing::info!("{:#?}", value);
-    tracing::info!("{:#?}", param);
     let resp = RespVo::<Value>::default();
     Ok(resp)
 }
 
-pub async fn delete_organ_by_path(
-    Path((field_name, field_value)): Path<(String, String)>,
+pub async fn delete_organ_by_id(Path(r_id): Path<String>) -> BmbpResp<impl IntoResponse> {
+    tracing::info!("删除组织:{}=>{}", "rId", r_id);
+    let mut delete_params = QueryParam::new();
+    delete_params.set_r_id(r_id);
+    let row_count = OrganService::delete_organ(&delete_params).await?;
+    Ok(RespVo::<usize>::ok_msg_data(
+        format!("成功删除记录数:{}", row_count),
+        row_count,
+    ))
+}
+
+pub async fn delete_organ_by_node_id(Path(organ_id): Path<String>) -> BmbpResp<impl IntoResponse> {
+    tracing::info!("删除组织:{}=>{}", "organId", organ_id);
+    let mut delete_params = QueryParam::new();
+    delete_params.set_organ_id(organ_id);
+    let row_count = OrganService::delete_organ(&delete_params).await?;
+    Ok(RespVo::<usize>::ok_msg_data(
+        format!("成功删除记录数:{}", row_count),
+        row_count,
+    ))
+}
+
+pub async fn delete_organ_by_id_vec(Path(params): Path<QueryParam>) -> BmbpResp<impl IntoResponse> {
+    tracing::info!("批量删除组织：rId：{}", params.get_r_id());
+    let mut delete_params = QueryParam::new();
+    delete_params.set_r_id(params.get_r_id().to_string());
+    let row_count = OrganService::delete_organ(&delete_params).await?;
+    Ok(RespVo::<usize>::ok_msg_data(
+        format!("成功删除记录数:{}", row_count),
+        row_count,
+    ))
+}
+
+pub async fn delete_organ_by_node_id_vec(
+    Json(params): Json<QueryParam>,
 ) -> BmbpResp<impl IntoResponse> {
-    tracing::info!("{}:{}", field_name, field_value);
-    let resp = RespVo::<Value>::default();
-    Ok(resp)
-}
-
-pub async fn delete_organ_by_params(Json(value): Json<Value>) -> BmbpResp<impl IntoResponse> {
-    tracing::info!("{:#?}", value);
-    let resp = RespVo::<Value>::default();
-    Ok(resp)
+    tracing::info!("批量删除组织：organId：{}", params.get_organ_id());
+    let mut delete_params = QueryParam::new();
+    delete_params.set_organ_id(params.get_organ_id().to_string());
+    let row_count = OrganService::delete_organ(&delete_params).await?;
+    Ok(RespVo::<usize>::ok_msg_data(
+        format!("成功删除记录数:{}", row_count),
+        row_count,
+    ))
 }
