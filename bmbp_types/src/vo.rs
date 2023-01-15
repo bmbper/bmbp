@@ -236,7 +236,6 @@ where
     pub fn msg(&self) -> String {
         self.msg.clone()
     }
-
     pub fn data(&self) -> Option<&T> {
         self.data.as_ref()
     }

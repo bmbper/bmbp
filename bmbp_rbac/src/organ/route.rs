@@ -14,7 +14,7 @@ use crate::organ::vopo::{
 
 use super::vopo::{BmbpOrganVo, PageQueryParam, QueryParam};
 
-pub async fn find_organ_tree(Json(param): Json<QueryParam>) -> BmbpResp<RespVo<Vec<BmbpOrganVo>>> {
+pub async fn find_organ_tree(Json(param): Json<QueryParam>) -> BmbpResp<impl IntoResponse> {
     tracing::info!("查询组织机构树");
     let organ_tree_data = OrganService::find_organ_tree(&param).await?;
     let resp = RespVo::<Vec<BmbpOrganVo>>::ok_data(organ_tree_data);
