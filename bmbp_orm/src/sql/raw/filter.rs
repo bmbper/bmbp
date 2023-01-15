@@ -57,6 +57,16 @@ impl<'a> RawFilterBuilder<'a> {
             return Ok(());
         }
 
+        if field.get_cp().is_in() {
+            let p_value = self.build_filter_in_field_value(field.get_value())?;
+            if !p_value.is_empty() {
+                self.raw_fields
+                    .borrow_mut()
+                    .push(format!(" {} {} ({})", column, cmp, p_value));
+            }
+            return Ok(());
+        }
+
         Ok(())
     }
 
@@ -147,6 +157,62 @@ impl<'a> RawFilterBuilder<'a> {
         let p = self.raw_values.borrow().len() + 1;
         self.raw_values.borrow_mut().push(raw_value);
         Ok(format!("${}", p))
+    }
+
+    fn build_filter_in_field_value(&self, v_type: &FilterValue) -> BmbpResp<String> {
+        let value = match v_type {
+            FilterValue::SCRIPT(field_key) => {
+                let k_value = self.get_params().get_k_value(field_key.clone());
+                let raw_value = {
+                    if let Some(rv) = k_value {
+                        rv.clone()
+                    } else {
+                        Value::Null
+                    }
+                };
+                raw_value
+            }
+            FilterValue::POSITION(position) => {
+                let p_value = self.get_params().get_p_value(position.clone());
+                let raw_value = {
+                    if let Some(rv) = p_value {
+                        rv.clone()
+                    } else {
+                        Value::Null
+                    }
+                };
+                raw_value
+            }
+            FilterValue::VALUE(v) => v.clone(),
+            #[allow(unused)]
+            FilterValue::Filter(filter) => Value::Null,
+            #[allow(unused)]
+            FilterValue::Query(query) => Value::Null,
+        };
+
+        let raw_value: String = {
+            match value {
+                Value::Array(v_vec) => {
+                    if v_vec.is_empty() {
+                        "''".to_string()
+                    } else {
+                        let mut raw_vec = vec![];
+                        for v in v_vec.as_slice() {
+                            let mut v_s = self.value_to_string(v);
+                            if v.is_string() {
+                                v_s = format!("'{}'", v_s)
+                            }
+                            raw_vec.push(v_s);
+                        }
+                        raw_vec.join(",")
+                    }
+                }
+
+                Value::String(v) => v.clone(),
+                _ => "''".to_string(),
+            }
+        };
+        Ok(raw_value)
     }
 
     fn build_filter_column(&self, field: &CompareField) -> BmbpResp<String> {

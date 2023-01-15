@@ -198,7 +198,7 @@ impl BmbpConn for BmbpPgConnect {
     }
     #[allow(unused)]
     async fn delete(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
-        tracing::info!("执行删除SQL:{}", &sql);
+        tracing::info!("执行删除SQL:{},params:{:#?}", &sql, params);
         self.execute(sql, params).await
     }
     #[allow(unused)]
@@ -247,7 +247,8 @@ fn to_pg_prams(params: &[Value]) -> Vec<Box<(dyn ToSql + Send + Sync + 'static)>
                     pg_params.push(Box::new(v.as_u64().unwrap() as i64))
                 }
             }
-            Value::String(v) => pg_params.push(Box::new(v.clone())),
+            Value::String(v) => pg_params.push(Box::new(v.to_string())),
+            Value::Array(_) => {}
             _ => {}
         }
     }

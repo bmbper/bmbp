@@ -158,6 +158,7 @@ pub async fn update_organ(Json(value): Json<Value>) -> BmbpResp<impl IntoRespons
     Ok(resp)
 }
 
+#[allow(unused)]
 pub async fn update_organ_by_path(
     Path((field_name, field_value)): Path<(String, String)>,
     Json(value): Json<Value>,
@@ -166,7 +167,7 @@ pub async fn update_organ_by_path(
     let resp = RespVo::<Value>::default();
     Ok(resp)
 }
-
+#[allow(unused)]
 pub async fn update_organ_by_param(
     Query(param): Query<QueryParam>,
     Json(value): Json<Value>,

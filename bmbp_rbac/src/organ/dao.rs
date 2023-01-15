@@ -162,7 +162,7 @@ impl OrganSql {
         if !raw_r_id_vec.is_empty() {
             if raw_r_id_vec.len() == 1 {
                 orm_sql
-                    .as_update_mut()?
+                    .as_delete_mut()?
                     .get_mut_filter()
                     .s_f_eq("rId".to_string());
                 orm_sql.get_mut_dynamic_params().add_k_param(
@@ -171,7 +171,7 @@ impl OrganSql {
                 );
             } else {
                 orm_sql
-                    .as_update_mut()?
+                    .as_delete_mut()?
                     .get_mut_filter()
                     .s_f_in("rId".to_string());
                 orm_sql
@@ -181,7 +181,7 @@ impl OrganSql {
         } else if !raw_organ_id_vec.is_empty() {
             if raw_organ_id_vec.len() == 1 {
                 orm_sql
-                    .as_update_mut()?
+                    .as_delete_mut()?
                     .get_mut_filter()
                     .s_f_eq("organId".to_string());
                 orm_sql.get_mut_dynamic_params().add_k_param(
@@ -190,7 +190,7 @@ impl OrganSql {
                 );
             } else {
                 orm_sql
-                    .as_update_mut()?
+                    .as_delete_mut()?
                     .get_mut_filter()
                     .s_f_in("organId".to_string());
                 orm_sql
@@ -339,6 +339,7 @@ impl OrganDao {
 
     pub(crate) async fn delete_organ(params: &QueryParam) -> BmbpResp<usize> {
         let delete_sql = OrganSql::delete_organ_sql(params)?;
+        tracing::info!("执行删除...");
         Ok(BmbpORM.await.delete(delete_sql).await?)
     }
 }

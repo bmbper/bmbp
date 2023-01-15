@@ -132,9 +132,6 @@ impl DeleteSQL {
             filter: None,
         }
     }
-}
-
-impl DeleteSQL {
     pub fn get_mut_filter(&mut self) -> &mut QueryFilter {
         if self.filter.is_none() {
             self.filter = Some(QueryFilter::new())
