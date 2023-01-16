@@ -8,10 +8,13 @@ edition = "2021"
 # 全局参数存放
 bmbp_vars = { path = "../bmbp_vars" }
 bmbp_types = { path = "../bmbp_types" }
-bmbp_macro = { path = "../bmbp_macro" }
 bmbp_auth = { path = "../bmbp_auth" }
-bmbp_audit = { path = "../bmbp_audit" }
 bmbp_rbac = { path = "../bmbp_rbac" }
+bmbp_home = { path = "../bmbp_home" }
+
+
+bmbp_macro = { path = "../bmbp_macro" }
+bmbp_audit = { path = "../bmbp_audit" }
 bmbp_set = { path = "../bmbp_set" }
 bmbp_manager = { path = "../bmbp_manager" }
 bmbp_engine = { path = "../bmbp_engine" }
@@ -22,7 +25,6 @@ bmbp_dsl_define = { path = "../bmbp_dsl_define" }
 bmbp_dsl_editor = { path = "../bmbp_dsl_editor" }
 bmbp_dsl_parser = { path = "../bmbp_dsl_parser" }
 bmbp_common = { path = "../bmbp_common" }
-bmbp_home = { path = "../bmbp_home" }
 bmbp_file = { path = "../bmbp_file" }
 # 所有公共类库
 # web
@@ -65,5 +67,5 @@ rhai = "1"
 
 axum = "0.6"
 tokio = { version = "1", features = ["full"] }
-tower-http = { version = "0.3", features = ["fs", "trace"] }
+tower-http = { version = "0.3", features = ["full"] }
 tower = { version = "0.4", features = ["util"] }
