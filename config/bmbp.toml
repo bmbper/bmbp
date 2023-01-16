@@ -7,7 +7,7 @@ login = "Bmbp低代码平台"
 copy_right = "Bmbp低代码平台 版权信息"
 [bmbp.server]
 host = ""
-port = 6666
+port = 8011
 [bmbp.ds]
 driver = "postgres"
 host = "127.0.0.1"

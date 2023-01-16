@@ -3,9 +3,10 @@ use axum::http::{Request, Uri};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
 use axum::{body, middleware, Router};
-use bmbp_auth::BmbpAuthLayer;
 use tower::Layer;
+use tower_http::cors::{AllowCredentials, AllowOrigin, Any, CorsLayer};
 
+use bmbp_auth::BmbpAuthLayer;
 use bmbp_file::build_file_router;
 use bmbp_home::build_home_router;
 use bmbp_rbac::build_rbac_router;
@@ -30,6 +31,13 @@ pub fn init_webapp_router(mut router: Router) -> Router {
 
     //认证处理
     router = router.layer(BmbpAuthLayer::new());
+    // 跨域处理
+    router = router.layer(
+        CorsLayer::new()
+            .allow_origin(Any)
+            .allow_methods(Any)
+            .allow_headers(Any),
+    );
     router
 }
 

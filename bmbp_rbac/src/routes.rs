@@ -42,10 +42,7 @@ fn build_v1_organ_router() -> Router {
             "/info/id/:id",
             get(query_organ_info_by_r_id).post(query_organ_info_by_r_id),
         )
-        .route(
-            "/info/organ/:id",
-            get(query_organ_info_by_organ_id).post(query_organ_info_by_organ_id),
-        )
+        .route("/info/organ/:id", get(query_organ_info_by_organ_id))
         .route("/save", post(save_organ))
         .route("/save/units", post(save_organ_units))
         .route("/save/unit", post(save_organ_unit))
