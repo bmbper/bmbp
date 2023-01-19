@@ -1,0 +1,45 @@
+[package]
+name = "bmbp_app"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[dependencies]
+# 全局参数存放
+bmbp_vars = { path = "../bmbp_vars" }
+bmbp_types = { path = "../bmbp_types" }
+bmbp_auth = { path = "../bmbp_auth" }
+bmbp_rbac = { path = "../bmbp_rbac" }
+bmbp_home = { path = "../bmbp_home" }
+
+
+bmbp_macro = { path = "../bmbp_macro" }
+bmbp_audit = { path = "../bmbp_audit" }
+bmbp_set = { path = "../bmbp_set" }
+bmbp_manager = { path = "../bmbp_manager" }
+bmbp_engine = { path = "../bmbp_engine" }
+bmbp_loader = { path = "../bmbp_load" }
+bmbp_config = { path = "../bmbp_config" }
+bmbp_cache = { path = "../bmbp_cache" }
+bmbp_dsl_define = { path = "../bmbp_dsl_define" }
+bmbp_dsl_editor = { path = "../bmbp_dsl_editor" }
+bmbp_dsl_parser = { path = "../bmbp_dsl_parser" }
+bmbp_base = { path = "../bmbp_base" }
+bmbp_file = { path = "../bmbp_file" }
+
+# 日志
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+# web
+axum = "0.6"
+tokio = { version = "1", features = ["full"] }
+tower-http = { version = "0.3", features = ["full"] }
+tower = { version = "0.4", features = ["util"] }
+# json
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# global
+once_cell = "1"
+# 导步
+async-trait = "0.1"
+toml = "0.5.9"

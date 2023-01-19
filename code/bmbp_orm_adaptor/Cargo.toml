@@ -1,0 +1,9 @@
+[package]
+name = "bmbp_orm_adaptor"
+version = "0.1.0"
+edition = "2021"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[dependencies]
+bmbp_orm = {path= "../bmbp_orm" }
+bmbp_util = {path= "../bmbp_util" }
+bmbp_types = {path= "../bmbp_types" }

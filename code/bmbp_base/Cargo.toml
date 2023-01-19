@@ -1,0 +1,27 @@
+[package]
+name = "bmbp_base"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+bmbp_orm_ins = { path = "../bmbp_orm_ins" }
+bmbp_vars = { path = "../bmbp_vars" }
+bmbp_types = { path = "../bmbp_types" }
+bmbp_util = { path = "../bmbp_util" }
+
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+axum = "0.6"
+tokio = { version = "1", features = ["full"] }
+tower-http = { version = "0.3", features = ["full"] }
+tower = { version = "0.4", features = ["util"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+once_cell = "1"
+async-trait = "0.1"
+
+

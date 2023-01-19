@@ -1,56 +1,15 @@
 [workspace]
-members = [
-    "bmbp",
-    "bmbp_api",
-    "bmbp_audit",
-    "bmbp_core",
-    "bmbp_set",
-    "bmbp_rbac",
-    "bmbp_util",
-    "bmbp_cache",
-    "bmbp_orm",
-    "bmbp_orm_ins",
-    "bmbp_orm_adaptor",
-    "bmbp_report",
-    "bmbp_mq",
-    "bmbp_macro",
-    "bmbp_excel",
-    "bmbp_event",
-    "bmbp_common",
-    "bmbp_engine",
-    "bmbp_auth",
-    "bmbp_http",
-    "bmbp_bpm",
-    "bmbp_schelude",
-    "bmbp_cli",
-    "bmbp_script",
-    "bmbp_express",
-    "bmbp_rule",
-    "bmbp_container",
-    "bmbp_montior",
-    "bmbp_config",
-    "bmbp_ops",
-    "bmbp_form",
-    "bmbp_screen",
-    "bmbp_app",
-    "bmbp_active",
-    "bmbp_docker",
-    "bmbp_pdf",
-    "bmbp_email",
-    "bmbp_third_api",
-    "bmbp_init",
-    "bmbp_load",
-    "bmbp_test",
-    "bmbp_guid",
+members = ["code/*"]
+resolver = "2"
+[workspace.package]
+version = "0.0.1"
+authors = ["Bmbp<rs_bmbp@163.com>"]
+edition = "2021"
+description = """
+    A power full MIS template
+"""
+[workspace.dependencies]
 
-    "bmbp_upgrade",
-    "bmbp_manager",
-    "bmbp_rutime",
-    "bmbp_dsl_parser",
-    "bmbp_dsl_define",
-    "bmbp_dsl_editor",
-    "bmbp_vars",
-    "bmbp_types",
-    "bmbp_home",
-    "bmbp_file",
-]
+
+
+
