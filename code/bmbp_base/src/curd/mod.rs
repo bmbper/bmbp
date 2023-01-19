@@ -2,13 +2,13 @@ use async_trait::async_trait;
 use bmbp_orm_ins::BmbpOrmSQL;
 use bmbp_types::{BmbpResp, PageInner};
 use serde::Serialize;
-
+#[allow(dead_code)]
 pub trait UpdatePropParam: Clone + Send {
     fn get_id(&self) -> &String;
     fn get_r_id(&self) -> &String;
     fn get_prop(&self) -> &String;
 }
-
+#[allow(dead_code)]
 #[async_trait]
 pub trait UpdatePropService {
     #[allow(unused)]
@@ -16,7 +16,7 @@ pub trait UpdatePropService {
         Ok(0)
     }
 }
-
+#[allow(dead_code)]
 #[async_trait]
 pub trait UpdateLevelService {
     #[allow(unused)]
@@ -24,6 +24,7 @@ pub trait UpdateLevelService {
         Ok(0)
     }
 }
+#[allow(dead_code)]
 #[async_trait]
 pub trait UpdateFlagService {
     #[allow(unused)]
@@ -31,6 +32,7 @@ pub trait UpdateFlagService {
         Ok(0)
     }
 }
+#[allow(dead_code)]
 #[async_trait]
 pub trait UpdateStatusService {
     #[allow(unused)]
@@ -45,7 +47,7 @@ pub trait UpdateSignService {
         Ok(0)
     }
 }
-
+#[allow(dead_code)]
 #[async_trait]
 pub trait UpdateOwnerOrgService {
     #[allow(unused)]
@@ -53,7 +55,7 @@ pub trait UpdateOwnerOrgService {
         Ok(0)
     }
 }
-
+#[allow(dead_code)]
 pub trait UpdateBasePropParam {
     fn get_id(&self) -> &String;
     fn get_r_id(&self) -> &String;
@@ -63,7 +65,7 @@ pub trait UpdateBasePropParam {
     fn get_status(&self) -> &String;
     fn get_owner_org(&self) -> &String;
 }
-
+#[allow(dead_code)]
 pub trait UpdateBasePropsService:
     UpdateFlagService
     + UpdateOwnerOrgService
@@ -72,7 +74,7 @@ pub trait UpdateBasePropsService:
     + UpdateLevelService
 {
 }
-
+#[allow(dead_code)]
 #[async_trait]
 pub trait CurdService {
     async fn find_list<Q, V>(&self, params: &Q) -> BmbpResp<Vec<V>>;
@@ -82,24 +84,25 @@ pub trait CurdService {
     async fn update<Q, V>(&self, params: &Q, po: &V) -> BmbpResp<usize>;
     async fn save<Q, V>(&self, params: &Q, po: &V) -> BmbpResp<usize>;
 }
-
+#[allow(dead_code)]
 #[async_trait]
 pub trait CurdPageService: CurdService {
     async fn find_page<Q, V>(&self, params: &Q) -> BmbpResp<PageInner<V>>
     where
         V: Clone + Default + Serialize + Send + Sync;
 }
-
+#[allow(dead_code)]
 #[async_trait]
 pub trait CurdTreeService: CurdService {
     async fn find_tree<Q, V>(&self, params: &Q) -> BmbpResp<PageInner<V>>
     where
         V: Clone + Default + Serialize + Send + Sync;
 }
-
+#[allow(dead_code)]
 #[async_trait]
 pub trait CurdTreePageService: CurdPageService + CurdTreeService {}
 
+#[allow(dead_code)]
 #[async_trait]
 pub trait CurdDao {
     fn orm_query_sql<Q>(&self, params: &Q) -> BmbpResp<BmbpOrmSQL>;

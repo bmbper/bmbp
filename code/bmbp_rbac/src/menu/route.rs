@@ -1,7 +1,6 @@
 use axum::extract::Path;
-use axum::{async_trait, Json};
+use axum::Json;
 
-use crate::menu::service::MenuService;
 use bmbp_types::{BmbpResp, PageInner, RespVo};
 
 use crate::menu::vopo::{AppQueryParam, BmbpAppVo, BmbpMenuVo, MenuQueryParam};

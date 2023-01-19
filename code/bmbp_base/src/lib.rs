@@ -10,4 +10,5 @@ pub mod vars;
 pub use curd::CurdDao;
 pub use curd::CurdPageService;
 pub use curd::CurdService;
+pub use curd::CurdTreePageService;
 pub use curd::CurdTreeService;
