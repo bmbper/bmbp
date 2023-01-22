@@ -148,7 +148,7 @@ where
 {
     fn default() -> Self {
         Self {
-            page_no: 1,
+            page_no: 0,
             page_size: 20,
             page_param: None,
         }
