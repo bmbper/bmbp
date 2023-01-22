@@ -6,6 +6,7 @@ mod curd;
 pub mod func;
 pub mod types;
 pub mod vars;
+mod vo;
 
 pub use curd::CurdDao;
 pub use curd::CurdPageService;

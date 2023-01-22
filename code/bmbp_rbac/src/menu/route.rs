@@ -1,19 +1,20 @@
 use axum::extract::Path;
 use axum::Json;
 
-use bmbp_types::{BmbpResp, PageInner, RespVo};
+use crate::menu::service::MenuService;
+use bmbp_types::{BmbpResp, PageInner, PageReqVo, RespVo};
 
 use crate::menu::vopo::{AppQueryParam, BmbpAppVo, BmbpMenuVo, MenuQueryParam};
 
 #[allow(unused)]
 pub async fn find_app_page(
-    Json(param): Json<AppQueryParam>,
+    Json(params): Json<AppQueryParam>,
 ) -> BmbpResp<RespVo<PageInner<BmbpAppVo>>> {
     tracing::info!("分页查询应用列表");
     Ok(RespVo::fail_msg("请求未实现".to_string()))
 }
 #[allow(unused)]
-pub async fn find_app_list(Json(param): Json<AppQueryParam>) -> BmbpResp<RespVo<Vec<BmbpAppVo>>> {
+pub async fn find_app_list(Json(params): Json<AppQueryParam>) -> BmbpResp<RespVo<Vec<BmbpAppVo>>> {
     tracing::info!("查询应用列表");
     Ok(RespVo::fail_msg("请求未实现".to_string()))
 }
@@ -50,51 +51,70 @@ pub async fn save_app(Json(app_vo): Json<BmbpMenuVo>) -> BmbpResp<RespVo<BmbpApp
 
 #[allow(unused)]
 pub async fn find_menu_tree(
-    Json(param): Json<MenuQueryParam>,
+    Json(params): Json<MenuQueryParam>,
 ) -> BmbpResp<RespVo<Vec<BmbpMenuVo>>> {
     tracing::info!("查询菜单树");
-    Ok(RespVo::fail_msg("请求未实现".to_string()))
+    let mut tree_params = MenuQueryParam::default();
+    tree_params.set_app_id(params.get_app_id().clone());
+    let menu_tree = MenuService::find_tree(&tree_params).await?;
+    Ok(RespVo::ok_data(menu_tree))
 }
 
 #[allow(unused)]
 pub async fn find_menu_page(
-    Json(param): Json<AppQueryParam>,
+    Json(params): Json<PageReqVo<MenuQueryParam>>,
 ) -> BmbpResp<RespVo<PageInner<BmbpMenuVo>>> {
     tracing::info!("分页查询菜单列表");
-    Ok(RespVo::fail_msg("请求未实现".to_string()))
+    let vo = MenuService::find_page(&params).await?;
+    Ok(RespVo::ok_data(vo))
 }
 #[allow(unused)]
-pub async fn find_menu_list(Json(param): Json<AppQueryParam>) -> BmbpResp<RespVo<Vec<BmbpMenuVo>>> {
+pub async fn find_menu_list(
+    Json(params): Json<MenuQueryParam>,
+) -> BmbpResp<RespVo<Vec<BmbpMenuVo>>> {
     tracing::info!("查询菜单列表");
-    Ok(RespVo::fail_msg("请求未实现".to_string()))
+    let vo = MenuService::find_list(&params).await?;
+    Ok(RespVo::ok_data(vo))
 }
 
 #[allow(unused)]
 pub async fn find_menu_info_r_id(Path(r_id): Path<String>) -> BmbpResp<RespVo<BmbpMenuVo>> {
-    tracing::info!("根据记录ID查询菜单详情");
-    Ok(RespVo::fail_msg("请求未实现".to_string()))
+    tracing::info!("查询菜单列表");
+    let mut params = MenuQueryParam::default();
+    params.set_r_id(r_id);
+    let vo = MenuService::find_one(&params).await?;
+    Ok(RespVo::ok_option(vo))
 }
 
 #[allow(unused)]
-pub async fn find_menu_info_menu_id(Path(app_id): Path<String>) -> BmbpResp<RespVo<BmbpMenuVo>> {
-    tracing::info!("根据菜单ID查询菜单详情");
-    Ok(RespVo::fail_msg("请求未实现".to_string()))
+pub async fn find_menu_info_menu_id(Path(menu_id): Path<String>) -> BmbpResp<RespVo<BmbpMenuVo>> {
+    let mut params = MenuQueryParam::default();
+    params.set_menu_id(menu_id);
+    let vo = MenuService::find_one(&params).await?;
+    Ok(RespVo::ok_option(vo))
 }
 
 #[allow(unused)]
 pub async fn delete_menu_info_r_id(Path(r_id): Path<String>) -> BmbpResp<RespVo<usize>> {
     tracing::info!("根据记录ID删除菜单详情");
-    Ok(RespVo::fail_msg("请求未实现".to_string()))
+    let mut params = MenuQueryParam::default();
+    params.set_r_id(r_id);
+    let vo = MenuService::delete(&params).await?;
+    Ok(RespVo::ok_data(vo))
 }
 
 #[allow(unused)]
-pub async fn delete_menu_info_menu_id(Path(app_id): Path<String>) -> BmbpResp<RespVo<usize>> {
+pub async fn delete_menu_info_menu_id(Path(menu_id): Path<String>) -> BmbpResp<RespVo<usize>> {
     tracing::info!("根据菜单ID删除菜单详情");
-    Ok(RespVo::fail_msg("请求未实现".to_string()))
+    let mut params = MenuQueryParam::default();
+    params.set_menu_id(menu_id);
+    let vo = MenuService::delete(&params).await?;
+    Ok(RespVo::ok_data(vo))
 }
 
 #[allow(unused)]
-pub async fn save_menu(Json(app_vo): Json<BmbpMenuVo>) -> BmbpResp<RespVo<BmbpMenuVo>> {
+pub async fn save_menu(Json(menu_vo): Json<BmbpMenuVo>) -> BmbpResp<RespVo<BmbpMenuVo>> {
     tracing::info!("保存菜单");
-    Ok(RespVo::fail_msg("请求未实现".to_string()))
+    let _ = MenuService::save(&menu_vo).await?;
+    Ok(RespVo::ok_data(menu_vo))
 }

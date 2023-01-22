@@ -17,7 +17,9 @@ impl OrganSql {
         for item in organ_table_columns {
             orm_sql.as_query_mut()?.select_column(item.clone());
         }
-        orm_sql.as_query_mut()?.from(BMBP_RBAC_ORGAN.to_string());
+        orm_sql
+            .as_query_mut()?
+            .target_table(BMBP_RBAC_ORGAN.to_string());
 
         if !query_params.get_organ_id().is_empty() {
             orm_sql

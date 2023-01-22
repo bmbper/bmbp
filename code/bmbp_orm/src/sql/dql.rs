@@ -91,7 +91,7 @@ impl QuerySQL {
         self
     }
 
-    pub fn from(&mut self, table: String) -> &mut Self {
+    pub fn target_table(&mut self, table: String) -> &mut Self {
         self.table.push(Table::new(table));
         self
     }
