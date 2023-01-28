@@ -88,6 +88,7 @@ pub struct MenuQueryParam {
     menu_id: String,
     menu_title: String,
     menu_parent_id: String,
+    menu_route_type: BmbpMenuRouteType,
     menu_path: String,
     app_id: String,
 }
@@ -111,6 +112,10 @@ impl MenuQueryParam {
     }
     pub(crate) fn set_app_id(&mut self, app_id: String) -> &mut Self {
         self.app_id = app_id;
+        self
+    }
+    pub(crate) fn set_menu_route_type(&mut self, menu_route_type: BmbpMenuRouteType) -> &mut Self {
+        self.menu_route_type = menu_route_type;
         self
     }
 
@@ -137,29 +142,55 @@ impl MenuQueryParam {
     pub(crate) fn get_app_id(&self) -> &String {
         &self.app_id
     }
-}
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[allow(dead_code)]
-pub enum BmbpMenuType {
-    Route, // 本地应用路由
-    URL,   // 接入外部页面地址
-    META,  // 配置界面
-}
-
-impl Default for BmbpMenuType {
-    fn default() -> Self {
-        BmbpMenuType::Route
+    pub(crate) fn get_menu_route_type(&self) -> &BmbpMenuRouteType {
+        &self.menu_route_type
     }
 }
 
-impl ToString for BmbpMenuType {
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum BmbpMenuRouteType {
+    Route, // 本地应用路由
+    URL,   // 接入外部页面地址
+    META,  // 配置界面
+    NULL,
+}
+
+impl Default for BmbpMenuRouteType {
+    fn default() -> Self {
+        BmbpMenuRouteType::NULL
+    }
+}
+
+impl From<String> for BmbpMenuRouteType {
+    fn from(value: String) -> Self {
+        match value.as_str() {
+            "url" => BmbpMenuRouteType::URL,
+            "route" => BmbpMenuRouteType::Route,
+            "meta" => BmbpMenuRouteType::META,
+            _ => BmbpMenuRouteType::NULL,
+        }
+    }
+}
+
+impl From<&str> for BmbpMenuRouteType {
+    fn from(value: &str) -> Self {
+        match value {
+            "url" => BmbpMenuRouteType::URL,
+            "route" => BmbpMenuRouteType::Route,
+            "meta" => BmbpMenuRouteType::META,
+            _ => BmbpMenuRouteType::NULL,
+        }
+    }
+}
+
+impl ToString for BmbpMenuRouteType {
     fn to_string(&self) -> String {
         match self {
-            BmbpMenuType::Route => "route".to_string(),
-            BmbpMenuType::URL => "url".to_string(),
-            BmbpMenuType::META => "meta".to_string(),
+            BmbpMenuRouteType::Route => "route".to_string(),
+            BmbpMenuRouteType::URL => "url".to_string(),
+            BmbpMenuRouteType::META => "meta".to_string(),
+            _ => "".to_string(),
         }
     }
 }
@@ -175,12 +206,12 @@ pub struct BmbpMenuVo {
     menu_title: String,
     menu_path: String,
     menu_route: String,
-    menu_route_type: BmbpMenuType,
+    menu_route_type: BmbpMenuRouteType,
     children: Vec<BmbpMenuVo>,
     #[serde(flatten)]
     base: BaseVoPo,
 }
-
+#[allow(dead_code)]
 impl BmbpMenuVo {
     pub(crate) fn set_app_id(&mut self, app_id: String) -> &mut Self {
         self.app_id = app_id;
@@ -206,7 +237,7 @@ impl BmbpMenuVo {
         self.menu_route = menu_route;
         self
     }
-    pub(crate) fn set_menu_route_type(&mut self, route_type: BmbpMenuType) -> &mut Self {
+    pub(crate) fn set_menu_route_type(&mut self, route_type: BmbpMenuRouteType) -> &mut Self {
         self.menu_route_type = route_type;
         self
     }
@@ -231,7 +262,7 @@ impl BmbpMenuVo {
     pub(crate) fn get_menu_route(&self) -> &String {
         &self.menu_route
     }
-    pub(crate) fn get_menu_route_type(&self) -> &BmbpMenuType {
+    pub(crate) fn get_menu_route_type(&self) -> &BmbpMenuRouteType {
         &self.menu_route_type
     }
 }

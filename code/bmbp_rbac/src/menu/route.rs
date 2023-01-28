@@ -64,7 +64,10 @@ pub async fn find_menu_tree(
 pub async fn find_menu_page(
     Json(params): Json<PageReqVo<MenuQueryParam>>,
 ) -> BmbpResp<RespVo<PageInner<BmbpMenuVo>>> {
-    tracing::info!("分页查询菜单列表");
+    tracing::info!(
+        "分页查询菜单列表:{}",
+        serde_json::to_string(&params).unwrap()
+    );
     let vo = MenuService::find_page(&params).await?;
     Ok(RespVo::ok_data(vo))
 }

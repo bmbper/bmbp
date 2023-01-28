@@ -79,6 +79,16 @@ impl MenuDao {
                     Value::String(params.get_menu_path().to_string()),
                 );
             }
+            if !params.get_menu_route_type().to_string().is_empty() {
+                orm_sql
+                    .as_query_mut()?
+                    .get_mut_filter()
+                    .s_f_eq("menuRouteType".to_string());
+                orm_sql.get_mut_dynamic_params().add_k_param(
+                    "menuRouteType".to_string(),
+                    Value::String(params.get_menu_route_type().to_string()),
+                );
+            }
         }
 
         Ok(orm_sql)
