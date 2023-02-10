@@ -12,31 +12,31 @@ pub async fn find_nav_app_menu() -> BmbpResp<impl IntoResponse> {
     [
 		{
 			"title": "系统管理",
-			"route": "",
+			"route": "11111111111111111111",
 			"children": [
 				{
 					"title": "组织管理",
-					"route": "home/sys/rbac/organ"
+					"route": "portal/sys/rbac/organ"
 				},
 				{
 					"title": "用户管理",
-					"route": "home/sys/rbac/user"
+					"route": "portal/sys/rbac/user"
 				},
 				{
 					"title": "菜单管理",
-					"route": "home/sys/rbac/menu"
+					"route": "portal/sys/rbac/menu"
 				},
 				{
 					"title": "角色管理",
-					"route": "home/sys/rbac/role"
+					"route": "portal/sys/rbac/role"
 				},
 				{
 					"title": "接口管理",
-					"route": "home/sys/rbac/api"
+					"route": "portal/sys/rbac/api"
 				},
 				{
 					"title": "数据管理",
-					"route": "home/sys/rbac/data"
+					"route": "portal/sys/rbac/data"
 				}
 			]
 		},

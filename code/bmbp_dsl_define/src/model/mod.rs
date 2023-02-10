@@ -44,8 +44,7 @@ pub struct BmbpDBColumn {
     scale: usize,
 }
 
-#[derive(Clone, Default, Serialize, Deserialize)]
-#[serde(default)]
+#[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum BmbpDBColumnType {
     STRING,
@@ -64,8 +63,7 @@ impl Default for BmbpDBColumnType {
     }
 }
 
-#[derive(Clone, Default, Serialize, Deserialize)]
-#[serde(default)]
+#[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum BmbpDbIndexType {
     PRIMARY,

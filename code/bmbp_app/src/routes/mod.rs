@@ -26,8 +26,6 @@ pub fn init_webapp_router(mut router: Router) -> Router {
     // 异常处理
     router = router.fallback(not_found);
 
-    //认证处理
-    router = router.layer(BmbpAuthLayer::new());
     // 跨域处理
     router = router.layer(
         CorsLayer::new()

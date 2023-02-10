@@ -49,7 +49,6 @@ pub async fn save_app(Json(app_vo): Json<BmbpMenuVo>) -> BmbpResp<RespVo<BmbpApp
     Ok(RespVo::fail_msg("接口为未实现".to_string()))
 }
 
-#[allow(unused)]
 pub async fn find_menu_tree(
     Json(params): Json<MenuQueryParam>,
 ) -> BmbpResp<RespVo<Vec<BmbpMenuVo>>> {
@@ -116,8 +115,8 @@ pub async fn delete_menu_info_menu_id(Path(menu_id): Path<String>) -> BmbpResp<R
 }
 
 #[allow(unused)]
-pub async fn save_menu(Json(menu_vo): Json<BmbpMenuVo>) -> BmbpResp<RespVo<BmbpMenuVo>> {
+pub async fn save_menu(Json(mut menu_vo): Json<BmbpMenuVo>) -> BmbpResp<RespVo<BmbpMenuVo>> {
     tracing::info!("保存菜单");
-    let _ = MenuService::save(&menu_vo).await?;
+    let _ = MenuService::save(&mut menu_vo).await?;
     Ok(RespVo::ok_data(menu_vo))
 }
