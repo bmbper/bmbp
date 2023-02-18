@@ -3,7 +3,6 @@ use axum::response::IntoResponse;
 use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
 
-use bmbp_auth::BmbpAuthLayer;
 use bmbp_file::build_file_router;
 use bmbp_home::build_home_router;
 use bmbp_rbac::build_rbac_router;
