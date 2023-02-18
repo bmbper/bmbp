@@ -19,9 +19,11 @@ impl BmbpWebApp {
     }
 
     pub fn init(&mut self) {
-        // 初始化日志打印INFO级別
-        tracing_subscriber::fmt().init();
-        //tracing_subscriber::fmt::init();
+        // TRACE-DEBUG-INFO-WARN-ERROR
+        tracing_subscriber::fmt()
+            .with_level(true)
+            .with_max_level(Level::TRACE)
+            .init();
         tracing::info!("初始化WebApp运行环境......");
         // 初始化环境变量
         init_app_env();
@@ -34,12 +36,7 @@ impl BmbpWebApp {
         router = init_webapp_router(router);
 
         // 增加中间处理器
-        router = router.layer(
-            TraceLayer::new_for_http()
-                .on_request(trace::DefaultOnRequest::new().level(Level::INFO))
-                .on_failure(trace::DefaultOnFailure::new().level(Level::DEBUG))
-                .on_response(trace::DefaultOnResponse::new().level(Level::DEBUG)),
-        );
+        router = router.layer(TraceLayer::new_for_http());
         self.router = Some(router);
     }
 
