@@ -116,7 +116,7 @@ pub async fn delete_menu_info_menu_id(Path(menu_id): Path<String>) -> BmbpResp<R
 
 #[allow(unused)]
 pub async fn save_menu(Json(mut menu_vo): Json<BmbpMenuVo>) -> BmbpResp<RespVo<BmbpMenuVo>> {
-    tracing::info!("保存菜单");
+    tracing::debug!("保存菜单:{:#?}", menu_vo);
     let _ = MenuService::save(&mut menu_vo).await?;
     Ok(RespVo::ok_data(menu_vo))
 }

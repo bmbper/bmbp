@@ -88,8 +88,9 @@ pub struct MenuQueryParam {
     menu_id: String,
     menu_title: String,
     menu_parent_id: String,
-    menu_route_type: BmbpMenuRouteType,
+    menu_route_type: Option<BmbpMenuRouteType>,
     menu_path: String,
+    menu_type: Option<BmbpMenuType>,
     app_id: String,
 }
 
@@ -115,7 +116,7 @@ impl MenuQueryParam {
         self
     }
     pub(crate) fn set_menu_route_type(&mut self, menu_route_type: BmbpMenuRouteType) -> &mut Self {
-        self.menu_route_type = menu_route_type;
+        self.menu_route_type = Some(menu_route_type);
         self
     }
 
@@ -143,8 +144,8 @@ impl MenuQueryParam {
         &self.app_id
     }
 
-    pub(crate) fn get_menu_route_type(&self) -> &BmbpMenuRouteType {
-        &self.menu_route_type
+    pub(crate) fn get_menu_route_type(&self) -> Option<&BmbpMenuRouteType> {
+        self.menu_route_type.as_ref()
     }
 }
 
@@ -153,45 +154,39 @@ pub enum BmbpMenuRouteType {
     Route, // 本地应用路由
     URL,   // 接入外部页面地址
     META,  // 配置界面
-    NULL,
-}
-
-impl Default for BmbpMenuRouteType {
-    fn default() -> Self {
-        BmbpMenuRouteType::NULL
-    }
-}
-
-impl From<String> for BmbpMenuRouteType {
-    fn from(value: String) -> Self {
-        match value.as_str() {
-            "url" => BmbpMenuRouteType::URL,
-            "route" => BmbpMenuRouteType::Route,
-            "meta" => BmbpMenuRouteType::META,
-            _ => BmbpMenuRouteType::NULL,
-        }
-    }
-}
-
-impl From<&str> for BmbpMenuRouteType {
-    fn from(value: &str) -> Self {
-        match value {
-            "url" => BmbpMenuRouteType::URL,
-            "route" => BmbpMenuRouteType::Route,
-            "meta" => BmbpMenuRouteType::META,
-            _ => BmbpMenuRouteType::NULL,
-        }
-    }
 }
 
 impl ToString for BmbpMenuRouteType {
     fn to_string(&self) -> String {
         match self {
-            BmbpMenuRouteType::Route => "route".to_string(),
-            BmbpMenuRouteType::URL => "url".to_string(),
-            BmbpMenuRouteType::META => "meta".to_string(),
-            _ => "".to_string(),
+            BmbpMenuRouteType::Route => "Route".to_string(),
+            BmbpMenuRouteType::URL => "URL".to_string(),
+            BmbpMenuRouteType::META => "META".to_string(),
         }
+    }
+}
+impl Default for BmbpMenuRouteType {
+    fn default() -> Self {
+        BmbpMenuRouteType::Route
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum BmbpMenuType {
+    FUNC,
+    MODULE,
+}
+impl ToString for BmbpMenuType {
+    fn to_string(&self) -> String {
+        match self {
+            BmbpMenuType::FUNC => "FUNC".to_string(),
+            BmbpMenuType::MODULE => "MODULE".to_string(),
+        }
+    }
+}
+impl Default for BmbpMenuType {
+    fn default() -> Self {
+        BmbpMenuType::FUNC
     }
 }
 
@@ -206,7 +201,8 @@ pub struct BmbpMenuVo {
     menu_title: String,
     menu_path: String,
     menu_route: String,
-    menu_route_type: BmbpMenuRouteType,
+    menu_route_type: Option<BmbpMenuRouteType>,
+    menu_type: BmbpMenuType,
     children: Vec<BmbpMenuVo>,
     #[serde(flatten)]
     base: BaseVoPo,
@@ -238,7 +234,11 @@ impl BmbpMenuVo {
         self
     }
     pub(crate) fn set_menu_route_type(&mut self, route_type: BmbpMenuRouteType) -> &mut Self {
-        self.menu_route_type = route_type;
+        self.menu_route_type = Some(route_type);
+        self
+    }
+    pub(crate) fn set_menu_type(&mut self, menu_type: BmbpMenuType) -> &mut Self {
+        self.menu_type = menu_type;
         self
     }
 
@@ -262,8 +262,11 @@ impl BmbpMenuVo {
     pub(crate) fn get_menu_route(&self) -> &String {
         &self.menu_route
     }
-    pub(crate) fn get_menu_route_type(&self) -> &BmbpMenuRouteType {
-        &self.menu_route_type
+    pub(crate) fn get_menu_route_type(&self) -> Option<&BmbpMenuRouteType> {
+        self.menu_route_type.as_ref()
+    }
+    pub(crate) fn get_menu_type(&self) -> &BmbpMenuType {
+        &self.menu_type
     }
 }
 
@@ -319,6 +322,7 @@ impl BaseOrmVoPo for BmbpMenuVo {
             "parent_menu_id".to_string(),
             "menu_title".to_string(),
             "menu_path".to_string(),
+            "menu_type".to_string(),
             "menu_route".to_string(),
             "menu_route_type".to_string(),
         ]

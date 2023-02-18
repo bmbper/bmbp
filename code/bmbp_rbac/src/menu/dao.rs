@@ -11,7 +11,7 @@ pub struct MenuDao {}
 impl MenuDao {
     pub(crate) fn orm_query_sql(params: &MenuQueryParam) -> BmbpResp<BmbpOrmSQL> {
         let mut orm_sql = BmbpOrmSQL::query();
-        for column in BmbpMenuVo::vo_fields().as_slice() {
+        for column in BmbpMenuVo::orm_fields().as_slice() {
             orm_sql.as_query_mut()?.select_column(column.to_string());
         }
         orm_sql
@@ -79,14 +79,14 @@ impl MenuDao {
                     Value::String(params.get_menu_path().to_string()),
                 );
             }
-            if !params.get_menu_route_type().to_string().is_empty() {
+            if params.get_menu_route_type().is_some() {
                 orm_sql
                     .as_query_mut()?
                     .get_mut_filter()
                     .s_f_eq("menuRouteType".to_string());
                 orm_sql.get_mut_dynamic_params().add_k_param(
                     "menuRouteType".to_string(),
-                    Value::String(params.get_menu_route_type().to_string()),
+                    Value::String(params.get_menu_route_type().unwrap().to_string()),
                 );
             }
         }
@@ -145,13 +145,88 @@ impl MenuDao {
     }
 
     pub(crate) fn orm_insert_sql(po: &BmbpMenuVo) -> BmbpResp<BmbpOrmSQL> {
-        Err(BmbpError::api("接口未实现".to_string()))
+        let mut orm_sql = BmbpOrmSQL::insert();
+        orm_sql
+            .as_insert_mut()?
+            .target_table(BMBP_RBAC_MENU.to_string());
+        for field in BmbpMenuVo::orm_fields().as_slice() {
+            orm_sql.as_insert_mut()?.c_insert(field.to_string());
+        }
+
+        let mut orm_params = orm_sql.get_mut_dynamic_params();
+        orm_params.add_k_param("rId".to_string(), Value::String(po.get_r_id().clone()));
+        orm_params.add_k_param("rFlag".to_string(), Value::String(po.get_r_flag().clone()));
+        orm_params.add_k_param(
+            "rLevel".to_string(),
+            Value::String(po.get_r_level().clone()),
+        );
+        orm_params.add_k_param(
+            "rCreateTime".to_string(),
+            Value::String(po.get_r_create_time().clone()),
+        );
+        orm_params.add_k_param(
+            "rCreateUser".to_string(),
+            Value::String(po.get_r_create_user().clone()),
+        );
+        orm_params.add_k_param(
+            "rUpdateTime".to_string(),
+            Value::String(po.get_r_update_time().clone()),
+        );
+        orm_params.add_k_param(
+            "rUpdateUser".to_string(),
+            Value::String(po.get_r_update_user().clone()),
+        );
+        orm_params.add_k_param(
+            "rOwnerOrg".to_string(),
+            Value::String(po.get_r_owner_org().clone()),
+        );
+        orm_params.add_k_param(
+            "rOwnerUser".to_string(),
+            Value::String(po.get_r_owner_user().clone()),
+        );
+        orm_params.add_k_param("rSign".to_string(), Value::String(po.get_r_sign().clone()));
+
+        orm_params.add_k_param(
+            "menuId".to_string(),
+            Value::String(po.get_menu_id().clone()),
+        );
+        orm_params.add_k_param(
+            "parentMenuId".to_string(),
+            Value::String(po.get_parent_menu_id().clone()),
+        );
+        orm_params.add_k_param(
+            "menuTitle".to_string(),
+            Value::String(po.get_menu_title().clone()),
+        );
+        orm_params.add_k_param(
+            "menuPath".to_string(),
+            Value::String(po.get_menu_path().clone()),
+        );
+        orm_params.add_k_param(
+            "menuType".to_string(),
+            Value::String(po.get_menu_type().to_string()),
+        );
+        if let Some(route_type) = po.get_menu_route_type() {
+            orm_params.add_k_param(
+                "menuRouteType".to_string(),
+                Value::String(route_type.to_string()),
+            );
+        }
+
+        orm_params.add_k_param(
+            "menuRoute".to_string(),
+            Value::String(po.get_menu_route().clone()),
+        );
+        orm_params.add_k_param("appId".to_string(), Value::String(po.get_app_id().clone()));
+        Ok(orm_sql)
     }
 
     pub(crate) fn orm_update_sql(params: &MenuQueryParam, po: &BmbpMenuVo) -> BmbpResp<BmbpOrmSQL> {
         Err(BmbpError::api("接口未实现".to_string()))
     }
+}
 
+impl MenuDao {
     pub(crate) async fn find_page(
         params: &PageReqVo<MenuQueryParam>,
     ) -> BmbpResp<PageInner<BmbpMenuVo>> {
@@ -165,6 +240,7 @@ impl MenuDao {
             .find_page(query_sql, &params.get_page_no(), &params.get_page_size())
             .await?;
         let vo_vec_json_string = serde_json::to_string(&vo_vec).unwrap();
+        tracing::info!("po:{}", vo_vec_json_string);
         let vo_vec_vo: PageInner<BmbpMenuVo> = serde_json::from_str(&vo_vec_json_string).unwrap();
         Ok(vo_vec_vo)
     }
@@ -197,7 +273,9 @@ impl MenuDao {
     }
 
     pub(crate) async fn insert(po: &BmbpMenuVo) -> BmbpResp<usize> {
+        tracing::info!("po:{}", serde_json::to_string(po).unwrap());
         let insert_sql = Self::orm_insert_sql(po)?;
+        tracing::debug!("保存菜单:{:#?}", insert_sql);
         let row_count = BmbpORM.await.insert(insert_sql).await?;
         Ok(row_count)
     }
