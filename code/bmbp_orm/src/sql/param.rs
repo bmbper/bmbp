@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 use serde_json::Value;
 
+#[derive(Debug)]
 pub struct DynamicSQLParam {
     k_params: HashMap<String, Value>,
     p_params: Vec<Value>,

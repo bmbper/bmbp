@@ -6,7 +6,8 @@ use std::{
 use async_trait::async_trait;
 use serde_json::{Map, Value};
 use tokio::sync::{Mutex, RwLock};
-use tokio_postgres::{connect, types::ToSql, Client, NoTls, Row};
+use tokio_postgres::{connect, types::ToSql, Client, Error, NoTls, Row};
+use tracing::debug;
 
 use bmbp_types::{BmbpError, BmbpResp, PageInner};
 use bmbp_util::uuid;
@@ -208,6 +209,8 @@ impl BmbpConn for BmbpPgConnect {
             .iter()
             .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
             .collect::<Vec<&(dyn ToSql + Sync)>>();
+        debug!("pg_sql:{}", sql);
+        debug!("pa_params:{:#?}", pg_params_ref);
         let execute_rs = self
             .client
             .lock()
@@ -264,14 +267,32 @@ fn to_json_value(row: &Row) -> Map<String, Value> {
         let mut props_value = Value::Null;
         match col_type {
             "varchar" => {
-                let v: String = row.get(col_name);
-                props_value = Value::String(v);
+                let v_rs: Result<String, Error> = row.try_get(col_name);
+                match v_rs {
+                    Ok(v) => {
+                        props_value = Value::String(v);
+                    }
+                    Err(e) => {
+                        tracing::warn!("{:#?}", e);
+                        props_value = Value::Null;
+                    }
+                }
             }
             "int2" | "int4" | "init8" => {
-                let v: u32 = row.get(col_name);
-                props_value = Value::from(v);
+                let v_rs: Result<u32, Error> = row.try_get(col_name);
+                match v_rs {
+                    Ok(v) => {
+                        props_value = Value::from(v);
+                    }
+                    Err(e) => {
+                        tracing::warn!("{:#?}", e);
+                        props_value = Value::Null;
+                    }
+                }
             }
-            _ => {}
+            _ => {
+                tracing::warn!("{}未识別的类型：{}", col_name, col_type);
+            }
         }
         map.insert(col_name.to_string(), props_value);
     }

@@ -5,7 +5,7 @@ use bmbp_util::{camel_to_snake_upper, snake_to_camel};
 use super::dql::{QueryFilter, Table};
 
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct InsertSQL {
     field: Vec<DmlField>,
     table: Vec<Table>,
@@ -68,7 +68,7 @@ impl InsertSQL {
 }
 
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UpdateSQL {
     field: Vec<DmlField>,
     table: Vec<Table>,
@@ -118,7 +118,7 @@ impl UpdateSQL {
 }
 
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DeleteSQL {
     table: Vec<Table>,
     filter: Option<QueryFilter>,
@@ -153,7 +153,7 @@ impl DeleteSQL {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum DMLFieldValue {
     SCRIPT(String),
     POSITION(usize),
@@ -161,7 +161,7 @@ pub enum DMLFieldValue {
 }
 
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DmlField {
     column: String,
     value: DMLFieldValue,

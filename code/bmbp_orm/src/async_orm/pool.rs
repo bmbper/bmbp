@@ -8,6 +8,7 @@ use std::{
 use serde_json::{Map, Value};
 use time::OffsetDateTime;
 use tokio::sync::{Mutex, RwLock};
+use tracing::debug;
 
 use bmbp_types::{BmbpError, BmbpResp, PageInner};
 
@@ -149,6 +150,8 @@ impl ConnInner {
     }
     pub async fn insert(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
         let (sql, params) = orm_sql.get_raw_orm()?;
+        debug!("SQL:{}", sql);
+        debug!("PARAMS:{}", sql);
         let row_count = self.inner().write().await.insert(sql, params).await?;
         Ok(row_count)
     }

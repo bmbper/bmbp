@@ -1,5 +1,5 @@
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum DdlSQL {
     DropDataBase(DropDataBaseSQL),
     CreateDataBase(CreateDataBaseSQL),
@@ -21,43 +21,43 @@ pub enum DdlSQL {
     AlterColumn(AlterColumnSQL),
 }
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CreateDataBaseSQL {}
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DropDataBaseSQL {}
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CreateSchemaSQL {}
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DropSchemaSQL {}
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CreateTableSQL {}
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DropTableSQL {}
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CreateViewSQL {}
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DropViewSQL {}
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CreateIndexSQL {}
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DropIndexSQL {}
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CreateCommentSQL {}
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DropCommentSQL {}
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CreateConstriantSQL {}
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DropConstriantSQL {}
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CreateColumnSQL {}
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DropColumnSQL {}
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AlterTableSQL {}
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AlterColumnSQL {}

@@ -9,6 +9,7 @@ use bmbp_types::BmbpResp;
 
 use super::{param::DynamicSQLParam, sql::DynamicSQL};
 
+#[derive(Debug)]
 pub struct OrmSQL {
     dynamic_sql: DynamicSQL,
     dynamic_param: DynamicSQLParam,

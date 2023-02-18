@@ -3,7 +3,7 @@ use serde_json::{Number, Value};
 use bmbp_util::{camel_to_snake, snake_to_camel};
 
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QuerySQL {
     select: Vec<SelectField>,
     table: Vec<Table>,
@@ -164,7 +164,7 @@ impl QuerySQL {
 }
 
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum SelectField {
     COLUMN(ColumnFieldInner),
     CST(CstFieldInner),
@@ -195,7 +195,7 @@ impl SelectField {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum SelectType {
     DISTINCT,
 }
@@ -212,7 +212,7 @@ impl ToString for SelectType {
 
 /// ColumnFieldInner  返回列
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ColumnFieldInner {
     table_alias: String,
     tag: Option<SelectType>,
@@ -278,7 +278,7 @@ impl ColumnFieldInner {
 
 /// ConstFieldInner 常量列
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CstFieldInner {
     tag: Option<SelectType>,
     field: String,
@@ -332,7 +332,7 @@ impl CstFieldInner {
 
 /// FuncFieldInner 简单函数列
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FuncFieldInner {
     typ: Option<SelectType>,
     func: String,
@@ -342,7 +342,7 @@ pub struct FuncFieldInner {
 
 /// ExpressFieldInner 表达式组合列
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExpressFieldInner {
     typ: Option<SelectType>,
     express: String,
@@ -351,14 +351,14 @@ pub struct ExpressFieldInner {
 
 /// SqlSelectFieldInner 查询返回SQL子语句
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SqlSelectFieldInner {
     typ: Option<SelectType>,
     field: QuerySQL,
     alias: String,
 }
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Table {
     name: String,
     alias: String,
@@ -409,7 +409,7 @@ impl Table {
 }
 
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct JoinTable {
     select: Vec<SelectField>,
     name: String,
@@ -417,7 +417,7 @@ pub struct JoinTable {
     filter: QueryFilter,
 }
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QueryFilter {
     typ: FilterType,
     fields: Vec<FilterField>,
@@ -576,7 +576,7 @@ impl QueryFilter {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum FilterType {
     AND,
     OR,
@@ -594,7 +594,7 @@ impl ToString for FilterType {
 }
 
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum CompareType {
     EQ,
     // equal
@@ -729,7 +729,7 @@ impl CompareType {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum FilterValue {
     SCRIPT(String),
     POSITION(usize),
@@ -738,7 +738,7 @@ pub enum FilterValue {
     Filter(QueryFilter),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FilterField {
     cp: CompareType,
     column: CompareField,
@@ -849,7 +849,7 @@ impl FilterField {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum CompareField {
     Column(String),
     Func(FuncCompareFieldInner),
@@ -862,13 +862,13 @@ impl CompareField {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FuncCompareFieldInner {}
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QueryComparefieldInner {}
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum OrderType {
     Asc,
     Desc,
@@ -883,7 +883,7 @@ impl ToString for OrderType {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct OrderField {
     field: String,
     order_type: OrderType,

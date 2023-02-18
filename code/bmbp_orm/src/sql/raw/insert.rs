@@ -21,12 +21,11 @@ impl<'a> RawInsertBuilder<'a> {
         let mut raw_insert_vec = vec![];
 
         let raw_insert_into_table = self.build_insert_table()?;
-        self.build_insert_columns(self.get_sql().get_fields());
         raw_insert_vec.push(format!("INSERT INTO {}", raw_insert_into_table));
 
+        self.build_insert_columns(self.get_sql().get_fields());
         let mut raw_insert_columns = vec![];
         let mut raw_insert_values = vec![];
-
         for (index, raw_field) in self.get_raw_fields().as_slice().iter().enumerate() {
             raw_insert_columns.push(raw_field.clone());
             raw_insert_values.push(format!("${}", index + 1));
@@ -48,21 +47,17 @@ impl<'a> RawInsertBuilder<'a> {
             match value {
                 DMLFieldValue::SCRIPT(v) => {
                     let k_value = self.get_params().get_k_value(v.clone());
-                    let raw_value = match k_value {
-                        None => Value::Null,
-                        Some(v) => v.clone(),
-                    };
-                    self.get_mut_raw_fields().push(column.clone());
-                    self.get_mut_raw_values().push(raw_value);
+                    if let Some(raw_value) = k_value {
+                        self.get_mut_raw_fields().push(column.clone());
+                        self.get_mut_raw_values().push(raw_value.clone());
+                    }
                 }
                 DMLFieldValue::POSITION(p) => {
                     let p_value = self.get_params().get_p_value(p.clone());
-                    let raw_value = match p_value {
-                        None => Value::Null,
-                        Some(v) => v.clone(),
-                    };
-                    self.get_mut_raw_fields().push(column.clone());
-                    self.get_mut_raw_values().push(raw_value);
+                    if let Some(raw_value) = p_value {
+                        self.get_mut_raw_fields().push(column.clone());
+                        self.get_mut_raw_values().push(raw_value.clone());
+                    }
                 }
                 DMLFieldValue::VALUE(v) => {
                     self.get_mut_raw_fields().push(column.clone());
