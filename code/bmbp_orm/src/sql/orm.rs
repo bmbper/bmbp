@@ -4,24 +4,24 @@ use crate::sql::raw::{
     RawDDLBuilder, RawDeleteBuilder, RawInsertBuilder, RawQueryBuilder, RawUpdateBuilder,
 };
 use crate::sql::DdlSQL;
-use crate::{DeleteSQL, InsertSQL, QuerySQL, UpdateSQL};
+use crate::{BmbpDeleteSQL, BmbpInsertSQL, BmbpQuerySQL, BmbpUpdateSQL};
 use bmbp_types::BmbpResp;
 
-use super::{param::DynamicSQLParam, sql::DynamicSQL};
+use super::{param::DynamicSQLParam, sql::BmbpDynamicSQL};
 
 #[derive(Debug)]
-pub struct OrmSQL {
-    dynamic_sql: DynamicSQL,
+pub struct BmbpOrmSQL {
+    dynamic_sql: BmbpDynamicSQL,
     dynamic_param: DynamicSQLParam,
     raw_sql: String,
     raw_sql_params: Vec<Value>,
 }
 
-impl OrmSQL {
+impl BmbpOrmSQL {
     pub fn query() -> Self {
-        let dynamic_sql = DynamicSQL::Query(DynamicSQL::query());
+        let dynamic_sql = BmbpDynamicSQL::Query(BmbpDynamicSQL::query());
         let dynamic_params = DynamicSQLParam::new();
-        let orm_sql = OrmSQL {
+        let orm_sql = BmbpOrmSQL {
             dynamic_sql,
             dynamic_param: dynamic_params,
             raw_sql_params: vec![],
@@ -30,9 +30,9 @@ impl OrmSQL {
         orm_sql
     }
     pub fn update() -> Self {
-        let dynamic_sql = DynamicSQL::Update(DynamicSQL::update());
+        let dynamic_sql = BmbpDynamicSQL::Update(BmbpDynamicSQL::update());
         let dynamic_params = DynamicSQLParam::new();
-        let orm_sql = OrmSQL {
+        let orm_sql = BmbpOrmSQL {
             dynamic_sql,
             dynamic_param: dynamic_params,
             raw_sql_params: vec![],
@@ -41,9 +41,9 @@ impl OrmSQL {
         orm_sql
     }
     pub fn insert() -> Self {
-        let dynamic_sql = DynamicSQL::Insert(DynamicSQL::insert());
+        let dynamic_sql = BmbpDynamicSQL::Insert(BmbpDynamicSQL::insert());
         let dynamic_params = DynamicSQLParam::new();
-        let orm_sql = OrmSQL {
+        let orm_sql = BmbpOrmSQL {
             dynamic_sql,
             dynamic_param: dynamic_params,
             raw_sql_params: vec![],
@@ -52,9 +52,9 @@ impl OrmSQL {
         orm_sql
     }
     pub fn delete() -> Self {
-        let dynamic_sql = DynamicSQL::Delete(DynamicSQL::delete());
+        let dynamic_sql = BmbpDynamicSQL::Delete(BmbpDynamicSQL::delete());
         let dynamic_params = DynamicSQLParam::new();
-        let orm_sql = OrmSQL {
+        let orm_sql = BmbpOrmSQL {
             dynamic_sql,
             dynamic_param: dynamic_params,
             raw_sql_params: vec![],
@@ -64,15 +64,15 @@ impl OrmSQL {
     }
 }
 
-impl OrmSQL {
-    pub fn set_dynamic_sql(&mut self, sql: DynamicSQL) -> &mut Self {
+impl BmbpOrmSQL {
+    pub fn set_dynamic_sql(&mut self, sql: BmbpDynamicSQL) -> &mut Self {
         self.dynamic_sql = sql;
         self
     }
-    pub fn get_dynamic_sql(&self) -> &DynamicSQL {
+    pub fn get_dynamic_sql(&self) -> &BmbpDynamicSQL {
         &self.dynamic_sql
     }
-    pub fn get_mut_dynamic_sql(&mut self) -> &mut DynamicSQL {
+    pub fn get_mut_dynamic_sql(&mut self) -> &mut BmbpDynamicSQL {
         &mut self.dynamic_sql
     }
     pub fn set_dynamic_params(&mut self, param: DynamicSQLParam) -> &mut Self {
@@ -99,16 +99,16 @@ impl OrmSQL {
         self
     }
 
-    pub fn as_query_mut(&mut self) -> BmbpResp<&mut QuerySQL> {
+    pub fn as_query_mut(&mut self) -> BmbpResp<&mut BmbpQuerySQL> {
         self.dynamic_sql.as_query_mut()
     }
-    pub fn as_insert_mut(&mut self) -> BmbpResp<&mut InsertSQL> {
+    pub fn as_insert_mut(&mut self) -> BmbpResp<&mut BmbpInsertSQL> {
         self.dynamic_sql.as_insert_mut()
     }
-    pub fn as_update_mut(&mut self) -> BmbpResp<&mut UpdateSQL> {
+    pub fn as_update_mut(&mut self) -> BmbpResp<&mut BmbpUpdateSQL> {
         self.dynamic_sql.as_update_mut()
     }
-    pub fn as_delete_mut(&mut self) -> BmbpResp<&mut DeleteSQL> {
+    pub fn as_delete_mut(&mut self) -> BmbpResp<&mut BmbpDeleteSQL> {
         self.dynamic_sql.as_delete_mut()
     }
     pub fn is_query(&self) -> bool {
@@ -125,39 +125,39 @@ impl OrmSQL {
     }
 }
 
-impl OrmSQL {
+impl BmbpOrmSQL {
     pub fn get_raw_orm(&mut self) -> BmbpResp<(String, &[Value])> {
         self.build_raw_orm()?;
         Ok((self.raw_sql.clone(), self.raw_sql_params.as_slice()))
     }
 }
 
-impl OrmSQL {
+impl BmbpOrmSQL {
     fn build_raw_orm(&mut self) -> BmbpResp<()> {
         let (raw_sql, raw_params) = match self.get_dynamic_sql() {
-            DynamicSQL::Query(query) => self.build_query(query)?,
-            DynamicSQL::Insert(insert) => self.build_insert(insert)?,
-            DynamicSQL::Update(update) => self.build_update(update)?,
-            DynamicSQL::Delete(delete) => self.build_delete(delete)?,
-            DynamicSQL::DDL(ddl) => self.build_ddl(ddl)?,
+            BmbpDynamicSQL::Query(query) => self.build_query(query)?,
+            BmbpDynamicSQL::Insert(insert) => self.build_insert(insert)?,
+            BmbpDynamicSQL::Update(update) => self.build_update(update)?,
+            BmbpDynamicSQL::Delete(delete) => self.build_delete(delete)?,
+            BmbpDynamicSQL::DDL(ddl) => self.build_ddl(ddl)?,
         };
         self.set_raw(raw_sql, raw_params);
         Ok(())
     }
 
-    fn build_query(&self, query: &QuerySQL) -> BmbpResp<(String, Vec<Value>)> {
+    fn build_query(&self, query: &BmbpQuerySQL) -> BmbpResp<(String, Vec<Value>)> {
         RawQueryBuilder::new(query, self.get_dynamic_params()).build()
     }
 
-    fn build_insert(&self, insert: &InsertSQL) -> BmbpResp<(String, Vec<Value>)> {
+    fn build_insert(&self, insert: &BmbpInsertSQL) -> BmbpResp<(String, Vec<Value>)> {
         RawInsertBuilder::new(insert, self.get_dynamic_params()).build()
     }
 
-    fn build_update(&self, update: &UpdateSQL) -> BmbpResp<(String, Vec<Value>)> {
+    fn build_update(&self, update: &BmbpUpdateSQL) -> BmbpResp<(String, Vec<Value>)> {
         RawUpdateBuilder::new(update, self.get_dynamic_params()).build()
     }
 
-    fn build_delete(&self, delete: &DeleteSQL) -> BmbpResp<(String, Vec<Value>)> {
+    fn build_delete(&self, delete: &BmbpDeleteSQL) -> BmbpResp<(String, Vec<Value>)> {
         RawDeleteBuilder::new(delete, self.get_dynamic_params()).build()
     }
 

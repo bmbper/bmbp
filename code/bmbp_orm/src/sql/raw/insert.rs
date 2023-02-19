@@ -6,10 +6,10 @@ use bmbp_types::BmbpResp;
 use crate::sql::dml::{DMLFieldValue, DmlField};
 use crate::sql::raw::table::TableBuilder;
 use crate::sql::DynamicSQLParam;
-use crate::InsertSQL;
+use crate::BmbpInsertSQL;
 
 pub struct RawInsertBuilder<'a> {
-    insert: &'a InsertSQL,
+    insert: &'a BmbpInsertSQL,
     params: &'a DynamicSQLParam,
     raw_fields: RefCell<Vec<String>>,
     raw_values: RefCell<Vec<Value>>,
@@ -69,7 +69,7 @@ impl<'a> RawInsertBuilder<'a> {
 }
 
 impl<'a> RawInsertBuilder<'a> {
-    pub fn new(insert: &'a InsertSQL, params: &'a DynamicSQLParam) -> Self {
+    pub fn new(insert: &'a BmbpInsertSQL, params: &'a DynamicSQLParam) -> Self {
         RawInsertBuilder {
             insert,
             params,
@@ -82,7 +82,7 @@ impl<'a> RawInsertBuilder<'a> {
         self.params
     }
 
-    pub fn get_sql(&self) -> &InsertSQL {
+    pub fn get_sql(&self) -> &BmbpInsertSQL {
         self.insert
     }
 

@@ -6,11 +6,11 @@ use bmbp_types::BmbpResp;
 use crate::sql::raw::filter::RawDmlFilterBuilder;
 use crate::sql::raw::table::TableBuilder;
 use crate::sql::DynamicSQLParam;
-use crate::DeleteSQL;
+use crate::BmbpDeleteSQL;
 
 #[allow(dead_code)]
 pub struct RawDeleteBuilder<'a> {
-    delete: &'a DeleteSQL,
+    delete: &'a BmbpDeleteSQL,
     params: &'a DynamicSQLParam,
     raw_fields: RefCell<Vec<String>>,
     raw_values: RefCell<Vec<Value>>,
@@ -47,7 +47,7 @@ impl<'a> RawDeleteBuilder<'a> {
 }
 #[allow(dead_code)]
 impl<'a> RawDeleteBuilder<'a> {
-    pub fn new(delete: &'a DeleteSQL, params: &'a DynamicSQLParam) -> Self {
+    pub fn new(delete: &'a BmbpDeleteSQL, params: &'a DynamicSQLParam) -> Self {
         RawDeleteBuilder {
             delete,
             params,
@@ -59,7 +59,7 @@ impl<'a> RawDeleteBuilder<'a> {
         self.params
     }
 
-    pub fn get_sql(&self) -> &DeleteSQL {
+    pub fn get_sql(&self) -> &BmbpDeleteSQL {
         self.delete
     }
 

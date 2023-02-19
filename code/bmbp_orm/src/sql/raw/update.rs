@@ -8,18 +8,18 @@ use crate::sql::dml::{DMLFieldValue, DmlField};
 use crate::sql::raw::filter::RawDmlFilterBuilder;
 use crate::sql::raw::table::TableBuilder;
 use crate::sql::DynamicSQLParam;
-use crate::UpdateSQL;
+use crate::BmbpUpdateSQL;
 
 #[allow(dead_code)]
 pub struct RawUpdateBuilder<'a> {
-    update: &'a UpdateSQL,
+    update: &'a BmbpUpdateSQL,
     params: &'a DynamicSQLParam,
     raw_fields: RefCell<Vec<String>>,
     raw_values: RefCell<Vec<Value>>,
 }
 
 impl<'a> RawUpdateBuilder<'a> {
-    pub fn new(update: &'a UpdateSQL, params: &'a DynamicSQLParam) -> Self {
+    pub fn new(update: &'a BmbpUpdateSQL, params: &'a DynamicSQLParam) -> Self {
         RawUpdateBuilder {
             update,
             params,
@@ -35,7 +35,7 @@ impl<'a> RawUpdateBuilder<'a> {
         self.params
     }
 
-    pub fn get_sql(&self) -> &UpdateSQL {
+    pub fn get_sql(&self) -> &BmbpUpdateSQL {
         self.update
     }
 

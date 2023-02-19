@@ -9,10 +9,10 @@ use crate::sql::dql::{
 use crate::sql::raw::filter::RawFilterBuilder;
 use crate::sql::util::{db_alias_escape, db_const_escape, db_escape};
 use crate::sql::DynamicSQLParam;
-use crate::QuerySQL;
+use crate::BmbpQuerySQL;
 
 pub struct RawQueryBuilder<'a> {
-    query: &'a QuerySQL,
+    query: &'a BmbpQuerySQL,
     params: &'a DynamicSQLParam,
 }
 #[allow(dead_code)]
@@ -92,7 +92,11 @@ impl<'a> RawQueryBuilder<'a> {
                 order_field.get_order_type().to_string()
             ));
         }
-        Ok(raw_order_vec.join(","))
+        if raw_order_vec.is_empty() {
+            Ok("".to_string())
+        } else {
+            Ok(format!(" ORDER BY {} ", raw_order_vec.join(",")))
+        }
     }
 
     fn build_filter(&self, filter: Option<&QueryFilter>) -> BmbpResp<(String, Vec<Value>)> {
@@ -208,11 +212,11 @@ impl<'a> RawQueryBuilder<'a> {
 }
 
 impl<'a> RawQueryBuilder<'a> {
-    pub fn new(query: &'a QuerySQL, params: &'a DynamicSQLParam) -> RawQueryBuilder<'a> {
+    pub fn new(query: &'a BmbpQuerySQL, params: &'a DynamicSQLParam) -> RawQueryBuilder<'a> {
         RawQueryBuilder { query, params }
     }
 
-    pub fn get_query(&self) -> &'a QuerySQL {
+    pub fn get_query(&self) -> &'a BmbpQuerySQL {
         &self.query
     }
 

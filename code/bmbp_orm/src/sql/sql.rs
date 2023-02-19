@@ -2,96 +2,96 @@ use bmbp_types::{BmbpError, BmbpResp};
 
 use super::{
     ddl::DdlSQL,
-    dml::{DeleteSQL, InsertSQL, UpdateSQL},
-    dql::QuerySQL,
+    dml::{BmbpDeleteSQL, BmbpInsertSQL, BmbpUpdateSQL},
+    dql::BmbpQuerySQL,
 };
 #[derive(Clone, Debug)]
-pub enum DynamicSQL {
-    Query(QuerySQL),
-    Insert(InsertSQL),
-    Update(UpdateSQL),
-    Delete(DeleteSQL),
+pub enum BmbpDynamicSQL {
+    Query(BmbpQuerySQL),
+    Insert(BmbpInsertSQL),
+    Update(BmbpUpdateSQL),
+    Delete(BmbpDeleteSQL),
     DDL(DdlSQL),
 }
 
-impl DynamicSQL {
-    pub fn new() -> DynamicSQL {
-        DynamicSQL::Query(QuerySQL::new())
+impl BmbpDynamicSQL {
+    pub fn new() -> BmbpDynamicSQL {
+        BmbpDynamicSQL::Query(BmbpQuerySQL::new())
     }
-    pub fn query() -> QuerySQL {
-        QuerySQL::new()
+    pub fn query() -> BmbpQuerySQL {
+        BmbpQuerySQL::new()
     }
-    pub fn insert() -> InsertSQL {
-        InsertSQL::new()
+    pub fn insert() -> BmbpInsertSQL {
+        BmbpInsertSQL::new()
     }
-    pub fn update() -> UpdateSQL {
-        UpdateSQL::new()
+    pub fn update() -> BmbpUpdateSQL {
+        BmbpUpdateSQL::new()
     }
-    pub fn delete() -> DeleteSQL {
-        DeleteSQL::new()
+    pub fn delete() -> BmbpDeleteSQL {
+        BmbpDeleteSQL::new()
     }
 }
 
-impl DynamicSQL {
-    pub fn as_query_mut(&mut self) -> BmbpResp<&mut QuerySQL> {
+impl BmbpDynamicSQL {
+    pub fn as_query_mut(&mut self) -> BmbpResp<&mut BmbpQuerySQL> {
         match self {
-            DynamicSQL::Query(query) => Ok(query),
+            BmbpDynamicSQL::Query(query) => Ok(query),
             _ => Err(BmbpError::orm("不是查询类型SQL".to_string())),
         }
     }
 
-    pub fn as_insert_mut(&mut self) -> BmbpResp<&mut InsertSQL> {
+    pub fn as_insert_mut(&mut self) -> BmbpResp<&mut BmbpInsertSQL> {
         match self {
-            DynamicSQL::Insert(insert) => Ok(insert),
+            BmbpDynamicSQL::Insert(insert) => Ok(insert),
             _ => Err(BmbpError::orm("不是新增类型SQL".to_string())),
         }
     }
 
-    pub fn as_update_mut(&mut self) -> BmbpResp<&mut UpdateSQL> {
+    pub fn as_update_mut(&mut self) -> BmbpResp<&mut BmbpUpdateSQL> {
         match self {
-            DynamicSQL::Update(update) => Ok(update),
+            BmbpDynamicSQL::Update(update) => Ok(update),
             _ => Err(BmbpError::orm("不是更新类型SQL".to_string())),
         }
     }
 
-    pub fn as_delete_mut(&mut self) -> BmbpResp<&mut DeleteSQL> {
+    pub fn as_delete_mut(&mut self) -> BmbpResp<&mut BmbpDeleteSQL> {
         match self {
-            DynamicSQL::Delete(delete) => Ok(delete),
+            BmbpDynamicSQL::Delete(delete) => Ok(delete),
             _ => Err(BmbpError::orm("不是删除类型SQL".to_string())),
         }
     }
 
     pub fn is_query(&self) -> bool {
         match self {
-            DynamicSQL::Query(_) => true,
+            BmbpDynamicSQL::Query(_) => true,
             _ => false,
         }
     }
 
     pub fn is_insert(&self) -> bool {
         match self {
-            DynamicSQL::Insert(_) => true,
+            BmbpDynamicSQL::Insert(_) => true,
             _ => false,
         }
     }
 
     pub fn is_update(&self) -> bool {
         match self {
-            DynamicSQL::Update(_) => true,
+            BmbpDynamicSQL::Update(_) => true,
             _ => false,
         }
     }
 
     pub fn is_delete(&self) -> bool {
         match self {
-            DynamicSQL::Delete(_) => true,
+            BmbpDynamicSQL::Delete(_) => true,
             _ => false,
         }
     }
 
     pub fn is_ddl(&self) -> bool {
         match self {
-            DynamicSQL::DDL(_) => true,
+            BmbpDynamicSQL::DDL(_) => true,
             _ => false,
         }
     }
@@ -103,10 +103,10 @@ impl DynamicSQL {
 
 #[cfg(test)]
 mod test {
-    use crate::DynamicSQL;
+    use crate::BmbpDynamicSQL;
 
     #[test]
     fn test_sql() {
-        let mut query = DynamicSQL::query();
+        let mut query = BmbpDynamicSQL::query();
     }
 }

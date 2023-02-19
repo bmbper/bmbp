@@ -1,5 +1,5 @@
 use axum::Router;
-use tower_http::trace::{self, TraceLayer};
+use tower_http::trace::TraceLayer;
 use tracing::Level;
 
 use bmbp_vars::map::{global_hash_map_vars, global_hash_map_vars_to_usize};

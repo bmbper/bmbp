@@ -61,9 +61,9 @@ fn build_data_source_from_vars() -> BmbpDataSource {
     data_source
 }
 
-pub type BmbpOrmSQL = bmbp_orm::OrmSQL;
-pub type BmbpSQL = bmbp_orm::DynamicSQL;
-pub type BmbpQuerySQL = bmbp_orm::QuerySQL;
-pub type BmbpInertSQL = bmbp_orm::InsertSQL;
-pub type BmbpUpdateSQL = bmbp_orm::UpdateSQL;
-pub type BmbpDeleteSQL = bmbp_orm::DeleteSQL;
+pub use bmbp_orm::BmbpDeleteSQL;
+pub use bmbp_orm::BmbpDynamicSQL;
+pub use bmbp_orm::BmbpInsertSQL;
+pub use bmbp_orm::BmbpOrmSQL;
+pub use bmbp_orm::BmbpQuerySQL;
+pub use bmbp_orm::BmbpUpdateSQL;

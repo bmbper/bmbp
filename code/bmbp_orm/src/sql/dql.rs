@@ -4,7 +4,7 @@ use bmbp_util::{camel_to_snake, snake_to_camel};
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct QuerySQL {
+pub struct BmbpQuerySQL {
     select: Vec<SelectField>,
     table: Vec<Table>,
     filter: Option<QueryFilter>,
@@ -12,9 +12,9 @@ pub struct QuerySQL {
     group: Vec<SelectField>,
 }
 #[allow(dead_code)]
-impl QuerySQL {
-    pub fn new() -> QuerySQL {
-        QuerySQL {
+impl BmbpQuerySQL {
+    pub fn new() -> BmbpQuerySQL {
+        BmbpQuerySQL {
             select: vec![],
             table: vec![],
             filter: None,
@@ -24,7 +24,7 @@ impl QuerySQL {
     }
 }
 #[allow(dead_code)]
-impl QuerySQL {
+impl BmbpQuerySQL {
     pub fn set_filter(&mut self, filter: QueryFilter) -> &mut Self {
         self.filter = Some(filter);
         self
@@ -47,7 +47,7 @@ impl QuerySQL {
 }
 
 #[allow(dead_code)]
-impl QuerySQL {
+impl BmbpQuerySQL {
     pub fn select_field(&mut self, field: String) -> &mut Self {
         let column = camel_to_snake(field.clone());
         self.select_column_as(column, field)
@@ -153,7 +153,7 @@ impl QuerySQL {
 
 /// 简易查询过虑器
 #[allow(dead_code)]
-impl QuerySQL {
+impl BmbpQuerySQL {
     // 简易SQL
     pub fn get_mut_filter(&mut self) -> &mut QueryFilter {
         if self.filter.is_none() {
@@ -354,7 +354,7 @@ pub struct ExpressFieldInner {
 #[derive(Clone, Debug)]
 pub struct SqlSelectFieldInner {
     typ: Option<SelectType>,
-    field: QuerySQL,
+    field: BmbpQuerySQL,
     alias: String,
 }
 #[allow(dead_code)]
@@ -628,16 +628,16 @@ pub enum CompareType {
     // limit
     OFFSET,
     // offset
-    EX(QuerySQL),
+    EX(BmbpQuerySQL),
     // exists
-    NEX(QuerySQL),
+    NEX(BmbpQuerySQL),
     // not exists
     IN,
     // in
     NIN,
     // not in
-    INSQL(QuerySQL),
-    NINSQL(QuerySQL),
+    INSQL(BmbpQuerySQL),
+    NINSQL(BmbpQuerySQL),
 }
 
 impl ToString for CompareType {
@@ -734,7 +734,7 @@ pub enum FilterValue {
     SCRIPT(String),
     POSITION(usize),
     VALUE(Value),
-    Query(QuerySQL),
+    Query(BmbpQuerySQL),
     Filter(QueryFilter),
 }
 

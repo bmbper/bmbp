@@ -279,7 +279,7 @@ fn to_json_value(row: &Row) -> Map<String, Value> {
                 }
             }
             "int2" | "int4" | "init8" => {
-                let v_rs: Result<u32, Error> = row.try_get(col_name);
+                let v_rs: Result<i32, Error> = row.try_get(col_name);
                 match v_rs {
                     Ok(v) => {
                         props_value = Value::from(v);

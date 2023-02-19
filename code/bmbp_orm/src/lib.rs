@@ -1,11 +1,11 @@
 pub use async_orm::BmbpDataSource;
 pub use async_orm::Orm;
-pub use sql::DeleteSQL;
-pub use sql::DynamicSQL;
-pub use sql::InsertSQL;
-pub use sql::OrmSQL;
-pub use sql::QuerySQL;
-pub use sql::UpdateSQL;
+pub use sql::BmbpDeleteSQL;
+pub use sql::BmbpDynamicSQL;
+pub use sql::BmbpInsertSQL;
+pub use sql::BmbpOrmSQL;
+pub use sql::BmbpQuerySQL;
+pub use sql::BmbpUpdateSQL;
 
 mod async_orm;
 mod script;

@@ -6,14 +6,14 @@ use super::dql::{QueryFilter, Table};
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct InsertSQL {
+pub struct BmbpInsertSQL {
     field: Vec<DmlField>,
     table: Vec<Table>,
 }
 #[allow(dead_code)]
-impl InsertSQL {
-    pub fn new() -> InsertSQL {
-        InsertSQL {
+impl BmbpInsertSQL {
+    pub fn new() -> BmbpInsertSQL {
+        BmbpInsertSQL {
             field: vec![],
             table: vec![],
         }
@@ -69,15 +69,15 @@ impl InsertSQL {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct UpdateSQL {
+pub struct BmbpUpdateSQL {
     field: Vec<DmlField>,
     table: Vec<Table>,
     filter: Option<QueryFilter>,
 }
 #[allow(dead_code)]
-impl UpdateSQL {
-    pub fn new() -> UpdateSQL {
-        UpdateSQL {
+impl BmbpUpdateSQL {
+    pub fn new() -> BmbpUpdateSQL {
+        BmbpUpdateSQL {
             field: vec![],
             table: vec![],
             filter: None,
@@ -85,7 +85,7 @@ impl UpdateSQL {
     }
 }
 
-impl UpdateSQL {
+impl BmbpUpdateSQL {
     pub fn get_mut_filter(&mut self) -> &mut QueryFilter {
         if self.filter.is_none() {
             self.filter = Some(QueryFilter::new())
@@ -103,7 +103,7 @@ impl UpdateSQL {
     }
 }
 
-impl UpdateSQL {
+impl BmbpUpdateSQL {
     pub fn target_table(&mut self, table: String) -> &mut Self {
         self.table.push(Table::new(table));
         self
@@ -119,15 +119,15 @@ impl UpdateSQL {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct DeleteSQL {
+pub struct BmbpDeleteSQL {
     table: Vec<Table>,
     filter: Option<QueryFilter>,
 }
 
 #[allow(dead_code)]
-impl DeleteSQL {
-    pub fn new() -> DeleteSQL {
-        DeleteSQL {
+impl BmbpDeleteSQL {
+    pub fn new() -> BmbpDeleteSQL {
+        BmbpDeleteSQL {
             table: vec![],
             filter: None,
         }
@@ -146,7 +146,7 @@ impl DeleteSQL {
     }
 }
 
-impl DeleteSQL {
+impl BmbpDeleteSQL {
     pub fn target_table(&mut self, table: String) -> &mut Self {
         self.table.push(Table::new(table));
         self

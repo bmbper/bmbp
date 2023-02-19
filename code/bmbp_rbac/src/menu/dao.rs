@@ -9,6 +9,115 @@ use serde_json::Value;
 pub struct MenuDao {}
 
 impl MenuDao {
+    fn build_query_params_app_id(
+        orm_sql: &mut BmbpOrmSQL,
+        params: &MenuQueryParam,
+    ) -> BmbpResp<()> {
+        if !params.get_app_id().is_empty() {
+            orm_sql
+                .as_query_mut()?
+                .get_mut_filter()
+                .s_f_eq("appId".to_string());
+            orm_sql.get_mut_dynamic_params().add_k_param(
+                "appId".to_string(),
+                Value::String(params.get_app_id().to_string()),
+            );
+        }
+        Ok(())
+    }
+    fn build_query_params_menu_id(
+        orm_sql: &mut BmbpOrmSQL,
+        params: &MenuQueryParam,
+    ) -> BmbpResp<()> {
+        if !params.get_menu_id().is_empty() {
+            orm_sql
+                .as_query_mut()?
+                .get_mut_filter()
+                .s_f_eq("menuId".to_string());
+            orm_sql.get_mut_dynamic_params().add_k_param(
+                "menuId".to_string(),
+                Value::String(params.get_menu_id().to_string()),
+            );
+        }
+        Ok(())
+    }
+    fn build_query_params_menu_parent_id(
+        orm_sql: &mut BmbpOrmSQL,
+        params: &MenuQueryParam,
+    ) -> BmbpResp<()> {
+        if !params.get_menu_parent_id().is_empty() {
+            orm_sql
+                .as_query_mut()?
+                .get_mut_filter()
+                .s_f_eq("menuParentId".to_string());
+            orm_sql.get_mut_dynamic_params().add_k_param(
+                "menuParentId".to_string(),
+                Value::String(params.get_menu_parent_id().to_string()),
+            );
+        }
+        Ok(())
+    }
+    fn build_query_params_menu_title(
+        orm_sql: &mut BmbpOrmSQL,
+        params: &MenuQueryParam,
+    ) -> BmbpResp<()> {
+        if !params.get_menu_title().is_empty() {
+            orm_sql
+                .as_query_mut()?
+                .get_mut_filter()
+                .s_f_lk("menuTitle".to_string());
+            orm_sql.get_mut_dynamic_params().add_k_param(
+                "menuTitle".to_string(),
+                Value::String(params.get_menu_title().to_string()),
+            );
+        }
+        Ok(())
+    }
+    fn build_query_params_menu_path(
+        orm_sql: &mut BmbpOrmSQL,
+        params: &MenuQueryParam,
+    ) -> BmbpResp<()> {
+        if !params.get_menu_path().is_empty() {
+            orm_sql
+                .as_query_mut()?
+                .get_mut_filter()
+                .s_f_llk("menuPath".to_string());
+            orm_sql.get_mut_dynamic_params().add_k_param(
+                "menuPath".to_string(),
+                Value::String(params.get_menu_path().to_string()),
+            );
+        }
+        Ok(())
+    }
+    fn build_query_params_menu_route_type(
+        orm_sql: &mut BmbpOrmSQL,
+        params: &MenuQueryParam,
+    ) -> BmbpResp<()> {
+        if params.get_menu_route_type().is_some() {
+            orm_sql
+                .as_query_mut()?
+                .get_mut_filter()
+                .s_f_eq("menuRouteType".to_string());
+            orm_sql.get_mut_dynamic_params().add_k_param(
+                "menuRouteType".to_string(),
+                Value::String(params.get_menu_route_type().unwrap().to_string()),
+            );
+        }
+        Ok(())
+    }
+    fn build_query_params_r_id(orm_sql: &mut BmbpOrmSQL, params: &MenuQueryParam) -> BmbpResp<()> {
+        orm_sql
+            .as_query_mut()?
+            .get_mut_filter()
+            .s_f_eq("rId".to_string());
+        orm_sql.get_mut_dynamic_params().add_k_param(
+            "rId".to_string(),
+            Value::String(params.get_r_id().to_string()),
+        );
+        Ok(())
+    }
+}
+impl MenuDao {
     pub(crate) fn orm_query_sql(params: &MenuQueryParam) -> BmbpResp<BmbpOrmSQL> {
         let mut orm_sql = BmbpOrmSQL::query();
         for column in BmbpMenuVo::orm_fields().as_slice() {
@@ -20,76 +129,21 @@ impl MenuDao {
 
         // filter
         if !params.get_r_id().is_empty() {
-            orm_sql
-                .as_query_mut()?
-                .get_mut_filter()
-                .s_f_eq("rId".to_string());
-            orm_sql.get_mut_dynamic_params().add_k_param(
-                "rId".to_string(),
-                Value::String(params.get_r_id().to_string()),
-            );
+            Self::build_query_params_r_id(&mut orm_sql, params)?;
         } else {
-            if !params.get_app_id().is_empty() {
-                orm_sql
-                    .as_query_mut()?
-                    .get_mut_filter()
-                    .s_f_eq("appId".to_string());
-                orm_sql.get_mut_dynamic_params().add_k_param(
-                    "appId".to_string(),
-                    Value::String(params.get_app_id().to_string()),
-                );
-            }
-            if !params.get_menu_id().is_empty() {
-                orm_sql
-                    .as_query_mut()?
-                    .get_mut_filter()
-                    .s_f_eq("menuId".to_string());
-                orm_sql.get_mut_dynamic_params().add_k_param(
-                    "menuId".to_string(),
-                    Value::String(params.get_menu_id().to_string()),
-                );
-            }
-            if !params.get_menu_title().is_empty() {
-                orm_sql
-                    .as_query_mut()?
-                    .get_mut_filter()
-                    .s_f_lk("menuTitle".to_string());
-                orm_sql.get_mut_dynamic_params().add_k_param(
-                    "menuTitle".to_string(),
-                    Value::String(params.get_menu_title().to_string()),
-                );
-            }
-            if !params.get_menu_parent_id().is_empty() {
-                orm_sql
-                    .as_query_mut()?
-                    .get_mut_filter()
-                    .s_f_eq("menuParentId".to_string());
-                orm_sql.get_mut_dynamic_params().add_k_param(
-                    "menuParentId".to_string(),
-                    Value::String(params.get_menu_parent_id().to_string()),
-                );
-            }
-            if !params.get_menu_path().is_empty() {
-                orm_sql
-                    .as_query_mut()?
-                    .get_mut_filter()
-                    .s_f_llk("menuPath".to_string());
-                orm_sql.get_mut_dynamic_params().add_k_param(
-                    "menuPath".to_string(),
-                    Value::String(params.get_menu_path().to_string()),
-                );
-            }
-            if params.get_menu_route_type().is_some() {
-                orm_sql
-                    .as_query_mut()?
-                    .get_mut_filter()
-                    .s_f_eq("menuRouteType".to_string());
-                orm_sql.get_mut_dynamic_params().add_k_param(
-                    "menuRouteType".to_string(),
-                    Value::String(params.get_menu_route_type().unwrap().to_string()),
-                );
-            }
+            Self::build_query_params_app_id(&mut orm_sql, params)?;
+            Self::build_query_params_menu_id(&mut orm_sql, params)?;
+            Self::build_query_params_menu_title(&mut orm_sql, params)?;
+            Self::build_query_params_menu_parent_id(&mut orm_sql, params)?;
+            Self::build_query_params_menu_path(&mut orm_sql, params)?;
+            Self::build_query_params_menu_route_type(&mut orm_sql, params)?;
         }
+
+        // 排序
+        orm_sql
+            .as_query_mut()?
+            .order_field_asc("menuOrder".to_string())
+            .order_field_asc("menuPath".to_string());
 
         Ok(orm_sql)
     }
@@ -101,45 +155,11 @@ impl MenuDao {
             .target_table(BMBP_RBAC_MENU.to_string());
 
         if !params.get_r_id().is_empty() {
-            orm_sql
-                .as_query_mut()?
-                .get_mut_filter()
-                .s_f_eq("rId".to_string());
-            orm_sql.get_mut_dynamic_params().add_k_param(
-                "rId".to_string(),
-                Value::String(params.get_r_id().to_string()),
-            );
+            Self::build_query_params_r_id(&mut orm_sql, params)?;
         } else {
-            if !params.get_app_id().is_empty() {
-                orm_sql
-                    .as_query_mut()?
-                    .get_mut_filter()
-                    .s_f_eq("appId".to_string());
-                orm_sql.get_mut_dynamic_params().add_k_param(
-                    "appId".to_string(),
-                    Value::String(params.get_app_id().to_string()),
-                );
-            }
-            if !params.get_menu_id().is_empty() {
-                orm_sql
-                    .as_query_mut()?
-                    .get_mut_filter()
-                    .s_f_eq("menuId".to_string());
-                orm_sql.get_mut_dynamic_params().add_k_param(
-                    "menuId".to_string(),
-                    Value::String(params.get_menu_id().to_string()),
-                );
-            }
-            if !params.get_menu_parent_id().is_empty() {
-                orm_sql
-                    .as_query_mut()?
-                    .get_mut_filter()
-                    .s_f_eq("menuParentId".to_string());
-                orm_sql.get_mut_dynamic_params().add_k_param(
-                    "menuParentId".to_string(),
-                    Value::String(params.get_menu_parent_id().to_string()),
-                );
-            }
+            Self::build_query_params_app_id(&mut orm_sql, params)?;
+            Self::build_query_params_menu_id(&mut orm_sql, params)?;
+            Self::build_query_params_menu_parent_id(&mut orm_sql, params)?;
         }
         Ok(orm_sql)
     }
@@ -273,9 +293,7 @@ impl MenuDao {
     }
 
     pub(crate) async fn insert(po: &BmbpMenuVo) -> BmbpResp<usize> {
-        tracing::info!("po:{}", serde_json::to_string(po).unwrap());
         let insert_sql = Self::orm_insert_sql(po)?;
-        tracing::debug!("保存菜单:{:#?}", insert_sql);
         let row_count = BmbpORM.await.insert(insert_sql).await?;
         Ok(row_count)
     }

@@ -12,7 +12,7 @@ use tracing::debug;
 
 use bmbp_types::{BmbpError, BmbpResp, PageInner};
 
-use crate::{BmbpDataSource, OrmSQL};
+use crate::{BmbpDataSource, BmbpOrmSQL};
 
 use super::{client::build_conn, conn::BmbpConn};
 
@@ -123,7 +123,7 @@ impl ConnInner {
 impl ConnInner {
     pub async fn find_page(
         &self,
-        mut orm_sql: OrmSQL,
+        mut orm_sql: BmbpOrmSQL,
         page_no: &usize,
         page_size: &usize,
     ) -> BmbpResp<PageInner<Map<String, Value>>> {
@@ -137,46 +137,46 @@ impl ConnInner {
         Ok(page)
     }
 
-    pub async fn find_list(&self, mut orm_sql: OrmSQL) -> BmbpResp<Vec<Map<String, Value>>> {
+    pub async fn find_list(&self, mut orm_sql: BmbpOrmSQL) -> BmbpResp<Vec<Map<String, Value>>> {
         let (sql, params) = orm_sql.get_raw_orm()?;
         let vec_vo = self.inner().write().await.find_list(sql, params).await?;
         Ok(vec_vo)
     }
 
-    pub async fn find_one(&self, mut orm_sql: OrmSQL) -> BmbpResp<Option<Map<String, Value>>> {
+    pub async fn find_one(&self, mut orm_sql: BmbpOrmSQL) -> BmbpResp<Option<Map<String, Value>>> {
         let (sql, params) = orm_sql.get_raw_orm()?;
         let vo = self.inner().write().await.find_one(sql, params).await?;
         Ok(vo)
     }
-    pub async fn insert(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
+    pub async fn insert(&self, mut orm_sql: BmbpOrmSQL) -> BmbpResp<usize> {
         let (sql, params) = orm_sql.get_raw_orm()?;
         debug!("SQL:{}", sql);
         debug!("PARAMS:{}", sql);
         let row_count = self.inner().write().await.insert(sql, params).await?;
         Ok(row_count)
     }
-    pub async fn update(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
+    pub async fn update(&self, mut orm_sql: BmbpOrmSQL) -> BmbpResp<usize> {
         let (sql, params) = orm_sql.get_raw_orm()?;
         let row_count = self.inner().write().await.update(sql, params).await?;
         Ok(row_count)
     }
-    pub async fn delete(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
+    pub async fn delete(&self, mut orm_sql: BmbpOrmSQL) -> BmbpResp<usize> {
         let (sql, params) = orm_sql.get_raw_orm()?;
         let row_count = self.inner().write().await.delete(sql, params).await?;
         Ok(row_count)
     }
 
-    pub async fn execute(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
+    pub async fn execute(&self, mut orm_sql: BmbpOrmSQL) -> BmbpResp<usize> {
         let (sql, params) = orm_sql.get_raw_orm()?;
         let row_count = self.inner().write().await.execute(sql, params).await?;
         Ok(row_count)
     }
-    pub async fn execute_dml(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
+    pub async fn execute_dml(&self, mut orm_sql: BmbpOrmSQL) -> BmbpResp<usize> {
         let (sql, params) = orm_sql.get_raw_orm()?;
         let row_count = self.inner().write().await.execute_dml(sql, params).await?;
         Ok(row_count)
     }
-    pub async fn execute_ddl(&self, mut orm_sql: OrmSQL) -> BmbpResp<usize> {
+    pub async fn execute_ddl(&self, mut orm_sql: BmbpOrmSQL) -> BmbpResp<usize> {
         let (sql, params) = orm_sql.get_raw_orm()?;
         let row_count = self.inner().write().await.execute_ddl(sql, params).await?;
         Ok(row_count)

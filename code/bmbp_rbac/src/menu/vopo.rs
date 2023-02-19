@@ -151,7 +151,7 @@ impl MenuQueryParam {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum BmbpMenuRouteType {
-    Route, // 本地应用路由
+    ROUTE, // 本地应用路由
     URL,   // 接入外部页面地址
     META,  // 配置界面
 }
@@ -159,7 +159,7 @@ pub enum BmbpMenuRouteType {
 impl ToString for BmbpMenuRouteType {
     fn to_string(&self) -> String {
         match self {
-            BmbpMenuRouteType::Route => "Route".to_string(),
+            BmbpMenuRouteType::ROUTE => "ROUTE".to_string(),
             BmbpMenuRouteType::URL => "URL".to_string(),
             BmbpMenuRouteType::META => "META".to_string(),
         }
@@ -167,7 +167,7 @@ impl ToString for BmbpMenuRouteType {
 }
 impl Default for BmbpMenuRouteType {
     fn default() -> Self {
-        BmbpMenuRouteType::Route
+        BmbpMenuRouteType::ROUTE
     }
 }
 
@@ -203,6 +203,7 @@ pub struct BmbpMenuVo {
     menu_route: String,
     menu_route_type: Option<BmbpMenuRouteType>,
     menu_type: BmbpMenuType,
+    menu_order: u32,
     children: Vec<BmbpMenuVo>,
     #[serde(flatten)]
     base: BaseVoPo,
@@ -241,6 +242,10 @@ impl BmbpMenuVo {
         self.menu_type = menu_type;
         self
     }
+    pub(crate) fn set_menu_order(&mut self, menu_order: u32) -> &mut Self {
+        self.menu_order = menu_order;
+        self
+    }
 
     pub(crate) fn get_app_id(&self) -> &String {
         &self.app_id
@@ -265,6 +270,10 @@ impl BmbpMenuVo {
     pub(crate) fn get_menu_route_type(&self) -> Option<&BmbpMenuRouteType> {
         self.menu_route_type.as_ref()
     }
+    pub(crate) fn get_menu_order(&self) -> &u32 {
+        &self.menu_order
+    }
+
     pub(crate) fn get_menu_type(&self) -> &BmbpMenuType {
         &self.menu_type
     }
@@ -325,6 +334,7 @@ impl BaseOrmVoPo for BmbpMenuVo {
             "menu_type".to_string(),
             "menu_route".to_string(),
             "menu_route_type".to_string(),
+            "menu_order".to_string(),
         ]
     }
 }
