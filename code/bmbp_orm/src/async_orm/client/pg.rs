@@ -119,7 +119,16 @@ impl BmbpConn for BmbpPgConnect {
             return err.unwrap();
         }
 
-        let page_sql = format!(" {} LIMIT {} OFFSET {}", &sql, page_size, page_no);
+        let limit_size = { *page_size };
+        let offset_no = {
+            if page_no < &1 {
+                0
+            } else {
+                page_size * (page_no - 1)
+            }
+        };
+
+        let page_sql = format!(" {} LIMIT {} OFFSET {}", &sql, limit_size, offset_no);
         let list_data = self.find_list(page_sql, params).await?;
         page_inner.set_data(list_data);
         Ok(page_inner)
@@ -272,8 +281,7 @@ fn to_json_value(row: &Row) -> Map<String, Value> {
                     Ok(v) => {
                         props_value = Value::String(v);
                     }
-                    Err(e) => {
-                        tracing::warn!("{:#?}", e);
+                    Err(_) => {
                         props_value = Value::Null;
                     }
                 }
@@ -284,8 +292,7 @@ fn to_json_value(row: &Row) -> Map<String, Value> {
                     Ok(v) => {
                         props_value = Value::from(v);
                     }
-                    Err(e) => {
-                        tracing::warn!("{:#?}", e);
+                    Err(_) => {
                         props_value = Value::Null;
                     }
                 }

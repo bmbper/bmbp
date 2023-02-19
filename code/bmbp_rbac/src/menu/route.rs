@@ -2,7 +2,7 @@ use axum::extract::Path;
 use axum::Json;
 
 use crate::menu::service::MenuService;
-use bmbp_types::{BmbpResp, PageInner, PageReqVo, RespVo};
+use bmbp_types::{BmbpPageReqVo, BmbpResp, PageInner, RespVo};
 
 use crate::menu::vopo::{AppQueryParam, BmbpAppVo, BmbpMenuVo, MenuQueryParam};
 
@@ -61,7 +61,7 @@ pub async fn find_menu_tree(
 
 #[allow(unused)]
 pub async fn find_menu_page(
-    Json(params): Json<PageReqVo<MenuQueryParam>>,
+    Json(params): Json<BmbpPageReqVo<MenuQueryParam>>,
 ) -> BmbpResp<RespVo<PageInner<BmbpMenuVo>>> {
     tracing::info!(
         "分页查询菜单列表:{}",

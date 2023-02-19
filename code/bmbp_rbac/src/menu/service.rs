@@ -2,7 +2,7 @@ use crate::menu::dao::MenuDao;
 use crate::menu::vopo::{BmbpMenuVo, MenuQueryParam};
 use crate::util::{append_create_vo, append_update_vo};
 use bmbp_types::vo::BaseOrmVoPo;
-use bmbp_types::{BmbpError, BmbpResp, PageInner, PageReqVo, ROOT_TREE_NODE};
+use bmbp_types::{BmbpError, BmbpPageReqVo, BmbpResp, PageInner, ROOT_TREE_NODE};
 use bmbp_util::{uuid, uuid_upper, TreeBuilder};
 use std::os::unix::process::parent_id;
 
@@ -18,7 +18,7 @@ impl MenuService {
     }
 
     pub(crate) async fn find_page(
-        params: &PageReqVo<MenuQueryParam>,
+        params: &BmbpPageReqVo<MenuQueryParam>,
     ) -> BmbpResp<PageInner<BmbpMenuVo>> {
         let vo_vec = MenuDao::find_page(params).await?;
         Ok(vo_vec)

@@ -1,9 +1,7 @@
 use crate::menu::vopo::{BmbpMenuVo, MenuQueryParam, BMBP_RBAC_MENU};
-use bmbp_base::{CurdDao, CurdService};
 use bmbp_orm_ins::{BmbpORM, BmbpOrmSQL};
 use bmbp_types::vo::{BaseOrmVoPo, QueryPageParam};
-use bmbp_types::{BmbpError, BmbpResp, PageInner, PageReqVo};
-use serde::Serialize;
+use bmbp_types::{BmbpError, BmbpPageReqVo, BmbpResp, PageInner};
 use serde_json::Value;
 
 pub struct MenuDao {}
@@ -248,7 +246,7 @@ impl MenuDao {
 
 impl MenuDao {
     pub(crate) async fn find_page(
-        params: &PageReqVo<MenuQueryParam>,
+        params: &BmbpPageReqVo<MenuQueryParam>,
     ) -> BmbpResp<PageInner<BmbpMenuVo>> {
         let mut mqp = &MenuQueryParam::default();
         if params.get_page_param().is_some() {

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use bmbp_types::vo::BaseOrmVoPo;
-use bmbp_types::{BaseVoPo, PageReqVo, TreeNode};
+use bmbp_types::{BaseVoPo, BmbpPageReqVo, TreeNode};
 
 // 组织树
 #[allow(dead_code)]
@@ -94,7 +94,7 @@ impl QueryParam {
 
 // 分页查询参数
 #[allow(dead_code)]
-pub type PageQueryParam = PageReqVo<QueryParam>;
+pub type PageQueryParam = BmbpPageReqVo<QueryParam>;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -132,7 +132,7 @@ pub trait TreeNode<T> {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
-pub struct BmbpApiQueryParam<T>
+pub struct BmbpPageReqVo<T>
 where
     T: Clone + Default + Serialize + Send + Sync,
 {
@@ -142,7 +142,7 @@ where
     page_param: Option<T>,
 }
 
-impl<T> Default for BmbpApiQueryParam<T>
+impl<T> Default for BmbpPageReqVo<T>
 where
     T: Clone + Default + Serialize + Send + Sync,
 {
@@ -155,12 +155,12 @@ where
     }
 }
 
-impl<T> BmbpApiQueryParam<T>
+impl<T> BmbpPageReqVo<T>
 where
     T: Clone + Default + Serialize + Send + Sync,
 {
     pub fn new() -> Self {
-        BmbpApiQueryParam::default()
+        BmbpPageReqVo::default()
     }
     pub fn get_page_param(&self) -> Option<&T> {
         self.page_param.as_ref()
@@ -176,7 +176,7 @@ where
     }
 }
 
-impl<T> QueryPageParam for BmbpApiQueryParam<T>
+impl<T> QueryPageParam for BmbpPageReqVo<T>
 where
     T: Default + Clone + Serialize + Send + Sync,
 {
@@ -187,8 +187,6 @@ where
         self.page_size.clone()
     }
 }
-
-pub type PageReqVo<T> = BmbpApiQueryParam<T>;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

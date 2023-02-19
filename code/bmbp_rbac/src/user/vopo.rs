@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use bmbp_types::vo::BaseOrmVoPo;
-use bmbp_types::{BaseVoPo, PageReqVo};
+use bmbp_types::{BaseVoPo, BmbpPageReqVo};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -12,7 +12,7 @@ pub struct UserQueryParam {
     user_name: String,
 }
 #[allow(dead_code)]
-pub type UserPageQueryParam = PageReqVo<UserQueryParam>;
+pub type UserPageQueryParam = BmbpPageReqVo<UserQueryParam>;
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
