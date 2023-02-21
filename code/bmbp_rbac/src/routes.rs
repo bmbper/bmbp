@@ -83,28 +83,30 @@ fn build_v1_role_router() -> Router {
 }
 
 fn build_v1_menu_router() -> Router {
-    let app_router = Router::new()
-        .route("/page", post(find_app_page))
-        .route("/list", post(find_app_list))
-        .route("/info/id/:r_id", get(find_app_info_r_id))
-        .route("/info/app/:app_id", get(find_app_info_app_id))
-        .route("/delete/id/:r_id", delete(delete_app_info_r_id))
-        .route("/delete/app/:app_id", delete(delete_app_info_app_id))
-        .route("/save", post(save_app));
-
-    let menu_router = Router::new()
-        .route("/tree", post(find_menu_tree))
-        .route("/page", post(find_menu_page))
-        .route("/list", post(find_menu_list))
-        .route("/info/id/:r_id", get(find_menu_info_r_id))
-        .route("/info/menu/:menu_id", get(find_menu_info_menu_id))
-        .route("/delete/id/:r_id", delete(delete_menu_info_r_id))
-        .route("/delete/menu/:app_id", delete(delete_menu_info_menu_id))
-        .route("/save", post(save_menu));
-
     let mut v1_router = Router::new();
-    v1_router = v1_router.nest("/app", app_router);
-    v1_router = v1_router.nest("/menu", menu_router);
+    v1_router = v1_router.nest(
+        "/app",
+        Router::new()
+            .route("/page", post(find_app_page))
+            .route("/list", post(find_app_list))
+            .route("/info/id/:r_id", get(find_app_info_r_id))
+            .route("/info/app/:app_id", get(find_app_info_app_id))
+            .route("/delete/id/:r_id", delete(delete_app_info_r_id))
+            .route("/delete/app/:app_id", delete(delete_app_info_app_id))
+            .route("/save", post(save_app)),
+    );
+    v1_router = v1_router.nest(
+        "/menu",
+        Router::new()
+            .route("/tree", post(find_menu_tree))
+            .route("/page", post(find_menu_page))
+            .route("/list", post(find_menu_list))
+            .route("/info/id/:r_id", get(find_menu_info_r_id))
+            .route("/info/menu/:menu_id", get(find_menu_info_menu_id))
+            .route("/delete/id/:r_id", delete(delete_menu_info_r_id))
+            .route("/delete/menu/:app_id", delete(delete_menu_info_menu_id))
+            .route("/save", post(save_menu)),
+    );
     v1_router
 }
 

@@ -50,7 +50,7 @@ impl MenuService {
         // 设置为根节点
         let mut set_root_node = |tpo: &mut BmbpMenuVo| {
             tpo.set_parent_menu_id(ROOT_TREE_NODE.to_string());
-            tpo.set_menu_path(format!("/{}", tpo.get_menu_title()));
+            tpo.set_menu_path(format!("/{}/", tpo.get_menu_title()));
         };
 
         // 获取上级菜单路径
@@ -59,7 +59,7 @@ impl MenuService {
         } else {
             let parent_menu_path = Self::find_parent_menu_path(po.get_parent_menu_id()).await?;
             if let Some(menu_path) = parent_menu_path {
-                po.set_menu_path(format!("{}/{}", menu_path, po.get_menu_title()));
+                po.set_menu_path(format!("{}{}/", menu_path, po.get_menu_title()));
             } else {
                 set_root_node(po);
             }
