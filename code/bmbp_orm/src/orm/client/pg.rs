@@ -13,7 +13,7 @@ use bmbp_types::{BmbpError, BmbpResp, PageInner};
 use bmbp_util::uuid;
 
 use crate::{
-    async_orm::{conn::BmbpConn, pool::BmbpConnectionPool},
+    orm::{conn::BmbpConn, pool::BmbpConnectionPool},
     BmbpDataSource,
 };
 
@@ -241,6 +241,18 @@ impl BmbpConn for BmbpPgConnect {
     async fn execute_dml(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
         tracing::info!("执行DML SQL:{}", &sql);
         self.execute(sql, params).await
+    }
+
+    async fn batch_execute(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
+        Ok(0)
+    }
+
+    async fn batch_execute_ddl(&mut self, ddl_vec: &[(String, &[Value])]) -> BmbpResp<usize> {
+        Ok(0)
+    }
+
+    async fn batch_execute_dml(&mut self, dml_vec: &[(String, &[Value])]) -> BmbpResp<usize> {
+        Ok(0)
     }
 }
 

@@ -11,21 +11,21 @@ use bmbp_types::{BmbpResp, PageInner};
 use bmbp_util::uuid;
 
 use crate::{
-    async_orm::{conn::BmbpConn, pool::BmbpConnectionPool},
+    orm::{conn::BmbpConn, pool::BmbpConnectionPool},
     BmbpDataSource,
 };
 
-pub struct BmbpMysqlConnect {
+pub struct BmbpSqliteConnect {
     id: String,
     data_source: Arc<BmbpDataSource>,
     pool: Weak<BmbpConnectionPool>,
 }
 
-impl BmbpMysqlConnect {
+impl BmbpSqliteConnect {
     pub async fn new(
         ds: Arc<BmbpDataSource>,
     ) -> BmbpResp<RwLock<Box<dyn BmbpConn + Send + Sync + 'static>>> {
-        let con = BmbpMysqlConnect {
+        let con = BmbpSqliteConnect {
             id: uuid(),
             data_source: ds.clone(),
             pool: Weak::new(),
@@ -36,7 +36,7 @@ impl BmbpMysqlConnect {
 
 #[allow(dead_code)]
 #[async_trait]
-impl BmbpConn for BmbpMysqlConnect {
+impl BmbpConn for BmbpSqliteConnect {
     fn id(&self) -> String {
         self.id.clone()
     }
@@ -48,12 +48,13 @@ impl BmbpConn for BmbpMysqlConnect {
     }
 
     fn set_data_source(&mut self, data_source: Arc<BmbpDataSource>) {
-        self.data_source = data_source.clone()
+        self.data_source = data_source.clone();
     }
 
     fn data_source(&self) -> Arc<BmbpDataSource> {
         self.data_source.clone()
     }
+
     #[allow(unused)]
     async fn find_page(
         &mut self,
@@ -102,6 +103,15 @@ impl BmbpConn for BmbpMysqlConnect {
     }
     #[allow(unused)]
     async fn execute_dml(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
+        Ok(0)
+    }
+    async fn batch_execute(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
+        Ok(0)
+    }
+    async fn batch_execute_ddl(&mut self, ddl_vec: &[(String, &[Value])]) -> BmbpResp<usize> {
+        Ok(0)
+    }
+    async fn batch_execute_dml(&mut self, dml_vec: &[(String, &[Value])]) -> BmbpResp<usize> {
         Ok(0)
     }
 }

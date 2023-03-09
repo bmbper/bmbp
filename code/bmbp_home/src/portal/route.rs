@@ -1,13 +1,13 @@
-use crate::home::vopo::NavAppMenuVo;
+use crate::portal::model::NavAppMenuVo;
 use axum::response::IntoResponse;
 use bmbp_types::{BmbpError, BmbpResp, RespVo};
 use serde_json::Error;
 
-pub async fn find_nav_app() -> BmbpResp<impl IntoResponse> {
+pub async fn find_app() -> BmbpResp<impl IntoResponse> {
     Ok("".to_string())
 }
 
-pub async fn find_nav_app_menu() -> BmbpResp<impl IntoResponse> {
+pub async fn find_app_menu() -> BmbpResp<impl IntoResponse> {
     let menu = r#"
     [
 		{

@@ -1,3 +1,7 @@
+mod dict;
+mod routes;
+mod vars;
+
 use tracing;
 
 /// 设置路由

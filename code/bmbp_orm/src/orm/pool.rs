@@ -171,6 +171,21 @@ impl ConnInner {
         let row_count = self.inner().write().await.execute(sql, params).await?;
         Ok(row_count)
     }
+    pub async fn batch_execute(&self, mut orm_sql: &mut [BmbpOrmSQL]) -> BmbpResp<usize> {
+        let mut ddl_vec = vec![];
+        for item in orm_sql {
+            let (sql, params) = item.get_raw_orm()?;
+            ddl_vec.push((sql, params));
+        }
+        let row_count = self
+            .inner()
+            .write()
+            .await
+            .batch_execute_dml(ddl_vec.as_slice())
+            .await?;
+        Ok(row_count)
+    }
+
     pub async fn execute_dml(&self, mut orm_sql: BmbpOrmSQL) -> BmbpResp<usize> {
         let (sql, params) = orm_sql.get_raw_orm()?;
         let row_count = self.inner().write().await.execute_dml(sql, params).await?;

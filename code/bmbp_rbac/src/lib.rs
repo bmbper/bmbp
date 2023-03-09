@@ -4,6 +4,7 @@ pub use face::*;
 pub use routes::build_rbac_router;
 
 mod api;
+mod app;
 mod data;
 mod face;
 mod menu;

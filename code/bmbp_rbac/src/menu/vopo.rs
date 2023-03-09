@@ -1,6 +1,6 @@
 use crate::menu::vopo::BmbpAppType::PLATFORM;
-use bmbp_types::vo::BaseOrmVoPo;
-use bmbp_types::{BaseVoPo, TreeNode};
+use bmbp_types::vo::BaseOrmModel;
+use bmbp_types::{BmbpBaseModel, TreeNode};
 use serde::{Deserialize, Serialize};
 
 // 应用信息
@@ -75,7 +75,7 @@ pub struct BmbpAppVo {
     app_url: String,
     app_key: String,
     #[serde(flatten)]
-    base: BaseVoPo,
+    base: BmbpBaseModel,
 }
 
 // 菜单查询参数
@@ -206,7 +206,7 @@ pub struct BmbpMenuVo {
     menu_order: u32,
     children: Vec<BmbpMenuVo>,
     #[serde(flatten)]
-    base: BaseVoPo,
+    base: BmbpBaseModel,
 }
 #[allow(dead_code)]
 impl BmbpMenuVo {
@@ -310,16 +310,16 @@ impl TreeNode<BmbpMenuVo> for BmbpMenuVo {
     }
 }
 
-impl BaseOrmVoPo for BmbpMenuVo {
-    fn get_base_vo(&self) -> &BaseVoPo {
+impl BaseOrmModel for BmbpMenuVo {
+    fn get_base_vo(&self) -> &BmbpBaseModel {
         &self.base
     }
 
-    fn get_mut_base_vo(&mut self) -> &mut BaseVoPo {
+    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
         &mut self.base
     }
 
-    fn set_base_vo(&mut self, vo: BaseVoPo) -> &mut Self {
+    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
         self.base = vo;
         self
     }

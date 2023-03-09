@@ -1,6 +1,6 @@
 use crate::menu::vopo::{BmbpMenuVo, MenuQueryParam, BMBP_RBAC_MENU};
 use bmbp_orm_ins::{BmbpORM, BmbpOrmSQL};
-use bmbp_types::vo::{BaseOrmVoPo, QueryPageParam};
+use bmbp_types::vo::{BaseOrmModel, QueryPageParam};
 use bmbp_types::{BmbpError, BmbpPageReqVo, BmbpResp, PageInner};
 use serde_json::Value;
 
@@ -242,6 +242,51 @@ impl MenuDao {
     pub(crate) fn orm_update_sql(params: &MenuQueryParam, po: &BmbpMenuVo) -> BmbpResp<BmbpOrmSQL> {
         Err(BmbpError::api("接口未实现".to_string()))
     }
+
+    pub(crate) fn build_update_parent_sql(id: String, parent_id: String) -> BmbpResp<BmbpOrmSQL> {
+        let mut orm_sql = BmbpOrmSQL::update();
+        orm_sql
+            .as_update_mut()?
+            .target_table(BMBP_RBAC_MENU.to_string());
+        orm_sql.as_update_mut()?.set_s_f("parentMenuId".to_string());
+        orm_sql
+            .as_update_mut()?
+            .get_mut_filter()
+            .s_f_eq("menuId".to_string());
+        orm_sql
+            .get_mut_dynamic_params()
+            .add_k_param("menuId".to_string(), Value::String(id));
+        orm_sql
+            .get_mut_dynamic_params()
+            .add_k_param("parentMenuId".to_string(), Value::String(parent_id));
+        Ok(orm_sql)
+    }
+
+    pub(crate) fn build_update_child_path_sql(
+        current_menu_path: String,
+        target_menu_path: String,
+    ) -> BmbpResp<BmbpOrmSQL> {
+        let mut orm_sql = BmbpOrmSQL::update();
+        orm_sql
+            .as_update_mut()?
+            .target_table(BMBP_RBAC_MENU.to_string());
+        orm_sql
+            .as_update_mut()?
+            .set_s_c_as("menuPath".to_string(), "".to_string());
+        orm_sql
+            .as_update_mut()?
+            .get_mut_filter()
+            .s_f_llk("menuPath".to_string());
+        orm_sql.get_mut_dynamic_params().add_k_param(
+            "currentMenuPath".to_string(),
+            Value::String(current_menu_path),
+        );
+        orm_sql.get_mut_dynamic_params().add_k_param(
+            "targetMenuPath".to_string(),
+            Value::String(target_menu_path),
+        );
+        Ok(orm_sql)
+    }
 }
 
 impl MenuDao {
@@ -300,5 +345,13 @@ impl MenuDao {
         let update_sql = Self::orm_update_sql(params, po)?;
         let row_count = BmbpORM.await.insert(update_sql).await?;
         Ok(row_count)
+    }
+
+    pub(crate) async fn execute_sql(
+        parent_sql: BmbpOrmSQL,
+        child_sql: BmbpOrmSQL,
+    ) -> BmbpResp<usize> {
+        let mut sql_vec = vec![parent_sql, child_sql];
+        BmbpORM.await.batch_execute(sql_vec.as_mut_slice()).await
     }
 }

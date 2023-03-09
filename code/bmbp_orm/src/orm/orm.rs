@@ -77,6 +77,13 @@ impl Orm {
         row_count
     }
 
+    pub async fn batch_execute(&self, orm_sql: &mut [BmbpOrmSQL]) -> BmbpResp<usize> {
+        let conn = self.pool.get_conn().await?;
+        let row_count = conn.batch_execute(orm_sql).await;
+        conn.release().await;
+        row_count
+    }
+
     pub async fn execute(&self, orm_sql: BmbpOrmSQL) -> BmbpResp<usize> {
         let conn = self.pool.get_conn().await?;
         let row_count = conn.execute(orm_sql).await;

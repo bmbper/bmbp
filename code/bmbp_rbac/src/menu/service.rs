@@ -1,7 +1,7 @@
 use crate::menu::dao::MenuDao;
 use crate::menu::vopo::{BmbpMenuVo, MenuQueryParam};
 use crate::util::{append_create_vo, append_update_vo};
-use bmbp_types::vo::BaseOrmVoPo;
+use bmbp_types::vo::BaseOrmModel;
 use bmbp_types::{BmbpError, BmbpPageReqVo, BmbpResp, PageInner, ROOT_TREE_NODE};
 use bmbp_util::{uuid, uuid_upper, TreeBuilder};
 use std::os::unix::process::parent_id;
@@ -42,6 +42,36 @@ impl MenuService {
         append_create_vo::<BmbpMenuVo>(po);
         Self::append_create_menu_vo(po).await?;
         MenuDao::insert(po).await
+    }
+
+    pub(crate) async fn update_parent(id: String, mut parent_id: String) -> BmbpResp<usize> {
+        // 查询上级目录信息
+        let mut parent_params = MenuQueryParam::default();
+        parent_params.set_menu_id(parent_id.clone());
+        let target_parent_vo = Self::find_one(&parent_params).await?;
+        let parent_menu_path = {
+            match target_parent_vo {
+                None => {
+                    parent_id = ROOT_TREE_NODE.to_string();
+                    "/".to_string()
+                }
+                Some(vo) => vo.get_menu_path().to_string(),
+            }
+        };
+        // 查询当前目录信息
+        let mut current_params = MenuQueryParam::default();
+        current_params.set_menu_id(id.clone());
+        let current_vo = Self::find_one(&current_params).await?;
+        if current_vo.is_none() {
+            return Err(BmbpError::api("当前目录不存在，请刷新后重试".to_string()));
+        }
+        let current_path = current_vo.unwrap().get_menu_path().to_string();
+        let update_parent_id_sql = MenuDao::build_update_parent_sql(id.clone(), parent_id.clone())?;
+        let update_child_path_sql =
+            MenuDao::build_update_child_path_sql(current_path.clone(), parent_menu_path.clone())?;
+        let row_count = MenuDao::execute_sql(update_parent_id_sql, update_child_path_sql).await?;
+        // 修改上级路径信息
+        Ok(row_count)
     }
 
     pub(crate) async fn append_create_menu_vo(po: &mut BmbpMenuVo) -> BmbpResp<()> {

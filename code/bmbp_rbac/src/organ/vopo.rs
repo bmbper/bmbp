@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use bmbp_types::vo::BaseOrmVoPo;
-use bmbp_types::{BaseVoPo, BmbpPageReqVo, TreeNode};
+use bmbp_types::vo::BaseOrmModel;
+use bmbp_types::{BmbpBaseModel, BmbpPageReqVo, TreeNode};
 
 // 组织树
 #[allow(dead_code)]
@@ -138,18 +138,18 @@ pub struct BmbpOrganVo {
     organ_type: BmbpOrganType,
     children: Vec<BmbpOrganVo>,
     #[serde(flatten)]
-    base: BaseVoPo,
+    base: BmbpBaseModel,
 }
 
 #[allow(dead_code)]
-impl BaseOrmVoPo for BmbpOrganVo {
-    fn get_base_vo(&self) -> &BaseVoPo {
+impl BaseOrmModel for BmbpOrganVo {
+    fn get_base_vo(&self) -> &BmbpBaseModel {
         &self.base
     }
-    fn get_mut_base_vo(&mut self) -> &mut BaseVoPo {
+    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
         &mut self.base
     }
-    fn set_base_vo(&mut self, vo: BaseVoPo) -> &mut Self {
+    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
         self.base = vo;
         self
     }
@@ -252,7 +252,7 @@ pub struct BmbpOrganUnitsVo {
     organ_id: String,
     units_desc: String,
     #[serde(flatten)]
-    base: BaseVoPo,
+    base: BmbpBaseModel,
 }
 
 #[allow(dead_code)]
@@ -281,16 +281,16 @@ impl BmbpOrganUnitsVo {
 }
 
 #[allow(dead_code)]
-impl BaseOrmVoPo for BmbpOrganUnitsVo {
-    fn get_base_vo(&self) -> &BaseVoPo {
+impl BaseOrmModel for BmbpOrganUnitsVo {
+    fn get_base_vo(&self) -> &BmbpBaseModel {
         &self.base
     }
 
-    fn get_mut_base_vo(&mut self) -> &mut BaseVoPo {
+    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
         &mut self.base
     }
 
-    fn set_base_vo(&mut self, vo: BaseVoPo) -> &mut Self {
+    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
         self.base = vo;
         self
     }
@@ -330,20 +330,20 @@ pub struct BmbpOrganUnitVo {
     district_code: String,
 
     #[serde(flatten)]
-    base: BaseVoPo,
+    base: BmbpBaseModel,
 }
 
 #[allow(dead_code)]
-impl BaseOrmVoPo for BmbpOrganUnitVo {
-    fn get_base_vo(&self) -> &BaseVoPo {
+impl BaseOrmModel for BmbpOrganUnitVo {
+    fn get_base_vo(&self) -> &BmbpBaseModel {
         &self.base
     }
 
-    fn get_mut_base_vo(&mut self) -> &mut BaseVoPo {
+    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
         &mut self.base
     }
 
-    fn set_base_vo(&mut self, vo: BaseVoPo) -> &mut Self {
+    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
         self.base = vo;
         self
     }
@@ -367,7 +367,7 @@ pub struct BmbpOrganUnitReportVo {
     // 区
     report_district_code: String,
     #[serde(flatten)]
-    base: BaseVoPo,
+    base: BmbpBaseModel,
 }
 
 #[allow(dead_code)]
@@ -378,16 +378,16 @@ impl BmbpOrganUnitReportVo {
 }
 
 #[allow(dead_code)]
-impl BaseOrmVoPo for BmbpOrganUnitReportVo {
-    fn get_base_vo(&self) -> &BaseVoPo {
+impl BaseOrmModel for BmbpOrganUnitReportVo {
+    fn get_base_vo(&self) -> &BmbpBaseModel {
         &self.base
     }
 
-    fn get_mut_base_vo(&mut self) -> &mut BaseVoPo {
+    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
         &mut self.base
     }
 
-    fn set_base_vo(&mut self, vo: BaseVoPo) -> &mut Self {
+    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
         self.base = vo;
         self
     }
@@ -414,20 +414,20 @@ pub struct BmbpOrganDeptVo {
     dept_desc: String,
     //
     #[serde(flatten)]
-    base: BaseVoPo,
+    base: BmbpBaseModel,
 }
 
 #[allow(dead_code)]
-impl BaseOrmVoPo for BmbpOrganDeptVo {
-    fn get_base_vo(&self) -> &BaseVoPo {
+impl BaseOrmModel for BmbpOrganDeptVo {
+    fn get_base_vo(&self) -> &BmbpBaseModel {
         &self.base
     }
 
-    fn get_mut_base_vo(&mut self) -> &mut BaseVoPo {
+    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
         &mut self.base
     }
 
-    fn set_base_vo(&mut self, vo: BaseVoPo) -> &mut Self {
+    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
         self.base = vo;
         self
     }
@@ -458,20 +458,20 @@ pub struct BmbpOrganPostVo {
     // 联系地址
     concat_address: String,
     #[serde(flatten)]
-    base: BaseVoPo,
+    base: BmbpBaseModel,
 }
 
 #[allow(dead_code)]
-impl BaseOrmVoPo for BmbpOrganPostVo {
-    fn get_base_vo(&self) -> &BaseVoPo {
+impl BaseOrmModel for BmbpOrganPostVo {
+    fn get_base_vo(&self) -> &BmbpBaseModel {
         &self.base
     }
 
-    fn get_mut_base_vo(&mut self) -> &mut BaseVoPo {
+    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
         &mut self.base
     }
 
-    fn set_base_vo(&mut self, vo: BaseVoPo) -> &mut Self {
+    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
         self.base = vo;
         self
     }
@@ -507,20 +507,20 @@ pub struct BmbpOrganPersonVo {
     // 学历
     education: String,
     #[serde(flatten)]
-    base: BaseVoPo,
+    base: BmbpBaseModel,
 }
 
 #[allow(dead_code)]
-impl BaseOrmVoPo for BmbpOrganPersonVo {
-    fn get_base_vo(&self) -> &BaseVoPo {
+impl BaseOrmModel for BmbpOrganPersonVo {
+    fn get_base_vo(&self) -> &BmbpBaseModel {
         &self.base
     }
 
-    fn get_mut_base_vo(&mut self) -> &mut BaseVoPo {
+    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
         &mut self.base
     }
 
-    fn set_base_vo(&mut self, vo: BaseVoPo) -> &mut Self {
+    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
         self.base = vo;
         self
     }
@@ -536,19 +536,19 @@ impl BaseOrmVoPo for BmbpOrganPersonVo {
 pub struct BmbpOrganPostManagerVo {
     organ_id: String,
     #[serde(flatten)]
-    base: BaseVoPo,
+    base: BmbpBaseModel,
 }
 
-impl BaseOrmVoPo for BmbpOrganPostManagerVo {
-    fn get_base_vo(&self) -> &BaseVoPo {
+impl BaseOrmModel for BmbpOrganPostManagerVo {
+    fn get_base_vo(&self) -> &BmbpBaseModel {
         &self.base
     }
 
-    fn get_mut_base_vo(&mut self) -> &mut BaseVoPo {
+    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
         &mut self.base
     }
 
-    fn set_base_vo(&mut self, vo: BaseVoPo) -> &mut Self {
+    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
         self.base = vo;
         self
     }
@@ -563,20 +563,20 @@ impl BaseOrmVoPo for BmbpOrganPostManagerVo {
 pub struct BmbpOrganPersonPostVo {
     organ_id: String,
     #[serde(flatten)]
-    base: BaseVoPo,
+    base: BmbpBaseModel,
 }
 
 #[allow(dead_code)]
-impl BaseOrmVoPo for BmbpOrganPersonPostVo {
-    fn get_base_vo(&self) -> &BaseVoPo {
+impl BaseOrmModel for BmbpOrganPersonPostVo {
+    fn get_base_vo(&self) -> &BmbpBaseModel {
         &self.base
     }
 
-    fn get_mut_base_vo(&mut self) -> &mut BaseVoPo {
+    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
         &mut self.base
     }
 
-    fn set_base_vo(&mut self, vo: BaseVoPo) -> &mut Self {
+    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
         self.base = vo;
         self
     }
@@ -598,7 +598,7 @@ pub struct BmbpOrganVirtualVo {
     organ_type: BmbpOrganType,
     children: Vec<BmbpOrganVirtualVo>,
     #[serde(flatten)]
-    base: BaseVoPo,
+    base: BmbpBaseModel,
 }
 
 impl TreeNode<BmbpOrganVirtualVo> for BmbpOrganVirtualVo {
@@ -626,16 +626,16 @@ impl TreeNode<BmbpOrganVirtualVo> for BmbpOrganVirtualVo {
     }
 }
 
-impl BaseOrmVoPo for BmbpOrganVirtualVo {
-    fn get_base_vo(&self) -> &BaseVoPo {
+impl BaseOrmModel for BmbpOrganVirtualVo {
+    fn get_base_vo(&self) -> &BmbpBaseModel {
         &self.base
     }
 
-    fn get_mut_base_vo(&mut self) -> &mut BaseVoPo {
+    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
         &mut self.base
     }
 
-    fn set_base_vo(&mut self, vo: BaseVoPo) -> &mut Self {
+    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
         self.base = vo;
         self
     }

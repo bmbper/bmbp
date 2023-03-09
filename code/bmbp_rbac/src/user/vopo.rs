@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use bmbp_types::vo::BaseOrmVoPo;
-use bmbp_types::{BaseVoPo, BmbpPageReqVo};
+use bmbp_types::vo::BaseOrmModel;
+use bmbp_types::{BmbpBaseModel, BmbpPageReqVo};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -38,19 +38,19 @@ pub struct BmbpUserVo {
     user_organ: String,
 
     #[serde(flatten)]
-    base: BaseVoPo,
+    base: BmbpBaseModel,
 }
 
-impl BaseOrmVoPo for BmbpUserVo {
-    fn get_base_vo(&self) -> &BaseVoPo {
+impl BaseOrmModel for BmbpUserVo {
+    fn get_base_vo(&self) -> &BmbpBaseModel {
         &self.base
     }
 
-    fn get_mut_base_vo(&mut self) -> &mut BaseVoPo {
+    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
         &mut self.base
     }
 
-    fn set_base_vo(&mut self, vo: BaseVoPo) -> &mut Self {
+    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
         self.base = vo;
         self
     }

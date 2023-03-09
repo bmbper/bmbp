@@ -1,4 +1,4 @@
-use bmbp_types::vo::BaseOrmVoPo;
+use bmbp_types::vo::BaseOrmModel;
 use bmbp_types::{BmbpError, BmbpResp, PageInner, ROOT_TREE_NODE};
 use bmbp_util::{simple_uuid_upper, TreeBuilder};
 

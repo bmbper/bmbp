@@ -6,14 +6,14 @@ pub trait QueryPageParam {
     fn get_page_no(&self) -> usize;
     fn get_page_size(&self) -> usize;
 }
-pub trait BaseOrmVoPo {
-    fn get_base_vo(&self) -> &BaseVoPo;
-    fn get_mut_base_vo(&mut self) -> &mut BaseVoPo;
-    fn set_base_vo(&mut self, vo: BaseVoPo) -> &mut Self;
+pub trait BaseOrmModel {
+    fn get_base_vo(&self) -> &BmbpBaseModel;
+    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel;
+    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self;
     fn vo_fields() -> Vec<String>;
     fn orm_fields() -> Vec<String> {
         let mut fields = vec![];
-        fields.extend_from_slice(BaseVoPo::vo_fields().as_slice());
+        fields.extend_from_slice(BmbpBaseModel::vo_fields().as_slice());
         fields.extend_from_slice(Self::vo_fields().as_slice());
         fields
     }
@@ -392,7 +392,7 @@ pub const ROOT_TREE_NODE: &str = "0";
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
-pub struct BaseVoPo {
+pub struct BmbpBaseModel {
     ///  记录ID
     r_id: String,
     // 记录级別
@@ -415,9 +415,9 @@ pub struct BaseVoPo {
     r_sign: String,
 }
 
-impl BaseVoPo {
-    pub fn new() -> BaseVoPo {
-        BaseVoPo::default()
+impl BmbpBaseModel {
+    pub fn new() -> BmbpBaseModel {
+        BmbpBaseModel::default()
     }
     pub fn vo_fields() -> Vec<String> {
         vec![

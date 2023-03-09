@@ -1,9 +1,9 @@
-use bmbp_types::vo::BaseOrmVoPo;
+use bmbp_types::vo::BaseOrmModel;
 use bmbp_util::{date_time_now, simple_uuid_upper};
 
 pub fn append_create_vo<T>(vo: &mut T)
 where
-    T: BaseOrmVoPo,
+    T: BaseOrmModel,
 {
     let now_time = date_time_now();
     vo.set_r_id(simple_uuid_upper())
@@ -19,7 +19,7 @@ where
 
 pub fn append_update_vo<T>(vo: &mut T)
 where
-    T: BaseOrmVoPo,
+    T: BaseOrmModel,
 {
     let now_time = date_time_now();
     vo.set_r_update_user("TODO".to_string())

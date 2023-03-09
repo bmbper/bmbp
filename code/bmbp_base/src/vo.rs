@@ -1,4 +1,4 @@
-use bmbp_types::vo::BaseOrmVoPo;
+use bmbp_types::vo::BaseOrmModel;
 use bmbp_util::crypto::md5_encode;
 use bmbp_util::{date_time_now, uuid};
 use serde::Serialize;
@@ -8,13 +8,13 @@ pub struct VoUtil;
 impl VoUtil {
     pub fn is_new<T>(vo: &T) -> bool
     where
-        T: BaseOrmVoPo + Serialize,
+        T: BaseOrmModel + Serialize,
     {
         vo.get_r_id().is_empty()
     }
     pub fn append_insert<T>(vo: &mut T)
     where
-        T: BaseOrmVoPo + Serialize,
+        T: BaseOrmModel + Serialize,
     {
         let current_user = "_".to_string();
         let current_time = date_time_now();
@@ -38,7 +38,7 @@ impl VoUtil {
     }
     pub fn append_update<T>(vo: &mut T)
     where
-        T: BaseOrmVoPo + Serialize,
+        T: BaseOrmModel + Serialize,
     {
         let current_user = "_".to_string();
         let current_time = date_time_now();
@@ -48,7 +48,7 @@ impl VoUtil {
 
     pub fn append_sign<T>(vo: &mut T)
     where
-        T: BaseOrmVoPo + Serialize,
+        T: BaseOrmModel + Serialize,
     {
         let sign = Self::get_sign::<T>(vo);
         vo.set_r_sign(sign);
@@ -56,7 +56,7 @@ impl VoUtil {
 
     pub fn get_sign<T>(vo: &mut T) -> String
     where
-        T: BaseOrmVoPo + Serialize,
+        T: BaseOrmModel + Serialize,
     {
         let old_sign = vo.get_r_sign().clone();
         vo.set_r_sign("".to_string());
@@ -68,7 +68,7 @@ impl VoUtil {
 
     pub fn valid_sign<T>(vo: &mut T) -> bool
     where
-        T: BaseOrmVoPo + Serialize,
+        T: BaseOrmModel + Serialize,
     {
         if vo.get_r_sign().is_empty() {
             return false;

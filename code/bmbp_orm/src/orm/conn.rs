@@ -46,4 +46,8 @@ pub trait BmbpConn {
     async fn execute(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize>;
     async fn execute_ddl(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize>;
     async fn execute_dml(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize>;
+    async fn batch_execute(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize>;
+    async fn batch_execute_ddl(&mut self, ddl_vec: &[(String, &[Value])]) -> BmbpResp<usize>;
+    async fn batch_execute_dml(&mut self, dml_vec: &[(String, &[Value])]) -> BmbpResp<usize>;
+
 }

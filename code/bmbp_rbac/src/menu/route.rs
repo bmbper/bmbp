@@ -49,7 +49,7 @@ pub async fn save_app(Json(app_vo): Json<BmbpMenuVo>) -> BmbpResp<RespVo<BmbpApp
     Ok(RespVo::fail_msg("接口为未实现".to_string()))
 }
 
-pub async fn find_menu_tree(
+pub async fn find_tree(
     Json(params): Json<MenuQueryParam>,
 ) -> BmbpResp<RespVo<Vec<BmbpMenuVo>>> {
     tracing::info!("查询菜单树");
@@ -59,8 +59,28 @@ pub async fn find_menu_tree(
     Ok(RespVo::ok_data(menu_tree))
 }
 
+pub async fn find_tree_by_parent_id(
+    Path(parent_menu_id): Path<String>
+) -> BmbpResp<RespVo<Vec<BmbpMenuVo>>> {
+    tracing::info!("查询菜单树");
+    let mut tree_params = MenuQueryParam::default();
+    tree_params.set_r_id(parent_menu_id);
+    let menu_tree = MenuService::find_tree(&tree_params).await?;
+    Ok(RespVo::ok_data(menu_tree))
+}
+
+pub async fn find_tree_by_node_id(
+    Path(menu_id): Path<String>
+) -> BmbpResp<RespVo<Vec<BmbpMenuVo>>> {
+    tracing::info!("查询菜单树");
+    let mut tree_params = MenuQueryParam::default();
+    tree_params.set_app_id(menu_id);
+    let menu_tree = MenuService::find_tree(&tree_params).await?;
+    Ok(RespVo::ok_data(menu_tree))
+}
+
 #[allow(unused)]
-pub async fn find_menu_page(
+pub async fn find_page(
     Json(params): Json<BmbpPageReqVo<MenuQueryParam>>,
 ) -> BmbpResp<RespVo<PageInner<BmbpMenuVo>>> {
     tracing::info!(
@@ -71,7 +91,7 @@ pub async fn find_menu_page(
     Ok(RespVo::ok_data(vo))
 }
 #[allow(unused)]
-pub async fn find_menu_list(
+pub async fn find_list(
     Json(params): Json<MenuQueryParam>,
 ) -> BmbpResp<RespVo<Vec<BmbpMenuVo>>> {
     tracing::info!("查询菜单列表");
@@ -80,7 +100,7 @@ pub async fn find_menu_list(
 }
 
 #[allow(unused)]
-pub async fn find_menu_info_r_id(Path(r_id): Path<String>) -> BmbpResp<RespVo<BmbpMenuVo>> {
+pub async fn find_info_by_r_id(Path(r_id): Path<String>) -> BmbpResp<RespVo<BmbpMenuVo>> {
     tracing::info!("查询菜单列表");
     let mut params = MenuQueryParam::default();
     params.set_r_id(r_id);
@@ -88,10 +108,15 @@ pub async fn find_menu_info_r_id(Path(r_id): Path<String>) -> BmbpResp<RespVo<Bm
     Ok(RespVo::ok_option(vo))
 }
 
-#[allow(unused)]
-pub async fn find_menu_info_menu_id(Path(menu_id): Path<String>) -> BmbpResp<RespVo<BmbpMenuVo>> {
+pub async fn update_parent(Path((id,parent_id)): Path<(String,String)>) -> BmbpResp<RespVo<usize>> {
+    tracing::info!("修改菜单上级:{}-{}",id,parent_id);
+    let vo = MenuService::update_parent(id,parent_id).await?;
+    Ok(RespVo::<usize>::ok_option(Some(vo)))
+}
+
+pub async fn find_info_by_id(Path(id): Path<String>) -> BmbpResp<RespVo<BmbpMenuVo>> {
     let mut params = MenuQueryParam::default();
-    params.set_menu_id(menu_id);
+    params.set_menu_id(id);
     let vo = MenuService::find_one(&params).await?;
     Ok(RespVo::ok_option(vo))
 }
@@ -115,7 +140,7 @@ pub async fn delete_menu_info_menu_id(Path(menu_id): Path<String>) -> BmbpResp<R
 }
 
 #[allow(unused)]
-pub async fn save_menu(Json(mut menu_vo): Json<BmbpMenuVo>) -> BmbpResp<RespVo<BmbpMenuVo>> {
+pub async fn save(Json(mut menu_vo): Json<BmbpMenuVo>) -> BmbpResp<RespVo<BmbpMenuVo>> {
     tracing::debug!("保存菜单:{:#?}", menu_vo);
     let _ = MenuService::save(&mut menu_vo).await?;
     Ok(RespVo::ok_data(menu_vo))

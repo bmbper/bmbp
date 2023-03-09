@@ -1,5 +1,5 @@
 use bmbp_orm_ins::{BmbpORM, BmbpOrmSQL};
-use bmbp_types::vo::BaseOrmVoPo;
+use bmbp_types::vo::BaseOrmModel;
 use bmbp_types::vo::QueryPageParam;
 use bmbp_types::{BmbpResp, PageInner};
 use serde_json::Value;

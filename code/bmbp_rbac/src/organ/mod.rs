@@ -8,7 +8,7 @@ mod vopo;
 
 #[cfg(test)]
 mod tests {
-    use bmbp_types::vo::BaseOrmVoPo;
+    use bmbp_types::vo::BaseOrmModel;
     use bmbp_types::BmbpResp;
     use bmbp_util::uuid_upper;
 

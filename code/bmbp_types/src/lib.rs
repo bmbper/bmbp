@@ -1,7 +1,7 @@
 pub use err::BmbpError;
 pub use err::BmbpErrorKind;
 pub use err::BmbpResp;
-pub use vo::BaseVoPo;
+pub use vo::BmbpBaseModel;
 pub use vo::BmbpPageReqVo;
 pub use vo::PageInner;
 pub use vo::RespVo;
