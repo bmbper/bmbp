@@ -105,7 +105,7 @@ impl BmbpValue {
             _ => None,
         }
     }
-    pub fn raw_Array(&self) -> Option<&BmbpVec> {
+    pub fn raw_array(&self) -> Option<&BmbpVec> {
         match self {
             BmbpValue::Array(v) => Some(v),
             _ => None,
@@ -149,7 +149,7 @@ impl PartialEq<Self> for BmbpValue {
                     }
                 }
                 BmbpValue::Array(v) => {
-                    let other_array = other.raw_Array().unwrap();
+                    let other_array = other.raw_array().unwrap();
                     if v.len().eq(&other_array.len()) {
                         let mut eq_res = true;
                         for (idx, v_item) in v.as_slice().into_iter().enumerate() {
