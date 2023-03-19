@@ -1,8 +1,8 @@
-use bmbp_types::{BmbpError, BmbpResp};
-use chrono::format::parse;
 use std::collections::HashMap;
 
-use crate::orm::{BmbpMap, BmbpValue, BmbpVec};
+use chrono::format::parse;
+
+use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, BmbpVec};
 
 /// ScriptSQL 动态解析器，主要负责值的替换
 /// 暂时使用正则提取标签，通过传入的实体参数中获取对映的值
@@ -71,7 +71,7 @@ impl ScriptUtil {
         let mut values = BmbpVec::new();
         let mut sql = script.clone();
         for (idx, item) in script_token.as_slice().into_iter().enumerate() {
-            sql = sql.replace(&item.name, &format!("${{{}}}", idx));
+            sql = sql.replace(&item.name, &format!("${}::text", values.len() + 1));
             values.push(item.visit_value.clone());
         }
         (sql, values)
@@ -283,8 +283,9 @@ impl ScriptUtil {
 mod tests {
     use std::env::var;
 
-    use crate::orm::{BmbpMap, BmbpValue, BmbpVec};
     use tokio_postgres::types::ToSql;
+
+    use bmbp_types::{BmbpMap, BmbpValue};
 
     use crate::script::parse::ScriptUtil;
 

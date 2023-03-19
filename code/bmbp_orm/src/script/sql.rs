@@ -1,3 +1,5 @@
+use tracing_subscriber::fmt::format;
+
 /// SQL脚本构建器，Mybatis的动态SQL构建器
 /// 复杂语法需要自己手动编写片断之后 组装到SQL当中
 /// 构建器仅负责SQL组装，具体解析法由SqlParser解析器负责
@@ -82,9 +84,9 @@ impl BmbpScriptSql {
 
     pub fn to_update_sql(&self) -> String {
         let mut update_vec = vec![];
-        if !self.insert_tables.is_empty() {
+        if !self.update_tables.is_empty() {
             update_vec.push("UPDATE ".to_string());
-            update_vec.push(self.insert_tables.join(","))
+            update_vec.push(self.update_tables.join(","))
         }
         if !self.set_values.is_empty() {
             update_vec.push("SET".to_string());
@@ -315,6 +317,10 @@ impl BmbpScriptSql {
     }
     pub fn set(&mut self, field: &str) -> &mut Self {
         self.set_values.push(field.to_string());
+        self
+    }
+    pub fn set_value(&mut self, field: &str, value: &str) -> &mut Self {
+        self.set_values.push(format!("{}={}", field, value));
         self
     }
     pub fn set_slice(&mut self, fields: &[&str]) -> &mut Self {

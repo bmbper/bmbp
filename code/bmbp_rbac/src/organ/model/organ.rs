@@ -31,7 +31,6 @@ pub const BMBP_RBAC_ORGAN_POST_MANAGER: &str = "BMBP_RBAC_ORGAN_POST_MANAGER";
 #[allow(dead_code)]
 pub const BMBP_RBAC_ORGAN_USER_POST: &str = "BMBP_RBAC_ORGAN_USER_POST";
 
-#[allow(dead_code)]
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
@@ -129,20 +128,20 @@ impl ToString for BmbpOrganType {
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
-pub struct BmbpOrganVo {
+pub struct BmbpOrganModel {
     organ_id: String,
     parent_organ_id: String,
     organ_title: String,
     organ_path: String,
     organ_data_id: String,
     organ_type: BmbpOrganType,
-    children: Vec<BmbpOrganVo>,
+    children: Vec<BmbpOrganModel>,
     #[serde(flatten)]
     base: BmbpBaseModel,
 }
 
 #[allow(dead_code)]
-impl BaseOrmModel for BmbpOrganVo {
+impl BaseOrmModel for BmbpOrganModel {
     fn get_base_vo(&self) -> &BmbpBaseModel {
         &self.base
     }
@@ -166,9 +165,9 @@ impl BaseOrmModel for BmbpOrganVo {
 }
 
 #[allow(dead_code)]
-impl BmbpOrganVo {
+impl BmbpOrganModel {
     pub fn new() -> Self {
-        BmbpOrganVo::default()
+        BmbpOrganModel::default()
     }
 
     pub fn set_organ_id(&mut self, organ_id: String) -> &mut Self {
@@ -219,7 +218,7 @@ impl BmbpOrganVo {
     }
 }
 #[allow(dead_code)]
-impl TreeNode<BmbpOrganVo> for BmbpOrganVo {
+impl TreeNode<BmbpOrganModel> for BmbpOrganModel {
     fn node_id(&self) -> &String {
         &self.organ_id
     }
@@ -235,69 +234,15 @@ impl TreeNode<BmbpOrganVo> for BmbpOrganVo {
     fn node_path(&self) -> &String {
         &self.organ_path
     }
-    fn children(&self) -> &[BmbpOrganVo] {
+    fn children(&self) -> &[BmbpOrganModel] {
         self.children.as_slice()
     }
-    fn set_children(&mut self, children: Vec<BmbpOrganVo>) -> &mut Self {
+    fn set_children(&mut self, children: Vec<BmbpOrganModel>) -> &mut Self {
         self.children = children;
         self
     }
 }
 
-#[allow(dead_code)]
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
-pub struct BmbpOrganUnitsVo {
-    organ_id: String,
-    units_desc: String,
-    #[serde(flatten)]
-    base: BmbpBaseModel,
-}
-
-#[allow(dead_code)]
-impl BmbpOrganUnitsVo {
-    pub fn new() -> Self {
-        BmbpOrganUnitsVo::default()
-    }
-}
-
-#[allow(dead_code)]
-impl BmbpOrganUnitsVo {
-    pub fn organ_id(&self) -> &String {
-        &self.organ_id
-    }
-    pub fn organ_desc(&self) -> &String {
-        &self.units_desc
-    }
-    pub fn set_organ_id(&mut self, organ_id: String) -> &mut Self {
-        self.organ_id = organ_id;
-        self
-    }
-    pub fn set_organ_desc(&mut self, units_desc: String) -> &mut Self {
-        self.units_desc = units_desc;
-        self
-    }
-}
-
-#[allow(dead_code)]
-impl BaseOrmModel for BmbpOrganUnitsVo {
-    fn get_base_vo(&self) -> &BmbpBaseModel {
-        &self.base
-    }
-
-    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
-        &mut self.base
-    }
-
-    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
-        self.base = vo;
-        self
-    }
-    fn vo_fields() -> Vec<String> {
-        vec!["organ_id".to_string(), "units_desc".to_string()]
-    }
-}
 #[allow(dead_code)]
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

@@ -13,3 +13,4 @@ mod orm;
 mod script;
 mod sql;
 mod util;
+pub use script::BmbpScriptSql;

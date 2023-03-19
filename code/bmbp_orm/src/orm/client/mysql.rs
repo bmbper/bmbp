@@ -4,10 +4,11 @@ use std::{
 };
 
 use async_trait::async_trait;
+use serde::Serialize;
 use serde_json::{Map, Value};
 use tokio::sync::RwLock;
 
-use bmbp_types::{BmbpResp, PageInner};
+use bmbp_types::{BmbpError, BmbpResp, PageInner};
 use bmbp_util::uuid;
 
 use crate::{
@@ -54,6 +55,7 @@ impl BmbpConn for BmbpMysqlConnect {
     fn data_source(&self) -> Arc<BmbpDataSource> {
         self.data_source.clone()
     }
+
     #[allow(unused)]
     async fn find_page(
         &mut self,

@@ -1,10 +1,6 @@
-use std::any::Any;
 use std::collections::HashMap;
-use std::error::Error;
 
 use serde::{Deserialize, Serialize};
-use tokio_postgres::types::private::BytesMut;
-use tokio_postgres::types::{Format, IsNull, ToSql, Type};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(untagged)]
@@ -36,6 +32,9 @@ impl BmbpValue {
     }
     pub fn from_i16(value: i16) -> Self {
         BmbpValue::Int(value as i16)
+    }
+    pub fn from_i32(value: i32) -> Self {
+        BmbpValue::BigInt(value as i64)
     }
 
     pub fn v_type(&self) -> String {
@@ -174,7 +173,7 @@ impl PartialEq<Self> for BmbpValue {
 mod tests {
     use tokio_postgres::types::ToSql;
 
-    use crate::orm::value::{BmbpMap, BmbpValue};
+    use crate::bmbp_value::{BmbpMap, BmbpValue};
 
     #[test]
     fn test_bmbp_value() {

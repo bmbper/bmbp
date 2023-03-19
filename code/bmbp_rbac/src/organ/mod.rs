@@ -1,10 +1,12 @@
+pub use model::*;
 pub use route::*;
-
 mod dao;
+mod model;
 mod route;
 mod service;
 mod util;
-mod vopo;
+
+pub use route::change_organ_parent;
 
 #[cfg(test)]
 mod tests {
@@ -12,13 +14,13 @@ mod tests {
     use bmbp_types::BmbpResp;
     use bmbp_util::uuid_upper;
 
+    use crate::organ::model::{BmbpOrganModel, BmbpOrganType};
     use crate::organ::service::OrganService;
-    use crate::organ::vopo::{BmbpOrganType, BmbpOrganVo};
 
     #[tokio::test]
     async fn save_organ() {
         tracing_subscriber::fmt().init();
-        let mut params = BmbpOrganVo::new();
+        let mut params = BmbpOrganModel::new();
         params.set_organ_title("中国简竹集团".to_string());
         params.set_organ_type(BmbpOrganType::Unit);
         params.set_organ_data_id(uuid_upper());

@@ -4,12 +4,14 @@ use std::{
 };
 
 use async_trait::async_trait;
+use serde::Serialize;
 use serde_json::{Map, Value};
 use tokio::sync::{Mutex, RwLock};
+use tokio_postgres::types::IsNull;
 use tokio_postgres::{connect, types::ToSql, Client, Error, NoTls, Row};
 use tracing::debug;
 
-use bmbp_types::{BmbpError, BmbpResp, PageInner};
+use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, BmbpVec, PageInner};
 use bmbp_util::uuid;
 
 use crate::{
@@ -254,6 +256,84 @@ impl BmbpConn for BmbpPgConnect {
     async fn batch_execute_dml(&mut self, dml_vec: &[(String, &[Value])]) -> BmbpResp<usize> {
         Ok(0)
     }
+
+    async fn raw_update(&mut self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
+        let pg_param = from_bmbp_value_to_pg_params(params);
+        let pg_params_ref = pg_param
+            .iter()
+            .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
+            .collect::<Vec<&(dyn ToSql + Sync)>>();
+        debug!("pg_sql:{}", sql);
+        debug!("pa_params:{:#?}", pg_params_ref);
+        let execute_rs = self
+            .client
+            .lock()
+            .await
+            .execute(sql.as_str(), pg_params_ref.as_slice())
+            .await;
+        match execute_rs {
+            Ok(row_count) => Ok(row_count as usize),
+            Err(err) => Err(BmbpError::orm(err.to_string())),
+        }
+    }
+    async fn raw_find_list(
+        &mut self,
+        sql: &String,
+        params: &[BmbpValue],
+    ) -> BmbpResp<Option<BmbpVec>> {
+        let pg_param = from_bmbp_value_to_pg_params(params);
+        let pg_params_ref = pg_param
+            .iter()
+            .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
+            .collect::<Vec<&(dyn ToSql + Sync)>>();
+        debug!("pg_sql:{}", sql);
+        debug!("pa_params:{:#?}", pg_params_ref);
+        let execute_rs = self
+            .client
+            .lock()
+            .await
+            .query(sql.as_str(), pg_params_ref.as_slice())
+            .await;
+        match execute_rs {
+            Ok(rows) => Ok(Some(to_bmbp_vec(rows.as_slice()))),
+            Err(err) => Err(BmbpError::orm(err.to_string())),
+        }
+    }
+}
+
+fn from_bmbp_value_to_pg_params(
+    params: &[BmbpValue],
+) -> Vec<Box<(dyn ToSql + Send + Sync + 'static)>> {
+    let mut pg_params: Vec<Box<(dyn ToSql + Send + Sync + 'static)>> = vec![];
+    for item in params {
+        match item {
+            BmbpValue::String(v) => {
+                pg_params.push(Box::new(v.clone()));
+            }
+            BmbpValue::Int(v) => {
+                pg_params.push(Box::new(v.clone()));
+            }
+            BmbpValue::BigInt(v) => {
+                pg_params.push(Box::new(v.clone()));
+            }
+            BmbpValue::Float(v) => {
+                pg_params.push(Box::new(v.clone()));
+            }
+            BmbpValue::BigFloat(v) => {
+                pg_params.push(Box::new(v.clone()));
+            }
+            BmbpValue::Bool(v) => {
+                pg_params.push(Box::new(v.clone()));
+            }
+            BmbpValue::Empty => {
+                pg_params.push(Box::new("".clone()));
+            }
+            BmbpValue::NULL => {}
+            BmbpValue::Map(_) => {}
+            BmbpValue::Array(_) => {}
+        }
+    }
+    pg_params
 }
 
 fn to_pg_prams(params: &[Value]) -> Vec<Box<(dyn ToSql + Send + Sync + 'static)>> {
@@ -306,6 +386,53 @@ fn to_json_value(row: &Row) -> Map<String, Value> {
                     }
                     Err(_) => {
                         props_value = Value::Null;
+                    }
+                }
+            }
+            _ => {
+                tracing::warn!("{}未识別的类型：{}", col_name, col_type);
+            }
+        }
+        map.insert(col_name.to_string(), props_value);
+    }
+    map
+}
+
+fn to_bmbp_vec(rows: &[Row]) -> BmbpVec {
+    let mut bmbp_vec = BmbpVec::new();
+    for item in rows {
+        bmbp_vec.push(BmbpValue::Map(to_bmbp_map(item)));
+    }
+    bmbp_vec
+}
+
+fn to_bmbp_map(row: &Row) -> BmbpMap {
+    let mut map = BmbpMap::new();
+    let columns = row.columns();
+    for column in columns {
+        let col_name = column.name();
+        let col_type = column.type_().name();
+        let mut props_value = BmbpValue::NULL;
+        match col_type {
+            "varchar" => {
+                let v_rs: Result<String, Error> = row.try_get(col_name);
+                match v_rs {
+                    Ok(v) => {
+                        props_value = BmbpValue::String(v);
+                    }
+                    Err(_) => {
+                        props_value = BmbpValue::NULL;
+                    }
+                }
+            }
+            "int2" | "int4" | "init8" => {
+                let v_rs: Result<i32, Error> = row.try_get(col_name);
+                match v_rs {
+                    Ok(v) => {
+                        props_value = BmbpValue::from_i32(v);
+                    }
+                    Err(_) => {
+                        props_value = BmbpValue::NULL;
                     }
                 }
             }

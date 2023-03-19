@@ -1,4 +1,5 @@
 pub use route::*;
+pub use vopo::*;
 mod dao;
 mod route;
 mod service;

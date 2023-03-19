@@ -66,4 +66,5 @@ pub use bmbp_orm::BmbpDynamicSQL;
 pub use bmbp_orm::BmbpInsertSQL;
 pub use bmbp_orm::BmbpOrmSQL;
 pub use bmbp_orm::BmbpQuerySQL;
+pub use bmbp_orm::BmbpScriptSql;
 pub use bmbp_orm::BmbpUpdateSQL;

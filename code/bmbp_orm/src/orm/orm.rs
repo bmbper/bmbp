@@ -3,9 +3,9 @@ use std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
-use bmbp_types::{BmbpError, BmbpResp, PageInner};
+use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, BmbpVec, PageInner};
 
-use crate::orm::{BmbpMap, BmbpValue, BmbpVec};
+use crate::script::ScriptUtil;
 use crate::{BmbpDataSource, BmbpOrmSQL};
 
 use super::pool::BmbpConnectionPool;
@@ -178,7 +178,10 @@ impl Orm {
         sql: &String,
         params: &[BmbpValue],
     ) -> BmbpResp<Option<BmbpVec>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        let conn = self.pool.get_conn().await?;
+        let model_vec = conn.raw_find_list(sql, params).await;
+        conn.release().await;
+        model_vec
     }
 
     pub async fn raw_query_one(&self, sql: &String) -> BmbpResp<Option<BmbpMap>> {
@@ -253,7 +256,10 @@ impl Orm {
         sql: &String,
         params: &[BmbpValue],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        let conn = self.pool.get_conn().await?;
+        let row_count = conn.raw_update(sql, params).await;
+        conn.release().await;
+        row_count
     }
 
     pub async fn raw_update_batch_with_params(
@@ -337,8 +343,10 @@ impl Orm {
         &self,
         script: &String,
         params: &BmbpMap,
-    ) -> BmbpResp<Option<BmbpMap>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+    ) -> BmbpResp<Option<BmbpVec>> {
+        let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
+        self.raw_query_list_with_params(&sql, params.as_slice())
+            .await
     }
     pub async fn script_query_one(
         &self,
@@ -383,7 +391,8 @@ impl Orm {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn script_update(&self, script: &String, params: &BmbpMap) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
+        self.raw_update_with_params(&sql, params.as_slice()).await
     }
     pub async fn script_insert_update(
         &self,
@@ -457,7 +466,8 @@ impl Orm {}
 mod tests {
     use std::sync::Arc;
 
-    use crate::orm::{BmbpMap, BmbpVec};
+    use bmbp_types::BmbpVec;
+
     use crate::{BmbpDataSource, Orm};
 
     #[tokio::test]

@@ -6,6 +6,7 @@ pub trait QueryPageParam {
     fn get_page_no(&self) -> usize;
     fn get_page_size(&self) -> usize;
 }
+
 pub trait BaseOrmModel {
     fn get_base_vo(&self) -> &BmbpBaseModel;
     fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel;
@@ -198,7 +199,7 @@ where
     page_no: usize,
     page_size: usize,
     total: usize,
-    data: Vec<T>,
+    data: Option<Vec<T>>,
 }
 
 impl<T> PageApiResponseVo<T>
@@ -219,7 +220,7 @@ where
         self.total = total;
     }
     pub fn set_data(&mut self, data: Vec<T>) {
-        self.data = data;
+        self.data = Some(data);
     }
 
     pub fn page_no(&self) -> usize {
@@ -232,8 +233,8 @@ where
         self.total.clone()
     }
 
-    pub fn data(&self) -> &[T] {
-        self.data.as_slice()
+    pub fn data(&self) -> Option<&Vec<T>> {
+        self.data.as_ref()
     }
 }
 

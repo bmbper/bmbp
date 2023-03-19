@@ -1,15 +1,15 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use serde::Serialize;
 use serde_json::{Map, Value};
 
-use bmbp_types::{BmbpResp, PageInner};
+use bmbp_types::{BmbpResp, BmbpValue, BmbpVec, PageInner};
 
 use crate::BmbpDataSource;
 
 use super::pool::BmbpConnectionPool;
 
-#[warn(where_clauses_object_safety)]
 #[async_trait]
 pub trait BmbpConn {
     /// id 获取数据库连接ID
@@ -22,7 +22,6 @@ pub trait BmbpConn {
     fn set_data_source(&mut self, data_source: Arc<BmbpDataSource>);
     ///data_source 获取数据库连接池
     fn data_source(&self) -> Arc<BmbpDataSource>;
-
     async fn find_page(
         &mut self,
         sql: String,
@@ -49,5 +48,14 @@ pub trait BmbpConn {
     async fn batch_execute(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize>;
     async fn batch_execute_ddl(&mut self, ddl_vec: &[(String, &[Value])]) -> BmbpResp<usize>;
     async fn batch_execute_dml(&mut self, dml_vec: &[(String, &[Value])]) -> BmbpResp<usize>;
-
+    async fn raw_update(&mut self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
+        Ok(0)
+    }
+    async fn raw_find_list(
+        &mut self,
+        sql: &String,
+        params: &[BmbpValue],
+    ) -> BmbpResp<Option<BmbpVec>> {
+        Ok(None)
+    }
 }
