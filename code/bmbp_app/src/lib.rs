@@ -22,7 +22,7 @@ impl BmbpWebApp {
         // TRACE-DEBUG-INFO-WARN-ERROR
         tracing_subscriber::fmt()
             .with_level(true)
-            .with_max_level(Level::DEBUG)
+            .with_max_level(Level::INFO)
             .init();
         tracing::info!("初始化WebApp运行环境......");
         // 初始化环境变量

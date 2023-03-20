@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use serde::Serialize;
 use serde_json::{Map, Value};
 
-use bmbp_types::{BmbpResp, BmbpValue, BmbpVec, PageInner};
+use bmbp_types::{BmbpMap, BmbpResp, BmbpValue, BmbpVec, PageInner};
 
 use crate::BmbpDataSource;
 
@@ -55,7 +55,16 @@ pub trait BmbpConn {
         &mut self,
         sql: &String,
         params: &[BmbpValue],
-    ) -> BmbpResp<Option<BmbpVec>> {
+    ) -> BmbpResp<Option<Vec<BmbpMap>>> {
         Ok(None)
+    }
+    async fn raw_find_page(
+        &mut self,
+        sql: &String,
+        params: &[BmbpValue],
+        page_no: usize,
+        page_size: usize,
+    ) -> BmbpResp<PageInner<BmbpMap>> {
+        Ok(PageInner::new())
     }
 }

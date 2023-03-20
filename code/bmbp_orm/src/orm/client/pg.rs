@@ -10,6 +10,7 @@ use tokio::sync::{Mutex, RwLock};
 use tokio_postgres::types::IsNull;
 use tokio_postgres::{connect, types::ToSql, Client, Error, NoTls, Row};
 use tracing::debug;
+use tracing_subscriber::fmt::format;
 
 use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, BmbpVec, PageInner};
 use bmbp_util::uuid;
@@ -280,7 +281,7 @@ impl BmbpConn for BmbpPgConnect {
         &mut self,
         sql: &String,
         params: &[BmbpValue],
-    ) -> BmbpResp<Option<BmbpVec>> {
+    ) -> BmbpResp<Option<Vec<BmbpMap>>> {
         let pg_param = from_bmbp_value_to_pg_params(params);
         let pg_params_ref = pg_param
             .iter()
@@ -296,6 +297,77 @@ impl BmbpConn for BmbpPgConnect {
             .await;
         match execute_rs {
             Ok(rows) => Ok(Some(to_bmbp_vec(rows.as_slice()))),
+            Err(err) => Err(BmbpError::orm(err.to_string())),
+        }
+    }
+    async fn raw_find_page(
+        &mut self,
+        sql: &String,
+        params: &[BmbpValue],
+        page_no: usize,
+        page_size: usize,
+    ) -> BmbpResp<PageInner<BmbpMap>> {
+        let pg_param = from_bmbp_value_to_pg_params(params);
+
+        let pg_params_ref = pg_param
+            .iter()
+            .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
+            .collect::<Vec<&(dyn ToSql + Sync)>>();
+        let mut pager: PageInner<BmbpMap> = PageInner::new();
+
+        let count_sql = format!("select count(1) as count from ({}) t1", sql);
+        let count_rs = self
+            .client
+            .lock()
+            .await
+            .query_one(&count_sql, pg_params_ref.as_slice())
+            .await;
+        match count_rs {
+            Ok(row) => {
+                let row_total = row.get::<&str, i64>("count") as usize;
+                pager.set_total(row_total as usize);
+            }
+            Err(err) => {
+                return Err(BmbpError::orm(err.to_string()));
+            }
+        }
+
+        let offset_limit = {
+            if page_size <= 0 {
+                10
+            } else {
+                page_size
+            }
+        };
+
+        let offset_page = {
+            if page_no <= 1 {
+                1
+            } else {
+                page_no
+            }
+        };
+        pager.set_page_no(offset_page.clone());
+        pager.set_page_size(offset_limit.clone());
+        let page_sql = format!(
+            "{} offset {} limit {}",
+            sql,
+            (offset_page - 1) * offset_limit,
+            offset_limit
+        );
+
+        let execute_rs = self
+            .client
+            .lock()
+            .await
+            .query(page_sql.as_str(), pg_params_ref.as_slice())
+            .await;
+        match execute_rs {
+            Ok(rows) => {
+                let vo_list: Vec<BmbpMap> = to_bmbp_vec(rows.as_slice());
+                pager.set_data(vo_list);
+                Ok(pager)
+            }
             Err(err) => Err(BmbpError::orm(err.to_string())),
         }
     }
@@ -398,10 +470,10 @@ fn to_json_value(row: &Row) -> Map<String, Value> {
     map
 }
 
-fn to_bmbp_vec(rows: &[Row]) -> BmbpVec {
-    let mut bmbp_vec = BmbpVec::new();
+fn to_bmbp_vec(rows: &[Row]) -> Vec<BmbpMap> {
+    let mut bmbp_vec = Vec::new();
     for item in rows {
-        bmbp_vec.push(BmbpValue::Map(to_bmbp_map(item)));
+        bmbp_vec.push(to_bmbp_map(item));
     }
     bmbp_vec
 }
@@ -415,7 +487,7 @@ fn to_bmbp_map(row: &Row) -> BmbpMap {
         let mut props_value = BmbpValue::NULL;
         match col_type {
             "varchar" => {
-                let v_rs: Result<String, Error> = row.try_get(col_name);
+                let v_rs = row.try_get(col_name);
                 match v_rs {
                     Ok(v) => {
                         props_value = BmbpValue::String(v);
@@ -425,8 +497,8 @@ fn to_bmbp_map(row: &Row) -> BmbpMap {
                     }
                 }
             }
-            "int2" | "int4" | "init8" => {
-                let v_rs: Result<i32, Error> = row.try_get(col_name);
+            "int2" | "int4" | "init8" | "int16" => {
+                let v_rs = row.try_get(col_name);
                 match v_rs {
                     Ok(v) => {
                         props_value = BmbpValue::from_i32(v);

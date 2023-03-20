@@ -10,7 +10,7 @@ use time::OffsetDateTime;
 use tokio::sync::{Mutex, RwLock};
 use tracing::debug;
 
-use bmbp_types::{BmbpError, BmbpResp, BmbpValue, BmbpVec, PageInner};
+use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, BmbpVec, PageInner};
 
 use crate::{BmbpDataSource, BmbpOrmSQL};
 
@@ -199,15 +199,26 @@ impl ConnInner {
 }
 
 impl ConnInner {
-    pub async fn raw_update(&self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
-        let row_count = self.inner().write().await.raw_update(sql, params).await?;
-        Ok(row_count)
+    pub async fn raw_find_page(
+        &self,
+        sql: &String,
+        params: &[BmbpValue],
+        page_no: usize,
+        page_size: usize,
+    ) -> BmbpResp<PageInner<BmbpMap>> {
+        let bmbp_vec = self
+            .inner()
+            .write()
+            .await
+            .raw_find_page(sql, params, page_no, page_size)
+            .await?;
+        Ok(bmbp_vec)
     }
     pub async fn raw_find_list(
         &self,
         sql: &String,
         params: &[BmbpValue],
-    ) -> BmbpResp<Option<BmbpVec>> {
+    ) -> BmbpResp<Option<Vec<BmbpMap>>> {
         let bmbp_vec = self
             .inner()
             .write()
@@ -215,5 +226,9 @@ impl ConnInner {
             .raw_find_list(sql, params)
             .await?;
         Ok(bmbp_vec)
+    }
+    pub async fn raw_update(&self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
+        let row_count = self.inner().write().await.raw_update(sql, params).await?;
+        Ok(row_count)
     }
 }

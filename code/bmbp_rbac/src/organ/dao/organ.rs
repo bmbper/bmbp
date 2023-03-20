@@ -152,7 +152,34 @@ impl OrganDao {
         page_params: &mut PageQueryParam,
     ) -> BmbpResp<PageInner<BmbpOrganModel>> {
         tracing::info!("组织机构数据服务-调用分页查询");
-        Ok(PageInner::new())
+        let orm_sql = OrganSql::find_organ_base_sql();
+        let page_inner = BmbpORM
+            .await
+            .script_query_page(
+                &orm_sql.to_sql_string(),
+                &BmbpMap::new(),
+                page_params.get_page_no(),
+                page_params.get_page_no(),
+            )
+            .await?;
+        let page_data_opt = page_inner.data();
+        let mut new_page_inner: PageInner<BmbpOrganModel> = PageInner::new();
+        match page_data_opt {
+            None => {
+                new_page_inner.set_page_no(page_inner.page_no());
+                new_page_inner.set_page_size(page_inner.page_size());
+                new_page_inner.set_total(page_inner.total())
+            }
+            Some(page_data) => {
+                let vo_str = serde_json::to_string(page_data).unwrap();
+                let organ_model: Vec<BmbpOrganModel> = serde_json::from_str(&vo_str).unwrap();
+                new_page_inner.set_data(organ_model);
+                new_page_inner.set_page_no(page_inner.page_no());
+                new_page_inner.set_page_size(page_inner.page_size());
+                new_page_inner.set_total(page_inner.total())
+            }
+        };
+        Ok(new_page_inner)
     }
     pub async fn find_organ_info_by_rid(r_id: &String) -> BmbpResp<Option<BmbpOrganModel>> {
         tracing::info!("调用组织数据库接口服务-查询组织详情");

@@ -158,26 +158,42 @@ impl Orm {
 
 // ORM 原生SQL调用方法
 impl Orm {
-    pub async fn raw_query_page(&self, sql: &String) -> BmbpResp<PageInner<Option<BmbpVec>>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+    pub async fn raw_query_page(
+        &self,
+        sql: &String,
+        page_no: usize,
+        page_size: usize,
+    ) -> BmbpResp<PageInner<BmbpMap>> {
+        let conn = self.pool.get_conn().await?;
+        let model_page = conn.raw_find_page(sql, &[], page_no, page_size).await;
+        conn.release().await;
+        model_page
     }
     pub async fn raw_query_page_with_params(
         &self,
         sql: &String,
         params: &[BmbpValue],
-    ) -> BmbpResp<PageInner<Option<BmbpVec>>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        page_no: usize,
+        page_size: usize,
+    ) -> BmbpResp<PageInner<BmbpMap>> {
+        let conn = self.pool.get_conn().await?;
+        let model_page = conn.raw_find_page(sql, params, page_no, page_size).await;
+        conn.release().await;
+        model_page
     }
 
-    pub async fn raw_query_list(&self, sql: &String) -> BmbpResp<Option<BmbpVec>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+    pub async fn raw_query_list(&self, sql: &String) -> BmbpResp<Option<Vec<BmbpMap>>> {
+        let conn = self.pool.get_conn().await?;
+        let model_vec = conn.raw_find_list(sql, &[]).await;
+        conn.release().await;
+        model_vec
     }
 
     pub async fn raw_query_list_with_params(
         &self,
         sql: &String,
         params: &[BmbpValue],
-    ) -> BmbpResp<Option<BmbpVec>> {
+    ) -> BmbpResp<Option<Vec<BmbpMap>>> {
         let conn = self.pool.get_conn().await?;
         let model_vec = conn.raw_find_list(sql, params).await;
         conn.release().await;
@@ -336,14 +352,18 @@ impl Orm {
         &self,
         script: &String,
         params: &BmbpMap,
-    ) -> BmbpResp<PageInner<Option<BmbpMap>>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        page_no: usize,
+        page_size: usize,
+    ) -> BmbpResp<PageInner<BmbpMap>> {
+        let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
+        self.raw_query_page_with_params(&sql, params.as_slice(), page_no, page_size)
+            .await
     }
     pub async fn script_query_list(
         &self,
         script: &String,
         params: &BmbpMap,
-    ) -> BmbpResp<Option<BmbpVec>> {
+    ) -> BmbpResp<Option<Vec<BmbpMap>>> {
         let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
         self.raw_query_list_with_params(&sql, params.as_slice())
             .await
