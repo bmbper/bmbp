@@ -159,7 +159,7 @@ impl OrganDao {
                 &orm_sql.to_sql_string(),
                 &BmbpMap::new(),
                 page_params.get_page_no(),
-                page_params.get_page_no(),
+                page_params.get_page_size(),
             )
             .await?;
         let page_data_opt = page_inner.data();
