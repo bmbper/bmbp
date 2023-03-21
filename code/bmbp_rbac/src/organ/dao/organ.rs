@@ -12,7 +12,7 @@ use crate::organ::{BmbpOrganModel, QueryParam};
 pub struct OrganSql();
 
 impl OrganSql {
-    fn find_organ_base_sql() -> BmbpScriptSql {
+    fn find_organ_sql() -> BmbpScriptSql {
         let mut orm_sql = BmbpScriptSql::new();
         orm_sql.from(BMBP_RBAC_ORGAN);
         for item in BmbpOrganModel::orm_fields().as_slice() {
@@ -24,27 +24,13 @@ impl OrganSql {
         }
         orm_sql
     }
-    fn find_organ_list_sql(query_params: &QueryParam) -> BmbpScriptSql {
-        Self::find_organ_base_sql()
+    fn insert_organ_sql() -> BmbpScriptSql {
+        let insert_script = BmbpScriptSql::new();
+        insert_script
     }
-    fn find_organ_info_sql(query_params: &QueryParam) -> BmbpScriptSql {
-        Self::find_organ_base_sql()
-    }
-    fn insert_organ(params: &BmbpOrganModel) -> BmbpResp<BmbpOrmSQL> {
-        let mut orm_sql = BmbpOrmSQL::insert();
-        let insert_sql = orm_sql.as_insert_mut()?;
-        insert_sql.target_table(BMBP_RBAC_ORGAN.to_string());
-        let organ_fields = BmbpOrganModel::orm_fields();
-        for field in organ_fields.as_slice() {
-            insert_sql.c_insert(field.clone());
-        }
-        Self::build_organ_params(&mut orm_sql, params);
-        Ok(orm_sql)
-    }
-    fn update_organ(params: &BmbpOrganModel) -> BmbpResp<BmbpOrmSQL> {
-        let mut orm_sql = BmbpOrmSQL::update();
-        Self::build_organ_params(&mut orm_sql, params);
-        Ok(orm_sql)
+    fn update_organ_sql() -> BmbpScriptSql {
+        let update_script = BmbpScriptSql::new();
+        update_script
     }
     fn update_organ_parent_sql() -> String {
         let mut sql = BmbpScriptSql::new();
@@ -62,97 +48,16 @@ impl OrganSql {
         delete_sql.filter("r_id=#{rId}");
         delete_sql
     }
-    pub fn build_organ_params(orm_sql: &mut BmbpOrmSQL, params: &BmbpOrganModel) {
-        let organ_params = orm_sql.get_mut_dynamic_params();
-        organ_params.add_k_param(
-            "organId".to_string(),
-            Value::String(params.get_organ_id().clone()),
-        );
-        organ_params.add_k_param(
-            "parentOrganId".to_string(),
-            Value::String(params.get_parent_organ_id().clone()),
-        );
-        organ_params.add_k_param(
-            "organTitle".to_string(),
-            Value::String(params.get_organ_title().clone()),
-        );
-        organ_params.add_k_param(
-            "organPath".to_string(),
-            Value::String(params.get_organ_path().clone()),
-        );
-        organ_params.add_k_param(
-            "organDataId".to_string(),
-            Value::String(params.get_organ_data_id().clone()),
-        );
-        organ_params.add_k_param(
-            "organType".to_string(),
-            Value::String(params.get_organ_type().to_string()),
-        );
-        organ_params.add_k_param("rId".to_string(), Value::String(params.get_r_id().clone()));
-        organ_params.add_k_param(
-            "rLevel".to_string(),
-            Value::String(params.get_r_level().clone()),
-        );
-        organ_params.add_k_param(
-            "rFlag".to_string(),
-            Value::String(params.get_r_flag().clone()),
-        );
-        organ_params.add_k_param(
-            "rCreateTime".to_string(),
-            Value::String(params.get_r_create_time().clone()),
-        );
-        organ_params.add_k_param(
-            "rCreateUser".to_string(),
-            Value::String(params.get_r_create_user().clone()),
-        );
-        organ_params.add_k_param(
-            "rUpdateTime".to_string(),
-            Value::String(params.get_r_update_time().clone()),
-        );
-        organ_params.add_k_param(
-            "rUpdateUser".to_string(),
-            Value::String(params.get_r_update_user().clone()),
-        );
-        organ_params.add_k_param(
-            "rOwnerOrg".to_string(),
-            Value::String(params.get_r_owner_org().clone()),
-        );
-        organ_params.add_k_param(
-            "rOwnerUser".to_string(),
-            Value::String(params.get_r_owner_user().clone()),
-        );
-        organ_params.add_k_param(
-            "rSign".to_string(),
-            Value::String(params.get_r_sign().clone()),
-        );
-    }
 }
 
 pub struct OrganDao();
 
 impl OrganDao {
-    pub async fn find_organ_list(params: &QueryParam) -> BmbpResp<Option<Vec<BmbpOrganModel>>> {
-        tracing::info!("组织机构数据服务-调用列表查询");
-        let orm_sql = OrganSql::find_organ_base_sql();
-        let vo_list = BmbpORM
-            .await
-            .script_query_list(&orm_sql.to_sql_string(), &BmbpMap::new())
-            .await?;
-        let v = match vo_list {
-            None => None,
-            Some(v) => {
-                let json_str = serde_json::to_string(&v).unwrap();
-                let model: Vec<BmbpOrganModel> = serde_json::from_str(&json_str).unwrap();
-                Some(model)
-            }
-        };
-        Ok(v)
-    }
     pub async fn find_organ_page(
         page_params: &mut PageQueryParam,
     ) -> BmbpResp<PageInner<BmbpOrganModel>> {
         tracing::info!("组织机构数据服务-调用分页查询");
-        let orm_sql = OrganSql::find_organ_base_sql();
+        let orm_sql = OrganSql::find_organ_sql();
         let page_inner = BmbpORM
             .await
             .script_query_page(
@@ -181,9 +86,26 @@ impl OrganDao {
         };
         Ok(new_page_inner)
     }
+    pub async fn find_organ_list(params: &QueryParam) -> BmbpResp<Option<Vec<BmbpOrganModel>>> {
+        tracing::info!("组织机构数据服务-调用列表查询");
+        let orm_sql = OrganSql::find_organ_sql();
+        let vo_list = BmbpORM
+            .await
+            .script_query_list(&orm_sql.to_sql_string(), &BmbpMap::new())
+            .await?;
+        let v = match vo_list {
+            None => None,
+            Some(v) => {
+                let json_str = serde_json::to_string(&v).unwrap();
+                let model: Vec<BmbpOrganModel> = serde_json::from_str(&json_str).unwrap();
+                Some(model)
+            }
+        };
+        Ok(v)
+    }
     pub async fn find_organ_info_by_rid(r_id: &String) -> BmbpResp<Option<BmbpOrganModel>> {
         tracing::info!("调用组织数据库接口服务-查询组织详情");
-        let mut script_sql = OrganSql::find_organ_base_sql();
+        let mut script_sql = OrganSql::find_organ_sql();
         script_sql.filter("r_id=#{rId}");
         let mut script_params = BmbpMap::new();
         script_params.insert("rId".to_string(), BmbpValue::from_string_ref(r_id));
@@ -208,13 +130,19 @@ impl OrganDao {
         Ok(None)
     }
     pub async fn insert_organ(params: &BmbpOrganModel) -> BmbpResp<usize> {
-        let insert_sql = OrganSql::insert_organ(params)?;
-        let row_count = BmbpORM.await.insert(insert_sql).await?;
-        Ok(row_count)
+        let insert_sql = OrganSql::insert_organ_sql();
+        let vo = BmbpORM
+            .await
+            .script_insert(&insert_sql.to_sql_string(), &BmbpMap::new())
+            .await?;
+        Ok(vo)
     }
     pub async fn update_organ(params: &BmbpOrganModel) -> BmbpResp<usize> {
-        let update_sql = OrganSql::update_organ(params)?;
-        let row_count = BmbpORM.await.update(update_sql).await?;
+        let update_sql = OrganSql::update_organ_sql();
+        let row_count = BmbpORM
+            .await
+            .script_update(&update_sql.to_sql_string(), &BmbpMap::new())
+            .await?;
         Ok(row_count)
     }
     pub(crate) async fn update_organ_parent(params: &BmbpMap) -> BmbpResp<usize> {
@@ -224,12 +152,14 @@ impl OrganDao {
             .script_update(&update_organ_sql, params)
             .await?)
     }
-    pub(crate) async fn delete_organ(params: &QueryParam) -> BmbpResp<usize> {
+    pub(crate) async fn delete_organ(r_id: &String) -> BmbpResp<usize> {
         let delete_sql = OrganSql::delete_organ_sql();
+        let mut bmbp_params = BmbpMap::new();
+        bmbp_params.insert("rId".to_string(), BmbpValue::from_string_ref(r_id));
         tracing::info!("执行删除...");
         Ok(BmbpORM
             .await
-            .script_delete(&delete_sql.to_sql_string(), &BmbpMap::new())
+            .script_delete(&delete_sql.to_sql_string(), &bmbp_params)
             .await?)
     }
 }

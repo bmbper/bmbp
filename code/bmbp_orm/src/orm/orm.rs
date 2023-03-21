@@ -383,11 +383,7 @@ impl Orm {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
 
-    pub async fn script_insert(
-        &self,
-        script: &String,
-        params: &BmbpMap,
-    ) -> BmbpResp<Option<BmbpValue>> {
+    pub async fn script_insert(&self, script: &String, params: &BmbpMap) -> BmbpResp<usize> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn script_insert_batch(

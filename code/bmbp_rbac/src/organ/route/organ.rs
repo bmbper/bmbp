@@ -81,9 +81,7 @@ pub async fn change_organ_parent(Json(param): Json<QueryParam>) -> BmbpResp<Resp
 /// 删除组织
 pub async fn delete_organ(Path(r_id): Path<String>) -> BmbpResp<RespVo<usize>> {
     tracing::info!("删除组织:{}=>{}", "rId", r_id);
-    let mut delete_params = QueryParam::new();
-    delete_params.set_r_id(r_id);
-    let row_count = OrganService::delete_organ(&delete_params).await?;
+    let row_count = OrganService::delete_organ(&r_id).await?;
     Ok(RespVo::<usize>::ok_msg_data(
         format!("成功删除记录数:{}", row_count),
         row_count,
