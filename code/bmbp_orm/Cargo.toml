@@ -3,8 +3,8 @@ name = "bmbp_orm"
 version = "0.1.0"
 edition = "2021"
 description = "数据库ORM"
-
 [dependencies]
+
 # 应用链路跟踪
 tracing = "0.1"
 tracing-subscriber = "0.3"

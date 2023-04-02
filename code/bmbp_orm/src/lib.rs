@@ -2,6 +2,7 @@ extern crate core;
 
 pub use orm::BmbpDataSource;
 pub use orm::Orm;
+pub use script::BmbpScriptSql;
 pub use sql::BmbpDeleteSQL;
 pub use sql::BmbpDynamicSQL;
 pub use sql::BmbpInsertSQL;
@@ -13,4 +14,3 @@ mod orm;
 mod script;
 mod sql;
 mod util;
-pub use script::BmbpScriptSql;
