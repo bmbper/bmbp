@@ -71,11 +71,11 @@ pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenS
                     #orm_struct_field_ident : #orm_struct_field_type
                 ));
 
-                let set_field_mehtod_ident = format_ident!("set_{}", orm_struct_field_ident);
+                let set_field_method_ident = format_ident!("set_{}", orm_struct_field_ident);
                 let get_field_method_ident = format_ident!("get_{}", orm_struct_field_ident);
                 let get_mut_field_ident = format_ident!("get_mut_{}", orm_struct_field_ident);
                 let field_method_token = quote!(
-                    pub fn #set_field_mehtod_ident(&mut self,v : #orm_struct_field_type)->&mut Self{
+                    pub fn #set_field_method_ident(&mut self,v : #orm_struct_field_type)->&mut Self{
                         self.#orm_struct_field_ident = v;
                         self
                     }
@@ -116,6 +116,12 @@ pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenS
     );
     all_orm_struct_method_token.push(orm_get_table_method_token);
 
+    // 增加获取驼峰字段属性方法
+    let mut all_orm_struct_camel_field = vec![];
+    for item in all_orm_struct_field.as_slice() {
+        all_orm_struct_camel_field.push(snake_to_camel(item.clone()));
+    }
+
     // 增加获取字段属性方法
     let orm_get_field_method_token = quote!(
         pub fn get_orm_fields() -> Vec<String> {
@@ -123,11 +129,141 @@ pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenS
                 #(#all_orm_struct_field.to_string()),*
             ]
         }
+        pub fn get_orm_camel_fields() -> Vec<String> {
+            vec![
+                #(#all_orm_struct_camel_field.to_string()),*
+            ]
+        }
     );
     all_orm_struct_method_token.push(orm_get_field_method_token);
 
-    // 拼接Struct类
+    // 拼pu接Struct类
     let struct_name_ident = &orm_struct_ident.ident;
+
+    let mut orm_query_sql_token = quote!(
+        pub fn query_sql() -> BmbpScriptSql {
+            let mut script_sql = BmbpScriptSql::new();
+            script_sql.from(#struct_name_ident::get_orm_table().as_str());
+            let fields: Vec<String> = #struct_name_ident::get_orm_fields();
+            for item in fields.as_slice() {
+                script_sql.select(item);
+            }
+            script_sql
+        }
+        pub fn query_camel_sql() -> BmbpScriptSql {
+            let mut script_sql = BmbpScriptSql::new();
+            script_sql.from(#struct_name_ident::get_orm_table().as_str());
+            let fields: Vec<String> = #struct_name_ident::get_orm_fields();
+            let camel_fields: Vec<String> = #struct_name_ident::get_orm_camel_fields();
+            for (index, item) in fields.as_slice().into_iter().enumerate() {
+               let camel_field = camel_fields.get(index);
+                match camel_field {
+                    Some(v)=>{
+                        script_sql.select(format!("{} as \"{}\"",item,v).as_str());
+
+                    }
+                    None=>{
+                     script_sql.select(format!("{} as \"{}\"",item,item).as_str());
+                    }
+                }
+            }
+            script_sql
+        }
+    );
+    all_orm_struct_method_token.push(orm_query_sql_token);
+
+    let mut orm_update_sql_token = quote!(
+        pub fn update_sql() -> BmbpScriptSql {
+            let mut script_sql = BmbpScriptSql::new();
+            script_sql.update(#struct_name_ident::get_orm_table().as_str());
+            let fields: Vec<String> = #struct_name_ident::get_orm_fields();
+            for item in fields.as_slice() {
+                script_sql.set(format!("{}=#{{{}}}",item,item).as_str());
+            }
+            script_sql
+        }
+        pub fn update_camel_sql() -> BmbpScriptSql {
+            let mut script_sql = BmbpScriptSql::new();
+            script_sql.update(#struct_name_ident::get_orm_table().as_str());
+            let fields: Vec<String> = #struct_name_ident::get_orm_fields();
+            let camel_fields: Vec<String> = #struct_name_ident::get_orm_camel_fields();
+            for (index, item) in fields.as_slice().into_iter().enumerate() {
+               let camel_field = camel_fields.get(index);
+                match camel_field {
+                    Some(v)=>{
+                        script_sql.set(format!("{}=#{{{}}}",item,v).as_str());
+                    }
+                    None=>{
+                        script_sql.set(format!("{}=#{{{}}}",item,item).as_str());
+                    }
+                }
+            }
+            script_sql
+        }
+    );
+    all_orm_struct_method_token.push(orm_update_sql_token);
+    let mut orm_meta_id_name = orm_meta.id_name.clone();
+    if orm_meta_id_name.is_empty() {
+        orm_meta_id_name = "r_id".to_string();
+    }
+
+    let filter_ident = format!(
+        "{}=#{{{}}}",
+        camel_to_snake(orm_meta_id_name.clone()).to_lowercase(),
+        snake_to_camel(camel_to_snake(orm_meta_id_name.clone()))
+    );
+    let mut orm_delete_sql_token = quote!(
+        pub fn delete_sql() -> BmbpScriptSql {
+            let mut script_sql = BmbpScriptSql::new();
+            script_sql.delete(#struct_name_ident::get_orm_table().as_str());
+            script_sql
+        }
+        pub fn delete_one_sql() -> BmbpScriptSql {
+            let mut script_sql = BmbpScriptSql::new();
+            script_sql.delete(#struct_name_ident::get_orm_table().as_str());
+            script_sql.filter("r_id=#{rId}");
+            script_sql
+        }
+        pub fn delete_by_id_sql() -> BmbpScriptSql {
+            let mut script_sql = BmbpScriptSql::new();
+            script_sql.delete(#struct_name_ident::get_orm_table().as_str());
+            script_sql.filter(#filter_ident);
+            script_sql
+        }
+    );
+    all_orm_struct_method_token.push(orm_delete_sql_token);
+
+    let mut orm_insert_sql_token = quote!(
+        pub fn insert_sql() -> BmbpScriptSql {
+            let mut script_sql = BmbpScriptSql::new();
+            script_sql.insert_into(#struct_name_ident::get_orm_table().as_str());
+            let fields: Vec<String> = #struct_name_ident::get_orm_fields();
+            for item in fields.as_slice() {
+                script_sql.insert_value(item, format!("#{{{}}}", item).as_str());
+            }
+            script_sql
+        }
+        pub fn insert_camel_sql() -> BmbpScriptSql {
+            let mut script_sql = BmbpScriptSql::new();
+            script_sql.insert_into(#struct_name_ident::get_orm_table().as_str());
+            let fields: Vec<String> = #struct_name_ident::get_orm_fields();
+            let camel_fields: Vec<String> = #struct_name_ident::get_orm_camel_fields();
+            for (index, item) in fields.as_slice().into_iter().enumerate() {
+               let camel_field = camel_fields.get(index);
+                match camel_field {
+                    Some(v)=>{
+                        script_sql.insert_value(item, format!("#{{{}}}", v).as_str());
+                    }
+                    None=>{
+                        script_sql.insert_value(item, format!("#{{{}}}", item).as_str());
+                    }
+                }
+            }
+            script_sql
+        }
+    );
+    all_orm_struct_method_token.push(orm_insert_sql_token);
+
     let new_struct_token = quote!(
         #[derive(Default, Debug, Clone, Serialize, Deserialize)]
         #[serde(rename_all = "camelCase")]
@@ -230,6 +366,12 @@ fn camel_to_snake(camel_string: String) -> String {
         .to_snakecase()
         .to_string()
         .to_uppercase()
+}
+
+fn snake_to_camel(snake_string: String) -> String {
+    case_style::CaseStyle::from_snakecase(snake_string)
+        .to_camelcase()
+        .to_string()
 }
 
 fn is_orm_struct_field_has_skip_marco(field: &Field) -> bool {
