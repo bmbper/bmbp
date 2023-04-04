@@ -76,7 +76,7 @@ impl BmbpScriptSql {
         }
         if !self.insert_values.is_empty() {
             insert_vec.push("VALUES(".to_string());
-            insert_vec.push(self.insert_columns.join(","));
+            insert_vec.push(self.insert_values.join(","));
             insert_vec.push(")".to_string());
         }
         insert_vec.join(" ")

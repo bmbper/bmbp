@@ -60,7 +60,7 @@ pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenS
             let orm_struct_fields = &orm_struct_data.fields;
             for struct_field in orm_struct_fields {
                 let struct_field_name = &struct_field.ident.as_ref().unwrap().to_string();
-                if !is_orm_struct_field_has_skip_marco(struct_field) {
+                if !is_orm_struct_field_has_skip_meta(struct_field) {
                     orm_struct_field.push(struct_field_name.clone());
                 }
                 let orm_struct_field_ident = struct_field.ident.as_ref().unwrap();
@@ -289,8 +289,8 @@ fn get_orm_meta(token_stream: &TokenStream) -> OrmMeta {
     }
     match token_tree.len() {
         0 => {}
-        1 => set_orm_table_token(&mut orm_token, &token_tree[0]),
-        3 => set_orm_token(
+        1 => set_orm_meta_table(&mut orm_token, &token_tree[0]),
+        3 => set_orm_meta(
             &mut orm_token,
             &token_tree[0],
             &token_tree[1],
@@ -299,13 +299,13 @@ fn get_orm_meta(token_stream: &TokenStream) -> OrmMeta {
         7 => {
             let split = get_token_tree_node_name(&token_tree[3]);
             if "," == split.as_str() {
-                set_orm_token(
+                set_orm_meta(
                     &mut orm_token,
                     &token_tree[0],
                     &token_tree[1],
                     &token_tree[2],
                 );
-                set_orm_token(
+                set_orm_meta(
                     &mut orm_token,
                     &token_tree[4],
                     &token_tree[5],
@@ -318,7 +318,7 @@ fn get_orm_meta(token_stream: &TokenStream) -> OrmMeta {
     orm_token
 }
 
-fn set_orm_table_token(orm: &mut OrmMeta, token: &TokenTree) {
+fn set_orm_meta_table(orm: &mut OrmMeta, token: &TokenTree) {
     match token {
         TokenTree::Ident(v) => {
             orm.table_name = v.to_string().replace("\"", "");
@@ -330,7 +330,7 @@ fn set_orm_table_token(orm: &mut OrmMeta, token: &TokenTree) {
     }
 }
 
-fn set_orm_token(orm: &mut OrmMeta, left: &TokenTree, split: &TokenTree, right: &TokenTree) {
+fn set_orm_meta(orm: &mut OrmMeta, left: &TokenTree, split: &TokenTree, right: &TokenTree) {
     let split_str = split.to_string();
     match split_str.as_str() {
         "=" | "," | "" => {
@@ -361,20 +361,7 @@ fn get_token_tree_node_name(token: &TokenTree) -> String {
     }
 }
 
-fn camel_to_snake(camel_string: String) -> String {
-    case_style::CaseStyle::from_camelcase(camel_string)
-        .to_snakecase()
-        .to_string()
-        .to_uppercase()
-}
-
-fn snake_to_camel(snake_string: String) -> String {
-    case_style::CaseStyle::from_snakecase(snake_string)
-        .to_camelcase()
-        .to_string()
-}
-
-fn is_orm_struct_field_has_skip_marco(field: &Field) -> bool {
+fn is_orm_struct_field_has_skip_meta(field: &Field) -> bool {
     // 从属性里面提取宏
     let field_attrs = field.attrs.as_slice();
     if field_attrs.is_empty() {
@@ -416,4 +403,18 @@ fn build_orm_model_base_field() -> Vec<String> {
         "r_owner_user".to_string(),
         "r_sign".to_string(),
     ]
+}
+
+// 字符串转换
+fn camel_to_snake(camel_string: String) -> String {
+    case_style::CaseStyle::from_camelcase(camel_string)
+        .to_snakecase()
+        .to_string()
+        .to_uppercase()
+}
+
+fn snake_to_camel(snake_string: String) -> String {
+    case_style::CaseStyle::from_snakecase(snake_string)
+        .to_camelcase()
+        .to_string()
 }
