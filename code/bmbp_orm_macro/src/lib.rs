@@ -4,82 +4,146 @@ use std::fmt::format;
 use quote::{format_ident, quote, ToTokens};
 use syn::{parse_macro_input, AttrStyle, Data, DeriveInput, Field, Ident, ItemStruct, Meta};
 
+/// OrmMeta #[orm(table=xxx,id=XX)]
 #[derive(Debug)]
-struct OrmToken {
+struct OrmMeta {
     table_name: String,
     id_name: String,
 }
 
 #[proc_macro_attribute]
-pub fn orm(orm_args: TokenStream, struct_token: TokenStream) -> TokenStream {
-    let mut orm_token = get_orm_token(&orm_args);
-    let st = parse_macro_input!(struct_token as DeriveInput);
-    let st_name = &st.ident.to_string().replace("\"", "");
-    if orm_token.table_name.is_empty() {
-        orm_token.table_name = camel_to_snake(st_name.clone());
-    }
+pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenStream {
+    // 解析#[orm(table=xxx,id=xxx)] 获取表、主键字段
+    let mut orm_meta = get_orm_meta(&orm_meta_token);
 
-    // 用于生成SQL语句
-    let mut st_field_names = vec![];
-    let mut struct_method = vec![];
-    let mut struct_fields = vec![];
-    let st_data_enum = &st.data;
-    match st_data_enum {
-        Data::Struct(st_data) => {
-            let st_fields = &st_data.fields;
-            for field in st_fields {
-                let field_name = &field.ident.as_ref().unwrap().to_string();
-                if !struct_field_has_skip_marco(field) {
-                    st_field_names.push(field_name.clone());
-                }
-                let ident = field.ident.as_ref().unwrap();
-                let ty = &field.ty;
-
-                struct_fields.push(quote!(
-                    #ident : #ty ,
-                ));
-
-                let set_ident = format_ident!("set_{}", ident);
-                let get_ident = format_ident!("get_{}", ident);
-                let temp = quote!(
-                    pub fn #set_ident(&mut self,v : #ty)->&mut Self{
-                        self.#ident = v;
+    // 处理ORM的公共属性
+    let mut orm_model_base_field = build_orm_model_base_field();
+    let mut orm_model_base_field_token = vec![];
+    let mut orm_model_base_method_token = vec![];
+    for field_name in orm_model_base_field.as_slice() {
+        let field_ident = format_ident!("{}", field_name.clone());
+        orm_model_base_field_token.push(quote!(
+           #field_ident :String
+        ));
+        let set_method_ident = format_ident!("set_{}", field_name.clone());
+        let get_method_ident = format_ident!("get_{}", field_name.clone());
+        let get_mut_method_ident = format_ident!("get_mut_{}", field_name.clone());
+        orm_model_base_method_token.push(quote!(
+                    pub fn #set_method_ident(&mut self,v : String)->&mut Self{
+                        self.#field_ident = v;
                         self
                     }
-                    pub fn #get_ident(&mut self)->& #ty{
-                        &self.#ident
+                    pub fn #get_method_ident(&mut self)->&String{
+                        &self.#field_ident
+                    }
+                    pub fn #get_mut_method_ident(&mut self)->&mut String{
+                        &mut self.#field_ident
+                    }
+        ));
+    }
+
+    // 处理Struct定义的属性
+    let orm_struct_ident = parse_macro_input!(orm_struct_token as DeriveInput);
+    let orm_struct_name = &orm_struct_ident.ident.to_string().replace("\"", "");
+    // 处理表名
+    if orm_meta.table_name.is_empty() {
+        orm_meta.table_name = camel_to_snake(orm_struct_name.clone());
+    }
+
+    let mut orm_struct_field = vec![];
+    let mut orm_struct_field_token = vec![];
+    let mut orm_struct_method_token = vec![];
+
+    let orm_struct_ident_data = &orm_struct_ident.data;
+    match orm_struct_ident_data {
+        Data::Struct(orm_struct_data) => {
+            let orm_struct_fields = &orm_struct_data.fields;
+            for struct_field in orm_struct_fields {
+                let struct_field_name = &struct_field.ident.as_ref().unwrap().to_string();
+                if !is_orm_struct_field_has_skip_marco(struct_field) {
+                    orm_struct_field.push(struct_field_name.clone());
+                }
+                let orm_struct_field_ident = struct_field.ident.as_ref().unwrap();
+                let orm_struct_field_type = &struct_field.ty;
+
+                // 增加结构字段
+                orm_struct_field_token.push(quote!(
+                    #orm_struct_field_ident : #orm_struct_field_type
+                ));
+
+                let set_field_mehtod_ident = format_ident!("set_{}", orm_struct_field_ident);
+                let get_field_method_ident = format_ident!("get_{}", orm_struct_field_ident);
+                let get_mut_field_ident = format_ident!("get_mut_{}", orm_struct_field_ident);
+                let field_method_token = quote!(
+                    pub fn #set_field_mehtod_ident(&mut self,v : #orm_struct_field_type)->&mut Self{
+                        self.#orm_struct_field_ident = v;
+                        self
+                    }
+                    pub fn #get_field_method_ident(&mut self)->& #orm_struct_field_type{
+                        &self.#orm_struct_field_ident
+                    }
+                    pub fn #get_mut_field_ident(&mut self)->& mut #orm_struct_field_type{
+                        &mut self.#orm_struct_field_ident
                     }
                 );
-                struct_method.push(temp.to_token_stream());
+                orm_struct_method_token.push(field_method_token.to_token_stream());
             }
         }
         _ => {}
     }
 
-    let orm_field_method = quote!(
-        pub fn get_orm_fields(&self) -> Vec<String> {
+    // 拼接StructField
+    let mut all_orm_struct_field = vec![];
+    all_orm_struct_field.extend_from_slice(orm_model_base_field.as_slice());
+    all_orm_struct_field.extend_from_slice(orm_struct_field.as_slice());
+
+    // 合并属性
+    let mut all_orm_struct_field_token = vec![];
+    all_orm_struct_field_token.extend_from_slice(orm_model_base_field_token.as_slice());
+    all_orm_struct_field_token.extend_from_slice(orm_struct_field_token.as_slice());
+
+    // 合并method
+    let mut all_orm_struct_method_token = vec![];
+    all_orm_struct_method_token.extend_from_slice(orm_model_base_method_token.as_slice());
+    all_orm_struct_method_token.extend_from_slice(orm_struct_method_token.as_slice());
+
+    // 增加 获取表结构、获取表字段方法
+    let orm_table_name = orm_meta.table_name.clone();
+    let orm_get_table_method_token = quote!(
+        pub fn get_orm_table() -> String {
+             #orm_table_name.to_string()
+        }
+    );
+    all_orm_struct_method_token.push(orm_get_table_method_token);
+
+    // 增加获取字段属性方法
+    let orm_get_field_method_token = quote!(
+        pub fn get_orm_fields() -> Vec<String> {
             vec![
-                #(#st_field_names.to_string()),*
+                #(#all_orm_struct_field.to_string()),*
             ]
         }
     );
-    struct_method.push(orm_field_method);
+    all_orm_struct_method_token.push(orm_get_field_method_token);
 
-    let struct_ident = &st.ident;
-    let struct_quote = quote!(
-        pub struct #struct_ident{
-            #(#struct_fields)*
+    // 拼接Struct类
+    let struct_name_ident = &orm_struct_ident.ident;
+    let new_struct_token = quote!(
+        #[derive(Default, Debug, Clone, Serialize, Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        #[serde(default)]
+        pub struct #struct_name_ident{
+             #(#all_orm_struct_field_token,)*
         }
-
-        impl #struct_ident{
-            #(#struct_method)*
+        impl #struct_name_ident{
+            #(#all_orm_struct_method_token)*
         }
     );
-    struct_quote.into()
+    new_struct_token.into()
 }
 
-fn get_orm_token(token_stream: &TokenStream) -> OrmToken {
-    let mut orm_token = OrmToken {
+fn get_orm_meta(token_stream: &TokenStream) -> OrmMeta {
+    let mut orm_token = OrmMeta {
         table_name: "".to_string(),
         id_name: "".to_string(),
     };
@@ -118,7 +182,7 @@ fn get_orm_token(token_stream: &TokenStream) -> OrmToken {
     orm_token
 }
 
-fn set_orm_table_token(orm: &mut OrmToken, token: &TokenTree) {
+fn set_orm_table_token(orm: &mut OrmMeta, token: &TokenTree) {
     match token {
         TokenTree::Ident(v) => {
             orm.table_name = v.to_string().replace("\"", "");
@@ -130,7 +194,7 @@ fn set_orm_table_token(orm: &mut OrmToken, token: &TokenTree) {
     }
 }
 
-fn set_orm_token(orm: &mut OrmToken, left: &TokenTree, split: &TokenTree, right: &TokenTree) {
+fn set_orm_token(orm: &mut OrmMeta, left: &TokenTree, split: &TokenTree, right: &TokenTree) {
     let split_str = split.to_string();
     match split_str.as_str() {
         "=" | "," | "" => {
@@ -168,7 +232,7 @@ fn camel_to_snake(camel_string: String) -> String {
         .to_uppercase()
 }
 
-fn struct_field_has_skip_marco(field: &Field) -> bool {
+fn is_orm_struct_field_has_skip_marco(field: &Field) -> bool {
     // 从属性里面提取宏
     let field_attrs = field.attrs.as_slice();
     if field_attrs.is_empty() {
@@ -194,4 +258,20 @@ fn struct_field_has_skip_marco(field: &Field) -> bool {
         }
     }
     has_skip_marco
+}
+
+/// orm_model_common_field 增加公共字段
+fn build_orm_model_base_field() -> Vec<String> {
+    vec![
+        "r_id".to_string(),
+        "r_level".to_string(),
+        "r_flag".to_string(),
+        "r_create_time".to_string(),
+        "r_create_user".to_string(),
+        "r_update_time".to_string(),
+        "r_update_user".to_string(),
+        "r_owner_org".to_string(),
+        "r_owner_user".to_string(),
+        "r_sign".to_string(),
+    ]
 }
