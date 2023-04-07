@@ -386,7 +386,7 @@ fn from_bmbp_value_to_pg_params(
                 pg_params.push(Box::new(v.clone()));
             }
             BmbpValue::BigInt(v) => {
-                pg_params.push(Box::new(v.clone()));
+                pg_params.push(Box::new(v.clone() as i64));
             }
             BmbpValue::Float(v) => {
                 pg_params.push(Box::new(v.clone()));
@@ -396,9 +396,6 @@ fn from_bmbp_value_to_pg_params(
             }
             BmbpValue::Bool(v) => {
                 pg_params.push(Box::new(v.clone()));
-            }
-            BmbpValue::Empty => {
-                pg_params.push(Box::new("".clone()));
             }
             BmbpValue::NULL => {}
             BmbpValue::Map(_) => {}
@@ -501,7 +498,7 @@ fn to_bmbp_map(row: &Row) -> BmbpMap {
                 let v_rs = row.try_get(col_name);
                 match v_rs {
                     Ok(v) => {
-                        props_value = BmbpValue::from_i32(v);
+                        props_value = BmbpValue::Int(v);
                     }
                     Err(_) => {
                         props_value = BmbpValue::NULL;

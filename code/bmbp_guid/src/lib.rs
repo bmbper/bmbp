@@ -1,7 +1,10 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 use bmbp_orm::BmbpScriptSql;
 use bmbp_orm_macro::{model, orm};
+use bmbp_types::BmbpValue;
 
 #[orm(id = "recordId")]
 pub struct Demo1 {
@@ -15,8 +18,9 @@ pub struct Demo1 {
 impl Demo1 {}
 
 #[orm(table = "rbac_organ_name")]
-pub struct Demo2 {}
-
+pub struct Demo2 {
+    gooo: Option<String>,
+}
 #[orm(table = "rbac_organ_name", id = "record_id")]
 pub struct Demo3 {}
 
@@ -40,8 +44,9 @@ pub struct Demo8 {
 #[cfg(test)]
 mod tests {
     use bmbp_orm::BmbpScriptSql;
+    use bmbp_types::BmbpValue;
 
-    use crate::{Demo1, Demo8};
+    use crate::{Demo1, Demo2, Demo8};
 
     #[test]
     fn test_orm() {
@@ -59,10 +64,13 @@ mod tests {
         println!("===>{:#?}", Demo1::delete_one_sql().to_sql_string());
         println!("===>{:#?}", Demo1::delete_by_id_sql().to_sql_string());
     }
+
     #[test]
     fn test_model() {
-        let mut demo2 = Demo8::default();
-        demo2.set_name("xxxx".to_string());
-        println!("=========>:{}", demo2.get_name())
+        let mut demo2 = Demo2::default();
+        demo2.set_r_id("xxxx".to_string());
+        let bmbp = <Demo2 as Into<BmbpValue>>::into(demo2);
+        let v = serde_json::to_string(&bmbp).unwrap();
+        println!("======>:{:#?}", v);
     }
 }

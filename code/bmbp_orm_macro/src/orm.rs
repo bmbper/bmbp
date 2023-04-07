@@ -1,7 +1,6 @@
 use proc_macro::{TokenStream, TokenTree};
-use std::fmt::format;
-
 use quote::{format_ident, quote, ToTokens};
+use std::fmt::format;
 use syn::{parse_macro_input, AttrStyle, Data, DeriveInput, Field, Ident, ItemStruct, Meta};
 
 /// OrmMeta #[orm(table=xxx,id=XX)]
@@ -10,6 +9,7 @@ struct OrmMeta {
     table_name: String,
     id_name: String,
 }
+
 pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenStream {
     // 解析#[orm(table=xxx,id=xxx)] 获取表、主键字段
     let mut orm_meta = get_orm_meta(&orm_meta_token);
@@ -18,24 +18,26 @@ pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenS
     let mut orm_model_base_field = build_orm_model_base_field();
     let mut orm_model_base_field_token = vec![];
     let mut orm_model_base_method_token = vec![];
+
     for field_name in orm_model_base_field.as_slice() {
-        let field_ident = format_ident!("{}", field_name.clone());
+        let field_name_ident = format_ident!("{}", field_name.0.clone());
+        let field_type_ident = format_ident!("{}", field_name.1.clone());
         orm_model_base_field_token.push(quote!(
-           #field_ident :String
+           #field_name_ident : #field_type_ident
         ));
-        let set_method_ident = format_ident!("set_{}", field_name.clone());
-        let get_method_ident = format_ident!("get_{}", field_name.clone());
-        let get_mut_method_ident = format_ident!("get_mut_{}", field_name.clone());
+        let set_method_ident = format_ident!("set_{}", field_name_ident);
+        let get_method_ident = format_ident!("get_{}", field_name_ident);
+        let get_mut_method_ident = format_ident!("get_mut_{}", field_name_ident);
         orm_model_base_method_token.push(quote!(
                     pub fn #set_method_ident(&mut self,v : String)->&mut Self{
-                        self.#field_ident = v;
+                        self.#field_name_ident = v;
                         self
                     }
                     pub fn #get_method_ident(&mut self)->&String{
-                        &self.#field_ident
+                        &self.#field_name_ident
                     }
                     pub fn #get_mut_method_ident(&mut self)->&mut String{
-                        &mut self.#field_ident
+                        &mut self.#field_name_ident
                     }
         ));
     }
@@ -58,8 +60,10 @@ pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenS
             let orm_struct_fields = &orm_struct_data.fields;
             for struct_field in orm_struct_fields {
                 let struct_field_name = &struct_field.ident.as_ref().unwrap().to_string();
+                let struct_field_type_name = &struct_field.ty.to_token_stream().to_string();
                 if !is_orm_struct_field_has_skip_meta(struct_field) {
-                    orm_struct_field.push(struct_field_name.clone());
+                    orm_struct_field
+                        .push((struct_field_name.clone(), struct_field_type_name.clone()));
                 }
                 let orm_struct_field_ident = struct_field.ident.as_ref().unwrap();
                 let orm_struct_field_type = &struct_field.ty;
@@ -115,21 +119,23 @@ pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenS
     all_orm_struct_method_token.push(orm_get_table_method_token);
 
     // 增加获取驼峰字段属性方法
-    let mut all_orm_struct_camel_field = vec![];
+    let mut all_orm_struct_field_name = vec![];
+    let mut all_orm_struct_camel_field_name = vec![];
     for item in all_orm_struct_field.as_slice() {
-        all_orm_struct_camel_field.push(snake_to_camel(item.clone()));
+        all_orm_struct_camel_field_name.push(snake_to_camel(item.0.clone()));
+        all_orm_struct_field_name.push(item.0.clone());
     }
 
     // 增加获取字段属性方法
     let orm_get_field_method_token = quote!(
         pub fn get_orm_fields() -> Vec<String> {
             vec![
-                #(#all_orm_struct_field.to_string()),*
+                #(#all_orm_struct_field_name.to_string()),*
             ]
         }
         pub fn get_orm_camel_fields() -> Vec<String> {
             vec![
-                #(#all_orm_struct_camel_field.to_string()),*
+                #(#all_orm_struct_camel_field_name.to_string()),*
             ]
         }
     );
@@ -262,6 +268,9 @@ pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenS
     );
     all_orm_struct_method_token.push(orm_insert_sql_token);
 
+    let impl_into_trait_token =
+        build_into_bmbp_value_token(&struct_name_ident, all_orm_struct_field.as_slice());
+
     let new_struct_token = quote!(
         #[derive(Default, Debug, Clone, Serialize, Deserialize)]
         #[serde(rename_all = "camelCase")]
@@ -272,8 +281,52 @@ pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenS
         impl #struct_name_ident{
             #(#all_orm_struct_method_token)*
         }
+
+        #impl_into_trait_token
+
     );
     new_struct_token.into()
+}
+
+/// 构建字典转换接口
+fn build_into_bmbp_value_token(
+    struct_name_ident: &Ident,
+    all_orm_struct_field: &[(String, String)],
+) -> proc_macro2::TokenStream {
+    let mut all_impl_into_bmbp_value_token = vec![];
+    for (field_name, field_type_name) in all_orm_struct_field {
+        let field_name_ident = format_ident!("{}", field_name.clone());
+        let field_type_ident = {
+            let trim_field_type_name = field_type_name.replace(" ", "");
+            let option_tag = "Option<";
+            if trim_field_type_name.starts_with(option_tag) {
+                let option_field_start_length = option_tag.len();
+                let option_field_end_length = trim_field_type_name.len() - 1;
+                let option_field_type_name =
+                    &trim_field_type_name[option_field_start_length..option_field_end_length];
+                let option_field_type_name_ident = format_ident!("{}", option_field_type_name);
+                quote!(Option<#option_field_type_name_ident>)
+            } else {
+                let field_type_ident = format_ident!("{}", field_type_name);
+                quote!(#field_type_ident)
+            }
+        };
+
+        let mp_token = quote!(
+            mp.insert(#field_name.to_string(),< #field_type_ident as Into<BmbpValue>>::into(self.#field_name_ident))
+        );
+        all_impl_into_bmbp_value_token.push(mp_token);
+    }
+    let impl_into_trait_token = quote!(
+        impl Into<BmbpValue> for #struct_name_ident {
+            fn into(self) -> BmbpValue {
+                let mut mp = HashMap::new();
+                #(#all_impl_into_bmbp_value_token;)*
+                BmbpValue::Map(mp)
+            }
+        }
+    );
+    impl_into_trait_token.to_token_stream()
 }
 
 fn get_orm_meta(token_stream: &TokenStream) -> OrmMeta {
@@ -388,18 +441,18 @@ fn is_orm_struct_field_has_skip_meta(field: &Field) -> bool {
 }
 
 /// orm_model_common_field 增加公共字段
-fn build_orm_model_base_field() -> Vec<String> {
+fn build_orm_model_base_field() -> Vec<(String, String)> {
     vec![
-        "r_id".to_string(),
-        "r_level".to_string(),
-        "r_flag".to_string(),
-        "r_create_time".to_string(),
-        "r_create_user".to_string(),
-        "r_update_time".to_string(),
-        "r_update_user".to_string(),
-        "r_owner_org".to_string(),
-        "r_owner_user".to_string(),
-        "r_sign".to_string(),
+        ("r_id".to_string(), "String".to_string()),
+        ("r_level".to_string(), "String".to_string()),
+        ("r_flag".to_string(), "String".to_string()),
+        ("r_create_time".to_string(), "String".to_string()),
+        ("r_create_user".to_string(), "String".to_string()),
+        ("r_update_time".to_string(), "String".to_string()),
+        ("r_update_user".to_string(), "String".to_string()),
+        ("r_owner_org".to_string(), "String".to_string()),
+        ("r_owner_user".to_string(), "String".to_string()),
+        ("r_sign".to_string(), "String".to_string()),
     ]
 }
 
