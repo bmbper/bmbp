@@ -6,6 +6,7 @@ use syn::{parse_macro_input, AttrStyle, Data, DeriveInput, Field, Ident, ItemStr
 
 mod model;
 mod orm;
+mod validator;
 
 /// #[orm] 给Struct增加以下方法：
 ///      get_,get_mut_,set_
@@ -16,8 +17,15 @@ mod orm;
 pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenStream {
     orm::orm(orm_meta_token, orm_struct_token)
 }
+
 /// #[model] 给Struct增加 get_,get_mut_,set_方法
 #[proc_macro_attribute]
 pub fn model(model_meta_token: TokenStream, model_struct_token: TokenStream) -> TokenStream {
     model::model(model_meta_token, model_struct_token)
+}
+
+/// #[validator] 增加规则校验
+#[proc_macro_attribute]
+pub fn validator(model_meta_token: TokenStream, model_struct_token: TokenStream) -> TokenStream {
+    validator::validator(model_meta_token, model_struct_token)
 }

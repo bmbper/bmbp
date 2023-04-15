@@ -20,7 +20,7 @@ use crate::{
     BmbpDataSource,
 };
 
-#[warn(dead_code)]
+#[allow(dead_code)]
 pub struct BmbpPgConnect {
     id: String,
     data_source: Arc<BmbpDataSource>,
