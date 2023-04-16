@@ -15,13 +15,13 @@ mod tests {
     use bmbp_types::BmbpResp;
     use bmbp_util::uuid_upper;
 
-    use crate::organ::model::{BmbpOrganModel, BmbpOrganType};
+    use crate::organ::model::{BmbpOrganType, BmbpRbacOrgan};
     use crate::organ::service::OrganService;
 
     #[tokio::test]
     async fn save_organ() {
         tracing_subscriber::fmt().init();
-        let mut params = BmbpOrganModel::new();
+        let mut params = BmbpRbacOrgan::new();
         params.set_organ_title("中国简竹集团".to_string());
         params.set_organ_type(BmbpOrganType::Unit);
         params.set_organ_data_id(uuid_upper());

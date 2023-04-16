@@ -1,11 +1,14 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
+use bmbp_orm_ins::BmbpScriptSql;
+use bmbp_orm_macro::orm;
+use bmbp_orm_macro::{model, page};
 use bmbp_types::vo::BaseOrmModel;
+use bmbp_types::BmbpValue;
 use bmbp_types::{BmbpBaseModel, BmbpPageReqVo, TreeNode};
 
-// 组织树
-#[allow(dead_code)]
-pub const BMBP_RBAC_ORGAN: &str = "BMBP_RBAC_ORGAN";
 // 单位分组明细
 #[allow(dead_code)]
 pub const BMBP_RBAC_ORGAN_UNITS: &str = "BMBP_RBAC_ORGAN_UNITS";
@@ -31,194 +34,55 @@ pub const BMBP_RBAC_ORGAN_POST_MANAGER: &str = "BMBP_RBAC_ORGAN_POST_MANAGER";
 #[allow(dead_code)]
 pub const BMBP_RBAC_ORGAN_USER_POST: &str = "BMBP_RBAC_ORGAN_USER_POST";
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
-pub struct QueryParam {
+#[page]
+pub struct OrganQueryParam {
     r_id: String,
+    parent_organ_id: String,
+    organ_id: String,
+}
+
+#[orm]
+pub struct BmbpRbacOrgan {
     organ_id: String,
     parent_organ_id: String,
     organ_title: String,
     organ_path: String,
-    organ_type: String,
+    organ_data_id: String,
+    organ_type: BmbpOrganType,
+    #[skip]
+    children: Vec<BmbpRbacOrgan>,
 }
-
-#[allow(dead_code)]
-impl QueryParam {
-    pub fn new() -> Self {
-        QueryParam::default()
-    }
-    pub fn set_r_id(&mut self, r_id: String) -> &mut Self {
-        self.r_id = r_id;
-        self
-    }
-    pub fn set_organ_id(&mut self, organ_id: String) -> &mut Self {
-        self.organ_id = organ_id;
-        self
-    }
-    pub fn set_parent_organ_id(&mut self, parent_organ_id: String) -> &mut Self {
-        self.parent_organ_id = parent_organ_id;
-        self
-    }
-    pub fn set_organ_title(&mut self, organ_title: String) -> &mut Self {
-        self.organ_title = organ_title;
-        self
-    }
-    pub fn set_organ_path(&mut self, organ_path: String) -> &mut Self {
-        self.organ_path = organ_path;
-        self
-    }
-    pub fn set_organ_type(&mut self, organ_type: String) -> &mut Self {
-        self.organ_type = organ_type;
-        self
-    }
-
-    pub fn get_r_id(&self) -> &String {
-        &self.r_id
-    }
-    pub fn get_organ_id(&self) -> &String {
-        &self.organ_id
-    }
-    pub fn get_parent_organ_id(&self) -> &String {
-        &self.parent_organ_id
-    }
-
-    pub fn get_organ_title(&self) -> &String {
-        &self.organ_title
-    }
-    pub fn get_organ_path(&self) -> &String {
-        &self.organ_path
-    }
-}
-
-// 分页查询参数
-#[allow(dead_code)]
-pub type PageQueryParam = BmbpPageReqVo<QueryParam>;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum BmbpOrganType {
-    Unit,
-    Units,
-    Dept,
-    Post,
-    Person,
+    Unit = 0,
+    Units = 1,
+    Dept = 2,
+    Post = 3,
+    Person = 4,
 }
 
+impl Into<BmbpValue> for BmbpOrganType {
+    fn into(self) -> BmbpValue {
+        match self {
+            BmbpOrganType::Unit => BmbpValue::from(0),
+            BmbpOrganType::Units => BmbpValue::from(1),
+            BmbpOrganType::Dept => BmbpValue::from(2),
+            BmbpOrganType::Post => BmbpValue::from(3),
+            BmbpOrganType::Person => BmbpValue::from(4),
+        }
+    }
+}
 impl Default for BmbpOrganType {
     fn default() -> Self {
         BmbpOrganType::Unit
     }
 }
 
-impl ToString for BmbpOrganType {
-    fn to_string(&self) -> String {
-        match self {
-            BmbpOrganType::Unit => "unit".to_string(),
-            BmbpOrganType::Units => "units".to_string(),
-            BmbpOrganType::Dept => "dept".to_string(),
-            BmbpOrganType::Post => "post".to_string(),
-            BmbpOrganType::Person => "person".to_string(),
-        }
-    }
-}
-
 #[allow(dead_code)]
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
-pub struct BmbpOrganModel {
-    organ_id: String,
-    parent_organ_id: String,
-    organ_title: String,
-    organ_path: String,
-    organ_data_id: String,
-    organ_type: BmbpOrganType,
-    children: Vec<BmbpOrganModel>,
-    #[serde(flatten)]
-    base: BmbpBaseModel,
-}
-
-#[allow(dead_code)]
-impl BaseOrmModel for BmbpOrganModel {
-    fn get_base_vo(&self) -> &BmbpBaseModel {
-        &self.base
-    }
-    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
-        &mut self.base
-    }
-    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
-        self.base = vo;
-        self
-    }
-    fn vo_fields() -> Vec<String> {
-        vec![
-            "organ_id".to_string(),
-            "parent_organ_id".to_string(),
-            "organ_title".to_string(),
-            "organ_path".to_string(),
-            "organ_type".to_string(),
-            "organ_data_id".to_string(),
-        ]
-    }
-}
-
-#[allow(dead_code)]
-impl BmbpOrganModel {
-    pub fn new() -> Self {
-        BmbpOrganModel::default()
-    }
-
-    pub fn set_organ_id(&mut self, organ_id: String) -> &mut Self {
-        self.organ_id = organ_id;
-        self
-    }
-    pub fn set_parent_organ_id(&mut self, parent_organ_id: String) -> &mut Self {
-        self.parent_organ_id = parent_organ_id;
-        self
-    }
-    pub fn set_organ_path(&mut self, organ_path: String) -> &mut Self {
-        self.organ_path = organ_path;
-        self
-    }
-
-    pub fn set_organ_title(&mut self, organ_title: String) -> &mut Self {
-        self.organ_title = organ_title;
-        self
-    }
-
-    pub fn set_organ_data_id(&mut self, organ_data_id: String) -> &mut Self {
-        self.organ_data_id = organ_data_id;
-        self
-    }
-
-    pub fn set_organ_type(&mut self, organ_type: BmbpOrganType) -> &mut Self {
-        self.organ_type = organ_type;
-        self
-    }
-
-    pub fn get_organ_id(&self) -> &String {
-        &self.organ_id
-    }
-    pub fn get_organ_data_id(&self) -> &String {
-        &self.organ_data_id
-    }
-    pub fn get_organ_title(&self) -> &String {
-        &self.organ_title
-    }
-    pub fn get_organ_path(&self) -> &String {
-        &self.organ_path
-    }
-    pub fn get_parent_organ_id(&self) -> &String {
-        &self.parent_organ_id
-    }
-    pub fn get_organ_type(&self) -> &BmbpOrganType {
-        &self.organ_type
-    }
-}
-#[allow(dead_code)]
-impl TreeNode<BmbpOrganModel> for BmbpOrganModel {
+impl TreeNode<BmbpRbacOrgan> for BmbpRbacOrgan {
     fn node_id(&self) -> &String {
         &self.organ_id
     }
@@ -234,364 +98,11 @@ impl TreeNode<BmbpOrganModel> for BmbpOrganModel {
     fn node_path(&self) -> &String {
         &self.organ_path
     }
-    fn children(&self) -> &[BmbpOrganModel] {
+    fn children(&self) -> &[BmbpRbacOrgan] {
         self.children.as_slice()
     }
-    fn set_children(&mut self, children: Vec<BmbpOrganModel>) -> &mut Self {
+    fn set_children(&mut self, children: Vec<BmbpRbacOrgan>) -> &mut Self {
         self.children = children;
         self
-    }
-}
-
-#[allow(dead_code)]
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
-pub struct BmbpOrganUnitVo {
-    organ_id: String,
-    // 所属行业
-    industry_code: String,
-    // 所属领域：
-    domain_code: String,
-    // 单位性质
-    unit_type: String,
-    // 行政级別
-    admin_grade: String,
-    // 联系人
-    concat_person: String,
-    // 联系电话
-    concat_phone: String,
-    // 联系邮件
-    concat_email: String,
-    // 联系手机号
-    concat_tel: String,
-    // 联系地址
-    concat_address: String,
-    // 省
-    province_code: String,
-    // 市
-    city_code: String,
-    // 区
-    district_code: String,
-
-    #[serde(flatten)]
-    base: BmbpBaseModel,
-}
-
-#[allow(dead_code)]
-impl BaseOrmModel for BmbpOrganUnitVo {
-    fn get_base_vo(&self) -> &BmbpBaseModel {
-        &self.base
-    }
-
-    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
-        &mut self.base
-    }
-
-    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
-        self.base = vo;
-        self
-    }
-    fn vo_fields() -> Vec<String> {
-        vec![]
-    }
-}
-
-#[allow(dead_code)]
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
-pub struct BmbpOrganUnitReportVo {
-    organ_id: String,
-    // 上报单位
-    report_organ_id: String,
-    // 省
-    report_province_code: String,
-    // 市
-    report_city_code: String,
-    // 区
-    report_district_code: String,
-    #[serde(flatten)]
-    base: BmbpBaseModel,
-}
-
-#[allow(dead_code)]
-impl BmbpOrganUnitReportVo {
-    pub fn new() -> Self {
-        BmbpOrganUnitReportVo::default()
-    }
-}
-
-#[allow(dead_code)]
-impl BaseOrmModel for BmbpOrganUnitReportVo {
-    fn get_base_vo(&self) -> &BmbpBaseModel {
-        &self.base
-    }
-
-    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
-        &mut self.base
-    }
-
-    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
-        self.base = vo;
-        self
-    }
-    fn vo_fields() -> Vec<String> {
-        vec![
-            "organ_id".to_string(),
-            "report_organ_id".to_string(),
-            "report_province_code".to_string(),
-            "report_city_code".to_string(),
-            "report_district_code".to_string(),
-        ]
-    }
-}
-
-#[allow(dead_code)]
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
-pub struct BmbpOrganDeptVo {
-    organ_id: String,
-    // 部门编制
-    dept_head_count: usize,
-    // 部门说明
-    dept_desc: String,
-    //
-    #[serde(flatten)]
-    base: BmbpBaseModel,
-}
-
-#[allow(dead_code)]
-impl BaseOrmModel for BmbpOrganDeptVo {
-    fn get_base_vo(&self) -> &BmbpBaseModel {
-        &self.base
-    }
-
-    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
-        &mut self.base
-    }
-
-    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
-        self.base = vo;
-        self
-    }
-
-    fn vo_fields() -> Vec<String> {
-        vec![]
-    }
-}
-
-#[allow(dead_code)]
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
-pub struct BmbpOrganPostVo {
-    organ_id: String,
-    // 岗位类型
-    post_type: String,
-    // 岗位描述
-    post_desc: String,
-    // 联系人
-    concat_person: String,
-    // 联系电话
-    concat_phone: String,
-    // 联系邮件
-    concat_email: String,
-    // 联系手机号
-    concat_tel: String,
-    // 联系地址
-    concat_address: String,
-    #[serde(flatten)]
-    base: BmbpBaseModel,
-}
-
-#[allow(dead_code)]
-impl BaseOrmModel for BmbpOrganPostVo {
-    fn get_base_vo(&self) -> &BmbpBaseModel {
-        &self.base
-    }
-
-    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
-        &mut self.base
-    }
-
-    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
-        self.base = vo;
-        self
-    }
-    fn vo_fields() -> Vec<String> {
-        vec![]
-    }
-}
-
-#[allow(dead_code)]
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
-pub struct BmbpOrganPersonVo {
-    organ_id: String,
-    //性別
-    gender: String,
-    //民族
-    nation: String,
-    // 政治面貌
-    politics: String,
-    //职称
-    positional_title: String,
-    // 职级
-    rank: String,
-    // 出生日期
-    birth_day: String,
-    // 年龄
-    age: usize,
-    // 手机号
-    tel: String,
-    // 身份证号
-    id_no: String,
-    // 学历
-    education: String,
-    #[serde(flatten)]
-    base: BmbpBaseModel,
-}
-
-#[allow(dead_code)]
-impl BaseOrmModel for BmbpOrganPersonVo {
-    fn get_base_vo(&self) -> &BmbpBaseModel {
-        &self.base
-    }
-
-    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
-        &mut self.base
-    }
-
-    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
-        self.base = vo;
-        self
-    }
-    fn vo_fields() -> Vec<String> {
-        vec![]
-    }
-}
-
-#[allow(dead_code)]
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
-pub struct BmbpOrganPostManagerVo {
-    organ_id: String,
-    #[serde(flatten)]
-    base: BmbpBaseModel,
-}
-
-impl BaseOrmModel for BmbpOrganPostManagerVo {
-    fn get_base_vo(&self) -> &BmbpBaseModel {
-        &self.base
-    }
-
-    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
-        &mut self.base
-    }
-
-    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
-        self.base = vo;
-        self
-    }
-    fn vo_fields() -> Vec<String> {
-        vec![]
-    }
-}
-
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
-pub struct BmbpOrganPersonPostVo {
-    organ_id: String,
-    #[serde(flatten)]
-    base: BmbpBaseModel,
-}
-
-#[allow(dead_code)]
-impl BaseOrmModel for BmbpOrganPersonPostVo {
-    fn get_base_vo(&self) -> &BmbpBaseModel {
-        &self.base
-    }
-
-    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
-        &mut self.base
-    }
-
-    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
-        self.base = vo;
-        self
-    }
-    fn vo_fields() -> Vec<String> {
-        vec![]
-    }
-}
-
-#[allow(dead_code)]
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
-pub struct BmbpOrganVirtualVo {
-    organ_id: String,
-    parent_organ_id: String,
-    organ_title: String,
-    organ_path: String,
-    organ_data_id: String,
-    organ_type: BmbpOrganType,
-    children: Vec<BmbpOrganVirtualVo>,
-    #[serde(flatten)]
-    base: BmbpBaseModel,
-}
-
-impl TreeNode<BmbpOrganVirtualVo> for BmbpOrganVirtualVo {
-    fn node_id(&self) -> &String {
-        &self.organ_id
-    }
-    fn node_parent_id(&self) -> &String {
-        &self.parent_organ_id
-    }
-    fn node_title(&self) -> &String {
-        &self.organ_title
-    }
-    fn node_data_id(&self) -> &String {
-        &self.organ_data_id
-    }
-    fn node_path(&self) -> &String {
-        &self.organ_path
-    }
-    fn children(&self) -> &[BmbpOrganVirtualVo] {
-        self.children.as_slice()
-    }
-    fn set_children(&mut self, children: Vec<BmbpOrganVirtualVo>) -> &mut Self {
-        self.children = children;
-        self
-    }
-}
-
-impl BaseOrmModel for BmbpOrganVirtualVo {
-    fn get_base_vo(&self) -> &BmbpBaseModel {
-        &self.base
-    }
-
-    fn get_mut_base_vo(&mut self) -> &mut BmbpBaseModel {
-        &mut self.base
-    }
-
-    fn set_base_vo(&mut self, vo: BmbpBaseModel) -> &mut Self {
-        self.base = vo;
-        self
-    }
-    fn vo_fields() -> Vec<String> {
-        vec![
-            "organ_id".to_string(),
-            "parent_organ_id".to_string(),
-            "organ_title".to_string(),
-            "organ_path".to_string(),
-            "organ_type".to_string(),
-            "organ_data_id".to_string(),
-        ]
     }
 }

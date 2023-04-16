@@ -3,18 +3,14 @@ use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, PageInner, ROOT_TREE_N
 use bmbp_util::{simple_uuid_upper, TreeBuilder};
 
 use crate::organ::dao::OrganDao;
-use crate::organ::model::{
-    BmbpOrganDeptVo, BmbpOrganPersonVo, BmbpOrganPostVo, BmbpOrganUnitVo, BmbpOrganUnitsVo,
-    PageQueryParam,
-};
-use crate::organ::{BmbpOrganModel, QueryParam};
+use crate::organ::model::{BmbpRbacOrgan, OrganQueryParam};
 use crate::util::{append_create_vo, append_update_vo};
 
 pub struct OrganService();
 
 impl OrganService {
     /// 查询组织树
-    pub(crate) async fn find_organ_tree(params: &QueryParam) -> BmbpResp<Vec<BmbpOrganModel>> {
+    pub(crate) async fn find_organ_tree(params: &OrganQueryParam) -> BmbpResp<Vec<BmbpRbacOrgan>> {
         tracing::info!("组织机构服务-调用组织树查询");
         let rows = Self::find_organ_list(params).await?;
         match rows {
@@ -27,36 +23,34 @@ impl OrganService {
     }
     /// 查询分页
     pub(crate) async fn find_organ_page(
-        params: &mut PageQueryParam,
-    ) -> BmbpResp<PageInner<BmbpOrganModel>> {
+        params: &mut OrganQueryParam,
+    ) -> BmbpResp<PageInner<BmbpRbacOrgan>> {
         tracing::info!("组织机构服务-调用组织分页查询");
         let page_inner = OrganDao::find_organ_page(params).await?;
         Ok(page_inner)
     }
     /// 查询组织列表
-    pub async fn find_organ_list(params: &QueryParam) -> BmbpResp<Option<Vec<BmbpOrganModel>>> {
+    pub async fn find_organ_list(params: &OrganQueryParam) -> BmbpResp<Option<Vec<BmbpRbacOrgan>>> {
         OrganDao::find_organ_list(params).await
     }
     /// 查询详情
-    pub async fn find_organ_info_by_rid(r_id: &String) -> BmbpResp<Option<BmbpOrganModel>> {
+    pub async fn find_organ_info_by_rid(r_id: &String) -> BmbpResp<Option<BmbpRbacOrgan>> {
         tracing::info!("调用组织服务-查询组织详情-根据当前节点");
-        let organ: Option<BmbpOrganModel> = OrganDao::find_organ_info_by_rid(r_id).await?;
+        let organ: Option<BmbpRbacOrgan> = OrganDao::find_organ_info_by_rid(r_id).await?;
         Ok(organ)
     }
     /// 查询详情
-    pub async fn find_organ_info_by_organ_id(
-        organ_id: &String,
-    ) -> BmbpResp<Option<BmbpOrganModel>> {
+    pub async fn find_organ_info_by_organ_id(organ_id: &String) -> BmbpResp<Option<BmbpRbacOrgan>> {
         tracing::info!("调用组织服务-查询组织详情-根据当前节点");
-        let organ: Option<BmbpOrganModel> = OrganDao::find_organ_info_by_organ_id(organ_id).await?;
+        let organ: Option<BmbpRbacOrgan> = OrganDao::find_organ_info_by_organ_id(organ_id).await?;
         Ok(organ)
     }
     /// 保存组织
-    pub(crate) async fn save_organ(params: &mut BmbpOrganModel) -> BmbpResp<BmbpOrganModel> {
+    pub(crate) async fn save_organ(params: &mut BmbpRbacOrgan) -> BmbpResp<BmbpRbacOrgan> {
         Ok(params.clone())
     }
     /// 新增组织
-    pub(crate) async fn insert_organ(params: &mut BmbpOrganModel) -> BmbpResp<()> {
+    pub(crate) async fn insert_organ(params: &mut BmbpRbacOrgan) -> BmbpResp<()> {
         let row_count = OrganDao::insert_organ(params).await?;
         if row_count != 1 {
             return Err(BmbpError::api("新增组织机构失败，记录为0条".to_string()));
@@ -64,11 +58,11 @@ impl OrganService {
         Ok(())
     }
     /// 更新组织
-    pub(crate) async fn update_organ(params: &mut BmbpOrganModel) -> BmbpResp<()> {
+    pub(crate) async fn update_organ(params: &mut BmbpRbacOrgan) -> BmbpResp<()> {
         Ok(())
     }
     /// 修改组织上级
-    pub(crate) async fn change_organ_parent(param: &QueryParam) -> BmbpResp<usize> {
+    pub(crate) async fn change_organ_parent(param: &OrganQueryParam) -> BmbpResp<usize> {
         // 判断传入的上级参数是否为空
         if param.get_parent_organ_id().is_empty() {
             return Err(BmbpError::api(
@@ -77,7 +71,7 @@ impl OrganService {
         }
 
         // 查询当前节点
-        let mut current_organ_params = QueryParam::new();
+        let mut current_organ_params = OrganQueryParam::default();
         current_organ_params.set_r_id(param.get_r_id().to_string());
         let current_organ_node = Self::find_organ_info_by_rid(param.get_r_id()).await?;
         if current_organ_node.is_none() {
@@ -88,7 +82,7 @@ impl OrganService {
         // 获取父级节点
         let parent_node;
         if !param.get_parent_organ_id().eq(&ROOT_TREE_NODE.clone()) {
-            let mut parent_organ_params = QueryParam::new();
+            let mut parent_organ_params = OrganQueryParam::new();
             parent_organ_params.set_organ_id(param.get_parent_organ_id().clone());
             if let Some(p_vo) = Self::find_organ_info_by_rid(param.get_r_id()).await? {
                 parent_node = p_vo;
@@ -97,7 +91,7 @@ impl OrganService {
             }
         } else {
             // 根节点
-            let mut parent_vo = BmbpOrganModel::new();
+            let mut parent_vo = BmbpRbacOrgan::new();
             parent_vo.set_organ_id("0".to_string());
             parent_vo.set_organ_path("/".to_string());
             parent_node = parent_vo;

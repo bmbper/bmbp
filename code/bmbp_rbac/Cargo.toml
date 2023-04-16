@@ -9,7 +9,7 @@ edition = "2021"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-
+bmbp_orm_macro = { path = "../bmbp_orm_macro" }
 bmbp_orm_ins = { path = "../bmbp_orm_ins" }
 bmbp_vars = { path = "../bmbp_vars" }
 bmbp_types = { path = "../bmbp_types" }
