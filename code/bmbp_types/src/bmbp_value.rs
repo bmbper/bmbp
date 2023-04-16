@@ -23,6 +23,12 @@ impl From<String> for BmbpValue {
     }
 }
 
+impl From<&String> for BmbpValue {
+    fn from(value: &String) -> Self {
+        BmbpValue::String(value.clone())
+    }
+}
+
 impl From<&str> for BmbpValue {
     fn from(value: &str) -> Self {
         BmbpValue::String(value.to_string())

@@ -17,6 +17,11 @@ pub fn build(
         impl #struct_name{
             #(#struct_method)*
         }
+        impl #struct_name{
+          pub fn new()->#struct_name{
+                #struct_name::default()
+            }
+        }
     )
 }
 

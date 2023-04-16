@@ -33,16 +33,16 @@ pub fn orm(orm_meta_token: TokenStream0, orm_struct_token: TokenStream0) -> Toke
         let get_method_ident = format_ident!("get_{}", field_name_ident);
         let get_mut_method_ident = format_ident!("get_mut_{}", field_name_ident);
         orm_model_base_method_token.push(quote!(
-                    pub fn #set_method_ident(&mut self,v : String)->&mut Self{
-                        self.#field_name_ident = v;
-                        self
-                    }
-                    pub fn #get_method_ident(&mut self)->&String{
-                        &self.#field_name_ident
-                    }
-                    pub fn #get_mut_method_ident(&mut self)->&mut String{
-                        &mut self.#field_name_ident
-                    }
+            pub fn #set_method_ident(&mut self,v : String)->&mut Self{
+                self.#field_name_ident = v;
+                self
+            }
+            pub fn #get_method_ident(&mut self)->&String{
+                &self.#field_name_ident
+            }
+            pub fn #get_mut_method_ident(&mut self)->&mut String{
+                &mut self.#field_name_ident
+            }
         ));
     }
 
