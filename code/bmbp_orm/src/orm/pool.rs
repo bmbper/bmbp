@@ -171,7 +171,7 @@ impl ConnInner {
         let row_count = self.inner().write().await.execute(sql, params).await?;
         Ok(row_count)
     }
-    pub async fn batch_execute(&self, mut orm_sql: &mut [BmbpOrmSQL]) -> BmbpResp<usize> {
+    pub async fn batch_execute(&self, orm_sql: &mut [BmbpOrmSQL]) -> BmbpResp<usize> {
         let mut ddl_vec = vec![];
         for item in orm_sql {
             let (sql, params) = item.get_raw_orm()?;

@@ -4,11 +4,10 @@ use std::{
 };
 
 use async_trait::async_trait;
-use serde::Serialize;
 use serde_json::{Map, Value};
 use tokio::sync::RwLock;
 
-use bmbp_types::{BmbpError, BmbpResp, PageInner};
+use bmbp_types::{BmbpResp, PageInner};
 use bmbp_util::uuid;
 
 use crate::{

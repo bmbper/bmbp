@@ -4,7 +4,6 @@ use std::{
 };
 
 use async_trait::async_trait;
-use serde::Serialize;
 use serde_json::{Map, Value};
 use tokio::sync::{Mutex, RwLock};
 use tokio_postgres::types::IsNull;
