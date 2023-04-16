@@ -234,19 +234,14 @@ pub fn orm(orm_meta_token: TokenStream0, orm_struct_token: TokenStream0) -> Toke
     let impl_into_trait_token =
         build_into_bmbp_value_token(&struct_name_ident, all_orm_struct_field.as_slice());
 
-    let new_struct_token = quote!(
-        #[derive(Default, Debug, Clone, Serialize, Deserialize)]
-        #[serde(rename_all = "camelCase")]
-        #[serde(default)]
-        pub struct #struct_name_ident{
-             #(#all_orm_struct_field_token,)*
-        }
-        impl #struct_name_ident{
-            #(#all_orm_struct_method_token)*
-        }
-
+    let mut new_struct_token = util::build(
+        struct_name_ident,
+        all_orm_struct_field_token,
+        all_orm_struct_method_token,
+    );
+    new_struct_token = quote!(
+        #new_struct_token
         #impl_into_trait_token
-
     );
     new_struct_token.into()
 }
