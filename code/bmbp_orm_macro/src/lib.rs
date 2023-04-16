@@ -6,6 +6,8 @@ use syn::{parse_macro_input, AttrStyle, Data, DeriveInput, Field, Ident, ItemStr
 
 mod model;
 mod orm;
+mod page;
+mod util;
 mod validator;
 
 /// #[orm] 给Struct增加以下方法：
@@ -22,6 +24,12 @@ pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenS
 #[proc_macro_attribute]
 pub fn model(model_meta_token: TokenStream, model_struct_token: TokenStream) -> TokenStream {
     model::model(model_meta_token, model_struct_token)
+}
+
+/// #[page] 给Struct增加 page_no,page_size,get_mut_,set_方法
+#[proc_macro_attribute]
+pub fn page(page_meta_token: TokenStream, model_struct_token: TokenStream) -> TokenStream {
+    page::page(page_meta_token, model_struct_token)
 }
 
 /// #[validator] 增加规则校验

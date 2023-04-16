@@ -1,3 +1,5 @@
+use crate::util;
+use proc_macro::TokenStream as TokenStream0;
 use proc_macro::{TokenStream, TokenTree};
 use quote::{format_ident, quote, ToTokens};
 use std::fmt::format;
@@ -10,7 +12,7 @@ struct OrmMeta {
     id_name: String,
 }
 
-pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenStream {
+pub fn orm(orm_meta_token: TokenStream0, orm_struct_token: TokenStream0) -> TokenStream0 {
     // 解析#[orm(table=xxx,id=xxx)] 获取表、主键字段
     let mut orm_meta = get_orm_meta(&orm_meta_token);
 
@@ -50,49 +52,8 @@ pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenS
         orm_meta.table_name = camel_to_snake(orm_struct_name.clone());
     }
 
-    let mut orm_struct_field = vec![];
-    let mut orm_struct_field_token = vec![];
-    let mut orm_struct_method_token = vec![];
-
-    let orm_struct_ident_data = &orm_struct_ident.data;
-    match orm_struct_ident_data {
-        Data::Struct(orm_struct_data) => {
-            let orm_struct_fields = &orm_struct_data.fields;
-            for struct_field in orm_struct_fields {
-                let struct_field_name = &struct_field.ident.as_ref().unwrap().to_string();
-                let struct_field_type_name = &struct_field.ty.to_token_stream().to_string();
-                if !is_orm_struct_field_has_skip_meta(struct_field) {
-                    orm_struct_field
-                        .push((struct_field_name.clone(), struct_field_type_name.clone()));
-                }
-                let orm_struct_field_ident = struct_field.ident.as_ref().unwrap();
-                let orm_struct_field_type = &struct_field.ty;
-
-                // 增加结构字段
-                orm_struct_field_token.push(quote!(
-                    #orm_struct_field_ident : #orm_struct_field_type
-                ));
-
-                let set_field_method_ident = format_ident!("set_{}", orm_struct_field_ident);
-                let get_field_method_ident = format_ident!("get_{}", orm_struct_field_ident);
-                let get_mut_field_ident = format_ident!("get_mut_{}", orm_struct_field_ident);
-                let field_method_token = quote!(
-                    pub fn #set_field_method_ident(&mut self,v : #orm_struct_field_type)->&mut Self{
-                        self.#orm_struct_field_ident = v;
-                        self
-                    }
-                    pub fn #get_field_method_ident(&mut self)->& #orm_struct_field_type{
-                        &self.#orm_struct_field_ident
-                    }
-                    pub fn #get_mut_field_ident(&mut self)->& mut #orm_struct_field_type{
-                        &mut self.#orm_struct_field_ident
-                    }
-                );
-                orm_struct_method_token.push(field_method_token.to_token_stream());
-            }
-        }
-        _ => {}
-    }
+    let (orm_struct_field, orm_struct_field_token, orm_struct_method_token) =
+        util::parse_struct(&orm_struct_ident);
 
     // 拼接StructField
     let mut all_orm_struct_field = vec![];
@@ -144,7 +105,7 @@ pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenS
     // 拼pu接Struct类
     let struct_name_ident = &orm_struct_ident.ident;
 
-    let mut orm_query_sql_token = quote!(
+    let orm_query_sql_token = quote!(
         pub fn query_sql() -> BmbpScriptSql {
             let mut script_sql = BmbpScriptSql::new();
             script_sql.from(#struct_name_ident::get_orm_table().as_str());
@@ -176,7 +137,7 @@ pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenS
     );
     all_orm_struct_method_token.push(orm_query_sql_token);
 
-    let mut orm_update_sql_token = quote!(
+    let orm_update_sql_token = quote!(
         pub fn update_sql() -> BmbpScriptSql {
             let mut script_sql = BmbpScriptSql::new();
             script_sql.update(#struct_name_ident::get_orm_table().as_str());
@@ -216,7 +177,7 @@ pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenS
         camel_to_snake(orm_meta_id_name.clone()).to_lowercase(),
         snake_to_camel(camel_to_snake(orm_meta_id_name.clone()))
     );
-    let mut orm_delete_sql_token = quote!(
+    let orm_delete_sql_token = quote!(
         pub fn delete_sql() -> BmbpScriptSql {
             let mut script_sql = BmbpScriptSql::new();
             script_sql.delete(#struct_name_ident::get_orm_table().as_str());
@@ -237,7 +198,7 @@ pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenS
     );
     all_orm_struct_method_token.push(orm_delete_sql_token);
 
-    let mut orm_insert_sql_token = quote!(
+    let orm_insert_sql_token = quote!(
         pub fn insert_sql() -> BmbpScriptSql {
             let mut script_sql = BmbpScriptSql::new();
             script_sql.insert_into(#struct_name_ident::get_orm_table().as_str());
@@ -410,34 +371,6 @@ fn get_token_tree_node_name(token: &TokenTree) -> String {
         TokenTree::Literal(v) => v.to_string().replace("\"", ""),
         _ => "".to_string(),
     }
-}
-
-fn is_orm_struct_field_has_skip_meta(field: &Field) -> bool {
-    // 从属性里面提取宏
-    let field_attrs = field.attrs.as_slice();
-    if field_attrs.is_empty() {
-        return false;
-    };
-    let mut has_skip_marco = false;
-    for attr in field_attrs {
-        let meta = &attr.meta;
-        match meta {
-            Meta::Path(mv) => {
-                let temp = mv.to_token_stream().to_string();
-                if "skip".eq(temp.as_str()) {
-                    has_skip_marco = true;
-                    break;
-                }
-            }
-            Meta::List(v) => {
-                println!("meta2:{:#?}", v.to_token_stream());
-            }
-            Meta::NameValue(v) => {
-                println!("meta3:{:#?}", v.to_token_stream());
-            }
-        }
-    }
-    has_skip_marco
 }
 
 /// orm_model_common_field 增加公共字段
