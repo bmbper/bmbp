@@ -2,7 +2,7 @@ use proc_macro::TokenStream as TokenStream0;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, ToTokens};
-use syn::{parse_macro_input, Data, DeriveInput};
+use syn::{parse_macro_input, DeriveInput};
 
 use crate::util;
 

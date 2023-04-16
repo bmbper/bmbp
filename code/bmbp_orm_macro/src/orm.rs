@@ -1,9 +1,11 @@
-use crate::util;
 use proc_macro::TokenStream as TokenStream0;
 use proc_macro::{TokenStream, TokenTree};
-use quote::{format_ident, quote, ToTokens};
 use std::fmt::format;
+
+use quote::{format_ident, quote, ToTokens};
 use syn::{parse_macro_input, AttrStyle, Data, DeriveInput, Field, Ident, ItemStruct, Meta};
+
+use crate::util;
 
 /// OrmMeta #[orm(table=xxx,id=XX)]
 #[derive(Debug)]
@@ -49,7 +51,7 @@ pub fn orm(orm_meta_token: TokenStream0, orm_struct_token: TokenStream0) -> Toke
     let orm_struct_name = &orm_struct_ident.ident.to_string().replace("\"", "");
     // 处理表名
     if orm_meta.table_name.is_empty() {
-        orm_meta.table_name = camel_to_snake(orm_struct_name.clone());
+        orm_meta.table_name = camel_to_snake(orm_struct_name.clone()).to_uppercase();
     }
 
     let (orm_struct_field, orm_struct_field_token, orm_struct_method_token) =

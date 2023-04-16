@@ -1,5 +1,3 @@
-use proc_macro::TokenStream as TokenStream0;
-
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, IdentFragment, ToTokens};
 use syn::{parse, parse_str, Data, DeriveInput, Field, Meta, Type, TypePath};
