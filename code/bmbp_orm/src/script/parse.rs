@@ -1,8 +1,4 @@
-use std::collections::HashMap;
-
-use chrono::format::parse;
-
-use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, BmbpVec};
+use bmbp_types::{BmbpMap, BmbpValue, BmbpVec};
 
 /// ScriptSQL 动态解析器，主要负责值的替换
 /// 暂时使用正则提取标签，通过传入的实体参数中获取对映的值
@@ -19,23 +15,25 @@ enum TokenType {
     REPLACE,
 }
 
+#[allow(dead_code)]
 enum TokenVisitType {
     KEY,
     POSITION,
     UNION,
 }
-
+#[allow(dead_code)]
 struct Token {
     _type: TokenType,
 }
 
+#[allow(dead_code)]
 struct ScriptToken {
     name: String,
     _type: TokenType,
     visit_name: Vec<String>,
     visit_value: BmbpValue,
 }
-
+#[allow(dead_code)]
 enum TokenState {
     EMPTY = 0,
     COUNT = 1,
@@ -46,13 +44,13 @@ enum TokenState {
 }
 
 pub struct ScriptUtil;
-
+#[allow(unused)]
 impl ScriptUtil {
     fn is_digital(value: &String) -> bool {
         return false;
     }
 }
-
+#[allow(unused)]
 impl ScriptUtil {
     pub fn parse_from_map(script: &String, params: BmbpMap) -> (String, BmbpVec) {
         let bmbp_value = BmbpValue::Map(params);

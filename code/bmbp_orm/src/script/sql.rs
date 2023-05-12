@@ -1,5 +1,3 @@
-use tracing_subscriber::fmt::format;
-
 /// SQL脚本构建器，Mybatis的动态SQL构建器
 /// 复杂语法需要自己手动编写片断之后 组装到SQL当中
 /// 构建器仅负责SQL组装，具体解析法由SqlParser解析器负责
@@ -17,6 +15,7 @@ pub enum BmbpScriptType {
     QUERY,
 }
 
+#[allow(unused)]
 pub struct BmbpScriptSql {
     script_type: BmbpScriptType,
     from_tables: Vec<String>,
@@ -150,7 +149,7 @@ impl BmbpScriptSql {
             query_vec.push(self.from_tables.join(","));
         }
         if !self.join_tables.is_empty() {
-            query_vec.push(self.join_tables.join("\n    "));
+            query_vec.push(self.join_tables.join("    "));
         }
         let mut filter_vec = vec![];
         for field in self.and_filters.as_slice() {

@@ -46,7 +46,7 @@ impl TreeBuilder {
             let tree_node_ref_children_slice = tree_node_ref_children_reader.as_slice();
             let children_tree_node_vec =
                 Self::build_tree_node_from_ref(tree_node_ref_children_slice);
-            tree_node.set_children(children_tree_node_vec);
+            tree_node.set_tree_children(children_tree_node_vec);
             tree_node_vec.push(tree_node);
         }
         tree_node_vec
@@ -59,7 +59,7 @@ impl TreeBuilder {
         let mut tree_node_ref_map = HashMap::new();
 
         for tree_node in tree_node_slice {
-            let tree_node_id = tree_node.node_id().clone();
+            let tree_node_id = tree_node.get_tree_id().clone();
             let tree_node_ref = TreeNodeRef {
                 ref_node: Some(tree_node),
                 ref_parent: RwLock::new(None),
@@ -78,12 +78,12 @@ impl TreeBuilder {
     {
         for tree_node in tree_node_slice {
             // 缺失上级节点ID的节点ID，上级节点ID改为根节点ID
-            let mut tree_node_parent_id = tree_node.node_parent_id().clone();
+            let mut tree_node_parent_id = tree_node.get_tree_parent_id().clone();
             if tree_node_parent_id.is_empty() {
                 tree_node_parent_id = ROOT_TREE_NODE.to_string();
             }
             if tree_node_ref_map.contains_key(&tree_node_parent_id) {
-                let current_ref = tree_node_ref_map.get(tree_node.node_id()).unwrap();
+                let current_ref = tree_node_ref_map.get(tree_node.get_tree_id()).unwrap();
                 let parent_ref = tree_node_ref_map.get(&tree_node_parent_id).unwrap();
                 *current_ref.ref_parent.write().unwrap() = Some(parent_ref.ref_node.unwrap());
                 parent_ref.ref_children.write().unwrap().push(current_ref);

@@ -15,6 +15,7 @@ pub struct RawQueryBuilder<'a> {
     query: &'a BmbpQuerySQL,
     params: &'a DynamicSQLParam,
 }
+
 #[allow(dead_code)]
 impl<'a> RawQueryBuilder<'a> {
     pub(crate) fn build(&self) -> BmbpResp<(String, Vec<Value>)> {
@@ -200,7 +201,7 @@ impl<'a> RawQueryBuilder<'a> {
 
         if table.join().is_some() {
             let join_sql = self.build_query_from_table_join(table.join().unwrap())?;
-            raw_table = raw_table + "\n" + "    " + join_sql.as_str();
+            raw_table = raw_table + "" + "    " + join_sql.as_str();
         }
         Ok(raw_table)
     }

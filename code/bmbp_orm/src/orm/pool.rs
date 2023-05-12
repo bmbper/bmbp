@@ -10,7 +10,7 @@ use time::OffsetDateTime;
 use tokio::sync::{Mutex, RwLock};
 use tracing::debug;
 
-use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, BmbpVec, PageInner};
+use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, PageRespVo};
 
 use crate::{BmbpDataSource, BmbpOrmSQL};
 
@@ -126,7 +126,7 @@ impl ConnInner {
         mut orm_sql: BmbpOrmSQL,
         page_no: &usize,
         page_size: &usize,
-    ) -> BmbpResp<PageInner<Map<String, Value>>> {
+    ) -> BmbpResp<PageRespVo<Map<String, Value>>> {
         let (sql, params) = orm_sql.get_raw_orm()?;
         let page = self
             .inner()
@@ -205,7 +205,7 @@ impl ConnInner {
         params: &[BmbpValue],
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageInner<BmbpMap>> {
+    ) -> BmbpResp<PageRespVo<BmbpMap>> {
         let bmbp_vec = self
             .inner()
             .write()

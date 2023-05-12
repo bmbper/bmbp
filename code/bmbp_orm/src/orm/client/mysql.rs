@@ -7,7 +7,7 @@ use async_trait::async_trait;
 use serde_json::{Map, Value};
 use tokio::sync::RwLock;
 
-use bmbp_types::{BmbpResp, PageInner};
+use bmbp_types::{BmbpResp, PageRespVo};
 use bmbp_util::uuid;
 
 use crate::{
@@ -34,7 +34,7 @@ impl BmbpMysqlConnect {
     }
 }
 
-#[allow(dead_code)]
+#[allow(unused)]
 #[async_trait]
 impl BmbpConn for BmbpMysqlConnect {
     fn id(&self) -> String {
@@ -62,8 +62,8 @@ impl BmbpConn for BmbpMysqlConnect {
         params: &[Value],
         page_no: &usize,
         page_size: &usize,
-    ) -> BmbpResp<PageInner<Map<String, Value>>> {
-        Ok(PageInner::default())
+    ) -> BmbpResp<PageRespVo<Map<String, Value>>> {
+        Ok(PageRespVo::default())
     }
     #[allow(unused)]
     async fn find_list(

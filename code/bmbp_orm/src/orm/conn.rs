@@ -1,15 +1,15 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use serde::Serialize;
 use serde_json::{Map, Value};
 
-use bmbp_types::{BmbpMap, BmbpResp, BmbpValue, BmbpVec, PageInner};
+use bmbp_types::{BmbpMap, BmbpResp, BmbpValue, PageRespVo};
 
 use crate::BmbpDataSource;
 
 use super::pool::BmbpConnectionPool;
 
+#[allow(unused)]
 #[async_trait]
 pub trait BmbpConn {
     /// id 获取数据库连接ID
@@ -28,7 +28,7 @@ pub trait BmbpConn {
         params: &[Value],
         page_no: &usize,
         page_size: &usize,
-    ) -> BmbpResp<PageInner<Map<String, Value>>>;
+    ) -> BmbpResp<PageRespVo<Map<String, Value>>>;
     async fn find_list(
         &mut self,
         _sql: String,
@@ -64,7 +64,7 @@ pub trait BmbpConn {
         params: &[BmbpValue],
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageInner<BmbpMap>> {
-        Ok(PageInner::new())
+    ) -> BmbpResp<PageRespVo<BmbpMap>> {
+        Ok(PageRespVo::new())
     }
 }

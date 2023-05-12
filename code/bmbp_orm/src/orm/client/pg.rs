@@ -6,12 +6,10 @@ use std::{
 use async_trait::async_trait;
 use serde_json::{Map, Value};
 use tokio::sync::{Mutex, RwLock};
-use tokio_postgres::types::IsNull;
 use tokio_postgres::{connect, types::ToSql, Client, Error, NoTls, Row};
 use tracing::debug;
-use tracing_subscriber::fmt::format;
 
-use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, BmbpVec, PageInner};
+use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, PageRespVo};
 use bmbp_util::uuid;
 
 use crate::{
@@ -90,13 +88,13 @@ impl BmbpConn for BmbpPgConnect {
         params: &[Value],
         page_no: &usize,
         page_size: &usize,
-    ) -> BmbpResp<PageInner<Map<String, Value>>> {
+    ) -> BmbpResp<PageRespVo<Map<String, Value>>> {
         let pg_params = to_pg_prams(params);
         let pg_params_ref = pg_params
             .iter()
             .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
             .collect::<Vec<&(dyn ToSql + Sync)>>();
-        let mut page_inner = PageInner::new();
+        let mut page_inner = PageRespVo::new();
         page_inner.set_page_no(page_no.clone());
         page_inner.set_page_size(page_size.clone());
 
@@ -245,14 +243,15 @@ impl BmbpConn for BmbpPgConnect {
         self.execute(sql, params).await
     }
 
-    async fn batch_execute(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
+    #[allow(unused)]
+    async fn batch_execute(&mut self, sql: String, _params: &[Value]) -> BmbpResp<usize> {
         Ok(0)
     }
-
+    #[allow(unused)]
     async fn batch_execute_ddl(&mut self, ddl_vec: &[(String, &[Value])]) -> BmbpResp<usize> {
         Ok(0)
     }
-
+    #[allow(unused)]
     async fn batch_execute_dml(&mut self, dml_vec: &[(String, &[Value])]) -> BmbpResp<usize> {
         Ok(0)
     }
@@ -305,14 +304,14 @@ impl BmbpConn for BmbpPgConnect {
         params: &[BmbpValue],
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageInner<BmbpMap>> {
+    ) -> BmbpResp<PageRespVo<BmbpMap>> {
         let pg_param = from_bmbp_value_to_pg_params(params);
 
         let pg_params_ref = pg_param
             .iter()
             .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
             .collect::<Vec<&(dyn ToSql + Sync)>>();
-        let mut pager: PageInner<BmbpMap> = PageInner::new();
+        let mut pager: PageRespVo<BmbpMap> = PageRespVo::new();
 
         let count_sql = format!("select count(1) as count from ({}) t1", sql);
         let count_rs = self

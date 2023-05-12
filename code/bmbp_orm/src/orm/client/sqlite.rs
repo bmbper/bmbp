@@ -4,11 +4,10 @@ use std::{
 };
 
 use async_trait::async_trait;
-use serde::Serialize;
 use serde_json::{Map, Value};
 use tokio::sync::RwLock;
 
-use bmbp_types::{BmbpError, BmbpResp, PageInner};
+use bmbp_types::{BmbpResp, PageRespVo};
 use bmbp_util::uuid;
 
 use crate::{
@@ -55,7 +54,6 @@ impl BmbpConn for BmbpSqliteConnect {
     fn data_source(&self) -> Arc<BmbpDataSource> {
         self.data_source.clone()
     }
-
     #[allow(unused)]
     async fn find_page(
         &mut self,
@@ -63,8 +61,8 @@ impl BmbpConn for BmbpSqliteConnect {
         params: &[Value],
         page_no: &usize,
         page_size: &usize,
-    ) -> BmbpResp<PageInner<Map<String, Value>>> {
-        Ok(PageInner::default())
+    ) -> BmbpResp<PageRespVo<Map<String, Value>>> {
+        Ok(PageRespVo::default())
     }
     #[allow(unused)]
     async fn find_list(
@@ -106,12 +104,15 @@ impl BmbpConn for BmbpSqliteConnect {
     async fn execute_dml(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
         Ok(0)
     }
+    #[allow(unused)]
     async fn batch_execute(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
         Ok(0)
     }
+    #[allow(unused)]
     async fn batch_execute_ddl(&mut self, ddl_vec: &[(String, &[Value])]) -> BmbpResp<usize> {
         Ok(0)
     }
+    #[allow(unused)]
     async fn batch_execute_dml(&mut self, dml_vec: &[(String, &[Value])]) -> BmbpResp<usize> {
         Ok(0)
     }

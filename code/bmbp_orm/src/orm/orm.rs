@@ -1,9 +1,8 @@
 use std::sync::Arc;
 
-use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
-use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, BmbpVec, PageInner};
+use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, BmbpVec, PageRespVo};
 
 use crate::script::ScriptUtil;
 use crate::{BmbpDataSource, BmbpOrmSQL};
@@ -38,7 +37,7 @@ impl Orm {
         orm_sql: BmbpOrmSQL,
         page_no: &usize,
         page_size: &usize,
-    ) -> BmbpResp<PageInner<Map<String, Value>>> {
+    ) -> BmbpResp<PageRespVo<Map<String, Value>>> {
         let conn = self.pool.get_conn().await?;
         let page = conn.find_page(orm_sql, page_no, page_size).await;
         conn.release().await;
@@ -101,11 +100,12 @@ impl Orm {
 }
 
 /// ORM 动态SQL方法
+#[allow(unused)]
 impl Orm {
     pub async fn dynamic_query_page(
         &self,
         orm: &mut BmbpOrmSQL,
-    ) -> BmbpResp<PageInner<Option<BmbpMap>>> {
+    ) -> BmbpResp<PageRespVo<Option<BmbpMap>>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn dynamic_query_list(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<Option<BmbpMap>> {
@@ -157,13 +157,14 @@ impl Orm {
 }
 
 // ORM 原生SQL调用方法
+#[allow(unused)]
 impl Orm {
     pub async fn raw_query_page(
         &self,
         sql: &String,
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageInner<BmbpMap>> {
+    ) -> BmbpResp<PageRespVo<BmbpMap>> {
         let conn = self.pool.get_conn().await?;
         let model_page = conn.raw_find_page(sql, &[], page_no, page_size).await;
         conn.release().await;
@@ -175,7 +176,7 @@ impl Orm {
         params: &[BmbpValue],
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageInner<BmbpMap>> {
+    ) -> BmbpResp<PageRespVo<BmbpMap>> {
         let conn = self.pool.get_conn().await?;
         let model_page = conn.raw_find_page(sql, params, page_no, page_size).await;
         conn.release().await;
@@ -224,7 +225,7 @@ impl Orm {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
 
-    pub async fn raw_insert(&self, sql: &String) -> BmbpResp<PageInner<usize>> {
+    pub async fn raw_insert(&self, sql: &String) -> BmbpResp<PageRespVo<usize>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
 
@@ -240,11 +241,11 @@ impl Orm {
         &self,
         sql: &String,
         params: &[&[BmbpValue]],
-    ) -> BmbpResp<PageInner<usize>> {
+    ) -> BmbpResp<PageRespVo<usize>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
 
-    pub async fn batch_raw_insert(&self, sql: &[String]) -> BmbpResp<PageInner<usize>> {
+    pub async fn batch_raw_insert(&self, sql: &[String]) -> BmbpResp<PageRespVo<usize>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
 
@@ -347,6 +348,7 @@ impl Orm {
 }
 
 // ORM的脚本调用方法
+#[allow(unused)]
 impl Orm {
     pub async fn script_query_page(
         &self,
@@ -354,7 +356,7 @@ impl Orm {
         params: &BmbpMap,
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageInner<BmbpMap>> {
+    ) -> BmbpResp<PageRespVo<BmbpMap>> {
         let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
         self.raw_query_page_with_params(&sql, params.as_slice(), page_no, page_size)
             .await
