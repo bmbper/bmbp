@@ -1,132 +1,150 @@
-use proc_macro2::{Ident, TokenStream};
-use quote::{format_ident, quote, IdentFragment, ToTokens};
-use syn::{parse, parse_str, Data, DeriveInput, Field, Meta, Type, TypePath};
+use std::collections::HashMap;
 
-pub fn build(
-    struct_name: &Ident,
-    struct_field: Vec<TokenStream>,
-    struct_method: Vec<TokenStream>,
-) -> TokenStream {
-    quote!(
-        #[derive(Default, Debug, Clone, Serialize, Deserialize)]
-        #[serde(rename_all = "camelCase")]
-        #[serde(default)]
-        pub struct #struct_name{
-             #(#struct_field,)*
-        }
-        impl #struct_name{
-            #(#struct_method)*
-        }
-        impl #struct_name{
-          pub fn new()->#struct_name{
-                #struct_name::default()
+use proc_macro2::TokenStream;
+use quote::{format_ident, quote, ToTokens};
+use syn::{Data, DeriveInput, Field};
+
+pub fn parse_struct_field(input_struct: &DeriveInput) -> Vec<(String, Field)> {
+    let mut field_vec = vec![];
+    let struct_data = &input_struct.data;
+    match struct_data {
+        Data::Struct(orm_struct_data) => {
+            let orm_struct_fields = &orm_struct_data.fields;
+            for struct_field in orm_struct_fields {
+                field_vec.push((
+                    struct_field.ident.as_ref().unwrap().to_string(),
+                    struct_field.clone(),
+                ))
             }
         }
-    )
+        _ => {}
+    }
+    field_vec
 }
 
-pub fn parse_struct(
-    derive_input: &DeriveInput,
-) -> ((Vec<(String, String)>, Vec<TokenStream>, Vec<TokenStream>)) {
-    let mut orm_struct_field = vec![];
-    let mut orm_struct_field_token = vec![];
-    let mut orm_struct_method_token = vec![];
-
-    let orm_struct_ident_data = &derive_input.data;
-    match orm_struct_ident_data {
+#[allow(dead_code)]
+pub fn parse_struct_field_name(input_struct: &DeriveInput) -> Vec<String> {
+    let mut field_vec = vec![];
+    let struct_data = &input_struct.data;
+    match struct_data {
         Data::Struct(orm_struct_data) => {
             let orm_struct_fields = &orm_struct_data.fields;
             for struct_field in orm_struct_fields {
                 let struct_field_name = &struct_field.ident.as_ref().unwrap().to_string();
-                let struct_field_type_name = &struct_field.ty.to_token_stream().to_string();
-                if !is_orm_struct_field_has_skip_meta(struct_field) {
-                    orm_struct_field
-                        .push((struct_field_name.clone(), struct_field_type_name.clone()));
-                }
-                let orm_struct_field_ident = struct_field.ident.as_ref().unwrap();
-                let orm_struct_field_type = &struct_field.ty;
-                // 增加结构字段
-                orm_struct_field_token.push(quote!(
-                    #orm_struct_field_ident : #orm_struct_field_type
-                ));
-                let field_method_token =
-                    build_token_with_name_type(&orm_struct_field_ident, orm_struct_field_type);
-                orm_struct_method_token.push(field_method_token.to_token_stream());
+                field_vec.push(struct_field_name.clone())
             }
         }
         _ => {}
-    };
-    (
-        orm_struct_field,
-        orm_struct_field_token,
-        orm_struct_method_token,
-    )
-}
-
-fn is_orm_struct_field_has_skip_meta(field: &Field) -> bool {
-    // 从属性里面提取宏
-    let field_attrs = field.attrs.as_slice();
-    if field_attrs.is_empty() {
-        return false;
-    };
-    let mut has_skip_marco = false;
-    for attr in field_attrs {
-        let meta = &attr.meta;
-        match meta {
-            Meta::Path(mv) => {
-                let temp = mv.to_token_stream().to_string();
-                if "skip".eq(temp.as_str()) {
-                    has_skip_marco = true;
-                    break;
-                }
-            }
-            Meta::List(v) => {
-                println!("meta2:{:#?}", v.to_token_stream());
-            }
-            Meta::NameValue(v) => {
-                println!("meta3:{:#?}", v.to_token_stream());
-            }
-        }
     }
-    has_skip_marco
+    field_vec
 }
 
-pub fn build_token_by_field(
-    field_slice: &[(String, String)],
-) -> (Vec<TokenStream>, Vec<TokenStream>) {
-    let mut field_token_vec = vec![];
-    let mut method_token_vec = vec![];
-    for field_name in field_slice {
-        let field_name_ident = format_ident!("{}", field_name.0.clone());
-        let field_type_ident = format_ident!("{}", field_name.1.clone());
-        let field_token = quote!(
-           #field_name_ident : #field_type_ident
-        );
-        field_token_vec.push(field_token);
+pub fn build_tree_field_token_stream(
+    tree_prefix: String,
+    tree_struct_name: String,
+) -> Vec<(String, TokenStream)> {
+    let tree_field_vec = vec![
+        (format!("{}_{}", tree_prefix, "id"), "String".to_string()),
+        (
+            format!("{}_{}", tree_prefix, "id_path"),
+            "String".to_string(),
+        ),
+        (format!("{}_{}", tree_prefix, "title"), "String".to_string()),
+        (
+            format!("{}_{}", tree_prefix, "title_path"),
+            "String".to_string(),
+        ),
+        (
+            format!("{}_{}", tree_prefix, "parent_id"),
+            "String".to_string(),
+        ),
+        (
+            format!("{}_{}", tree_prefix, "data_id"),
+            "String".to_string(),
+        ),
+    ];
+    let mut field_vec = build_field_token_stream(tree_field_vec.as_slice());
+    let child_field_id = format_ident!("{}_{}", tree_prefix, "children");
+    let struct_ident = format_ident!("{}", tree_struct_name);
+    field_vec.push((
+        child_field_id.to_string(),
+        quote!(#child_field_id:Vec<#struct_ident>),
+    ));
+    field_vec
+}
 
-        let token = build_token_with_name_type(&field_name_ident, &field_type_ident);
-        method_token_vec.push(token);
+pub fn build_model_field_token_stream() -> Vec<(String, TokenStream)> {
+    let field_vec = vec![
+        ("r_id".to_string(), "String".to_string()),
+        ("r_level".to_string(), "String".to_string()),
+        ("r_flag".to_string(), "String".to_string()),
+        ("r_create_time".to_string(), "String".to_string()),
+        ("r_create_user".to_string(), "String".to_string()),
+        ("r_update_time".to_string(), "String".to_string()),
+        ("r_update_user".to_string(), "String".to_string()),
+        ("r_owner_org".to_string(), "String".to_string()),
+        ("r_owner_user".to_string(), "String".to_string()),
+        ("r_sign".to_string(), "String".to_string()),
+    ];
+    build_field_token_stream(field_vec.as_slice())
+}
+
+pub fn build_page_field_token_stream() -> Vec<(String, TokenStream)> {
+    let field_vec = vec![
+        ("page_no".to_string(), "usize".to_string()),
+        ("page_size".to_string(), "usize".to_string()),
+        ("total".to_string(), "usize".to_string()),
+    ];
+    build_field_token_stream(field_vec.as_slice())
+}
+
+fn build_field_token_stream(field_slice: &[(String, String)]) -> Vec<(String, TokenStream)> {
+    let mut tree_field_vec = vec![];
+    for (name, type_) in field_slice {
+        let name_ident = format_ident!("{}", name.to_string().replace("\"", ""));
+        let type_ident = format_ident!("{}", type_.to_string().replace("\"", ""));
+        tree_field_vec.push((name.to_string(), quote!(#name_ident: #type_ident)));
     }
-    (field_token_vec, method_token_vec)
+    tree_field_vec
 }
 
-fn build_token_with_name_type<T>(field_name_ident: &Ident, field_type_ident: &T) -> TokenStream
-where
-    T: ToTokens,
-{
-    let set_method_ident = format_ident!("set_{}", field_name_ident);
-    let get_method_ident = format_ident!("get_{}", field_name_ident);
-    let get_mut_method_ident = format_ident!("get_mut_{}", field_name_ident);
-    quote!(
-        pub fn #set_method_ident(&mut self,v : #field_type_ident)->&mut Self{
-            self.#field_name_ident = v;
-            self
+#[allow(dead_code)]
+pub fn merge_field_token_stream(
+    tree_field: Vec<(String, TokenStream)>,
+    struct_field: Vec<(String, TokenStream)>,
+) -> Vec<TokenStream> {
+    let mut merge_field = vec![];
+    let mut field_key_map = HashMap::new();
+    for (key, item) in tree_field {
+        field_key_map.insert(key, "");
+        merge_field.push(item);
+    }
+    for (key, item) in struct_field {
+        if field_key_map.contains_key(key.as_str()) {
+            continue;
         }
-        pub fn #get_method_ident(&self)->&#field_type_ident{
-            &self.#field_name_ident
+        field_key_map.insert(key, "");
+        merge_field.push(item);
+    }
+    merge_field
+}
+
+pub fn merge_field_token_stream_from_field(
+    tree_field: Vec<(String, TokenStream)>,
+    struct_field: Vec<(String, Field)>,
+) -> Vec<TokenStream> {
+    let mut merge_field = vec![];
+    let mut field_key_map = HashMap::new();
+    for (key, item) in tree_field {
+        field_key_map.insert(key, "");
+        merge_field.push(item);
+    }
+    for (key, item) in struct_field {
+        if field_key_map.contains_key(key.as_str()) {
+            continue;
         }
-        pub fn #get_mut_method_ident(&mut self)->&mut #field_type_ident{
-            &mut self.#field_name_ident
-        }
-    )
+        field_key_map.insert(key, "");
+        merge_field.push(item.into_token_stream());
+    }
+    merge_field
 }

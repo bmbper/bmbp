@@ -1,14 +1,30 @@
-use proc_macro::{TokenStream, TokenTree};
-use std::fmt::format;
+use proc_macro::TokenStream;
 
-use quote::{format_ident, quote, ToTokens};
-use syn::{parse_macro_input, AttrStyle, Data, DeriveInput, Field, Ident, ItemStruct, Meta};
-
+mod method;
 mod model;
 mod orm;
 mod page;
+mod tree;
 mod util;
 mod validator;
+
+/// #[tree] 给Struct增加 TreeTrait的实现方法
+#[proc_macro_attribute]
+pub fn tree(tree_meta_token: TokenStream, tree_struct_token: TokenStream) -> TokenStream {
+    tree::tree(tree_meta_token, tree_struct_token)
+}
+
+/// #[model] 给Struct增加 get_,get_mut_,set_方法
+#[proc_macro_attribute]
+pub fn model(model_meta_token: TokenStream, model_struct_token: TokenStream) -> TokenStream {
+    model::model(model_meta_token, model_struct_token)
+}
+
+/// #[method] 给Struct增加 get_,get_mut_,set_方法
+#[proc_macro_attribute]
+pub fn method(method_meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
+    method::method(method_meta_token, struct_token)
+}
 
 /// #[orm] 给Struct增加以下方法：
 ///      get_,get_mut_,set_
@@ -18,12 +34,6 @@ mod validator;
 #[proc_macro_attribute]
 pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenStream {
     orm::orm(orm_meta_token, orm_struct_token)
-}
-
-/// #[model] 给Struct增加 get_,get_mut_,set_方法
-#[proc_macro_attribute]
-pub fn model(model_meta_token: TokenStream, model_struct_token: TokenStream) -> TokenStream {
-    model::model(model_meta_token, model_struct_token)
 }
 
 /// #[page] 给Struct增加 page_no,page_size,get_mut_,set_方法

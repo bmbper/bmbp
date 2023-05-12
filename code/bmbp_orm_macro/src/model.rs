@@ -1,25 +1,26 @@
-use proc_macro::TokenStream as TokenStream0;
-use proc_macro::{TokenStream, TokenTree};
-use std::fmt::format;
+use proc_macro::TokenStream;
+
+use quote::quote;
+use syn::{parse_macro_input, DeriveInput, Ident};
 
 use crate::util;
-use quote::{format_ident, quote, ToTokens};
-use syn::{parse_macro_input, AttrStyle, Data, DeriveInput, Field, Ident, ItemStruct, Meta};
 
-pub fn model(_: TokenStream0, model_struct_token: TokenStream0) -> TokenStream0 {
-    // 处理Struct定义的属性
-    let mut model_struct_field_token = vec![];
-    let mut model_struct_method_token = vec![];
-    // 处理Struct定义的属性
+pub fn model(_: TokenStream, model_struct_token: TokenStream) -> TokenStream {
     let model_struct = parse_macro_input!(model_struct_token as DeriveInput);
-    let (_, struct_field_token, struct_method_token) = util::parse_struct(&model_struct);
-    model_struct_field_token.extend_from_slice(struct_field_token.as_slice());
-    model_struct_method_token.extend_from_slice(struct_method_token.as_slice());
+    // 公共字段
+    let base_field = util::build_model_field_token_stream();
+    // 自定义字段
+    let old_struct_field = util::parse_struct_field(&model_struct);
+    // 合并字段
+    let struct_merge_filed =
+        util::merge_field_token_stream_from_field(base_field, old_struct_field);
+    let struct_atts = &model_struct.attrs;
     let struct_name_ident: &Ident = &model_struct.ident;
-    let new_struct_token = util::build(
-        struct_name_ident,
-        model_struct_field_token,
-        model_struct_method_token,
+    let final_struct = quote!(
+        #(#struct_atts)*
+        pub struct #struct_name_ident{
+           #(#struct_merge_filed),*
+        }
     );
-    new_struct_token.into()
+    final_struct.into()
 }
