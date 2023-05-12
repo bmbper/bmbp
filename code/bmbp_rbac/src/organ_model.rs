@@ -1,28 +1,27 @@
+use std::collections::HashMap;
+
+use serde::{Deserialize, Serialize};
+
 use bmbp_orm_ins::BmbpScriptSql;
-use bmbp_orm_macro::{model, orm, page};
+use bmbp_orm_macro::{method, model, orm, page};
 use bmbp_types::vo::BaseOrmModel;
 use bmbp_types::BmbpValue;
 use bmbp_types::{BmbpBaseModel, BmbpPageReqVo, TreeNode};
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 #[page]
+#[method]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct OrganQueryParam {
     r_id: String,
     parent_organ_id: String,
     organ_id: String,
 }
 
-#[orm]
+#[tree(organ)]
+#[model]
+#[method]
 pub struct BmbpRbacOrgan {
-    organ_id: String,
-    parent_organ_id: String,
-    organ_title: String,
-    organ_path: String,
-    organ_data_id: String,
     organ_type: BmbpOrganType,
-    #[skip]
-    children: Vec<BmbpRbacOrgan>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -35,6 +34,7 @@ pub enum BmbpOrganType {
     Post = 3,
     Person = 4,
 }
+
 impl ToString for BmbpOrganType {
     fn to_string(&self) -> String {
         match self {
@@ -46,11 +46,13 @@ impl ToString for BmbpOrganType {
         }
     }
 }
+
 impl Default for BmbpOrganType {
     fn default() -> Self {
         BmbpOrganType::Unit
     }
 }
+
 impl Into<BmbpValue> for BmbpOrganType {
     fn into(self) -> BmbpValue {
         match self {
