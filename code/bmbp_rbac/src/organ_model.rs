@@ -1,16 +1,12 @@
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 
-use bmbp_orm_ins::BmbpScriptSql;
-use bmbp_orm_macro::{method, model, orm, page};
-use bmbp_types::vo::BaseOrmModel;
+use bmbp_orm_macro::{method, model, page, tree};
 use bmbp_types::BmbpValue;
-use bmbp_types::{BmbpBaseModel, BmbpPageReqVo, TreeNode};
+use bmbp_types::TreeNode;
 
 #[page]
 #[method]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct OrganQueryParam {
     r_id: String,
     parent_organ_id: String,
@@ -20,6 +16,7 @@ pub struct OrganQueryParam {
 #[tree(organ)]
 #[model]
 #[method]
+#[derive(Default, Debug, Clone, Deserialize, Serialize)]
 pub struct BmbpRbacOrgan {
     organ_type: BmbpOrganType,
 }

@@ -1,8 +1,6 @@
-mod dict;
-mod routes;
-mod vars;
-
 use tracing;
+
+mod routes;
 
 /// 设置路由
 pub fn set_route_scope() {
