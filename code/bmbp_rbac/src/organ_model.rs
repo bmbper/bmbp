@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use bmbp_orm_macro::{method, model, page, tree};
+use bmbp_orm_macro::{method, model, tree};
 use bmbp_types::BmbpTree;
 
 #[method]

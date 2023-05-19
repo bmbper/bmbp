@@ -89,15 +89,6 @@ pub fn build_model_field_token_stream() -> Vec<(String, TokenStream)> {
     build_field_token_stream(field_vec.as_slice())
 }
 
-pub fn build_page_field_token_stream() -> Vec<(String, TokenStream)> {
-    let field_vec = vec![
-        ("page_no".to_string(), "usize".to_string()),
-        ("page_size".to_string(), "usize".to_string()),
-        ("total".to_string(), "usize".to_string()),
-    ];
-    build_field_token_stream(field_vec.as_slice())
-}
-
 fn build_field_token_stream(field_slice: &[(String, String)]) -> Vec<(String, TokenStream)> {
     let mut tree_field_vec = vec![];
     for (name, type_) in field_slice {

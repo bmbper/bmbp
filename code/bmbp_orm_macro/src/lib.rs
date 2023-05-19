@@ -3,7 +3,6 @@ use proc_macro::TokenStream;
 mod method;
 mod model;
 mod orm;
-mod page;
 mod tree;
 mod util;
 mod validator;
@@ -34,12 +33,6 @@ pub fn method(method_meta_token: TokenStream, struct_token: TokenStream) -> Toke
 #[proc_macro_attribute]
 pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenStream {
     orm::orm(orm_meta_token, orm_struct_token)
-}
-
-/// #[page] 给Struct增加 page_no,page_size,get_mut_,set_方法
-#[proc_macro_attribute]
-pub fn page(page_meta_token: TokenStream, model_struct_token: TokenStream) -> TokenStream {
-    page::page(page_meta_token, model_struct_token)
 }
 
 /// #[validator] 增加规则校验

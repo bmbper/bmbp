@@ -32,19 +32,6 @@ fn test_model() {
 }
 
 #[test]
-fn test_page() {
-    #[page]
-    #[method]
-    #[derive(Default)]
-    pub struct Demo {
-        name: String,
-    }
-    let mut demo1 = Demo::default();
-    demo1.set_page_no(12usize);
-    println!("{:#?}", demo1.get_page_no())
-}
-
-#[test]
 fn test_validator() {}
 
 #[test]
