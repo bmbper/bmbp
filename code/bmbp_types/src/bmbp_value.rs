@@ -441,7 +441,7 @@ impl BmbpValue {
             _ => None,
         }
     }
-    pub fn raw_map(&self) -> Option<&BmbpMap> {
+    pub fn raw_map(&self) -> Option<&BmbpHashMap> {
         match self {
             BmbpValue::Map(v) => Some(v),
             _ => None,
@@ -456,18 +456,18 @@ impl BmbpValue {
 }
 
 pub type BmbpVec = Vec<BmbpValue>;
-pub type BmbpMap = HashMap<String, BmbpValue>;
+pub type BmbpHashMap = HashMap<String, BmbpValue>;
 
 #[cfg(test)]
 mod tests {
-    use crate::bmbp_value::{BmbpMap, BmbpValue};
+    use crate::bmbp_value::{BmbpHashMap, BmbpValue};
 
     #[test]
     fn test_bmbp_value() {
         let v = BmbpValue::from("xxxx");
         println!("{}", serde_json::to_string(&v).unwrap());
 
-        let mut bp = BmbpMap::new();
+        let mut bp = BmbpHashMap::new();
         bp.insert("a".to_string(), BmbpValue::from("xxx"));
 
         println!("{}", serde_json::to_string(&bp).unwrap());

@@ -1,8 +1,14 @@
+use axum::Json;
+use tracing;
+
 use bmbp_types::{BmbpError, BmbpResp, RespVo};
 
-use crate::organ_model::BmbpRbacOrgan;
+use crate::organ_model::{BmbpRbacOrgan, OrganQueryParam};
 
-pub async fn find_organ_tree() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
+pub async fn find_organ_tree(
+    params: Json<OrganQueryParam>,
+) -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
+    tracing::debug!("组织树查询参数:{:#?}", params);
     Err(BmbpError::api("接口未实现".to_string()))
 }
 

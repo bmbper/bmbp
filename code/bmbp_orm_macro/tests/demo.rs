@@ -1,6 +1,6 @@
 use serde;
 
-use bmbp_types::TreeNode;
+use bmbp_types::BmbpTree;
 
 #[model]
 pub struct Demo {
@@ -14,7 +14,7 @@ pub struct Demo {
     organ_children: Vec<Demo>,
 }
 
-impl TreeNode<Demo> for Demo {
+impl BmbpTree<Demo> for Demo {
     fn get_tree_id(&self) -> &String {
         &self.organ_id
     }

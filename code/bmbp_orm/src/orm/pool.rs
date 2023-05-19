@@ -10,7 +10,7 @@ use time::OffsetDateTime;
 use tokio::sync::{Mutex, RwLock};
 use tracing::debug;
 
-use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, PageRespVo};
+use bmbp_types::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, PageRespVo};
 
 use crate::{BmbpDataSource, BmbpOrmSQL};
 
@@ -205,7 +205,7 @@ impl ConnInner {
         params: &[BmbpValue],
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageRespVo<BmbpMap>> {
+    ) -> BmbpResp<PageRespVo<BmbpHashMap>> {
         let bmbp_vec = self
             .inner()
             .write()
@@ -218,7 +218,7 @@ impl ConnInner {
         &self,
         sql: &String,
         params: &[BmbpValue],
-    ) -> BmbpResp<Option<Vec<BmbpMap>>> {
+    ) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
         let bmbp_vec = self
             .inner()
             .write()

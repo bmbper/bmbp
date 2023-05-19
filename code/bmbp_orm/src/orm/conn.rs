@@ -3,7 +3,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use serde_json::{Map, Value};
 
-use bmbp_types::{BmbpMap, BmbpResp, BmbpValue, PageRespVo};
+use bmbp_types::{BmbpHashMap, BmbpResp, BmbpValue, PageRespVo};
 
 use crate::BmbpDataSource;
 
@@ -55,7 +55,7 @@ pub trait BmbpConn {
         &mut self,
         sql: &String,
         params: &[BmbpValue],
-    ) -> BmbpResp<Option<Vec<BmbpMap>>> {
+    ) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
         Ok(None)
     }
     async fn raw_find_page(
@@ -64,7 +64,7 @@ pub trait BmbpConn {
         params: &[BmbpValue],
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageRespVo<BmbpMap>> {
+    ) -> BmbpResp<PageRespVo<BmbpHashMap>> {
         Ok(PageRespVo::new())
     }
 }

@@ -9,7 +9,7 @@ use tokio::sync::{Mutex, RwLock};
 use tokio_postgres::{connect, types::ToSql, Client, Error, NoTls, Row};
 use tracing::debug;
 
-use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, PageRespVo};
+use bmbp_types::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, PageRespVo};
 use bmbp_util::uuid;
 
 use crate::{
@@ -279,7 +279,7 @@ impl BmbpConn for BmbpPgConnect {
         &mut self,
         sql: &String,
         params: &[BmbpValue],
-    ) -> BmbpResp<Option<Vec<BmbpMap>>> {
+    ) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
         let pg_param = from_bmbp_value_to_pg_params(params);
         let pg_params_ref = pg_param
             .iter()
@@ -304,14 +304,14 @@ impl BmbpConn for BmbpPgConnect {
         params: &[BmbpValue],
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageRespVo<BmbpMap>> {
+    ) -> BmbpResp<PageRespVo<BmbpHashMap>> {
         let pg_param = from_bmbp_value_to_pg_params(params);
 
         let pg_params_ref = pg_param
             .iter()
             .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
             .collect::<Vec<&(dyn ToSql + Sync)>>();
-        let mut pager: PageRespVo<BmbpMap> = PageRespVo::new();
+        let mut pager: PageRespVo<BmbpHashMap> = PageRespVo::new();
 
         let count_sql = format!("select count(1) as count from ({}) t1", sql);
         let count_rs = self
@@ -362,7 +362,7 @@ impl BmbpConn for BmbpPgConnect {
             .await;
         match execute_rs {
             Ok(rows) => {
-                let vo_list: Vec<BmbpMap> = to_bmbp_vec(rows.as_slice());
+                let vo_list: Vec<BmbpHashMap> = to_bmbp_vec(rows.as_slice());
                 pager.set_data(vo_list);
                 Ok(pager)
             }
@@ -465,7 +465,7 @@ fn to_json_value(row: &Row) -> Map<String, Value> {
     map
 }
 
-fn to_bmbp_vec(rows: &[Row]) -> Vec<BmbpMap> {
+fn to_bmbp_vec(rows: &[Row]) -> Vec<BmbpHashMap> {
     let mut bmbp_vec = Vec::new();
     for item in rows {
         bmbp_vec.push(to_bmbp_map(item));
@@ -473,8 +473,8 @@ fn to_bmbp_vec(rows: &[Row]) -> Vec<BmbpMap> {
     bmbp_vec
 }
 
-fn to_bmbp_map(row: &Row) -> BmbpMap {
-    let mut map = BmbpMap::new();
+fn to_bmbp_map(row: &Row) -> BmbpHashMap {
+    let mut map = BmbpHashMap::new();
     let columns = row.columns();
     for column in columns {
         let col_name = column.name();

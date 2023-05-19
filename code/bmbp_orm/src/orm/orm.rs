@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use serde_json::{Map, Value};
 
-use bmbp_types::{BmbpError, BmbpMap, BmbpResp, BmbpValue, BmbpVec, PageRespVo};
+use bmbp_types::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, BmbpVec, PageRespVo};
 
 use crate::script::ScriptUtil;
 use crate::{BmbpDataSource, BmbpOrmSQL};
@@ -105,13 +105,13 @@ impl Orm {
     pub async fn dynamic_query_page(
         &self,
         orm: &mut BmbpOrmSQL,
-    ) -> BmbpResp<PageRespVo<Option<BmbpMap>>> {
+    ) -> BmbpResp<PageRespVo<Option<BmbpHashMap>>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
-    pub async fn dynamic_query_list(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<Option<BmbpMap>> {
+    pub async fn dynamic_query_list(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<Option<BmbpHashMap>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
-    pub async fn dynamic_query_one(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<Option<BmbpMap>> {
+    pub async fn dynamic_query_one(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<Option<BmbpHashMap>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn dynamic_query_value(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<BmbpValue> {
@@ -164,7 +164,7 @@ impl Orm {
         sql: &String,
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageRespVo<BmbpMap>> {
+    ) -> BmbpResp<PageRespVo<BmbpHashMap>> {
         let conn = self.pool.get_conn().await?;
         let model_page = conn.raw_find_page(sql, &[], page_no, page_size).await;
         conn.release().await;
@@ -176,14 +176,14 @@ impl Orm {
         params: &[BmbpValue],
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageRespVo<BmbpMap>> {
+    ) -> BmbpResp<PageRespVo<BmbpHashMap>> {
         let conn = self.pool.get_conn().await?;
         let model_page = conn.raw_find_page(sql, params, page_no, page_size).await;
         conn.release().await;
         model_page
     }
 
-    pub async fn raw_query_list(&self, sql: &String) -> BmbpResp<Option<Vec<BmbpMap>>> {
+    pub async fn raw_query_list(&self, sql: &String) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
         let conn = self.pool.get_conn().await?;
         let model_vec = conn.raw_find_list(sql, &[]).await;
         conn.release().await;
@@ -194,14 +194,14 @@ impl Orm {
         &self,
         sql: &String,
         params: &[BmbpValue],
-    ) -> BmbpResp<Option<Vec<BmbpMap>>> {
+    ) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
         let conn = self.pool.get_conn().await?;
         let model_vec = conn.raw_find_list(sql, params).await;
         conn.release().await;
         model_vec
     }
 
-    pub async fn raw_query_one(&self, sql: &String) -> BmbpResp<Option<BmbpMap>> {
+    pub async fn raw_query_one(&self, sql: &String) -> BmbpResp<Option<BmbpHashMap>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
 
@@ -353,10 +353,10 @@ impl Orm {
     pub async fn script_query_page(
         &self,
         script: &String,
-        params: &BmbpMap,
+        params: &BmbpHashMap,
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageRespVo<BmbpMap>> {
+    ) -> BmbpResp<PageRespVo<BmbpHashMap>> {
         let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
         self.raw_query_page_with_params(&sql, params.as_slice(), page_no, page_size)
             .await
@@ -364,8 +364,8 @@ impl Orm {
     pub async fn script_query_list(
         &self,
         script: &String,
-        params: &BmbpMap,
-    ) -> BmbpResp<Option<Vec<BmbpMap>>> {
+        params: &BmbpHashMap,
+    ) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
         let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
         self.raw_query_list_with_params(&sql, params.as_slice())
             .await
@@ -373,105 +373,105 @@ impl Orm {
     pub async fn script_query_one(
         &self,
         script: &String,
-        params: &BmbpMap,
-    ) -> BmbpResp<Option<BmbpMap>> {
+        params: &BmbpHashMap,
+    ) -> BmbpResp<Option<BmbpHashMap>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn script_query_value(
         &self,
         script: &String,
-        params: &BmbpMap,
+        params: &BmbpHashMap,
     ) -> BmbpResp<Option<BmbpValue>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
 
-    pub async fn script_insert(&self, script: &String, params: &BmbpMap) -> BmbpResp<usize> {
+    pub async fn script_insert(&self, script: &String, params: &BmbpHashMap) -> BmbpResp<usize> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn script_insert_batch(
         &self,
         script: &String,
-        params: &[&BmbpMap],
+        params: &[&BmbpHashMap],
     ) -> BmbpResp<Option<BmbpValue>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn batch_script_insert(
         &self,
         script: &[String],
-        params: &[&BmbpMap],
+        params: &[&BmbpHashMap],
     ) -> BmbpResp<Option<BmbpValue>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn batch_script_insert_slice(
         &self,
-        batch_script_params: &[&(String, &BmbpMap)],
+        batch_script_params: &[&(String, &BmbpHashMap)],
     ) -> BmbpResp<Option<BmbpValue>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
-    pub async fn script_update(&self, script: &String, params: &BmbpMap) -> BmbpResp<usize> {
+    pub async fn script_update(&self, script: &String, params: &BmbpHashMap) -> BmbpResp<usize> {
         let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
         self.raw_update_with_params(&sql, params.as_slice()).await
     }
     pub async fn script_insert_update(
         &self,
         script: &String,
-        params: &[&BmbpMap],
+        params: &[&BmbpHashMap],
     ) -> BmbpResp<usize> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn batch_script_update(
         &self,
         script: &[String],
-        params: &[&BmbpMap],
+        params: &[&BmbpHashMap],
     ) -> BmbpResp<usize> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn batch_script_update_slice(
         &self,
-        batch_script_params: &[&(String, &BmbpMap)],
+        batch_script_params: &[&(String, &BmbpHashMap)],
     ) -> BmbpResp<usize> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
-    pub async fn script_delete(&self, script: &String, params: &BmbpMap) -> BmbpResp<usize> {
+    pub async fn script_delete(&self, script: &String, params: &BmbpHashMap) -> BmbpResp<usize> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn script_insert_delete(
         &self,
         script: &String,
-        params: &[&BmbpMap],
+        params: &[&BmbpHashMap],
     ) -> BmbpResp<usize> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn batch_script_delete(
         &self,
         script: &[String],
-        params: &[&BmbpMap],
+        params: &[&BmbpHashMap],
     ) -> BmbpResp<usize> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn batch_script_delete_slice(
         &self,
-        batch_script_params: &[&(String, &BmbpMap)],
+        batch_script_params: &[&(String, &BmbpHashMap)],
     ) -> BmbpResp<usize> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn script_execute(
         &self,
         script: &String,
-        params: &BmbpMap,
+        params: &BmbpHashMap,
     ) -> BmbpResp<Option<BmbpValue>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn batch_script_execute(
         &self,
         script: &[String],
-        params: &[&BmbpMap],
+        params: &[&BmbpHashMap],
     ) -> BmbpResp<usize> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn batch_script_execute_slice(
         &self,
-        batch_script_params: &[&(String, &BmbpMap)],
+        batch_script_params: &[&(String, &BmbpHashMap)],
     ) -> BmbpResp<usize> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }

@@ -9,8 +9,8 @@ use bmbp_orm_macro::model;
 use bmbp_orm_macro::orm;
 use bmbp_orm_macro::page;
 use bmbp_orm_macro::tree;
+use bmbp_types::BmbpTree;
 use bmbp_types::BmbpValue;
-use bmbp_types::TreeNode;
 
 #[test]
 fn test_orm() {

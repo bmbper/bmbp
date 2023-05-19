@@ -70,7 +70,7 @@ pub fn build_tree_node_trait(tree_prefix: String, tree_struct_name: String) -> T
     let tree_struct = format_ident!("{}", tree_struct_name);
 
     let tree_trait = quote!(
-        impl TreeNode<#tree_struct> for  #tree_struct {
+        impl BmbpTree<#tree_struct> for  #tree_struct {
             fn get_tree_id(&self) -> &String {
                 &self.#tree_id
             }

@@ -1,4 +1,4 @@
-use bmbp_types::{BmbpMap, BmbpValue, BmbpVec};
+use bmbp_types::{BmbpHashMap, BmbpValue, BmbpVec};
 
 /// ScriptSQL 动态解析器，主要负责值的替换
 /// 暂时使用正则提取标签，通过传入的实体参数中获取对映的值
@@ -21,6 +21,7 @@ enum TokenVisitType {
     POSITION,
     UNION,
 }
+
 #[allow(dead_code)]
 struct Token {
     _type: TokenType,
@@ -33,6 +34,7 @@ struct ScriptToken {
     visit_name: Vec<String>,
     visit_value: BmbpValue,
 }
+
 #[allow(dead_code)]
 enum TokenState {
     EMPTY = 0,
@@ -44,15 +46,17 @@ enum TokenState {
 }
 
 pub struct ScriptUtil;
+
 #[allow(unused)]
 impl ScriptUtil {
     fn is_digital(value: &String) -> bool {
         return false;
     }
 }
+
 #[allow(unused)]
 impl ScriptUtil {
-    pub fn parse_from_map(script: &String, params: BmbpMap) -> (String, BmbpVec) {
+    pub fn parse_from_map(script: &String, params: BmbpHashMap) -> (String, BmbpVec) {
         let bmbp_value = BmbpValue::Map(params);
         Self::parse(script, &bmbp_value)
     }
@@ -283,7 +287,7 @@ mod tests {
 
     use tokio_postgres::types::ToSql;
 
-    use bmbp_types::{BmbpMap, BmbpValue};
+    use bmbp_types::{BmbpHashMap, BmbpValue};
 
     use crate::script::parse::ScriptUtil;
 
@@ -298,7 +302,7 @@ mod tests {
         assert_eq!("#{organId}", script_params[0]);
         assert_eq!("${xxxx}", script_params[1]);
 
-        let mut mp_values = BmbpMap::new();
+        let mut mp_values = BmbpHashMap::new();
         mp_values.insert("organId".to_string(), BmbpValue::from_str("004"));
         mp_values.insert("xxxx".to_string(), BmbpValue::from_i16(33 as i16));
 

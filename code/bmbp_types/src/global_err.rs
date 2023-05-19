@@ -77,5 +77,3 @@ impl IntoResponse for BmbpError {
         vo.into_response()
     }
 }
-
-pub type BmbpResp<T> = Result<T, BmbpError>;
