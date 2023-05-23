@@ -8,6 +8,7 @@ pub enum BmbpErrorKind {
     ORM,
     DynSQL,
     ApiService,
+    Model,
 }
 
 impl ToString for BmbpErrorKind {
@@ -17,6 +18,7 @@ impl ToString for BmbpErrorKind {
             BmbpErrorKind::ORM => "ORM".to_string(),
             BmbpErrorKind::ApiService => "apiService".to_string(),
             BmbpErrorKind::DynSQL => "DynSql".to_string(),
+            BmbpErrorKind::Model => "Model".to_string(),
         }
     }
 }
@@ -28,6 +30,7 @@ impl BmbpErrorKind {
             BmbpErrorKind::ORM => "ORM".to_string(),
             BmbpErrorKind::ApiService => "ApiService".to_string(),
             BmbpErrorKind::DynSQL => "DynSQL".to_string(),
+            BmbpErrorKind::Model => "Model".to_string(),
         }
     }
 }
@@ -42,14 +45,12 @@ impl BmbpError {
     pub fn name(&self) -> String {
         self.kind.name()
     }
-
     pub fn orm(msg: String) -> Self {
         BmbpError {
             kind: BmbpErrorKind::ORM,
             msg,
         }
     }
-
     pub fn api(msg: String) -> Self {
         BmbpError {
             kind: BmbpErrorKind::ApiService,
@@ -60,6 +61,12 @@ impl BmbpError {
         BmbpError {
             kind: BmbpErrorKind::DynSQL,
             msg,
+        }
+    }
+    pub fn valid(msg: &str) -> Self {
+        BmbpError {
+            kind: BmbpErrorKind::Model,
+            msg: msg.to_string(),
         }
     }
 }

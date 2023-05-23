@@ -1,9 +1,12 @@
 use proc_macro::TokenStream;
 
+mod base;
+mod bmbp_value;
 mod method;
 mod model;
 mod orm;
 mod tree;
+mod tree_model;
 mod util;
 mod validator;
 
@@ -15,14 +18,24 @@ pub fn tree(tree_meta_token: TokenStream, tree_struct_token: TokenStream) -> Tok
 
 /// #[model] 给Struct增加 get_,get_mut_,set_方法
 #[proc_macro_attribute]
-pub fn model(model_meta_token: TokenStream, model_struct_token: TokenStream) -> TokenStream {
-    model::model(model_meta_token, model_struct_token)
+pub fn base(model_meta_token: TokenStream, model_struct_token: TokenStream) -> TokenStream {
+    base::base(model_meta_token, model_struct_token)
 }
 
 /// #[method] 给Struct增加 get_,get_mut_,set_方法
 #[proc_macro_attribute]
 pub fn method(method_meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
     method::method(method_meta_token, struct_token)
+}
+
+#[proc_macro_attribute]
+pub fn model(model_meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
+    model::model(model_meta_token, struct_token)
+}
+
+#[proc_macro_attribute]
+pub fn tree_model(tree_meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
+    tree_model::tree_model(tree_meta_token, struct_token)
 }
 
 /// #[orm] 给Struct增加以下方法：
@@ -33,6 +46,12 @@ pub fn method(method_meta_token: TokenStream, struct_token: TokenStream) -> Toke
 #[proc_macro_attribute]
 pub fn orm(orm_meta_token: TokenStream, orm_struct_token: TokenStream) -> TokenStream {
     orm::orm(orm_meta_token, orm_struct_token)
+}
+
+/// #[bmbp_value] 增加规则校验
+#[proc_macro_attribute]
+pub fn bmbp_value(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
+    bmbp_value::bmbp_value(meta_token, struct_token)
 }
 
 /// #[validator] 增加规则校验

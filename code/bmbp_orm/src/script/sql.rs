@@ -192,6 +192,12 @@ impl BmbpScriptSql {
         }
         self
     }
+    pub fn select_string_slice(&mut self, field_slice: &[String]) -> &mut Self {
+        for field in field_slice {
+            self.select_fields.push(field.to_string());
+        }
+        self
+    }
     pub fn from(&mut self, table: &str) -> &mut Self {
         self.script_type = BmbpScriptType::QUERY;
         self.from_tables.push(table.to_string());

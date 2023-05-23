@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use bmbp_types::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, BmbpVec, PageRespVo};
@@ -225,8 +226,12 @@ impl Orm {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
 
-    pub async fn raw_insert(&self, sql: &String) -> BmbpResp<PageRespVo<usize>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+    pub async fn raw_insert(&self, sql: &String) -> BmbpResp<usize> {
+        let conn = self.pool.get_conn().await?;
+
+        let model_vec = conn.raw_insert(sql, &[]).await;
+        conn.release().await;
+        model_vec
     }
 
     pub async fn raw_insert_with_params(
@@ -234,7 +239,10 @@ impl Orm {
         sql: &String,
         params: &[BmbpValue],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        let conn = self.pool.get_conn().await?;
+        let model_vec = conn.raw_insert(sql, params).await;
+        conn.release().await;
+        model_vec
     }
 
     pub async fn raw_insert_batch_with_params(
@@ -386,7 +394,9 @@ impl Orm {
     }
 
     pub async fn script_insert(&self, script: &String, params: &BmbpHashMap) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        println!("===>script sql:{:#?}", script);
+        let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
+        self.raw_insert_with_params(&sql, params.as_slice()).await
     }
     pub async fn script_insert_batch(
         &self,
@@ -478,7 +488,47 @@ impl Orm {
 }
 
 /// ORM 泛型处理调用方法
-impl Orm {}
+#[allow(unused)]
+impl Orm {
+    pub async fn generate_script_query_list<T>(
+        &self,
+        script: &String,
+        params: &BmbpHashMap,
+    ) -> BmbpResp<Option<Vec<T>>>
+    where
+        T: Serialize + for<'a> Deserialize<'a>,
+    {
+        let rs = self.script_query_list(script, params).await?;
+        let rsp = match rs {
+            None => None,
+            Some(v) => {
+                let js = serde_json::to_string(&v).unwrap();
+                let rs = serde_json::from_str(&js);
+                rs.unwrap()
+            }
+        };
+        Ok(rsp)
+    }
+    pub async fn generate_script_query_one<T>(
+        &self,
+        script: &String,
+        params: &BmbpHashMap,
+    ) -> BmbpResp<Option<T>>
+    where
+        T: Serialize + for<'a> Deserialize<'a>,
+    {
+        let rs = self.script_query_one(script, params).await?;
+        let rsp = match rs {
+            None => None,
+            Some(v) => {
+                let js = serde_json::to_string(&v).unwrap();
+                let rs = serde_json::from_str(&js);
+                rs.unwrap()
+            }
+        };
+        Ok(rsp)
+    }
+}
 
 #[cfg(test)]
 mod tests {

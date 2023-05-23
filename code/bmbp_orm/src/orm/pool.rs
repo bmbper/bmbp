@@ -231,4 +231,8 @@ impl ConnInner {
         let row_count = self.inner().write().await.raw_update(sql, params).await?;
         Ok(row_count)
     }
+    pub async fn raw_insert(&self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
+        let row_count = self.inner().write().await.raw_insert(sql, params).await?;
+        Ok(row_count)
+    }
 }

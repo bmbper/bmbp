@@ -1,27 +1,36 @@
+use std::string::ToString;
+
 use serde::{Deserialize, Serialize};
 
-use bmbp_orm_macro::{method, model, tree};
-use bmbp_types::BmbpTree;
+use bmbp_orm_ins::BmbpScriptSql;
+use bmbp_orm_macro::{base, bmbp_value, method, orm, tree};
+use bmbp_types::BmbpBaseModel;
+use bmbp_types::{BmbpHashMap, BmbpTree, BmbpValue};
 
 #[method]
+#[bmbp_value]
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[serde(default)]
 pub struct OrganQueryParam {
     r_id: String,
-    parent_organ_id: String,
+    organ_parent_id: String,
     organ_id: String,
 }
 
 #[tree(organ)]
-#[model]
+#[base]
 #[method]
+#[bmbp_value]
+#[orm(table = BMBP_RBAC_ORGAN, id = r_id, exclude = organ_children)]
 #[derive(Default, Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
 pub struct BmbpRbacOrgan {
     organ_type: BmbpOrganType,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
 pub enum BmbpOrganType {
     Unit,
     Units,
@@ -33,5 +42,42 @@ pub enum BmbpOrganType {
 impl Default for BmbpOrganType {
     fn default() -> Self {
         BmbpOrganType::Unit
+    }
+}
+
+impl ToString for BmbpOrganType {
+    fn to_string(&self) -> String {
+        match self {
+            BmbpOrganType::Unit => "Unit".to_string(),
+            BmbpOrganType::Units => "Units".to_string(),
+            BmbpOrganType::Dept => "Dept".to_string(),
+            BmbpOrganType::Post => "Post".to_string(),
+            BmbpOrganType::Person => "Person".to_string(),
+        }
+    }
+}
+
+impl From<BmbpOrganType> for BmbpValue {
+    fn from(value: BmbpOrganType) -> Self {
+        BmbpValue::from(value.to_string())
+    }
+}
+
+impl From<&BmbpOrganType> for BmbpValue {
+    fn from(value: &BmbpOrganType) -> Self {
+        BmbpValue::from(value.to_string())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::organ_model::BmbpRbacOrgan;
+
+    #[test]
+    fn test_organ_serde() {
+        let organ = BmbpRbacOrgan::default();
+        println!("===>{:#?}", organ.organ_type);
+        let organ_string = serde_json::to_string_pretty(&organ);
+        println!("===>{:#?}", organ_string)
     }
 }

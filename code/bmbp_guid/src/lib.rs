@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use bmbp_orm::BmbpScriptSql;
-use bmbp_orm_macro::{model, orm};
+use bmbp_orm_macro::{base, orm};
 use bmbp_types::BmbpValue;
 
 #[orm(id = "recordId")]
@@ -21,6 +21,7 @@ impl Demo1 {}
 pub struct Demo2 {
     gooo: Option<String>,
 }
+
 #[orm(table = "rbac_organ_name", id = "record_id")]
 pub struct Demo3 {}
 
@@ -36,7 +37,7 @@ pub struct Demo6 {}
 #[orm("rbac_organ_name", recordId)]
 pub struct Demo7 {}
 
-#[model]
+#[base]
 pub struct Demo8 {
     name: String,
 }

@@ -1,16 +1,14 @@
-use std::collections::HashMap;
-
 use serde::Deserialize;
 use serde::Serialize;
 
 use bmbp_orm::BmbpScriptSql;
-use bmbp_orm_macro::method;
-use bmbp_orm_macro::model;
+use bmbp_orm_macro::base;
 use bmbp_orm_macro::orm;
-use bmbp_orm_macro::page;
 use bmbp_orm_macro::tree;
+use bmbp_orm_macro::{bmbp_value, method};
 use bmbp_types::BmbpTree;
 use bmbp_types::BmbpValue;
+use bmbp_types::{BmbpBaseModel, BmbpHashMap};
 
 #[test]
 fn test_orm() {
@@ -21,7 +19,7 @@ fn test_orm() {
 
 #[test]
 fn test_model() {
-    #[model]
+    #[base]
     #[method]
     #[derive(Default)]
     pub struct Demo {
@@ -32,12 +30,23 @@ fn test_model() {
 }
 
 #[test]
-fn test_validator() {}
+fn test_bmbp_value() {
+    #[base]
+    #[method]
+    #[bmbp_value]
+    #[derive(Default, Debug)]
+    pub struct Demo {
+        name: String,
+    }
+    let demo1 = Demo::default();
+    let bv = BmbpValue::from(demo1);
+    println!("{:#?}", bv);
+}
 
 #[test]
 fn test_tree() {
     #[tree("organ")]
-    #[model]
+    #[base]
     #[method]
     #[orm(table = RBAC_ORGAN, id = r_id, exclude = organ_children | organ_title)]
     #[derive(Default, Debug, Deserialize, Serialize, Clone)]

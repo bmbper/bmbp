@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote, ToTokens};
@@ -39,6 +39,16 @@ pub fn parse_struct_field_name(input_struct: &DeriveInput) -> Vec<String> {
     field_vec
 }
 
+#[allow(dead_code)]
+pub fn build_base_field_name_set() -> HashSet<String> {
+    let token = build_base_field_token_stream();
+    let mut name_set = HashSet::new();
+    for (name, _) in token.as_slice() {
+        name_set.insert(name.to_string());
+    }
+    name_set
+}
+
 pub fn build_tree_field_token_stream(
     tree_prefix: String,
     tree_struct_name: String,
@@ -73,7 +83,7 @@ pub fn build_tree_field_token_stream(
     field_vec
 }
 
-pub fn build_model_field_token_stream() -> Vec<(String, TokenStream)> {
+pub fn build_base_field_token_stream() -> Vec<(String, TokenStream)> {
     let field_vec = vec![
         ("r_id".to_string(), "String".to_string()),
         ("r_level".to_string(), "String".to_string()),

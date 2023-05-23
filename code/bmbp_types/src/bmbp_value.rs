@@ -161,6 +161,21 @@ where
     }
 }
 
+impl<T> From<&Vec<T>> for BmbpValue
+where
+    T: Clone,
+    BmbpValue: From<T>,
+{
+    fn from(value: &Vec<T>) -> Self {
+        let mut t_vec = vec![];
+        for item in value {
+            let v: BmbpValue = item.clone().into();
+            t_vec.push(v);
+        }
+        BmbpValue::Array(t_vec)
+    }
+}
+
 impl<T> From<Option<T>> for BmbpValue
 where
     T: Clone,

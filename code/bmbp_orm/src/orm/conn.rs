@@ -51,6 +51,9 @@ pub trait BmbpConn {
     async fn raw_update(&mut self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
         Ok(0)
     }
+    async fn raw_insert(&mut self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
+        Ok(0)
+    }
     async fn raw_find_list(
         &mut self,
         sql: &String,

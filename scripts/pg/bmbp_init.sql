@@ -13,10 +13,10 @@ create table if not exists public.bmbp_rbac_organ
     r_owner_user     varchar(36)                                   not null,
     r_sign           varchar(512),
     organ_id         varchar(36)                                   not null,
-    parent_organ_id  varchar(36) default 0                         not null,
+    organ_parent_id  varchar(36) default 0                         not null,
     organ_title      varchar(64)                                   not null,
     organ_title_path varchar(4096),
-    organ_type       varchar(36) default 'unit'::character varying not null,
+    organ_type       varchar(36) default 'Unit'::character varying not null,
     organ_data_id    varchar(36),
     organ_id_path    varchar(4096)                                 not null
 );
@@ -43,7 +43,7 @@ comment on column public.bmbp_rbac_organ.r_sign is '记录数签';
 
 comment on column public.bmbp_rbac_organ.organ_id is '组织ID';
 
-comment on column public.bmbp_rbac_organ.parent_organ_id is '上级组织ID';
+comment on column public.bmbp_rbac_organ.organ_parent_id is '上级组织ID';
 
 comment on column public.bmbp_rbac_organ.organ_title is '组织名称';
 
