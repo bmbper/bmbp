@@ -73,8 +73,14 @@ pub async fn find_organ_list_by_parent() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>>
     Err(BmbpError::api("接口未实现".to_string()))
 }
 
-pub async fn find_organ_info_by_id() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
-    Err(BmbpError::api("接口未实现".to_string()))
+pub async fn find_organ_info_by_id(
+    Path(id): Path<String>,
+) -> BmbpResp<RespVo<Option<BmbpRbacOrgan>>> {
+    let organ = OrganService::find_organ_by_id(&id).await?;
+    Ok(RespVo::ok_msg_data(
+        "查询组织机构树详情!".to_string(),
+        organ,
+    ))
 }
 
 pub async fn find_organ_info_by_code() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {

@@ -389,6 +389,39 @@ impl BmbpConn for BmbpPgConnect {
             Err(err) => Err(BmbpError::orm(err.to_string())),
         }
     }
+
+    async fn raw_find_one(
+        &mut self,
+        sql: &String,
+        params: &[BmbpValue],
+    ) -> BmbpResp<Option<BmbpHashMap>> {
+        let pg_param = from_bmbp_value_to_pg_params(params);
+        let pg_params_ref = pg_param
+            .iter()
+            .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
+            .collect::<Vec<&(dyn ToSql + Sync)>>();
+        debug!("pg_sql:{}", sql);
+        debug!("pa_params:{:#?}", pg_params_ref);
+        let execute_rs = self
+            .client
+            .lock()
+            .await
+            .query_opt(sql.as_str(), pg_params_ref.as_slice())
+            .await;
+        match execute_rs {
+            Ok(row_op) => {
+                let rs = match row_op {
+                    None => None,
+                    Some(v) => {
+                        let mp = to_bmbp_map(&v);
+                        Some(mp)
+                    }
+                };
+                Ok(rs)
+            }
+            Err(err) => Err(BmbpError::orm(err.to_string())),
+        }
+    }
 }
 
 fn from_bmbp_value_to_pg_params(

@@ -61,6 +61,7 @@ pub trait BmbpConn {
     ) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
         Ok(None)
     }
+
     async fn raw_find_page(
         &mut self,
         sql: &String,
@@ -69,5 +70,13 @@ pub trait BmbpConn {
         page_size: usize,
     ) -> BmbpResp<PageRespVo<BmbpHashMap>> {
         Ok(PageRespVo::new())
+    }
+
+    async fn raw_find_one(
+        &mut self,
+        sql: &String,
+        params: &[BmbpValue],
+    ) -> BmbpResp<Option<BmbpHashMap>> {
+        Ok(None)
     }
 }

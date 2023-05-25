@@ -227,6 +227,14 @@ impl ConnInner {
             .await?;
         Ok(bmbp_vec)
     }
+    pub async fn raw_find_one(
+        &self,
+        sql: &String,
+        params: &[BmbpValue],
+    ) -> BmbpResp<Option<BmbpHashMap>> {
+        let bmbp_vec = self.inner().write().await.raw_find_one(sql, params).await?;
+        Ok(bmbp_vec)
+    }
     pub async fn raw_update(&self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
         let row_count = self.inner().write().await.raw_update(sql, params).await?;
         Ok(row_count)

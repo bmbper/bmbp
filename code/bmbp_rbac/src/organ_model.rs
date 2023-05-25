@@ -10,7 +10,6 @@ use bmbp_types::{BmbpHashMap, BmbpTree, BmbpValue};
 #[method]
 #[bmbp_value]
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 #[serde(default)]
 pub struct OrganQueryParam {
     r_id: String,
@@ -24,7 +23,6 @@ pub struct OrganQueryParam {
 #[bmbp_value]
 #[orm(table = BMBP_RBAC_ORGAN, id = r_id, exclude = organ_children)]
 #[derive(Default, Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
 #[serde(default)]
 pub struct BmbpRbacOrgan {
     organ_type: BmbpOrganType,

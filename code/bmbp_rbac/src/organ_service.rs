@@ -11,7 +11,7 @@ pub struct OrganService();
 impl OrganService {
     pub async fn find_organ_tree(params: &OrganQueryParam) -> BmbpResp<Vec<BmbpRbacOrgan>> {
         let mut script_param = BmbpHashMap::new();
-        let mut query_script: BmbpScriptSql = BmbpRbacOrgan::query_script();
+        let mut query_script: BmbpScriptSql = BmbpRbacOrgan::raw_query_script();
         let mut path_id = "".to_string();
         // 记录ID不为空
         if !params.get_r_id().is_empty() {
@@ -47,7 +47,7 @@ impl OrganService {
         let mut script_sql: BmbpScriptSql = BmbpRbacOrgan::raw_query_script();
         let mut params = HashMap::new();
         params.insert("rId".to_string(), BmbpValue::from(r_id));
-        script_sql.filter("organ_id = #{organId}");
+        script_sql.filter("r_id = #{rId}");
         let rs = BmbpORM
             .await
             .generate_script_query_one::<BmbpRbacOrgan>(&script_sql.to_query_sql(), &params)
@@ -55,9 +55,11 @@ impl OrganService {
         Ok(rs)
     }
     pub async fn find_organ_by_organ_id(organ_id: &String) -> BmbpResp<Option<BmbpRbacOrgan>> {
-        let script_sql: BmbpScriptSql = BmbpRbacOrgan::raw_query_script();
+        let mut script_sql: BmbpScriptSql = BmbpRbacOrgan::raw_query_script();
         let mut params = HashMap::new();
         params.insert("organId".to_string(), BmbpValue::from(organ_id));
+        script_sql.filter("organ_id = #{organId}");
+
         let rs = BmbpORM
             .await
             .generate_script_query_one::<BmbpRbacOrgan>(&script_sql.to_query_sql(), &params)
@@ -90,7 +92,7 @@ impl OrganService {
             organ.set_organ_id_path(format!("/{}/", organ.get_organ_id()));
             organ.set_organ_title_path(format!("/{}/", organ.get_organ_title()));
         } else {
-            let parent_organ_op = Self::find_organ_by_id(organ.get_organ_parent_id()).await?;
+            let parent_organ_op = Self::find_organ_by_organ_id(organ.get_organ_parent_id()).await?;
             match parent_organ_op {
                 None => {
                     return Err(BmbpError::api("所指定的父级节点不存在".to_string()));
@@ -103,7 +105,7 @@ impl OrganService {
                     ));
                     organ.set_organ_title_path(format!(
                         "{}{}/",
-                        p_organ.get_organ_parent_id(),
+                        p_organ.get_organ_title_path(),
                         organ.get_organ_title()
                     ));
                 }

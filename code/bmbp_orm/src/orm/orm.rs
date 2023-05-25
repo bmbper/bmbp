@@ -210,8 +210,11 @@ impl Orm {
         &self,
         sql: &String,
         params: &[BmbpValue],
-    ) -> BmbpResp<Option<BmbpVec>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+    ) -> BmbpResp<Option<BmbpHashMap>> {
+        let conn = self.pool.get_conn().await?;
+        let model_vec = conn.raw_find_one(sql, params).await;
+        conn.release().await;
+        model_vec
     }
 
     pub async fn raw_query_value(&self, sql: &String) -> BmbpResp<Option<BmbpValue>> {
@@ -383,7 +386,9 @@ impl Orm {
         script: &String,
         params: &BmbpHashMap,
     ) -> BmbpResp<Option<BmbpHashMap>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
+        self.raw_query_one_with_params(&sql, params.as_slice())
+            .await
     }
     pub async fn script_query_value(
         &self,
@@ -522,6 +527,7 @@ impl Orm {
             None => None,
             Some(v) => {
                 let js = serde_json::to_string(&v).unwrap();
+                println!("bmbp->js:{}", js);
                 let rs = serde_json::from_str(&js);
                 rs.unwrap()
             }
