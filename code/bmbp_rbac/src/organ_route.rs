@@ -2,7 +2,7 @@ use axum::extract::Path;
 use axum::Json;
 use tracing;
 
-use bmbp_types::{BmbpError, BmbpResp, RespVo};
+use bmbp_types::{BmbpError, BmbpResp, PageParams, PageRespVo, RespVo};
 
 use crate::organ_model::{BmbpRbacOrgan, OrganQueryParam};
 use crate::organ_service::OrganService;
@@ -57,8 +57,15 @@ pub async fn find_organ_tree_start_with_parent(
     ))
 }
 
-pub async fn find_organ_page() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
-    Err(BmbpError::api("接口未实现".to_string()))
+pub async fn find_organ_page(
+    params: Json<PageParams<OrganQueryParam>>,
+) -> BmbpResp<RespVo<PageRespVo<BmbpRbacOrgan>>> {
+    tracing::debug!("组织树查询参数:{:#?}", params);
+    let organ_tree = OrganService::find_organ_page(&params).await?;
+    Ok(RespVo::ok_msg_data(
+        "查询组织机构树成功!".to_string(),
+        organ_tree,
+    ))
 }
 
 pub async fn find_organ_page_by_parent() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {

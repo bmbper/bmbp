@@ -3,6 +3,7 @@ pub use bmbp_value::BmbpValue;
 pub use bmbp_value::BmbpVec;
 pub use global_err::BmbpError;
 pub use global_err::BmbpErrorKind;
+pub use global_req::PageParams;
 pub use global_resp::BmbpResp;
 pub use global_resp::PageRespVo;
 pub use global_resp::RespVo;

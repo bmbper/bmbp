@@ -1,4 +1,3 @@
-use quote::quote;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -71,7 +70,7 @@ fn test_derive_model() {
 
 #[test]
 fn test_nest_vo() {
-    let organ = BmbpOrganVo::default();
+    let _organ = BmbpOrganVo::default();
     let organ_columns = BmbpOrganVo::orm_fields();
     println!("====>{:#?}", organ_columns);
 }

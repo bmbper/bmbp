@@ -107,6 +107,6 @@ mod test {
 
     #[test]
     fn test_sql() {
-        let mut query = BmbpDynamicSQL::query();
+        _ = BmbpDynamicSQL::query();
     }
 }

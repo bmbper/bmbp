@@ -3,12 +3,11 @@ use std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
-use bmbp_types::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, BmbpVec, PageRespVo};
-
-use crate::script::ScriptUtil;
-use crate::{BmbpDataSource, BmbpOrmSQL};
+use bmbp_types::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, PageRespVo};
 
 use super::pool::BmbpConnectionPool;
+use crate::script::ScriptUtil;
+use crate::{BmbpDataSource, BmbpOrmSQL};
 
 #[allow(dead_code)]
 pub struct Orm {
@@ -495,6 +494,39 @@ impl Orm {
 /// ORM 泛型处理调用方法
 #[allow(unused)]
 impl Orm {
+    /// 查询分页并转为实际的类型
+    pub async fn generate_script_query_page<T>(
+        &self,
+        script: &String,
+        params: &BmbpHashMap,
+        page_no: usize,
+        page_size: usize,
+    ) -> BmbpResp<PageRespVo<T>>
+    where
+        T: Default + Clone + Serialize + for<'a> Deserialize<'a> + Send + Sync,
+    {
+        let rs = self
+            .script_query_page(script, params, page_no, page_size)
+            .await?;
+        let gen_rs = rs.data();
+        let rs_1 = match gen_rs {
+            None => None,
+            Some(v) => {
+                let js = serde_json::to_string(&v).unwrap().clone();
+                let rs = serde_json::from_str(&js);
+                rs.unwrap()
+            }
+        };
+        let mut new_page = PageRespVo::new();
+        new_page.set_page_no(rs.page_no());
+        new_page.set_page_size(rs.page_size());
+        new_page.set_total(rs.total());
+        if rs_1.is_some() {
+            new_page.set_data(rs_1.unwrap());
+        }
+        Ok(new_page)
+    }
+    /// 查询分页 并转为实际类型
     pub async fn generate_script_query_list<T>(
         &self,
         script: &String,
@@ -514,6 +546,7 @@ impl Orm {
         };
         Ok(rsp)
     }
+    /// 查询详情，并转为实际类弄
     pub async fn generate_script_query_one<T>(
         &self,
         script: &String,
@@ -540,9 +573,9 @@ impl Orm {
 mod tests {
     use std::sync::Arc;
 
-    use bmbp_types::BmbpVec;
-
     use crate::{BmbpDataSource, Orm};
+    use bmbp_types::BmbpVec;
+    use tracing::info;
 
     #[tokio::test]
     async fn test_orm_sql() {
@@ -553,16 +586,26 @@ mod tests {
         let mut batch_params = vec![];
         let params = BmbpVec::new();
         batch_params.push(params.as_slice());
-        orm.raw_insert_batch_with_params(
-            &raw_insert_batch_with_params_script,
-            batch_params.as_slice(),
-        );
+        let rs = orm
+            .raw_insert_batch_with_params(
+                &raw_insert_batch_with_params_script,
+                batch_params.as_slice(),
+            )
+            .await;
 
+        match rs {
+            Ok(v) => {
+                info!("{:#?}", v);
+            }
+            Err(e) => {
+                info!("{:#?}", e);
+            }
+        }
         let mut batch_sql = vec![];
         let one_sql = "".to_string();
         let one_params = BmbpVec::new();
         let one_sql_params = &(one_sql, one_params.as_slice());
         batch_sql.push(one_sql_params);
-        orm.batch_raw_delete_with_slice(batch_sql.as_slice());
+        _ = orm.batch_raw_delete_with_slice(batch_sql.as_slice()).await;
     }
 }

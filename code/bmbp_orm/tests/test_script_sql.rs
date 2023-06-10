@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use serde::{Deserialize, Serialize};
 
@@ -33,7 +33,11 @@ async fn test_orm_query_struct() -> BmbpResp<()> {
     let ds = Arc::new(build_data_source());
     let orm = Orm::new(ds).await?;
     let sql = "select name,code from demo".to_string();
-    let demo_a_lsit = orm.struct_query_list::<DemoA>(&sql).await?;
-    assert_eq!(demo_a_lsit.len(), 2);
+    let params = HashMap::new();
+    let demo_a_lsit = orm
+        .clone()
+        .generate_script_query_list::<DemoA>(&sql, &params)
+        .await?;
+    assert_eq!(demo_a_lsit.unwrap().len(), 2);
     Ok(())
 }

@@ -283,9 +283,6 @@ impl ScriptUtil {
 
 #[cfg(test)]
 mod tests {
-    use std::env::var;
-
-    use tokio_postgres::types::ToSql;
 
     use bmbp_types::{BmbpHashMap, BmbpValue};
 
@@ -303,14 +300,14 @@ mod tests {
         assert_eq!("${xxxx}", script_params[1]);
 
         let mut mp_values = BmbpHashMap::new();
-        mp_values.insert("organId".to_string(), BmbpValue::from_str("004"));
-        mp_values.insert("xxxx".to_string(), BmbpValue::from_i16(33 as i16));
+        mp_values.insert("organId".to_string(), BmbpValue::from("004"));
+        mp_values.insert("xxxx".to_string(), BmbpValue::from(33));
 
         let raw_sql =
             "SELECT * FROM BMBP_RBAC_ORGAN WHERE (ORGAN_ID = ${0}) and temp = ${1}".to_string();
         let (sql, value) = ScriptUtil::parse_from_map(&script_sql, mp_values);
         assert_eq!(sql, raw_sql);
-        assert_eq!(BmbpValue::from_str("004"), value[0]);
-        assert_eq!(BmbpValue::from_i16(33 as i16), value[1]);
+        assert_eq!(BmbpValue::from("004"), value[0]);
+        assert_eq!(BmbpValue::from(33), value[1]);
     }
 }

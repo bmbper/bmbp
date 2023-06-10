@@ -175,7 +175,7 @@ fn build_query_script() -> TokenStream2 {
             let orm_fields: Vec<(String, String)> = Self::get_orm_field_alias();
             let mut query_script = BmbpScriptSql::new();
             for (raw_field, field) in orm_fields.as_slice() {
-                query_script.select(format!("{} as {}", raw_field, field).as_str());
+                query_script.select(format!("{} as \"{}\"", raw_field, field).as_str());
             }
             query_script.from(orm_table.as_str());
             query_script
@@ -204,7 +204,7 @@ fn build_query_script_by_id() -> TokenStream2 {
             let orm_fields: Vec<(String, String)> = Self::get_orm_field_alias();
             let mut query_script = BmbpScriptSql::new();
             for (raw_field, field) in orm_fields.as_slice() {
-                query_script.select(format!("{} as {}", raw_field, field).as_str());
+                query_script.select(format!("{} as \"{}\"", raw_field, field).as_str());
             }
             query_script.from(orm_table.as_str());
             query_script.filter("r_id = #{rId}");
