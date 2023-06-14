@@ -9,7 +9,7 @@ pub use global_resp::PageRespVo;
 pub use global_resp::RespVo;
 pub use global_trait::BmbpBaseModel;
 pub use global_trait::BmbpTree;
-pub use global_value::ROOT_TREE_NODE;
+pub use global_value::*;
 
 mod bmbp_value;
 mod global_err;

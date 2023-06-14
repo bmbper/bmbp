@@ -26,6 +26,9 @@ where
     pub fn get_params(&self) -> Option<&T> {
         self.params.as_ref()
     }
+    pub fn get_mut_params(&mut self) -> Option<&mut T> {
+        self.params.as_mut()
+    }
     pub fn set_page_no(&mut self, page_no: usize) -> &mut Self {
         self.page_no = page_no;
         self

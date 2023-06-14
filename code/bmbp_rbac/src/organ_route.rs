@@ -2,13 +2,16 @@ use axum::extract::Path;
 use axum::Json;
 use tracing;
 
-use bmbp_types::{BmbpError, BmbpResp, PageParams, PageRespVo, RespVo};
+use bmbp_types::{
+    BmbpError, BmbpResp, PageParams, PageRespVo, RespVo, RECORD_STATUS_DISABLE,
+    RECORD_STATUS_ENABLE,
+};
 
 use crate::organ_model::{BmbpRbacOrgan, OrganQueryParam};
 use crate::organ_service::OrganService;
 
 pub async fn find_organ_tree(
-    params: Json<OrganQueryParam>,
+    Json(params): Json<OrganQueryParam>,
 ) -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
     tracing::debug!("组织树查询参数:{:#?}", params);
     let organ_tree = OrganService::find_organ_tree(&params).await?;
@@ -58,7 +61,7 @@ pub async fn find_organ_tree_start_with_parent(
 }
 
 pub async fn find_organ_page(
-    params: Json<PageParams<OrganQueryParam>>,
+    Json(params): Json<PageParams<OrganQueryParam>>,
 ) -> BmbpResp<RespVo<PageRespVo<BmbpRbacOrgan>>> {
     tracing::debug!("组织树查询参数:{:#?}", params);
     let organ_tree = OrganService::find_organ_page(&params).await?;
@@ -68,15 +71,28 @@ pub async fn find_organ_page(
     ))
 }
 
-pub async fn find_organ_page_by_parent() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
+pub async fn find_organ_page_by_parent(
+    Path(parent): Path<String>,
+    Json(mut params): Json<PageParams<OrganQueryParam>>,
+) -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
+    params.get_mut_params().unwrap().set_organ_parent_id(parent);
+    println!("{:#?}", params);
     Err(BmbpError::api("接口未实现".to_string()))
 }
 
-pub async fn find_organ_list() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
+pub async fn find_organ_list(
+    Json(mut params): Json<PageParams<OrganQueryParam>>,
+) -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
+    println!("{:#?}", params);
     Err(BmbpError::api("接口未实现".to_string()))
 }
 
-pub async fn find_organ_list_by_parent() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
+pub async fn find_organ_list_by_parent(
+    Path(parent): Path<String>,
+    Json(mut params): Json<OrganQueryParam>,
+) -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
+    params.set_organ_parent_id(parent);
+    println!("{:#?}", params);
     Err(BmbpError::api("接口未实现".to_string()))
 }
 
@@ -90,8 +106,14 @@ pub async fn find_organ_info_by_id(
     ))
 }
 
-pub async fn find_organ_info_by_code() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
-    Err(BmbpError::api("接口未实现".to_string()))
+pub async fn find_organ_info_by_code(
+    Path(code): Path<String>,
+) -> BmbpResp<RespVo<Option<BmbpRbacOrgan>>> {
+    let organ = OrganService::find_organ_by_organ_code(&code).await?;
+    Ok(RespVo::ok_msg_data(
+        "查询组织机构树详情!".to_string(),
+        organ,
+    ))
 }
 
 pub async fn save_organ(Json(mut organ): Json<BmbpRbacOrgan>) -> BmbpResp<RespVo<BmbpRbacOrgan>> {
@@ -100,34 +122,67 @@ pub async fn save_organ(Json(mut organ): Json<BmbpRbacOrgan>) -> BmbpResp<RespVo
     Ok(RespVo::ok_msg_data("保存组织机构成功!".to_string(), organ))
 }
 
-pub async fn insert_organ() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
+pub async fn insert_organ(Json(mut organ): Json<BmbpRbacOrgan>) -> BmbpResp<RespVo<BmbpRbacOrgan>> {
+    tracing::debug!("新增组织信息:{:#?}", organ);
+    OrganService::insert_organ(&mut organ).await?;
+    Ok(RespVo::ok_msg_data("保存组织机构成功!".to_string(), organ))
+}
+
+pub async fn update_organ(Json(mut organ): Json<BmbpRbacOrgan>) -> BmbpResp<RespVo<BmbpRbacOrgan>> {
+    tracing::debug!("更新组织信息:{:#?}", organ);
+    OrganService::update_organ(&mut organ).await?;
+    Ok(RespVo::ok_msg_data("保存组织机构成功!".to_string(), organ))
+}
+
+pub async fn update_organ_by_id(
+    Path(id): Path<String>,
+    Json(mut organ): Json<BmbpRbacOrgan>,
+) -> BmbpResp<RespVo<BmbpRbacOrgan>> {
+    organ.set_r_id(id);
+    tracing::debug!("更新组织信息:{:#?}", organ);
+    OrganService::update_organ(&mut organ).await?;
+    Ok(RespVo::ok_msg_data("保存组织机构成功!".to_string(), organ))
+}
+
+pub async fn update_organ_parent(
+    Path(id): Path<String>,
+    Path(parent): Path<String>,
+) -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
+    tracing::debug!("更新组织父级:{}:{}", id, parent);
     Err(BmbpError::api("接口未实现".to_string()))
 }
 
-pub async fn update_organ() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
-    Err(BmbpError::api("接口未实现".to_string()))
+pub async fn enable_organ_by_id(Path(id): Path<String>) -> BmbpResp<RespVo<usize>> {
+    tracing::debug!("启用组织{}", id);
+    let row_count = OrganService::update_organ_status(id, RECORD_STATUS_ENABLE.to_string()).await?;
+    Ok(RespVo::ok_msg_data(
+        "启用组织机构成功!".to_string(),
+        row_count,
+    ))
 }
 
-pub async fn update_organ_by_id() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
-    Err(BmbpError::api("接口未实现".to_string()))
+pub async fn disable_organ_by_id(Path(id): Path<String>) -> BmbpResp<RespVo<usize>> {
+    tracing::debug!("停用组织{}", id);
+    let row_count =
+        OrganService::update_organ_status(id, RECORD_STATUS_DISABLE.to_string()).await?;
+    Ok(RespVo::ok_msg_data(
+        "停用组织机构成功!".to_string(),
+        row_count,
+    ))
 }
 
-pub async fn update_organ_parent() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
-    Err(BmbpError::api("接口未实现".to_string()))
+pub async fn remove_organ_by_id(Path(id): Path<String>) -> BmbpResp<RespVo<usize>> {
+    tracing::debug!("删除组织{}", id);
+    let row_count = OrganService::remove_organ_by_id(id).await?;
+    Ok(RespVo::ok_msg_data(
+        "删除组织机构成功!".to_string(),
+        row_count,
+    ))
 }
 
-pub async fn enable_organ_by_id() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
-    Err(BmbpError::api("接口未实现".to_string()))
-}
-
-pub async fn disable_organ_by_id() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
-    Err(BmbpError::api("接口未实现".to_string()))
-}
-
-pub async fn remove_organ_by_id() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
-    Err(BmbpError::api("接口未实现".to_string()))
-}
-
-pub async fn batch_remove_organ_by_id() -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
+pub async fn batch_remove_organ_by_id(
+    Path(id): Path<String>,
+) -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
+    tracing::debug!("删除组织{}", id);
     Err(BmbpError::api("接口未实现".to_string()))
 }

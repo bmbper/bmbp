@@ -18,20 +18,27 @@ impl OrganService {
         let mut script_param = BmbpHashMap::new();
         let mut query_script: BmbpScriptSql = BmbpRbacOrgan::query_script();
         let mut path_id = "".to_string();
+
         // 记录ID不为空
         if !params.get_r_id().is_empty() {
             let organ = Self::find_organ_by_id(params.get_r_id()).await?;
             if organ.is_some() {
                 path_id = organ.unwrap().get_organ_id().to_string();
+            } else {
+                return Err(BmbpError::api("指定的节点不存在".to_string()));
             }
         } else if !params.get_organ_id().is_empty() {
             path_id = params.get_organ_id().to_string();
         } else if !params.get_organ_parent_id().is_empty() {
             path_id = params.get_organ_parent_id().to_string();
         }
+
         if !path_id.is_empty() {
-            script_param.insert("organId".to_string(), BmbpValue::from(path_id));
-            query_script.filter("ORGAN_ID_PATH '%/#{organId}/%'");
+            script_param.insert(
+                "organId".to_string(),
+                BmbpValue::from(format!("%/{}/%", path_id)),
+            );
+            query_script.filter(" organ_id_path like #{organId}");
         }
         let organ_list = BmbpORM
             .await
@@ -74,8 +81,11 @@ impl OrganService {
         }
 
         if !path_id.is_empty() {
-            script_param.insert("organId".to_string(), BmbpValue::from(path_id));
-            query_script.filter("ORGAN_ID_PATH '%/#{organId}/%'");
+            script_param.insert(
+                "organId".to_string(),
+                BmbpValue::from(format!("%/{}/%", path_id)),
+            );
+            query_script.filter(" organ_id_path like #{organId}");
         }
         let organ_list = BmbpORM
             .await
@@ -231,7 +241,7 @@ impl OrganService {
     }
 
     /// 更新组织状态
-    pub async fn update_organ_status(organ: &mut BmbpRbacOrgan) -> BmbpResp<usize> {
+    pub async fn update_organ_status(id: String, status: String) -> BmbpResp<usize> {
         Ok(0)
     }
     /// 更新组织上级
@@ -239,7 +249,7 @@ impl OrganService {
         Ok(0)
     }
     /// 删除组织
-    pub async fn delete_organ(organ: &mut BmbpRbacOrgan) -> BmbpResp<usize> {
+    pub async fn remove_organ_by_id(id: String) -> BmbpResp<usize> {
         Ok(0)
     }
 }

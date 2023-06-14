@@ -17,7 +17,7 @@ pub fn build_rbac_router() -> Router {
                         "/organ",
                         Router::new()
                             .route("/find/tree", post(find_organ_tree))
-                            .route("/find/tree/id/:id", post(find_organ_tree_start_with_id))
+                            .route("/find/tree/id/:id", post(find_organ_tree_start_with_id).get(find_organ_tree_start_with_id))
                             .route(
                                 "/find/tree/code/:code",
                                 post(find_organ_tree_start_with_code),
