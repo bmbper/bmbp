@@ -15,19 +15,7 @@ bmbp_app_audit = { path = "../bmbp_app_audit" }
 bmbp_app_setting = { path = "../bmbp_app_setting" }
 bmbp_app_init = { path = "../bmbp_app_init" }
 bmbp_app_upgrade = { path = "../bmbp_app_upgrade" }
-
-
-bmbp_macro = { path = "../bmbp_macro" }
-bmbp_manager = { path = "../bmbp_manager" }
-bmbp_engine = { path = "../bmbp_engine" }
-bmbp_loader = { path = "../bmbp_load" }
-bmbp_config = { path = "../bmbp_config" }
-bmbp_cache = { path = "../bmbp_cache" }
-bmbp_dsl_define = { path = "../bmbp_dsl_define" }
-bmbp_dsl_editor = { path = "../bmbp_dsl_editor" }
-bmbp_dsl_parser = { path = "../bmbp_dsl_parser" }
-bmbp_base = { path = "../bmbp_base" }
-bmbp_file = { path = "../bmbp_file" }
+bmbp_app_file = { path = "../bmbp_app_file" }
 
 # 日志
 tracing = "0.1"

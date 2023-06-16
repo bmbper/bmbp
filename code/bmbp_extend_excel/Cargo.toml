@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_excel"
+name = "bmbp_extend_excel"
 version = "0.1.0"
 edition = "2021"
 

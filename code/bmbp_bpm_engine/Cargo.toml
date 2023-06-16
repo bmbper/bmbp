@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_base"
+name = "bmbp_app_base"
 version = "0.1.0"
 edition = "2021"
 

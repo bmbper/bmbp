@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_email"
+name = "bmbp_extend_email"
 version = "0.1.0"
 edition = "2021"
 

@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_dsl_parser"
+name = "bmbp_dev_runtime"
 version = "0.1.0"
 edition = "2021"
 
@@ -12,10 +12,7 @@ serde_json = "1"
 svg = "0.12"
 async-trait = "0.1"
 tokio = { version = "1", features = ["full"] }
-bmbp_dsl_define = { path = "../bmbp_dsl_define" }
 bmbp_vars = { path = "../bmbp_vars" }
 bmbp_util = { path = "../bmbp_util" }
-bmbp_base = { path = "../bmbp_base" }
 bmbp_orm = { path = "../bmbp_orm" }
 bmbp_types = { path = "../bmbp_types" }
-bmbp_rule = { path = "../bmbp_rule" }

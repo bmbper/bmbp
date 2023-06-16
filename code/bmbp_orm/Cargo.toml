@@ -32,5 +32,3 @@ async-trait = "0.1"
 # 应用工具类
 bmbp_types = { path = "../bmbp_types" }
 bmbp_util = { path = "../bmbp_util" }
-bmbp_rule = { path = "../bmbp_rule" }
-bmbp_cache = { path = "../bmbp_cache" }

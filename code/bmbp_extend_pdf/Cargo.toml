@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_pdf"
+name = "bmbp_extend_pdf"
 version = "0.1.0"
 edition = "2021"
 

@@ -13,7 +13,6 @@ bmbp_orm_macro = { path = "../bmbp_orm_macro" }
 bmbp_orm_ins = { path = "../bmbp_orm_ins" }
 bmbp_vars = { path = "../bmbp_vars" }
 bmbp_types = { path = "../bmbp_types" }
-bmbp_base = { path = "../bmbp_base" }
 bmbp_util = { path = "../bmbp_util" }
 
 

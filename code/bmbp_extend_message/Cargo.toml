@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_mq"
+name = "bmbp_extend_message"
 version = "0.1.0"
 edition = "2021"
 
