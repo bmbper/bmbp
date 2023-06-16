@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_file"
+name = "bmbp_app_file"
 version = "0.1.0"
 edition = "2021"
 description = "应用中附件和静态文件的管理模块"

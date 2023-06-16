@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_rbac"
+name = "bmbp_app_rbac"
 version = "0.1.0"
 edition = "2021"
 

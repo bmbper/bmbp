@@ -3,9 +3,9 @@ use axum::response::IntoResponse;
 use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
 
+use bmbp_app_portal::build_home_router;
+use bmbp_app_rbac::build_rbac_router;
 use bmbp_file::build_file_router;
-use bmbp_home::build_home_router;
-use bmbp_rbac::build_rbac_router;
 use bmbp_types::{BmbpResp, RespVo};
 
 /// init_webapp_router web应用的路由注册

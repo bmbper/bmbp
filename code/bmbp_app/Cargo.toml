@@ -8,14 +8,16 @@ edition = "2021"
 # 全局参数存放
 bmbp_vars = { path = "../bmbp_vars" }
 bmbp_types = { path = "../bmbp_types" }
-bmbp_auth = { path = "../bmbp_auth" }
-bmbp_rbac = { path = "../bmbp_rbac" }
-bmbp_home = { path = "../bmbp_home" }
+bmbp_app_auth = { path = "../bmbp_app_auth" }
+bmbp_app_rbac = { path = "../bmbp_app_rbac" }
+bmbp_app_portal = { path = "../bmbp_app_portal" }
+bmbp_app_audit = { path = "../bmbp_app_audit" }
+bmbp_app_setting = { path = "../bmbp_app_setting" }
+bmbp_app_init = { path = "../bmbp_app_init" }
+bmbp_app_upgrade = { path = "../bmbp_app_upgrade" }
 
 
 bmbp_macro = { path = "../bmbp_macro" }
-bmbp_audit = { path = "../bmbp_audit" }
-bmbp_set = { path = "../bmbp_set" }
 bmbp_manager = { path = "../bmbp_manager" }
 bmbp_engine = { path = "../bmbp_engine" }
 bmbp_loader = { path = "../bmbp_load" }
