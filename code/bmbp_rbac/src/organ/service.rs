@@ -6,7 +6,7 @@ use bmbp_types::{
 };
 use bmbp_util::{insert_decorate, uuid_upper, TreeBuilder};
 
-use crate::organ_model::{BmbpRbacOrgan, OrganQueryParam};
+use crate::organ::model::{BmbpRbacOrgan, OrganQueryParam};
 
 /// 服务声明
 pub struct OrganService();
