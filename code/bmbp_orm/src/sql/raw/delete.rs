@@ -1,7 +1,7 @@
 use serde_json::Value;
 use std::cell::{Ref, RefCell, RefMut};
 
-use bmbp_types::BmbpResp;
+use bmbp_app_common::BmbpResp;
 
 use crate::sql::raw::filter::RawDmlFilterBuilder;
 use crate::sql::raw::table::TableBuilder;

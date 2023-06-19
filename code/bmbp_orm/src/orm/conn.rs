@@ -3,7 +3,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use serde_json::{Map, Value};
 
-use bmbp_types::{BmbpHashMap, BmbpResp, BmbpValue, PageRespVo};
+use bmbp_app_common::{BmbpHashMap, BmbpResp, BmbpValue, PageRespVo};
 
 use crate::BmbpDataSource;
 

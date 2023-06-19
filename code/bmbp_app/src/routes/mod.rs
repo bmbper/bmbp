@@ -3,10 +3,10 @@ use axum::response::IntoResponse;
 use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
 
+use bmbp_app_common::{BmbpResp, RespVo};
 use bmbp_app_file::build_file_router;
 use bmbp_app_portal::build_home_router;
 use bmbp_app_rbac::build_rbac_router;
-use bmbp_types::{BmbpResp, RespVo};
 
 /// init_webapp_router web应用的路由注册
 pub fn init_webapp_router(mut router: Router) -> Router {

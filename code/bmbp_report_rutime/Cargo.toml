@@ -6,8 +6,8 @@ edition = "2021"
 proc-macro = true
 [dependencies]
 
-bmbp_types = { path = "../bmbp_types" }
-
+bmbp_app_common = { path = "../bmbp_app_common" }
+bmbp_app_utils = { path = "../bmbp_app_utils" }
 # 宏语法解析器
 syn = "1"
 quote = "1"

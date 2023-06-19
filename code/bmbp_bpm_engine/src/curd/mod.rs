@@ -1,6 +1,6 @@
 use async_trait::async_trait;
+use bmbp_app_common::{BmbpResp, PageRespVo};
 use bmbp_orm_ins::BmbpOrmSQL;
-use bmbp_types::{BmbpResp, PageRespVo};
 use serde::Serialize;
 #[allow(dead_code)]
 pub trait UpdatePropParam: Clone + Send {

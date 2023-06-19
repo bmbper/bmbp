@@ -10,7 +10,7 @@ use time::OffsetDateTime;
 use tokio::sync::{Mutex, RwLock};
 use tracing::debug;
 
-use bmbp_types::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, PageRespVo};
+use bmbp_app_common::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, PageRespVo};
 
 use crate::{BmbpDataSource, BmbpOrmSQL};
 

@@ -7,8 +7,8 @@ use async_trait::async_trait;
 use serde_json::{Map, Value};
 use tokio::sync::RwLock;
 
-use bmbp_types::{BmbpResp, PageRespVo};
-use bmbp_util::uuid;
+use bmbp_app_common::{BmbpResp, PageRespVo};
+use bmbp_app_utils::uuid;
 
 use crate::{
     orm::{conn::BmbpConn, pool::BmbpConnectionPool},

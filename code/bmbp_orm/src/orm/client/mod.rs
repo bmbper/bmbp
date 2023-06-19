@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use tokio::sync::RwLock;
 
-use bmbp_types::BmbpResp;
+use bmbp_app_common::BmbpResp;
 pub use mysql::BmbpMysqlConnect;
 pub use pg::BmbpPgConnect;
 pub use sqlite::BmbpSqliteConnect;

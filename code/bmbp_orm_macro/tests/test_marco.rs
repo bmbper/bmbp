@@ -1,14 +1,14 @@
 use serde::Deserialize;
 use serde::Serialize;
 
+use bmbp_app_common::BmbpTree;
+use bmbp_app_common::BmbpValue;
+use bmbp_app_common::{BmbpBaseModel, BmbpHashMap};
 use bmbp_orm::BmbpScriptSql;
 use bmbp_orm_macro::base;
 use bmbp_orm_macro::orm;
 use bmbp_orm_macro::tree;
 use bmbp_orm_macro::{bmbp_value, method};
-use bmbp_types::BmbpTree;
-use bmbp_types::BmbpValue;
-use bmbp_types::{BmbpBaseModel, BmbpHashMap};
 
 #[test]
 fn test_orm() {

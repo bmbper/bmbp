@@ -2,10 +2,10 @@ use std::string::ToString;
 
 use serde::{Deserialize, Serialize};
 
+use bmbp_app_common::BmbpBaseModel;
+use bmbp_app_common::{BmbpHashMap, BmbpTree, BmbpValue};
 use bmbp_orm_ins::BmbpScriptSql;
 use bmbp_orm_macro::{base, bmbp_value, method, orm, tree};
-use bmbp_types::BmbpBaseModel;
-use bmbp_types::{BmbpHashMap, BmbpTree, BmbpValue};
 
 #[method]
 #[bmbp_value]

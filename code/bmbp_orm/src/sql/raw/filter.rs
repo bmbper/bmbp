@@ -2,7 +2,7 @@ use std::cell::RefCell;
 
 use serde_json::Value;
 
-use bmbp_types::BmbpResp;
+use bmbp_app_common::BmbpResp;
 
 use crate::sql::dql::{
     CompareField, CompareType, FilterField, FilterType, FilterValue, FuncCompareFieldInner,

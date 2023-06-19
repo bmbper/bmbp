@@ -5,7 +5,7 @@ mod validator;
 
 #[cfg(test)]
 mod tests {
-    use bmbp_types::BmbpValue;
+    use bmbp_app_common::BmbpValue;
 
     use crate::Validator;
 

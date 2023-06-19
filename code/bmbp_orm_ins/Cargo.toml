@@ -7,8 +7,8 @@ edition = "2021"
 
 [dependencies]
 bmbp_orm = { path = "../bmbp_orm" }
-bmbp_vars = { path = "../bmbp_vars" }
-bmbp_types = { path = "../bmbp_types" }
+bmbp_app_common = { path = "../bmbp_app_common" }
+bmbp_app_utils = { path = "../bmbp_app_utils" }
 once_cell = "1"
 async-once-cell = "0.4"
 async_static = "0.1"

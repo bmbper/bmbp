@@ -1,4 +1,4 @@
-use bmbp_types::BmbpResp;
+use bmbp_app_common::BmbpResp;
 
 pub trait ModelParser {}
 

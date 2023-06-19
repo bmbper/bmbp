@@ -2,7 +2,7 @@ use axum::extract::Path;
 use axum::Json;
 use tracing;
 
-use bmbp_types::{
+use bmbp_app_common::{
     BmbpError, BmbpResp, PageParams, PageRespVo, RespVo, RECORD_STATUS_DISABLE,
     RECORD_STATUS_ENABLE,
 };

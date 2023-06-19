@@ -1,6 +1,6 @@
 use crate::portal::model::NavAppMenuVo;
 use axum::response::IntoResponse;
-use bmbp_types::{BmbpError, BmbpResp, RespVo};
+use bmbp_app_common::{BmbpError, BmbpResp, RespVo};
 use serde_json::Error;
 
 pub async fn find_app() -> BmbpResp<impl IntoResponse> {

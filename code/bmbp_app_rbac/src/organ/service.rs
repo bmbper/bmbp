@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use bmbp_orm_ins::{BmbpORM, BmbpScriptSql};
-use bmbp_types::{
+use bmbp_app_common::{
     BmbpError, BmbpHashMap, BmbpResp, BmbpValue, PageParams, PageRespVo, ROOT_TREE_NODE,
 };
-use bmbp_util::{insert_decorate, uuid_upper, TreeBuilder};
+use bmbp_app_utils::{insert_decorate, uuid_upper, TreeBuilder};
+use bmbp_orm_ins::{BmbpORM, BmbpScriptSql};
 
 use crate::organ::model::{BmbpRbacOrgan, OrganQueryParam};
 

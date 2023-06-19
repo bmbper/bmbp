@@ -2,7 +2,7 @@ use axum::Router;
 use tower_http::trace::TraceLayer;
 use tracing::Level;
 
-use bmbp_vars::map::{global_hash_map_vars, global_hash_map_vars_to_usize};
+use bmbp_app_common::map::{global_hash_map_vars, global_hash_map_vars_to_usize};
 use env::init_app_env;
 use routes::init_webapp_router;
 

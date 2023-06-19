@@ -2,11 +2,11 @@ use std::sync::Arc;
 
 use async_static::async_static;
 
-use bmbp_orm::BmbpDataSource;
-use bmbp_orm::Orm;
-use bmbp_vars::map::{
+use bmbp_app_common::map::{
     global_hash_map_vars, global_hash_map_vars_to_bool, global_hash_map_vars_to_usize,
 };
+use bmbp_orm::BmbpDataSource;
+use bmbp_orm::Orm;
 
 async_static! {
  pub static  ref BmbpORM:Arc<Orm> = build_orm_ins().await;

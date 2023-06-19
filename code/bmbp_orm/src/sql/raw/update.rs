@@ -2,7 +2,7 @@ use std::cell::{Ref, RefCell, RefMut};
 
 use serde_json::Value;
 
-use bmbp_types::{BmbpError, BmbpResp};
+use bmbp_app_common::{BmbpError, BmbpResp};
 
 use crate::sql::dml::{DMLFieldValue, DmlField};
 use crate::sql::raw::filter::RawDmlFilterBuilder;

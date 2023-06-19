@@ -1,6 +1,6 @@
 use serde_json::{Number, Value};
 
-use bmbp_util::{camel_to_snake, snake_to_camel};
+use bmbp_app_utils::{camel_to_snake, snake_to_camel};
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]

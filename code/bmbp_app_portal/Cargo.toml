@@ -7,9 +7,7 @@ edition = "2021"
 
 [dependencies]
 
-bmbp_vars = { path = "../bmbp_vars" }
-bmbp_types = {path="../bmbp_types"}
-
+bmbp_app_common = { path = "../bmbp_app_common" }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 serde = { version = "1", features = ["derive"] }

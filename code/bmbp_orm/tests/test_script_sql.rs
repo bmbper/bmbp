@@ -2,8 +2,8 @@ use std::{collections::HashMap, sync::Arc};
 
 use serde::{Deserialize, Serialize};
 
+use bmbp_app_common::BmbpResp;
 use bmbp_orm::{BmbpDataSource, Orm};
-use bmbp_types::BmbpResp;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct DemoA {

@@ -2,12 +2,12 @@ use std::fs;
 
 use toml::Value;
 
-use bmbp_vars::app::set_global_vars;
-use bmbp_vars::map::set_global_hash_map_vars;
+use bmbp_app_common::app::set_global_vars;
+use bmbp_app_common::map::set_global_hash_map_vars;
 
 pub fn load_config_to_global_vars() {
     tracing::info!("加配配置文件到全局变量中......");
-    let config_path = "config/bmbp.toml";
+    let config_path = "../config/bmbp.toml";
     let bmbp_config_rs = fs::read_to_string(config_path);
     match bmbp_config_rs {
         Ok(bmbp_config_str) => {

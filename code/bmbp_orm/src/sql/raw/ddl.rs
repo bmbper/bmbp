@@ -1,6 +1,6 @@
 use serde_json::Value;
 
-use bmbp_types::BmbpResp;
+use bmbp_app_common::BmbpResp;
 
 use crate::sql::{DdlSQL, DynamicSQLParam};
 

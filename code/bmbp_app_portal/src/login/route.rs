@@ -1,6 +1,6 @@
 use crate::login::model::LoginModel;
 use axum::Json;
-use bmbp_types::BmbpResp;
+use bmbp_app_common::BmbpResp;
 
 pub async fn login(Json(login): Json<LoginModel>) -> BmbpResp<()> {
     tracing::info!("登录信息：{:#?}", login);

@@ -6,8 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 # 全局参数存放
-bmbp_vars = { path = "../bmbp_vars" }
-bmbp_types = { path = "../bmbp_types" }
+bmbp_app_common = { path = "../bmbp_app_common" }
 bmbp_app_auth = { path = "../bmbp_app_auth" }
 bmbp_app_rbac = { path = "../bmbp_app_rbac" }
 bmbp_app_portal = { path = "../bmbp_app_portal" }

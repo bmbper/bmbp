@@ -1,4 +1,4 @@
-use bmbp_types::{BmbpError, BmbpResp};
+use bmbp_app_common::{BmbpError, BmbpResp};
 
 use super::{
     ddl::DdlSQL,

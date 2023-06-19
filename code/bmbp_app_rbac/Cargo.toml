@@ -11,9 +11,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 bmbp_orm_macro = { path = "../bmbp_orm_macro" }
 bmbp_orm_ins = { path = "../bmbp_orm_ins" }
-bmbp_vars = { path = "../bmbp_vars" }
-bmbp_types = { path = "../bmbp_types" }
-bmbp_util = { path = "../bmbp_util" }
+bmbp_app_common = { path = "../bmbp_app_common" }
+bmbp_app_utils = { path = "../bmbp_app_utils" }
 
 
 axum = "0.6"

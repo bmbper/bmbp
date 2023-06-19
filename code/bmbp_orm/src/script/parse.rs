@@ -1,4 +1,4 @@
-use bmbp_types::{BmbpHashMap, BmbpValue, BmbpVec};
+use bmbp_app_common::{BmbpHashMap, BmbpValue, BmbpVec};
 
 /// ScriptSQL 动态解析器，主要负责值的替换
 /// 暂时使用正则提取标签，通过传入的实体参数中获取对映的值
@@ -284,7 +284,7 @@ impl ScriptUtil {
 #[cfg(test)]
 mod tests {
 
-    use bmbp_types::{BmbpHashMap, BmbpValue};
+    use bmbp_app_common::{BmbpHashMap, BmbpValue};
 
     use crate::script::parse::ScriptUtil;
 

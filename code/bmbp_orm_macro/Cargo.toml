@@ -15,4 +15,5 @@ syn = { version = "2.0", features = ["full"] }
 quote = "1.0"
 case_style = "0.2"
 bmbp_orm = { path = "../bmbp_orm" }
-bmbp_types = {path="../bmbp_types"}
+bmbp_app_common = { path = "../bmbp_app_common" }
+bmbp_app_utils = { path = "../bmbp_app_utils" }

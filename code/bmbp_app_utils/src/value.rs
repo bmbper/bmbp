@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use bmbp_types::BmbpBaseModel;
+use bmbp_app_common::BmbpBaseModel;
 
 use crate::crypto::md5_encode;
 use crate::date_time_now;

@@ -1,6 +1,6 @@
 use serde_json::Value;
 
-use bmbp_util::{camel_to_snake_upper, snake_to_camel};
+use bmbp_app_utils::{camel_to_snake_upper, snake_to_camel};
 
 use super::dql::{QueryFilter, Table};
 

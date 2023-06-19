@@ -5,5 +5,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 bmbp_orm = {path= "../bmbp_orm" }
-bmbp_util = {path= "../bmbp_util" }
-bmbp_types = {path= "../bmbp_types" }
+bmbp_app_common = { path = "../bmbp_app_common" }
+bmbp_app_utils = { path = "../bmbp_app_utils" }

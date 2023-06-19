@@ -30,5 +30,5 @@ tokio = { version = "1", features = ["full"] }
 
 async-trait = "0.1"
 # 应用工具类
-bmbp_types = { path = "../bmbp_types" }
-bmbp_util = { path = "../bmbp_util" }
+bmbp_app_common = { path = "../bmbp_app_common" }
+bmbp_app_utils = { path = "../bmbp_app_utils" }

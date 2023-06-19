@@ -1,4 +1,4 @@
-use bmbp_types::BmbpValue;
+use bmbp_app_common::BmbpValue;
 
 use crate::validator::bmbp_valid_rule::BmbpValidRule;
 

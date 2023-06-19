@@ -1,5 +1,5 @@
 mod client;
-use bmbp_types::{BmbpError, BmbpResp};
+use bmbp_app_common::{BmbpError, BmbpResp};
 
 use self::client::{ModelClient, MysqlModelClient};
 #[allow(dead_code)]

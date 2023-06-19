@@ -3,7 +3,7 @@ use std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
-use bmbp_types::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, PageRespVo};
+use bmbp_app_common::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, PageRespVo};
 
 use super::pool::BmbpConnectionPool;
 use crate::script::ScriptUtil;
@@ -574,7 +574,7 @@ mod tests {
     use std::sync::Arc;
 
     use crate::{BmbpDataSource, Orm};
-    use bmbp_types::BmbpVec;
+    use bmbp_app_common::BmbpVec;
     use tracing::info;
 
     #[tokio::test]

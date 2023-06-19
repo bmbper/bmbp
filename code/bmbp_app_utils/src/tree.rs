@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 use std::{collections::HashMap, sync::RwLock};
 
-use bmbp_types::{BmbpTree, ROOT_TREE_NODE};
+use bmbp_app_common::{BmbpTree, ROOT_TREE_NODE};
 
 struct TreeNodeRef<'a, T>
 where

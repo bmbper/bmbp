@@ -12,7 +12,6 @@ serde_json = "1"
 svg = "0.12"
 async-trait = "0.1"
 tokio = { version = "1", features = ["full"] }
-bmbp_vars = { path = "../bmbp_vars" }
-bmbp_util = { path = "../bmbp_util" }
+bmbp_app_common = { path = "../bmbp_app_common" }
+bmbp_app_utils = { path = "../bmbp_app_utils" }
 bmbp_orm = { path = "../bmbp_orm" }
-bmbp_types = { path = "../bmbp_types" }

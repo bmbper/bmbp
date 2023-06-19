@@ -5,7 +5,7 @@ use crate::sql::raw::{
 };
 use crate::sql::DdlSQL;
 use crate::{BmbpDeleteSQL, BmbpInsertSQL, BmbpQuerySQL, BmbpUpdateSQL};
-use bmbp_types::BmbpResp;
+use bmbp_app_common::BmbpResp;
 
 use super::{param::DynamicSQLParam, sql::BmbpDynamicSQL};
 
