@@ -475,7 +475,7 @@ pub type BmbpHashMap = HashMap<String, BmbpValue>;
 
 #[cfg(test)]
 mod tests {
-    use crate::bmbp_value::{BmbpHashMap, BmbpValue};
+    use crate::{BmbpHashMap, BmbpValue};
 
     #[test]
     fn test_bmbp_value() {

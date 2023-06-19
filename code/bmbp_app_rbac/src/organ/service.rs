@@ -12,6 +12,7 @@ use crate::organ::model::{BmbpRbacOrgan, OrganQueryParam};
 pub struct OrganService();
 
 /// CURD 逻辑
+#[allow(dead_code)]
 impl OrganService {
     /// 查询组织树
     pub async fn find_organ_tree(params: &OrganQueryParam) -> BmbpResp<Vec<BmbpRbacOrgan>> {

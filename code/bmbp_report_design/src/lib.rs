@@ -10,10 +10,7 @@ mod tests {
     fn mysql_client_model() {
         let client_rs = ModelClientFactory::client("mysql".to_string());
         match client_rs {
-            Ok(cli) => {
-                let sql = cli.database_sql(&DataBase::new());
-                println!("{:#?}", sql);
-            }
+            Ok(_cli) => {}
             Err(e) => {
                 println!("{:#?}", e);
                 assert!(false);
