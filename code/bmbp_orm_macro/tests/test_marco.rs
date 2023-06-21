@@ -3,7 +3,7 @@ use serde::Serialize;
 
 use bmbp_app_common::BmbpTree;
 use bmbp_app_common::BmbpValue;
-use bmbp_app_common::{BmbpBaseModel, BmbpHashMap};
+use bmbp_app_common::{BmbpBaseModelTrait, BmbpHashMap};
 use bmbp_orm::BmbpScriptSql;
 use bmbp_orm_macro::base;
 use bmbp_orm_macro::orm;

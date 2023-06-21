@@ -7,7 +7,7 @@ use async_trait::async_trait;
 use serde_json::{Map, Value};
 use tokio::sync::RwLock;
 
-use bmbp_app_common::{BmbpResp, PageRespVo};
+use bmbp_app_common::{BmbpResp, PageVo};
 use bmbp_app_utils::uuid;
 
 use crate::{
@@ -61,8 +61,8 @@ impl BmbpConn for BmbpSqliteConnect {
         params: &[Value],
         page_no: &usize,
         page_size: &usize,
-    ) -> BmbpResp<PageRespVo<Map<String, Value>>> {
-        Ok(PageRespVo::default())
+    ) -> BmbpResp<PageVo<Map<String, Value>>> {
+        Ok(PageVo::default())
     }
     #[allow(unused)]
     async fn find_list(

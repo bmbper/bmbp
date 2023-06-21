@@ -3,7 +3,7 @@ use std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
-use bmbp_app_common::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, PageRespVo};
+use bmbp_app_common::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, PageVo};
 
 use super::pool::BmbpConnectionPool;
 use crate::script::ScriptUtil;
@@ -37,7 +37,7 @@ impl Orm {
         orm_sql: BmbpOrmSQL,
         page_no: &usize,
         page_size: &usize,
-    ) -> BmbpResp<PageRespVo<Map<String, Value>>> {
+    ) -> BmbpResp<PageVo<Map<String, Value>>> {
         let conn = self.pool.get_conn().await?;
         let page = conn.find_page(orm_sql, page_no, page_size).await;
         conn.release().await;
@@ -105,7 +105,7 @@ impl Orm {
     pub async fn dynamic_query_page(
         &self,
         orm: &mut BmbpOrmSQL,
-    ) -> BmbpResp<PageRespVo<Option<BmbpHashMap>>> {
+    ) -> BmbpResp<PageVo<Option<BmbpHashMap>>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
     pub async fn dynamic_query_list(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<Option<BmbpHashMap>> {
@@ -164,7 +164,7 @@ impl Orm {
         sql: &String,
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageRespVo<BmbpHashMap>> {
+    ) -> BmbpResp<PageVo<BmbpHashMap>> {
         let conn = self.pool.get_conn().await?;
         let model_page = conn.raw_find_page(sql, &[], page_no, page_size).await;
         conn.release().await;
@@ -176,7 +176,7 @@ impl Orm {
         params: &[BmbpValue],
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageRespVo<BmbpHashMap>> {
+    ) -> BmbpResp<PageVo<BmbpHashMap>> {
         let conn = self.pool.get_conn().await?;
         let model_page = conn.raw_find_page(sql, params, page_no, page_size).await;
         conn.release().await;
@@ -251,11 +251,11 @@ impl Orm {
         &self,
         sql: &String,
         params: &[&[BmbpValue]],
-    ) -> BmbpResp<PageRespVo<usize>> {
+    ) -> BmbpResp<PageVo<usize>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
 
-    pub async fn batch_raw_insert(&self, sql: &[String]) -> BmbpResp<PageRespVo<usize>> {
+    pub async fn batch_raw_insert(&self, sql: &[String]) -> BmbpResp<PageVo<usize>> {
         Err(BmbpError::orm("方法未实现".to_string()))
     }
 
@@ -366,7 +366,7 @@ impl Orm {
         params: &BmbpHashMap,
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageRespVo<BmbpHashMap>> {
+    ) -> BmbpResp<PageVo<BmbpHashMap>> {
         let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
         self.raw_query_page_with_params(&sql, params.as_slice(), page_no, page_size)
             .await
@@ -501,14 +501,14 @@ impl Orm {
         params: &BmbpHashMap,
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageRespVo<T>>
+    ) -> BmbpResp<PageVo<T>>
     where
         T: Default + Clone + Serialize + for<'a> Deserialize<'a> + Send + Sync,
     {
         let rs = self
             .script_query_page(script, params, page_no, page_size)
             .await?;
-        let gen_rs = rs.data();
+        let gen_rs = rs.get_data();
         let rs_1 = match gen_rs {
             None => None,
             Some(v) => {
@@ -517,10 +517,10 @@ impl Orm {
                 rs.unwrap()
             }
         };
-        let mut new_page = PageRespVo::new();
-        new_page.set_page_no(rs.page_no());
-        new_page.set_page_size(rs.page_size());
-        new_page.set_total(rs.total());
+        let mut new_page = PageVo::new();
+        new_page.set_page_no(rs.get_page_no().unwrap().clone());
+        new_page.set_page_size(rs.get_page_size().unwrap().clone());
+        new_page.set_row_total(rs.get_row_total().unwrap().clone());
         if rs_1.is_some() {
             new_page.set_data(rs_1.unwrap());
         }

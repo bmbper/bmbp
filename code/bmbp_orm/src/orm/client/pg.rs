@@ -9,7 +9,7 @@ use tokio::sync::{Mutex, RwLock};
 use tokio_postgres::{connect, types::ToSql, Client, Error, NoTls, Row};
 use tracing::debug;
 
-use bmbp_app_common::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, PageRespVo};
+use bmbp_app_common::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, PageVo};
 use bmbp_app_utils::uuid;
 
 use crate::{
@@ -88,13 +88,13 @@ impl BmbpConn for BmbpPgConnect {
         params: &[Value],
         page_no: &usize,
         page_size: &usize,
-    ) -> BmbpResp<PageRespVo<Map<String, Value>>> {
+    ) -> BmbpResp<PageVo<Map<String, Value>>> {
         let pg_params = to_pg_prams(params);
         let pg_params_ref = pg_params
             .iter()
             .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
             .collect::<Vec<&(dyn ToSql + Sync)>>();
-        let mut page_inner = PageRespVo::new();
+        let mut page_inner = PageVo::new();
         page_inner.set_page_no(page_no.clone());
         page_inner.set_page_size(page_size.clone());
 
@@ -110,7 +110,7 @@ impl BmbpConn for BmbpPgConnect {
         let err = match count_rs {
             Ok(row) => {
                 let total_count: i64 = row.get("count");
-                page_inner.set_total(total_count as usize);
+                page_inner.set_row_total(total_count as usize);
                 None
             }
             Err(err) => Some(Err(BmbpError::orm(err.to_string()))),
@@ -324,14 +324,14 @@ impl BmbpConn for BmbpPgConnect {
         params: &[BmbpValue],
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageRespVo<BmbpHashMap>> {
+    ) -> BmbpResp<PageVo<BmbpHashMap>> {
         let pg_param = from_bmbp_value_to_pg_params(params);
 
         let pg_params_ref = pg_param
             .iter()
             .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
             .collect::<Vec<&(dyn ToSql + Sync)>>();
-        let mut pager: PageRespVo<BmbpHashMap> = PageRespVo::new();
+        let mut pager: PageVo<BmbpHashMap> = PageVo::new();
 
         let count_sql = format!("select count(1) as count from ({}) t1", sql);
         let count_rs = self
@@ -343,7 +343,7 @@ impl BmbpConn for BmbpPgConnect {
         match count_rs {
             Ok(row) => {
                 let row_total = row.get::<&str, i64>("count") as usize;
-                pager.set_total(row_total as usize);
+                pager.set_row_total(row_total as usize);
             }
             Err(err) => {
                 return Err(BmbpError::orm(err.to_string()));

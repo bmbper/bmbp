@@ -31,7 +31,7 @@ pub fn base(_: TokenStream, model_struct_token: TokenStream) -> TokenStream {
     }
 
     let impl_base_model_trait = quote!(
-        impl BmbpBaseModel for #struct_name_ident{
+        impl BmbpBaseModelTrait for #struct_name_ident{
              #(#base_method_vec)*
         }
     );

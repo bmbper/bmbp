@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use bmbp_app_common::{BmbpResp, PageRespVo};
+use bmbp_app_common::{BmbpResp, PageVo};
 use bmbp_orm_ins::BmbpOrmSQL;
 use serde::Serialize;
 #[allow(dead_code)]
@@ -87,14 +87,14 @@ pub trait CurdService {
 #[allow(dead_code)]
 #[async_trait]
 pub trait CurdPageService: CurdService {
-    async fn find_page<Q, V>(&self, params: &Q) -> BmbpResp<PageRespVo<V>>
+    async fn find_page<Q, V>(&self, params: &Q) -> BmbpResp<PageVo<V>>
     where
         V: Clone + Default + Serialize + Send + Sync;
 }
 #[allow(dead_code)]
 #[async_trait]
 pub trait CurdTreeService: CurdService {
-    async fn find_tree<Q, V>(&self, params: &Q) -> BmbpResp<PageRespVo<V>>
+    async fn find_tree<Q, V>(&self, params: &Q) -> BmbpResp<PageVo<V>>
     where
         V: Clone + Default + Serialize + Send + Sync;
 }
@@ -114,7 +114,7 @@ pub trait CurdDao {
         params: Q,
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageRespVo<V>>
+    ) -> BmbpResp<PageVo<V>>
     where
         V: Clone + Default + Serialize + Send + Sync;
     async fn find_list<Q, V>(&self, params: &Q) -> BmbpResp<Vec<V>>;

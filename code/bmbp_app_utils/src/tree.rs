@@ -58,13 +58,14 @@ impl TreeBuilder {
         let mut tree_node_ref_map = HashMap::new();
 
         for tree_node in tree_node_slice {
-            let tree_node_id = tree_node.get_tree_id().clone();
-            let tree_node_ref = TreeNodeRef {
-                ref_node: Some(tree_node),
-                ref_parent: RwLock::new(None),
-                ref_children: RwLock::new(vec![]),
-            };
-            tree_node_ref_map.insert(tree_node_id, tree_node_ref);
+            if let Some(tree_code) = tree_node.get_tree_code() {
+                let tree_node_ref = TreeNodeRef {
+                    ref_node: Some(tree_node),
+                    ref_parent: RwLock::new(None),
+                    ref_children: RwLock::new(vec![]),
+                };
+                tree_node_ref_map.insert(tree_code.to_string(), tree_node_ref);
+            }
         }
         tree_node_ref_map
     }
@@ -77,15 +78,20 @@ impl TreeBuilder {
     {
         for tree_node in tree_node_slice {
             // 缺失上级节点ID的节点ID，上级节点ID改为根节点ID
-            let mut tree_node_parent_id = tree_node.get_tree_parent_id().clone();
-            if tree_node_parent_id.is_empty() {
-                tree_node_parent_id = ROOT_TREE_NODE.to_string();
-            }
-            if tree_node_ref_map.contains_key(&tree_node_parent_id) {
-                let current_ref = tree_node_ref_map.get(tree_node.get_tree_id()).unwrap();
-                let parent_ref = tree_node_ref_map.get(&tree_node_parent_id).unwrap();
-                *current_ref.ref_parent.write().unwrap() = Some(parent_ref.ref_node.unwrap());
-                parent_ref.ref_children.write().unwrap().push(current_ref);
+            if let Some(tree_node_parent_id_ref) = tree_node.get_tree_parent_code() {
+                let mut tree_node_parent_id = tree_node_parent_id_ref.to_string();
+                if tree_node_parent_id.is_empty() {
+                    tree_node_parent_id = ROOT_TREE_NODE.to_string();
+                }
+                if tree_node_ref_map.contains_key(&tree_node_parent_id) {
+                    if let Some(tree_id) = tree_node.get_tree_code() {
+                        let current_ref = tree_node_ref_map.get(tree_id).unwrap();
+                        let parent_ref = tree_node_ref_map.get(&tree_node_parent_id).unwrap();
+                        *current_ref.ref_parent.write().unwrap() =
+                            Some(parent_ref.ref_node.unwrap());
+                        parent_ref.ref_children.write().unwrap().push(current_ref);
+                    }
+                }
             }
         }
     }

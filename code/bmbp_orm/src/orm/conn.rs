@@ -3,7 +3,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use serde_json::{Map, Value};
 
-use bmbp_app_common::{BmbpHashMap, BmbpResp, BmbpValue, PageRespVo};
+use bmbp_app_common::{BmbpHashMap, BmbpResp, BmbpValue, PageVo};
 
 use crate::BmbpDataSource;
 
@@ -28,7 +28,7 @@ pub trait BmbpConn {
         params: &[Value],
         page_no: &usize,
         page_size: &usize,
-    ) -> BmbpResp<PageRespVo<Map<String, Value>>>;
+    ) -> BmbpResp<PageVo<Map<String, Value>>>;
     async fn find_list(
         &mut self,
         _sql: String,
@@ -68,8 +68,8 @@ pub trait BmbpConn {
         params: &[BmbpValue],
         page_no: usize,
         page_size: usize,
-    ) -> BmbpResp<PageRespVo<BmbpHashMap>> {
-        Ok(PageRespVo::new())
+    ) -> BmbpResp<PageVo<BmbpHashMap>> {
+        Ok(PageVo::new())
     }
 
     async fn raw_find_one(

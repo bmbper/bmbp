@@ -54,6 +54,10 @@ impl BmbpScriptSql {
             join_tables: vec![],
         }
     }
+    /// 输出SQL脚本
+    pub fn to_script(&self) -> String {
+        self.to_sql_string()
+    }
     pub fn to_sql_string(&self) -> String {
         match self.script_type {
             BmbpScriptType::INSERT => self.to_insert_sql(),

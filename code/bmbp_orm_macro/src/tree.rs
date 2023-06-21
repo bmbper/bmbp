@@ -60,84 +60,84 @@ pub fn get_tree_meta(tree_meta_token: TokenStream) -> String {
 
 pub fn build_tree_node_trait(tree_prefix: String, tree_struct_name: String) -> TokenStream2 {
     // tree_field
-    let tree_id = format_ident!("{}_id", tree_prefix);
-    let tree_parent_id = format_ident!("{}_parent_id", tree_prefix);
+    let tree_id = format_ident!("{}_code", tree_prefix);
+    let tree_parent_id = format_ident!("{}_parent_code", tree_prefix);
     let tree_data_id = format_ident!("{}_data_id", tree_prefix);
     let tree_title = format_ident!("{}_title", tree_prefix);
     let tree_children = format_ident!("{}_children", tree_prefix);
-    let tree_id_path = format_ident!("{}_id_path", tree_prefix);
+    let tree_id_path = format_ident!("{}_code_path", tree_prefix);
     let tree_title_path = format_ident!("{}_title_path", tree_prefix);
     let tree_struct = format_ident!("{}", tree_struct_name);
 
     let tree_trait = quote!(
-        impl BmbpTree<#tree_struct> for  #tree_struct {
-            fn get_tree_id(&self) -> &String {
-                &self.#tree_id
-            }
+        // impl BmbpTree<#tree_struct> for  #tree_struct {
+        //     fn get_tree_code(&self) -> Option<&String>{
+        //         &self.#tree_id
+        //     }
 
-            fn get_tree_parent_id(&self) -> &String {
-               &self.#tree_parent_id
-            }
+        //     fn get_tree_parent_code(&self) -> Option<&String> {
+        //        &self.#tree_parent_id
+        //     }
 
-            fn get_tree_data_id(&self) -> &String {
-                &self.#tree_data_id
-            }
+        //     fn get_tree_data_id(&self) -> &String {
+        //         &self.#tree_data_id
+        //     }
 
-            fn get_tree_title(&self) -> &String {
-                 &self.#tree_title
-            }
+        //     fn get_tree_title(&self) -> &String {
+        //          &self.#tree_title
+        //     }
 
-            fn get_tree_id_path(&self) -> &String {
-                &self.#tree_id_path
-            }
+        //     fn get_tree_id_path(&self) -> &String {
+        //         &self.#tree_id_path
+        //     }
 
-            fn get_tree_title_path(&self) -> &String {
-                &self.#tree_title_path
-            }
+        //     fn get_tree_title_path(&self) -> &String {
+        //         &self.#tree_title_path
+        //     }
 
-            fn get_tree_children(&self) -> &[#tree_struct] {
-               self.#tree_children.as_slice()
-            }
+        //     fn get_tree_children(&self) -> &[#tree_struct] {
+        //        self.#tree_children.as_slice()
+        //     }
 
-            fn get_mut_tree_children(&mut self) -> &mut Vec<#tree_struct> {
-                &mut self.#tree_children
-            }
+        //     fn get_mut_tree_children(&mut self) -> &mut Vec<#tree_struct> {
+        //         &mut self.#tree_children
+        //     }
 
-            fn set_tree_id(&mut self, #tree_id: String) -> &mut Self {
-                self.#tree_id = #tree_id;
-                self
-            }
+        //     fn set_tree_id(&mut self, #tree_id: String) -> &mut Self {
+        //         self.#tree_id = #tree_id;
+        //         self
+        //     }
 
-            fn set_tree_parent_id(&mut self, #tree_parent_id: String) -> &mut Self {
-                self.#tree_parent_id = #tree_parent_id;
-                self
-            }
+        //     fn set_tree_parent_id(&mut self, #tree_parent_id: String) -> &mut Self {
+        //         self.#tree_parent_id = #tree_parent_id;
+        //         self
+        //     }
 
-            fn set_tree_data_id(&mut self, #tree_data_id: String) -> &mut Self {
-                self.#tree_data_id = #tree_data_id;
-                self
-            }
+        //     fn set_tree_data_id(&mut self, #tree_data_id: String) -> &mut Self {
+        //         self.#tree_data_id = #tree_data_id;
+        //         self
+        //     }
 
-            fn set_tree_title(&mut self, #tree_title: String) -> &mut Self {
-                self.#tree_title = #tree_title;
-                self
-            }
+        //     fn set_tree_title(&mut self, #tree_title: String) -> &mut Self {
+        //         self.#tree_title = #tree_title;
+        //         self
+        //     }
 
-            fn set_tree_id_path(&mut self, #tree_id_path: String) -> &mut Self {
-                self.#tree_id_path = #tree_id_path;
-                self
-            }
+        //     fn set_tree_id_path(&mut self, #tree_id_path: String) -> &mut Self {
+        //         self.#tree_id_path = #tree_id_path;
+        //         self
+        //     }
 
-            fn set_tree_title_path(&mut self, #tree_title_path: String) -> &mut Self {
-                self.#tree_title_path = #tree_title_path;
-                self
-            }
+        //     fn set_tree_title_path(&mut self, #tree_title_path: String) -> &mut Self {
+        //         self.#tree_title_path = #tree_title_path;
+        //         self
+        //     }
 
-            fn set_tree_children(&mut self, #tree_children: Vec<#tree_struct>) -> &mut Self {
-                self.#tree_children = #tree_children;
-                self
-            }
-        }
+        //     fn set_tree_children(&mut self, #tree_children: Vec<#tree_struct>) -> &mut Self {
+        //         self.#tree_children = #tree_children;
+        //         self
+        //     }
+        // }
 
     );
 

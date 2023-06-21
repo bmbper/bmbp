@@ -119,6 +119,90 @@ impl From<f64> for BmbpValue {
     }
 }
 
+impl From<&i8> for BmbpValue {
+    fn from(value: &i8) -> Self {
+        BmbpValue::Int(value.clone() as i16)
+    }
+}
+
+impl From<&u8> for BmbpValue {
+    fn from(value: &u8) -> Self {
+        BmbpValue::Int(value.clone() as i16)
+    }
+}
+
+impl From<&i16> for BmbpValue {
+    fn from(value: &i16) -> Self {
+        BmbpValue::Int(value.clone())
+    }
+}
+
+impl From<&u16> for BmbpValue {
+    fn from(value: &u16) -> Self {
+        BmbpValue::Int(value.clone() as i16)
+    }
+}
+
+impl From<&i32> for BmbpValue {
+    fn from(value: &i32) -> Self {
+        BmbpValue::BigInt(value.clone() as i128)
+    }
+}
+
+impl From<&u32> for BmbpValue {
+    fn from(value: &u32) -> Self {
+        BmbpValue::BigInt(value.clone() as i128)
+    }
+}
+
+impl From<&u64> for BmbpValue {
+    fn from(value: &u64) -> Self {
+        BmbpValue::BigInt(value.clone() as i128)
+    }
+}
+
+impl From<&i64> for BmbpValue {
+    fn from(value: &i64) -> Self {
+        BmbpValue::BigInt(value.clone() as i128)
+    }
+}
+
+impl From<&usize> for BmbpValue {
+    fn from(value: &usize) -> Self {
+        BmbpValue::BigInt(value.clone() as i128)
+    }
+}
+
+impl From<&isize> for BmbpValue {
+    fn from(value: &isize) -> Self {
+        BmbpValue::BigInt(value.clone() as i128)
+    }
+}
+
+impl From<&u128> for BmbpValue {
+    fn from(value: &u128) -> Self {
+        BmbpValue::BigInt(value.clone() as i128)
+    }
+}
+
+impl From<&i128> for BmbpValue {
+    fn from(value: &i128) -> Self {
+        BmbpValue::BigInt(value.clone() as i128)
+    }
+}
+
+impl From<&f32> for BmbpValue {
+    fn from(value: &f32) -> Self {
+        BmbpValue::Float(value.clone())
+    }
+}
+
+impl From<&f64> for BmbpValue {
+    fn from(value: &f64) -> Self {
+        BmbpValue::BigFloat(value.clone())
+    }
+}
+
 impl From<bool> for BmbpValue {
     fn from(value: bool) -> Self {
         BmbpValue::Bool(value)
@@ -128,6 +212,18 @@ impl From<bool> for BmbpValue {
 impl From<char> for BmbpValue {
     fn from(value: char) -> Self {
         BmbpValue::String(String::from(value))
+    }
+}
+
+impl From<&bool> for BmbpValue {
+    fn from(value: &bool) -> Self {
+        BmbpValue::Bool(value.clone())
+    }
+}
+
+impl From<&char> for BmbpValue {
+    fn from(value: &char) -> Self {
+        BmbpValue::String(String::from(value.clone()))
     }
 }
 
