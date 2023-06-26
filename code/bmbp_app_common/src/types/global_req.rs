@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 
 #[allow(dead_code)]
 #[derive(Debug, Default, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
 pub struct PageParams<T>
 where
     T: Serialize + Clone + Default + Send + Sync,

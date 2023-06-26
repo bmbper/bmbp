@@ -39,6 +39,24 @@ impl BmbpBaseModel {
         BmbpBaseModel::default()
     }
 
+    pub fn get_fields() -> Vec<String> {
+        vec![
+            "record_id".to_string(),
+            "record_level".to_string(),
+            "record_status".to_string(),
+            "record_flag".to_string(),
+            "record_num".to_string(),
+            "record_remark".to_string(),
+            "record_create_time".to_string(),
+            "record_create_user".to_string(),
+            "record_update_time".to_string(),
+            "record_update_user".to_string(),
+            "record_owner_org".to_string(),
+            "record_owner_user".to_string(),
+            "record_sign".to_string(),
+        ]
+    }
+
     pub fn set_record_id(&mut self, record_id: String) -> &mut Self {
         self.record_id = Some(record_id);
         self

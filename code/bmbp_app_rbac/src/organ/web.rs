@@ -16,7 +16,7 @@ pub async fn find_organ_tree(
 ) -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
     tracing::debug!("组织树查询参数:{:#?}", params);
     let organ_tree = OrganService::find_organ_tree(&params).await?;
-    Ok(RespVo::ok_msg_data("查询组织机构树成功!", organ_tree))
+    Ok(RespVo::ok_msg_option("查询组织机构树成功!", organ_tree))
 }
 
 /// 查询指定REOCORD_ID开始的组织机构树
@@ -25,7 +25,7 @@ pub async fn find_organ_tree_start_with_id(
 ) -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
     tracing::debug!("组织树查询参数 record_id:{:#?}", id);
     let organ_tree = OrganService::find_organ_tree_start_with_id(&id).await?;
-    Ok(RespVo::ok_msg_data("查询组织机构树成功!", organ_tree))
+    Ok(RespVo::ok_msg_option("查询组织机构树成功!", organ_tree))
 }
 
 /// 查询指定ORGAN_CODE开始的组织机构树
@@ -34,7 +34,7 @@ pub async fn find_organ_tree_start_with_code(
 ) -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
     tracing::debug!("组织树查询参数 organ_code:{:#?}", code);
     let organ_tree = OrganService::find_organ_tree_start_with_code(&code).await?;
-    Ok(RespVo::ok_msg_data("查询组织机构树成功!", organ_tree))
+    Ok(RespVo::ok_msg_option("查询组织机构树成功!", organ_tree))
 }
 
 /// 分页查询组织机构列表
@@ -52,7 +52,7 @@ pub async fn find_organ_page_by_parent(
     Json(mut params): Json<PageParams<OrganQueryParam>>,
 ) -> BmbpResp<RespVo<PageVo<BmbpRbacOrgan>>> {
     tracing::debug!("组织分页查询参数 organ_parent_code:{:#?}", params);
-    let organ_tree = OrganService::find_organ_page_by_parent(&parent, &params).await?;
+    let organ_tree = OrganService::find_organ_page_by_parent(&parent, &mut params).await?;
     Ok(RespVo::ok_msg_data("查询组织机构树成功!", organ_tree))
 }
 
@@ -62,7 +62,7 @@ pub async fn find_organ_list(
 ) -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
     tracing::debug!("组织列表查询参数:{:#?}", params);
     let organ_tree = OrganService::find_organ_list(&params).await?;
-    Ok(RespVo::ok_msg_data("查询组织机构树成功!", organ_tree))
+    Ok(RespVo::ok_msg_option("查询组织机构树成功!", organ_tree))
 }
 
 /// 查询指定ORGAN_PARENT_CODE组织下的组织机构列表
@@ -70,14 +70,13 @@ pub async fn find_organ_list_by_parent(
     Path(parent): Path<String>,
     Json(mut params): Json<OrganQueryParam>,
 ) -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
-
     tracing::debug!(
         "组织列表查询参数:organ_parent_code:{}, params: {:#?}",
         parent,
         params
     );
     let organ_tree = OrganService::find_organ_list(&params).await?;
-    Ok(RespVo::ok_msg_data("查询组织机构树成功!", organ_tree))
+    Ok(RespVo::ok_msg_option("查询组织机构树成功!", organ_tree))
 }
 
 /// 查询指定RECORD_ID组织机构详情
@@ -124,7 +123,6 @@ pub async fn update_organ_by_id(
     Path(id): Path<String>,
     Json(mut organ): Json<BmbpRbacOrgan>,
 ) -> BmbpResp<RespVo<BmbpRbacOrgan>> {
-
     tracing::debug!("更新组织信息 record_id:{} :{:#?}", id, organ);
     let _row_count = OrganService::update_organ(&mut organ).await?;
     Ok(RespVo::ok_msg_data("更新组织机构成功!", organ))

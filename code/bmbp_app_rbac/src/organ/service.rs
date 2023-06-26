@@ -14,7 +14,7 @@ pub struct OrganService();
 #[allow(unused)]
 impl OrganService {
     /// 查询组织树
-    pub async fn find_organ_tree(params: &OrganQueryParam) -> BmbpResp<Vec<BmbpRbacOrgan>> {
+    pub async fn find_organ_tree(params: &OrganQueryParam) -> BmbpResp<Option<Vec<BmbpRbacOrgan>>> {
         if let Some(record_id) = params.get_record_id() {
             return Self::find_organ_tree_start_with_id(record_id).await;
         }
@@ -22,22 +22,32 @@ impl OrganService {
             return Self::find_organ_tree_start_with_code(organ_parent_code).await;
         }
         let query_script_sql = OrganScript::query_script();
-        let organ_list =
+        let organ_list_op =
             OrganDao::find_organ_tree(&query_script_sql.to_script(), &BmbpHashMap::new()).await?;
-        let organ_tree = TreeBuilder::build::<BmbpRbacOrgan>(organ_list);
-        Ok(organ_tree)
+
+        match organ_list_op {
+            Some(organ_list) => {
+                let organ_tree = TreeBuilder::build::<BmbpRbacOrgan>(organ_list);
+                Ok(Some(organ_tree))
+            }
+            None => Ok(None),
+        }
     }
-    pub async fn find_organ_tree_start_with_id(id: &String) -> BmbpResp<Vec<BmbpRbacOrgan>> {
+    pub async fn find_organ_tree_start_with_id(
+        id: &String,
+    ) -> BmbpResp<Option<Vec<BmbpRbacOrgan>>> {
         let organ_op = Self::find_organ_by_id(id).await?;
         Self::find_organ_tree_start_with_organ(organ_op).await
     }
-    pub async fn find_organ_tree_start_with_code(code: &String) -> BmbpResp<Vec<BmbpRbacOrgan>> {
+    pub async fn find_organ_tree_start_with_code(
+        code: &String,
+    ) -> BmbpResp<Option<Vec<BmbpRbacOrgan>>> {
         let organ_op = Self::find_organ_by_organ_code(code).await?;
         Self::find_organ_tree_start_with_organ(organ_op).await
     }
     async fn find_organ_tree_start_with_organ(
         organ_op: Option<BmbpRbacOrgan>,
-    ) -> BmbpResp<Vec<BmbpRbacOrgan>> {
+    ) -> BmbpResp<Option<Vec<BmbpRbacOrgan>>> {
         if organ_op.is_none() {
             return Err(BmbpError::api("指定的节点不存在".to_string()));
         }
@@ -57,31 +67,91 @@ impl OrganService {
             ));
         }
 
-        let organ_list =
+        let organ_list_op =
             OrganDao::find_organ_tree(&query_script_sql.to_script(), &query_script_params).await?;
-        let organ_tree = TreeBuilder::build::<BmbpRbacOrgan>(organ_list);
-        Ok(organ_tree)
+        match organ_list_op {
+            Some(organ_list) => {
+                let organ_tree = TreeBuilder::build::<BmbpRbacOrgan>(organ_list);
+                Ok(Some(organ_tree))
+            }
+            None => Ok(None),
+        }
     }
 
     /// 分页查询组织列表
     pub async fn find_organ_page(
-        _params: &PageParams<OrganQueryParam>,
+        page_params: &PageParams<OrganQueryParam>,
     ) -> BmbpResp<PageVo<BmbpRbacOrgan>> {
         let mut script_param = BmbpHashMap::new();
         let mut query_script: BmbpScriptSql = OrganScript::query_script();
-        Err(BmbpError::api("接口未实现".to_string()))
+        if let Some(params) = page_params.get_params() {
+            if let Some(organ_parent_code) = params.get_organ_parent_code() {
+                if !organ_parent_code.is_empty() {
+                    script_param.insert(
+                        "organ_parent_code".to_string(),
+                        BmbpValue::from(organ_parent_code),
+                    );
+                    query_script.filter("organ_parent_code = #{organ_parent_code}");
+                }
+            }
+
+            if let Some(organ_title) = params.get_organ_title() {
+                if !organ_title.is_empty() {
+                    script_param.insert(
+                        "organ_title".to_string(),
+                        BmbpValue::from(format!("%{}%", organ_title)),
+                    );
+                    query_script.filter("organ_title like #{organ_title}");
+                }
+            }
+        }
+
+        OrganDao::find_organ_page(
+            &query_script.to_script(),
+            &script_param,
+            page_params.get_page_no(),
+            page_params.get_page_size(),
+        )
+        .await
     }
 
     pub async fn find_organ_page_by_parent(
         parent: &String,
-        params: &PageParams<OrganQueryParam>,
+        page_params: &mut PageParams<OrganQueryParam>,
     ) -> BmbpResp<PageVo<BmbpRbacOrgan>> {
-        Err(BmbpError::api("接口未实现".to_string()))
+        if let Some(params) = page_params.get_mut_params() {
+            params.set_organ_parent_code(parent.to_string());
+        } else {
+            let mut organ_params = OrganQueryParam::new();
+            organ_params.set_organ_parent_code(parent.to_string());
+            page_params.set_params(organ_params);
+        }
+        Self::find_organ_page(page_params).await
     }
 
     /// 查询组织列表
-    pub async fn find_organ_list(params: &OrganQueryParam) -> BmbpResp<Vec<BmbpRbacOrgan>> {
-        Err(BmbpError::api("接口未实现".to_string()))
+    pub async fn find_organ_list(params: &OrganQueryParam) -> BmbpResp<Option<Vec<BmbpRbacOrgan>>> {
+        let mut script_param = BmbpHashMap::new();
+        let mut query_script: BmbpScriptSql = OrganScript::query_script();
+        if let Some(organ_title) = params.get_organ_title() {
+            if !organ_title.is_empty() {
+                script_param.insert(
+                    "organ_title".to_string(),
+                    BmbpValue::from(format!("%{}%", organ_title)),
+                );
+                query_script.filter("organ_title like #{organ_title}");
+            }
+        }
+        if let Some(organ_parent_code) = params.get_organ_parent_code() {
+            if !organ_parent_code.is_empty() {
+                script_param.insert(
+                    "organ_parent_code".to_string(),
+                    BmbpValue::from(organ_parent_code),
+                );
+                query_script.filter("organ_parent_code = #{organ_parent_code}");
+            }
+        }
+        OrganDao::find_organ_list(&query_script.to_script(), &script_param).await
     }
     pub async fn find_organ_list_by_parent(
         parent: &String,
@@ -95,7 +165,11 @@ impl OrganService {
     }
     /// 查询组织详情-通过R_ID
     pub async fn find_organ_by_id(r_id: &String) -> BmbpResp<Option<BmbpRbacOrgan>> {
-        Err(BmbpError::api("接口未实现".to_string()))
+        let mut script_param = BmbpHashMap::new();
+        let mut query_script: BmbpScriptSql = OrganScript::query_script();
+        script_param.insert("record_id".to_string(), BmbpValue::from(r_id));
+        query_script.filter("record_id = #{record_id}");
+        OrganDao::find_organ_info(&query_script.to_script(), &script_param).await
     }
     /// 查询组织详情-通过ORGAN-CODE
     pub async fn find_organ_by_organ_code(organ_id: &String) -> BmbpResp<Option<BmbpRbacOrgan>> {
