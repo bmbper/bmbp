@@ -47,10 +47,34 @@ impl OrganDao {
     pub(crate) async fn find_organ_info(
         script_sql: &String,
         script_params: &BmbpHashMap,
-    ) -> Result<Option<BmbpRbacOrgan>, bmbp_app_common::BmbpError> {
+    ) -> BmbpResp<Option<BmbpRbacOrgan>> {
         bmbp_orm_ins::BmbpORM
             .await
             .generate_script_query_one::<BmbpRbacOrgan>(script_sql, script_params)
+            .await
+    }
+
+    pub(crate) async fn insert(
+        script_sql: &String,
+        script_params: &BmbpHashMap,
+    ) -> BmbpResp<usize> {
+        bmbp_orm_ins::BmbpORM
+            .await
+            .script_insert(script_sql, script_params)
+            .await
+    }
+
+    pub(crate) async fn update(script: &String, params: &BmbpHashMap) -> BmbpResp<usize> {
+        bmbp_orm_ins::BmbpORM
+            .await
+            .script_update(script, params)
+            .await
+    }
+
+    pub(crate) async fn delete(script: &String, params: &BmbpHashMap) -> BmbpResp<usize> {
+        bmbp_orm_ins::BmbpORM
+            .await
+            .script_delete(script, params)
             .await
     }
 }

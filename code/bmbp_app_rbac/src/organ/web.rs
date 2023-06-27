@@ -53,7 +53,7 @@ pub async fn find_organ_page_by_parent(
 ) -> BmbpResp<RespVo<PageVo<BmbpRbacOrgan>>> {
     tracing::debug!("组织分页查询参数 organ_parent_code:{:#?}", params);
     let organ_tree = OrganService::find_organ_page_by_parent(&parent, &mut params).await?;
-    Ok(RespVo::ok_msg_data("查询组织机构树成功!", organ_tree))
+    Ok(RespVo::ok_msg_data("查询组织机构分页成功!", organ_tree))
 }
 
 /// 查询组织机构列表
@@ -62,7 +62,7 @@ pub async fn find_organ_list(
 ) -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
     tracing::debug!("组织列表查询参数:{:#?}", params);
     let organ_tree = OrganService::find_organ_list(&params).await?;
-    Ok(RespVo::ok_msg_option("查询组织机构树成功!", organ_tree))
+    Ok(RespVo::ok_msg_option("查询组织机构列表成功!", organ_tree))
 }
 
 /// 查询指定ORGAN_PARENT_CODE组织下的组织机构列表
@@ -76,7 +76,7 @@ pub async fn find_organ_list_by_parent(
         params
     );
     let organ_tree = OrganService::find_organ_list(&params).await?;
-    Ok(RespVo::ok_msg_option("查询组织机构树成功!", organ_tree))
+    Ok(RespVo::ok_msg_option("查询组织机构列表成功!", organ_tree))
 }
 
 /// 查询指定RECORD_ID组织机构详情
@@ -85,7 +85,7 @@ pub async fn find_organ_info_by_id(
 ) -> BmbpResp<RespVo<Option<BmbpRbacOrgan>>> {
     tracing::debug!("组织详情查询参数r_id:{:#?}", id);
     let organ = OrganService::find_organ_by_id(&id).await?;
-    Ok(RespVo::ok_msg_data("查询组织机构树详情!", organ))
+    Ok(RespVo::ok_msg_data("查询组织机构详情!", organ))
 }
 
 /// 查询指定RECORD_CODE的组织机构详情
@@ -94,7 +94,7 @@ pub async fn find_organ_info_by_code(
 ) -> BmbpResp<RespVo<Option<BmbpRbacOrgan>>> {
     tracing::debug!("组织详情查询参数organ_code:{:#?}", code);
     let organ = OrganService::find_organ_by_organ_code(&code).await?;
-    Ok(RespVo::ok_msg_data("查询组织机构树详情!", organ))
+    Ok(RespVo::ok_msg_data("查询组织机构详情!", organ))
 }
 
 /// 保存组织机构
@@ -130,11 +130,10 @@ pub async fn update_organ_by_id(
 
 /// 更新组织机构的上级信息
 pub async fn update_organ_parent(
-    Path(id): Path<String>,
-    Path(parent): Path<String>,
-) -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
-    tracing::debug!("更新组织父级:{}:{}", id, parent);
-    Err(BmbpError::api("接口未实现".to_string()))
+    Path((id, parent)): Path<(String, String)>,
+) -> BmbpResp<RespVo<usize>> {
+    let row_count = OrganService::update_organ_parent_by_record_id(&id, &parent).await?;
+    Ok(RespVo::ok_msg_data("更新组织上级机构成功!", row_count))
 }
 /// 启用指定RECORD_ID的组织机构
 pub async fn enable_organ_by_id(Path(id): Path<String>) -> BmbpResp<RespVo<usize>> {

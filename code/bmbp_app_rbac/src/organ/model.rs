@@ -219,7 +219,45 @@ impl From<&BmbpRbacOrgan> for BmbpValue {
 impl From<&BmbpRbacOrgan> for BmbpHashMap {
     fn from(value: &BmbpRbacOrgan) -> Self {
         let mut hash_map = BmbpHashMap::new();
-        hash_map.insert("base".to_string(), BmbpValue::from(value.get_base_model()));
+        let bash_map = BmbpHashMap::from(value.get_base_model());
+        hash_map.extend(bash_map);
+        hash_map.insert(
+            "organ_code".to_string(),
+            BmbpValue::from(value.get_organ_code()),
+        );
+        hash_map.insert(
+            "organ_parent_code".to_string(),
+            BmbpValue::from(value.get_organ_parent_code()),
+        );
+        hash_map.insert(
+            "organ_title".to_string(),
+            BmbpValue::from(value.get_organ_title()),
+        );
+        hash_map.insert(
+            "organ_code_path".to_string(),
+            BmbpValue::from(value.get_organ_code_path()),
+        );
+        hash_map.insert(
+            "organ_title_path".to_string(),
+            BmbpValue::from(value.get_organ_title_path()),
+        );
+        hash_map.insert(
+            "organ_data_id".to_string(),
+            BmbpValue::from(value.get_organ_data_id()),
+        );
+        hash_map.insert(
+            "organ_type".to_string(),
+            BmbpValue::from(value.get_organ_type()),
+        );
+
+        hash_map
+    }
+}
+impl From<&mut BmbpRbacOrgan> for BmbpHashMap {
+    fn from(value: &mut BmbpRbacOrgan) -> Self {
+        let mut hash_map = BmbpHashMap::new();
+        let bash_map = BmbpHashMap::from(value.get_base_model());
+        hash_map.extend(bash_map);
         hash_map.insert(
             "organ_code".to_string(),
             BmbpValue::from(value.get_organ_code()),

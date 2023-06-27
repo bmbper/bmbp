@@ -38,4 +38,40 @@ impl OrganScript {
         query_script.select_string_slice(columns.as_slice());
         query_script
     }
+    pub(crate) fn insert_script() -> BmbpScriptSql {
+        let mut insert = BmbpScriptSql::new();
+        insert.insert_into(Self::get_organ_table_name().as_str());
+        for field in Self::get_organ_table_columns().as_slice() {
+            insert.insert_value(field, format!("#{}", field).as_str());
+        }
+        insert
+    }
+    pub(crate) fn update_script() -> BmbpScriptSql {
+        let mut update = BmbpScriptSql::new();
+        update.update(Self::get_organ_table_name().as_str());
+        update
+    }
+    pub(crate) fn update_status_script() -> BmbpScriptSql {
+        let mut script = Self::update_script();
+        script.set("record_status = #{record_status}");
+        script.filter("record_id = #{record_id}");
+        script
+    }
+    pub(crate) fn update_parent_script() -> BmbpScriptSql {
+        let mut script = Self::update_script();
+        script.set("organ_parent_code = #{organ_parent_code}");
+        script.filter("record_id = #{record_id}");
+        script
+    }
+    pub(crate) fn delete_script_by_id() -> BmbpScriptSql {
+        let mut script = Self::delete_script();
+        script.filter("record_id in (#{record_id})");
+        script
+    }
+    pub(crate) fn delete_script() -> BmbpScriptSql {
+        let mut script = BmbpScriptSql::new();
+        script.delete(Self::get_organ_table_name().as_str());
+        script.filter("record_id in (#{record_id})");
+        script
+    }
 }

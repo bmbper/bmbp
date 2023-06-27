@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -170,7 +172,7 @@ impl From<&BmbpBaseModel> for BmbpValue {
     }
 }
 
-impl From<&BmbpBaseModel> for BmbpHashMap {
+impl From<&BmbpBaseModel> for HashMap<String, BmbpValue> {
     fn from(model: &BmbpBaseModel) -> Self {
         let mut bmbp_map = BmbpHashMap::new();
         bmbp_map.insert(
