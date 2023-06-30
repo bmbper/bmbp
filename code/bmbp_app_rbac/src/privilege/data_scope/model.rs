@@ -5,31 +5,31 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
-pub struct RbacPrivilegeUrl {
+pub struct RbacPrivilegeDataScope {
     /// 公共信息
     #[serde(flatten)]
     base: BmbpBaseModel,
     /// 权限编码
     privilege_code: Option<String>,
-    /// URL编码
-    url_code: Option<String>,
-    /// 校验权重
-    url_wight: Option<usize>,
-    /// 校验类型
-    url_valid: BmbpUrlValidType,
+    /// 数据权限编码
+    scope_code: Option<String>,
+    /// 过虑类型
+    scope_type: BmbpRbacDataScopeValidType,
 }
 
 /// URL 校验类型
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum BmbpUrlValidType {
-    /// 通过
-    ACEESS,
-    /// 拒绝
-    REJECT,
+pub enum BmbpRbacDataScopeValidType {
+    /// 包含
+    INCLUDE,
+    /// 排除
+    EXCLUDE,
+    /// 忽略
+    IGNORE,
 }
 
-impl Default for BmbpUrlValidType {
+impl Default for BmbpRbacDataScopeValidType {
     fn default() -> Self {
-        BmbpUrlValidType::ACEESS
+        BmbpRbacDataScopeValidType::EXCLUDE
     }
 }

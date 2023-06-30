@@ -3,7 +3,7 @@ use axum::Json;
 use tracing;
 
 use bmbp_app_common::{
-    BmbpError, BmbpResp, PageParams, PageVo, RespVo, RECORD_STATUS_DISABLE, RECORD_STATUS_ENABLE,
+    BmbpResp, PageParams, PageVo, RespVo, RECORD_STATUS_DISABLE, RECORD_STATUS_ENABLE,
 };
 
 use crate::organ::model::{BmbpRbacOrgan, OrganQueryParam};
@@ -68,7 +68,7 @@ pub async fn find_organ_list(
 /// 查询指定ORGAN_PARENT_CODE组织下的组织机构列表
 pub async fn find_organ_list_by_parent(
     Path(parent): Path<String>,
-    Json(mut params): Json<OrganQueryParam>,
+    Json(params): Json<OrganQueryParam>,
 ) -> BmbpResp<RespVo<Vec<BmbpRbacOrgan>>> {
     tracing::debug!(
         "组织列表查询参数:organ_parent_code:{}, params: {:#?}",

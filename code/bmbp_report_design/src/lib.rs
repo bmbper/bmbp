@@ -4,7 +4,7 @@ mod meta;
 
 #[cfg(test)]
 mod tests {
-    use crate::{client::ModelClientFactory, db::DataBase};
+    use crate::client::ModelClientFactory;
 
     #[test]
     fn mysql_client_model() {

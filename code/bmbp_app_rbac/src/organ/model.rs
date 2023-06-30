@@ -65,7 +65,7 @@ pub struct BmbpRbacOrgan {
     /// 惟一数据标识
     organ_data_id: Option<String>,
     /// 组织类型
-    organ_type: BmbpOrganType,
+    organ_type: BmbpRbacOrganType,
     /// 下级组织
     organ_children: Option<Vec<BmbpRbacOrgan>>,
 }
@@ -107,7 +107,7 @@ impl BmbpRbacOrgan {
         self.organ_children = Some(organ_children);
         self
     }
-    pub fn set_organ_type(&mut self, organ_type: BmbpOrganType) -> &mut Self {
+    pub fn set_organ_type(&mut self, organ_type: BmbpRbacOrganType) -> &mut Self {
         self.organ_type = organ_type;
         self
     }
@@ -142,7 +142,7 @@ impl BmbpRbacOrgan {
     pub fn get_mut_organ_children(&mut self) -> Option<&mut Vec<BmbpRbacOrgan>> {
         self.organ_children.as_mut()
     }
-    pub fn get_organ_type(&self) -> &BmbpOrganType {
+    pub fn get_organ_type(&self) -> &BmbpRbacOrganType {
         &self.organ_type
     }
 }
@@ -292,7 +292,7 @@ impl From<&mut BmbpRbacOrgan> for BmbpHashMap {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum BmbpOrganType {
+pub enum BmbpRbacOrganType {
     /// 单位
     UNIT,
     /// 分组
@@ -305,32 +305,32 @@ pub enum BmbpOrganType {
     PERSON,
 }
 
-impl Default for BmbpOrganType {
+impl Default for BmbpRbacOrganType {
     fn default() -> Self {
-        BmbpOrganType::UNIT
+        BmbpRbacOrganType::UNIT
     }
 }
 
-impl ToString for BmbpOrganType {
+impl ToString for BmbpRbacOrganType {
     fn to_string(&self) -> String {
         match self {
-            BmbpOrganType::UNIT => "UNIT".to_string(),
-            BmbpOrganType::UNITS => "UNITS".to_string(),
-            BmbpOrganType::DEPT => "DEPT".to_string(),
-            BmbpOrganType::POST => "POST".to_string(),
-            BmbpOrganType::PERSON => "PERSON".to_string(),
+            BmbpRbacOrganType::UNIT => "UNIT".to_string(),
+            BmbpRbacOrganType::UNITS => "UNITS".to_string(),
+            BmbpRbacOrganType::DEPT => "DEPT".to_string(),
+            BmbpRbacOrganType::POST => "POST".to_string(),
+            BmbpRbacOrganType::PERSON => "PERSON".to_string(),
         }
     }
 }
 
-impl From<BmbpOrganType> for BmbpValue {
-    fn from(value: BmbpOrganType) -> Self {
+impl From<BmbpRbacOrganType> for BmbpValue {
+    fn from(value: BmbpRbacOrganType) -> Self {
         BmbpValue::from(value.to_string())
     }
 }
 
-impl From<&BmbpOrganType> for BmbpValue {
-    fn from(value: &BmbpOrganType) -> Self {
+impl From<&BmbpRbacOrganType> for BmbpValue {
+    fn from(value: &BmbpRbacOrganType) -> Self {
         BmbpValue::from(value.to_string())
     }
 }

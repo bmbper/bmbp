@@ -58,16 +58,16 @@ pub fn get_tree_meta(tree_meta_token: TokenStream) -> String {
     tree_prefix
 }
 
-pub fn build_tree_node_trait(tree_prefix: String, tree_struct_name: String) -> TokenStream2 {
-    // tree_field
-    let tree_id = format_ident!("{}_code", tree_prefix);
-    let tree_parent_id = format_ident!("{}_parent_code", tree_prefix);
-    let tree_data_id = format_ident!("{}_data_id", tree_prefix);
-    let tree_title = format_ident!("{}_title", tree_prefix);
-    let tree_children = format_ident!("{}_children", tree_prefix);
-    let tree_id_path = format_ident!("{}_code_path", tree_prefix);
-    let tree_title_path = format_ident!("{}_title_path", tree_prefix);
-    let tree_struct = format_ident!("{}", tree_struct_name);
+pub fn build_tree_node_trait(_tree_prefix: String, _tree_struct_name: String) -> TokenStream2 {
+    // // tree_field
+    // let tree_id = format_ident!("{}_code", tree_prefix);
+    // let tree_parent_id = format_ident!("{}_parent_code", tree_prefix);
+    // let tree_data_id = format_ident!("{}_data_id", tree_prefix);
+    // let tree_title = format_ident!("{}_title", tree_prefix);
+    // let tree_children = format_ident!("{}_children", tree_prefix);
+    // let tree_id_path = format_ident!("{}_code_path", tree_prefix);
+    // let tree_title_path = format_ident!("{}_title_path", tree_prefix);
+    // let tree_struct = format_ident!("{}", tree_struct_name);
 
     let tree_trait = quote!(
         // impl BmbpTree<#tree_struct> for  #tree_struct {

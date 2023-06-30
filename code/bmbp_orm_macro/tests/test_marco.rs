@@ -1,7 +1,6 @@
 use serde::Deserialize;
 use serde::Serialize;
 
-use bmbp_app_common::BmbpTree;
 use bmbp_app_common::BmbpValue;
 use bmbp_app_common::{BmbpBaseModelTrait, BmbpHashMap};
 use bmbp_orm::BmbpScriptSql;
