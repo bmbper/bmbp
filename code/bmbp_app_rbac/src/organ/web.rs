@@ -4,11 +4,16 @@ use salvo::Response;
 
 /// 根据参数查询组织机构树
 #[handler]
-pub async fn find_organ_tree(_req: &mut Request, _res: &mut Response) {}
+pub async fn find_organ_tree(_req: &mut Request, _res: &mut Response) {
+    _res.render("查询组织权树接kkkkk")
+}
 
 /// 查询指定REOCORD_ID开始的组织机构树
 #[handler]
-pub async fn find_organ_tree_start_with_id(_req: &mut Request, _res: &mut Response) {}
+pub async fn find_organ_tree_start_with_id(req: &mut Request, res: &mut Response) {
+    tracing::info!("查询组织构树{:#?}", req.param::<String>("id"));
+    res.render(req.param::<String>("id").as_ref().unwrap())
+}
 
 /// 查询指定ORGAN_CODE开始的组织机构树
 #[handler]
@@ -23,7 +28,9 @@ pub async fn find_organ_page_by_parent(_req: &mut Request, _res: &mut Response) 
 
 /// 查询组织机构列表
 #[handler]
-pub async fn find_organ_list(_req: &mut Request, _res: &mut Response) {}
+pub async fn find_organ_list(_req: &mut Request, res: &mut Response) {
+    res.render("查询树列表")
+}
 
 /// 查询指定ORGAN_PARENT_CODE组织下的组织机构列表
 #[handler]
