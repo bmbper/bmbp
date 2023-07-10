@@ -2,7 +2,7 @@ use super::web::*;
 use salvo::Router;
 
 pub fn file_router() -> Router {
-    Router::with_path("/bmbp/file")
+    Router::new()
         .push(Router::with_path("/upload").post(upload_file))
         .push(Router::with_path("/upload/img").post(upload_img))
         .push(

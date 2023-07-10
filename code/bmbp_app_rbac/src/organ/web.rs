@@ -1,4 +1,7 @@
+use bmbp_app_common::PageVo;
+use bmbp_app_common::RespVo;
 use salvo::handler;
+use salvo::writing::Json;
 use salvo::Request;
 use salvo::Response;
 
@@ -20,7 +23,10 @@ pub async fn find_organ_tree_start_with_id(req: &mut Request, res: &mut Response
 pub async fn find_organ_tree_start_with_code(_req: &mut Request, _res: &mut Response) {}
 /// 分页查询组织机构列表
 #[handler]
-pub async fn find_organ_page(_req: &mut Request, _res: &mut Response) {}
+pub async fn find_organ_page(_req: &mut Request, res: &mut Response) {
+    let resp: RespVo<PageVo<String>> = RespVo::ok_data(PageVo::default());
+    res.render(Json(resp))
+}
 
 /// 分页查询指定ORGAN_PARENT_CODE组织下的机构列表
 #[handler]

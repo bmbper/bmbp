@@ -1,3 +1,4 @@
+use salvo::fs::NamedFile;
 use salvo::handler;
 use salvo::Request;
 use salvo::Response;
@@ -14,7 +15,12 @@ pub async fn download_file(_req: &mut Request, _res: &mut Response) {}
 
 /// 下载指定ID的附件
 #[handler]
-pub async fn download_file_by_id(_req: &mut Request, _res: &mut Response) {}
+pub async fn download_file_by_id(req: &mut Request, res: &mut Response) {
+    NamedFile::builder("config/bmbp.toml")
+        .attached_name("bmbp.toml")
+        .send(req.headers(), res)
+        .await
+}
 
 /// 下载指定路径的附件
 #[handler]
