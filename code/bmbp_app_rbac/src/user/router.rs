@@ -1,6 +1,6 @@
 use crate::user::web::*;
-use axum::{routing::post, Router};
+use salvo::Router;
 
 pub fn user_router() -> Router {
-    Router::new().route("/user/tree", post(find_user_tree))
+    Router::with_path("/find/user/tree").get(find_user_tree)
 }

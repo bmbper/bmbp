@@ -1,5 +1,3 @@
-use axum::response::IntoResponse;
-
 use crate::RespVo;
 
 #[derive(Debug)]
@@ -75,12 +73,5 @@ impl ToString for BmbpError {
     fn to_string(&self) -> String {
         let vo: RespVo<String> = RespVo::fail_msg(format!("{}:{}", self.name(), self.msg).as_str());
         serde_json::to_string(&vo).unwrap()
-    }
-}
-
-impl IntoResponse for BmbpError {
-    fn into_response(self) -> axum::response::Response {
-        let vo: RespVo<String> = RespVo::fail_msg(format!("{}:{}", self.name(), self.msg).as_str());
-        vo.into_response()
     }
 }

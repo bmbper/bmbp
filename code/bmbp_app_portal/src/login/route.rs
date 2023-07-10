@@ -1,13 +1,11 @@
-use crate::login::model::LoginModel;
-use axum::Json;
-use bmbp_app_common::BmbpResp;
-
-pub async fn login(Json(login): Json<LoginModel>) -> BmbpResp<()> {
-    tracing::info!("登录信息：{:#?}", login);
-    Ok(())
+use salvo::handler;
+use salvo::Request;
+use salvo::Response;
+#[handler]
+pub async fn login(_req: &mut Request, res: &mut Response) {
+    res.render("login")
 }
-
-pub async fn login_out(Json(login): Json<LoginModel>) -> BmbpResp<()> {
-    tracing::info!("登出信息：{:#?}", login);
-    Ok(())
+#[handler]
+pub async fn login_out(_req: &mut Request, res: &mut Response) {
+    res.render("logout")
 }

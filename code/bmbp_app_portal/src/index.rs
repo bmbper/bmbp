@@ -1,5 +1,8 @@
-use axum::response::IntoResponse;
+use salvo::handler;
+use salvo::Request;
+use salvo::Response;
 
-pub async fn index_api() -> impl IntoResponse {
-    "欢迎使用bmbp应用模块，本项目仅提供后台接口，前端项目请移步bmbp_ui"
+#[handler]
+pub fn index_api(_req: &mut Request, res: &mut Response) {
+    res.render("欢迎使用bmbp应用模块，本项目仅提供后台接口，前端项目请移步bmbp_ui")
 }

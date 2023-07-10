@@ -1,51 +1,36 @@
-use axum::Router;
-use tower_http::trace::TraceLayer;
-use tracing::Level;
-
 use bmbp_app_common::map::{global_hash_map_vars, global_hash_map_vars_to_usize};
 use env::init_app_env;
 use routes::init_webapp_router;
+use salvo::prelude::*;
 
 mod env;
 mod routes;
 
-pub struct BmbpWebApp {
-    router: Option<Router>,
-}
+pub struct BmbpWebApp {}
 
 impl BmbpWebApp {
     pub fn new() -> Self {
-        BmbpWebApp { router: None }
+        BmbpWebApp {}
     }
 
     pub fn init(&mut self) {
-        // TRACE-DEBUG-INFO-WARN-ERROR
-        tracing_subscriber::fmt()
-            .with_level(true)
-            .with_max_level(Level::DEBUG)
-            .init();
+        tracing_subscriber::fmt().init();
         tracing::info!("初始化WebApp运行环境......");
         // 初始化环境变量
         init_app_env();
-        self.init_router();
     }
 
-    fn init_router(&mut self) {
+    fn init_router(&mut self) -> Router {
         tracing::info!("初始化WebApp接口服务路由......");
-        let mut router = Router::new();
-        router = init_webapp_router(router);
-
-        // 增加中间处理器
-        router = router.layer(TraceLayer::new_for_http());
-        self.router = Some(router);
+        init_webapp_router()
     }
 
     pub async fn start(&mut self) {
         let host = self.host().clone();
         tracing::info!("启动WebApp应用服务,监听地址:{}......", host.clone());
-        let addr = &host.parse().unwrap();
-        let serve = self.router.as_mut().unwrap().clone().into_make_service();
-        axum::Server::bind(addr).serve(serve).await.unwrap();
+        let acceptor = TcpListener::new(host.as_str()).bind().await;
+        let router = self.init_router();
+        Server::new(acceptor).serve(router).await;
     }
 
     fn host(&self) -> String {

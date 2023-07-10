@@ -1,12 +1,14 @@
-use axum::Router;
+use salvo::serve_static::StaticDir;
+use salvo::Router;
 
-use static_file::build_static_method_serve;
-
-mod static_file;
+mod file;
+use file::file_router;
 
 pub fn build_file_router() -> Router {
-    let mut router = Router::new();
-    let serve_dir_router = build_static_method_serve();
-    router = router.nest_service("/webapp/lib", serve_dir_router);
-    router
+    Router::new()
+        .push(Router::with_path("/bmbp/file").push(file_router()))
+        .push(
+            Router::with_path("/static/<**path>")
+                .get(StaticDir::new(["/webapp/lib"]).listing(true)),
+        )
 }

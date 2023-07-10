@@ -1,4 +1,3 @@
-use axum::response::IntoResponse;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -199,18 +198,6 @@ where
             code: Some(RespCode::ERROR),
             msg: Some(msg.to_string()),
             data,
-        }
-    }
-}
-
-impl<T> IntoResponse for RespVo<T>
-where
-    T: Clone + Default + Serialize + Send + Sync,
-{
-    fn into_response(self) -> axum::response::Response {
-        match serde_json::to_string(&self) {
-            Ok(v) => v.into_response(),
-            Err(err) => err.to_string().into_response(),
         }
     }
 }
