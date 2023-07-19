@@ -1,3 +1,4 @@
+use salvo::{writing::Json, Piece};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -204,3 +205,21 @@ where
 
 /// 定义包含异常的返回类型
 pub type BmbpResp<T> = Result<T, BmbpError>;
+
+impl<T> Piece for RespVo<T>
+where
+    T: Clone + Default + Serialize + Send + Sync,
+{
+    fn render(self, res: &mut salvo::Response) {
+        res.render(Json(self))
+    }
+}
+
+impl<T> Piece for PageVo<T>
+where
+    T: Clone + Default + Serialize + Send + Sync,
+{
+    fn render(self, res: &mut salvo::Response) {
+        res.render(Json(self))
+    }
+}

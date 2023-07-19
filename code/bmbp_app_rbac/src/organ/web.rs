@@ -1,3 +1,5 @@
+use bmbp_app_common::BmbpError;
+use bmbp_app_common::BmbpResp;
 use bmbp_app_common::PageVo;
 use bmbp_app_common::RespVo;
 use salvo::handler;
@@ -5,10 +7,19 @@ use salvo::writing::Json;
 use salvo::Request;
 use salvo::Response;
 
+use super::service::OrganService;
+use super::BmbpRbacOrgan;
+use super::OrganQueryParam;
+
 /// 根据参数查询组织机构树
 #[handler]
-pub async fn find_organ_tree(_req: &mut Request, _res: &mut Response) {
-    _res.render("查询组织权树接kkkkk")
+pub async fn find_organ_tree(
+    req: &mut Request,
+    _res: &mut Response,
+) -> BmbpResp<RespVo<Option<Vec<BmbpRbacOrgan>>>> {
+    let params = OrganQueryParam::default();
+    let rs = OrganService::find_organ_tree(&params).await?;
+    Ok(RespVo::ok_data(rs))
 }
 
 /// 查询指定REOCORD_ID开始的组织机构树
