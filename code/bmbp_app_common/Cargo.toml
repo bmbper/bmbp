@@ -17,6 +17,6 @@ async-trait = "0.1"
 chrono = "0.4"
 
 
-salvo={version = "0.45",features=["full"]}
+salvo={version = "0.48",features=["full"]}
 uuid = {version = "1.4.0",features=["serde","v4"]}
 tokio = { version = "1", features = ["full"] }

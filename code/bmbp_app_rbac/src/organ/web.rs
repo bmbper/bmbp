@@ -1,4 +1,3 @@
-use bmbp_app_common::BmbpError;
 use bmbp_app_common::BmbpResp;
 use bmbp_app_common::PageVo;
 use bmbp_app_common::RespVo;
@@ -14,7 +13,7 @@ use super::OrganQueryParam;
 /// 根据参数查询组织机构树
 #[handler]
 pub async fn find_organ_tree(
-    req: &mut Request,
+    _req: &mut Request,
     _res: &mut Response,
 ) -> BmbpResp<RespVo<Option<Vec<BmbpRbacOrgan>>>> {
     let params = OrganQueryParam::default();
@@ -35,6 +34,11 @@ pub async fn find_organ_tree_start_with_code(_req: &mut Request, _res: &mut Resp
 /// 分页查询组织机构列表
 #[handler]
 pub async fn find_organ_page(_req: &mut Request, res: &mut Response) {
+    let path_params = _req.param::<String>("path_params");
+    let url_params = _req.query::<String>("totken");
+    let json_params = _req.parse_json::<OrganQueryParam>().await;
+    let form_data = _req.parse_form::<OrganQueryParam>().await;
+
     let resp: RespVo<PageVo<String>> = RespVo::ok_data(PageVo::default());
     res.render(Json(resp))
 }

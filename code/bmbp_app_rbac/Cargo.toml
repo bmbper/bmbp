@@ -14,7 +14,7 @@ bmbp_orm_ins = { path = "../bmbp_orm_ins" }
 bmbp_app_common = { path = "../bmbp_app_common" }
 bmbp_app_utils = { path = "../bmbp_app_utils" }
 
-salvo={version = "0.45",features=["full"]}
+salvo={version = "0.48",features=["full"]}
 tokio = { version = "1", features = ["full"] }
 
 
