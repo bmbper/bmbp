@@ -1,3 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <title>{{appTitle}}</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="/static/lib/arco/css/arco.min.css">
+</head>
+
 <body>
-    登录
+    <div id="root"></div>
 </body>
+<script src="/static/lib/reactjs/react.production.min.js"></script>
+<script src="/static/lib/reactjs/react-dom.production.min.js"></script>
+<script src="/static/lib/reactjs/babel.min.js"></script>
+<script src="/static/lib/arco/arco.min.js"></script>
+<script src="/static/lib/arco/arco-icon.min.js"></script>
+<script src="/static/lib/axios.min.js"></script>
+<script type="text/babel">
+    let btnStyle = {
+        color: "blue"
+    };
+    ReactDOM.render(
+        <arco.Button type="primary" style={btnStyle}>Hello Arco</arco.Button>,
+        document.querySelector("#root")
+    );
+</script>
+
+</html>

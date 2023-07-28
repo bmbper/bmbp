@@ -1,4 +1,5 @@
 mod model;
 mod route;
-pub use route::login;
-pub use route::login_out;
+mod view;
+pub use route::*;
+pub use view::*;

@@ -5,6 +5,7 @@ name = "Bmbp低代码平台"
 title = "Bmbp低代码平台"
 login = "Bmbp低代码平台"
 copy_right = "Bmbp低代码平台 版权信息"
+env = "dev"
 [bmbp.server]
 host = ""
 port = 8011
@@ -17,4 +18,3 @@ schema = "public"
 user = "bmbp"
 password = "zgk0130!"
 ignore_case = true
-

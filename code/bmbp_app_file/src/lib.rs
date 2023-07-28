@@ -1,5 +1,5 @@
-use salvo::serve_static::StaticDir;
-use salvo::Router;
+use bmbp_app_common::EmbedStatic;
+use salvo::{serve_static::static_embed, Router};
 
 mod file;
 use file::file_router;
@@ -7,8 +7,5 @@ use file::file_router;
 pub fn build_file_router() -> Router {
     Router::new()
         .push(Router::with_path("/bmbp/file").push(file_router()))
-        .push(
-            Router::with_path("/static/<**path>")
-                .get(StaticDir::new(["webapp/static"]).listing(true)),
-        )
+        .push(Router::with_path("/static/<**path>").get(static_embed::<EmbedStatic>()))
 }

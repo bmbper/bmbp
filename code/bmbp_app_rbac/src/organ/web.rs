@@ -34,10 +34,10 @@ pub async fn find_organ_tree_start_with_code(_req: &mut Request, _res: &mut Resp
 /// 分页查询组织机构列表
 #[handler]
 pub async fn find_organ_page(_req: &mut Request, res: &mut Response) {
-    let path_params = _req.param::<String>("path_params");
-    let url_params = _req.query::<String>("totken");
-    let json_params = _req.parse_json::<OrganQueryParam>().await;
-    let form_data = _req.parse_form::<OrganQueryParam>().await;
+    let _ = _req.param::<String>("path_params");
+    let _ = _req.query::<String>("totken");
+    let _ = _req.parse_json::<OrganQueryParam>().await;
+    let _ = _req.parse_form::<OrganQueryParam>().await;
 
     let resp: RespVo<PageVo<String>> = RespVo::ok_data(PageVo::default());
     res.render(Json(resp))

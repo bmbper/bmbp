@@ -9,3 +9,5 @@ pub const RECORD_STATUS_ENABLE: &str = "0";
 pub const RECORD_FLAG_NORMAL: &str = "0";
 /// RECORD_DELETE_FLAG 记录删除标记
 pub const RECORD_FLAG_REMOVE: &str = "-1";
+/// 应用名称
+pub const APP_TITLE: &str = "Bmbp信息管理";
