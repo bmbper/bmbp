@@ -17,10 +17,10 @@
 <script src="/static/lib/arco/arco.min.js"></script>
 <script src="/static/lib/arco/arco-icon.min.js"></script>
 <script src="/static/lib/axios.min.js"></script>
-<script type="text/babel" src="/static/app/login/login.js"></script>
+<script type="text/babel" src="/static/app/{{viewPath}}"></script>
 <script type="text/babel">
     ReactDOM.render(
-        <AppView></AppView>,
+        < {{viewName}}/>,
         document.querySelector("#root")
     );
 </script>

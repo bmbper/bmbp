@@ -5,13 +5,12 @@ use salvo::writing::Text;
 use salvo::Request;
 use salvo::Response;
 use tera::Context;
-
 #[handler]
-pub async fn login_view(_req: &mut Request, res: &mut Response) {
+pub async fn portal_view(_req: &mut Request, res: &mut Response) {
     let mut ctx = Context::new();
     ctx.insert("appTitle", APP_TITLE);
-    ctx.insert("viewPath", "login/login.js");
-    ctx.insert("viewName", "LoginView");
+    ctx.insert("viewPath", "portal/portal.js");
+    ctx.insert("viewName", "PortalView");
     let te = BMBP_TEMPLATE.render("page.html", &ctx).unwrap();
     res.render(Text::Html(&te))
 }
