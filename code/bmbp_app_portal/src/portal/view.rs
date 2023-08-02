@@ -11,6 +11,7 @@ pub async fn portal_view(_req: &mut Request, res: &mut Response) {
     ctx.insert("appTitle", APP_TITLE);
     ctx.insert("viewPath", "portal/portal.js");
     ctx.insert("viewName", "PortalView");
+    ctx.insert("viewCss", "portal/portal.css");
     let te = BMBP_TEMPLATE.render("page.html", &ctx).unwrap();
     res.render(Text::Html(&te))
 }

@@ -5,7 +5,10 @@
     <title>{{appTitle}}</title>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="/static/lib/arco/css/arco.min.css">
-    <link rel="stylesheet" type="text/css" href="/static/asserts/css/login.css">
+    <link rel="stylesheet" type="text/css" href="/static/asserts/css/app.css">
+    {% if viewCss %}
+    <link rel="stylesheet" type="text/css" href="/static/asserts/css/{{viewCss}}">
+    {% endif %}
 </head>
 
 <body>

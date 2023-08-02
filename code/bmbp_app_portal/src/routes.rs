@@ -11,15 +11,5 @@ pub fn build_home_router() -> Router {
         .push(Router::with_path("/index.view").get(index_view))
         .push(Router::with_path("/login.view").get(login_view))
         .push(Router::with_path("/portal.view").get(portal_view))
-        .push(
-            Router::with_path("/portal")
-                .push(Router::with_path("/login").post(login))
-                .push(Router::with_path("/logout").post(login_out).get(login_out))
-                .push(Router::with_path("/app").post(find_app).get(find_app))
-                .push(
-                    Router::with_path("/app/menu/<app_id>")
-                        .post(find_app_menu)
-                        .get(find_app_menu),
-                ),
-        )
+        .push(Router::with_path("/api/v1").push(Router::with_path("/login.do").post(login)))
 }
