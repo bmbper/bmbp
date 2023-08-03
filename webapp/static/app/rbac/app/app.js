@@ -21,6 +21,10 @@ const onSearchFormQueryBtnClick = () => {
   onQueryGridData(queryData);
 }
 
+const onSearchFormRestBtnClick = () => {
+  AppPageIns.formRef.current.resetFields();
+}
+
 const onQueryGridData = (queryData) => {
   queryData = queryData || {}
   let data = [
@@ -83,10 +87,6 @@ const onGridPageChange = (page) => {
   AppPageIns.setPagination({ ...AppPageIns.pagination, pageSize: page.pageSize });
 }
 
-const onSearchFormRestBtnClick = () => {
-  AppPageIns.formRef.current.resetFields();
-}
-
 const onRowEditBtnClick = (record) => {
   AppPageIns.setRecordId(record.recordId);
   AppPageIns.setEditFormVisible(true);
@@ -120,8 +120,12 @@ const AppPageIns = {
   pagination: null,
 };
 
-function SearchForm() {
+const SearchForm = () => {
   AppPageIns.formRef = React.useRef();
+  React.useEffect(() => {
+    //AppPageIns.formRef.current.setFieldsValue({ appCode: '1111', appTitle: "ddd" });
+  }, []);
+
   const searchBtnStyle = {
     marginRight: "8px",
     padding: "0 10px"
@@ -174,7 +178,7 @@ function SearchForm() {
   </div >;
 }
 
-function GridTable(props) {
+const GridTable = (props) => {
   // 初始化查询函数
   React.useEffect(() => {
     onQueryGridData({});
@@ -240,11 +244,11 @@ function GridTable(props) {
           <arco.Popover
             trigger='hover' position='left'
             content={
-              <div className="bmbp-grid-row-action-more">
+              <div className="bmbp-action-more">
                 {record.recordStatus == '0' ? <arco.Button type='text' size={'mini'} onClick={() => onRowDisableBtnClick(record)}>上线</arco.Button> : <arco.Button type='text' size={'mini'} onClick={() => onRowEnableBtnClick(record)}>下线</arco.Button>}
                 <arco.Button type='text' size={'mini'} onClick={() => onRowInfoBtnClick(record)}>查看</arco.Button>
-                <arco.Popconfirm focusLock title='删除确认' content='数据删除之后，无法恢复，是否继续?'>
-                  <arco.Button type='text' size={'mini'} onClick={() => onRowDelBtnClick(record)} status='danger'>删除</arco.Button>
+                <arco.Popconfirm focusLock title='删除确认' content='数据删除之后，无法恢复，是否继续?' onOk={() => { onRowDelBtnClick(record) }}>
+                  <arco.Button type='text' size={'mini'} status='danger'>删除</arco.Button>
                 </arco.Popconfirm>
 
               </div>
@@ -269,7 +273,7 @@ function GridTable(props) {
 }
 
 
-function AppPage() {
+const AppPage = () => {
   // 新增应用表单
   const [addFormVisible, setAddFormVisible] = React.useState(false);
   AppPageIns.addFormVisible = addFormVisible;

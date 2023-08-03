@@ -1,9 +1,12 @@
+html,body{
+    height: 100vh;
+}
+
 .bmbp-page-body{
-    width:  calc(100% - 15px);
-    height: calc(100vh - 10px);
-    min-height: 480px;
-    margin:  0px;
-    padding: 5px;
+    width:  100% ;
+    height: 100vh;
+    margin:  5px;
+    padding: 0px;
     background: #FFFFFF;
 }
 
@@ -46,11 +49,51 @@
 }
 
 
-.bmbp-grid-row-action-more {
+.bmbp-action-more {
     display: flex;
     flex-direction: column;
+    padding: 0px;
 }
 
-.bmbp-grid-row-action-more > button{
-    padding: 0 2px;
+.bmbp-action-more > button{
+   margin: 2px;
+   width: 100%;
+}
+
+
+.bmbp-page-tree-grid-body{
+    width: calc(100% - 12px);
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    padding:5px;
+}
+
+
+.bmbp-page-tree-grid-tree{
+    width:220px;
+    min-width:220px;
+    height: 100%;
+    border-right: 1px solid rgba(0,0,0,0.08);
+    box-shadow:0 2px 5px 0 rgba(0,0,0,0.08);
+    padding: 0;
+}
+
+.bmbp-page-tree-grid-tree-title{
+    padding: 2px;
+    height:32px;
+    position: relative;
+    background: #f2f3f5;
+}
+
+
+
+.bmbp-page-tree-grid-grid{
+    flex: 1;
+    min-width:800px;
+    height: 100%;
+    background: #fff;
+    padding: 5px;
 }

@@ -1,7 +1,11 @@
+use crate::organ::view::*;
 use crate::organ::web::*;
+
 use salvo::Router;
 pub fn organ_router() -> Router {
-    Router::new()
+    let organ_view_router =
+        Router::new().push(Router::with_path("index.view").get(organ_index_view));
+    let organ_api_router = Router::new()
         .push(
             Router::with_path("/find/tree")
                 .post(find_organ_tree)
@@ -40,5 +44,7 @@ pub fn organ_router() -> Router {
         .push(Router::with_path("/disable/id/<id>").post(disable_organ_by_id))
         .push(Router::with_path("/remove").post(remove_organ))
         .push(Router::with_path("/remove/id/<id>").post(remove_organ_by_id))
-        .push(Router::with_path("/remove/batch/id/<id>").post(batch_remove_organ_by_id))
+        .push(Router::with_path("/remove/batch/id/<id>").post(batch_remove_organ_by_id));
+
+    Router::new().push(organ_view_router).push(organ_api_router)
 }

@@ -184,7 +184,7 @@ function CenterPage() {
       </arco.Breadcrumb>
     </div>
     <div className="bmbp-layout-center-body">
-      <iframe className="bmbp-layout-center-body-content" src="/rbac/v1/app/index.view" />
+      <iframe className="bmbp-layout-center-body-content" src="/rbac/v1/organ/index.view" />
     </div>
   </div>;
 }
