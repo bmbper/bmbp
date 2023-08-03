@@ -9,7 +9,17 @@ use tera::Context;
 pub async fn app_index_view(_req: &mut Request, res: &mut Response) {
     let mut ctx = Context::new();
     ctx.insert("appTitle", APP_TITLE);
-    ctx.insert("viewPath", "rbac/app/app.js");
+    ctx.insert(
+        "viewScript",
+        vec![
+            "rbac/app/app.js",
+            "rbac/app/app_edit.js",
+            "rbac/app/app_config.js",
+            "rbac/app/app_info.js",
+            "rbac/app/api.js",
+        ]
+        .as_slice(),
+    );
     ctx.insert("viewName", "RbacAppView");
     let te = BMBP_TEMPLATE.render("page.html", &ctx).unwrap();
     res.render(Text::Html(&te))

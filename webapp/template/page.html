@@ -7,7 +7,9 @@
     <link rel="stylesheet" type="text/css" href="/static/lib/arco/css/arco.min.css">
     <link rel="stylesheet" type="text/css" href="/static/asserts/css/app.css">
     {% if viewCss %}
-    <link rel="stylesheet" type="text/css" href="/static/asserts/css/{{viewCss}}">
+    {% for css in viewCss %}
+    <link rel="stylesheet" type="text/css" href="/static/asserts/css/{{css}}">
+    {% endfor %}
     {% endif %}
 </head>
 
@@ -20,7 +22,12 @@
 <script src="/static/lib/arco/arco.min.js"></script>
 <script src="/static/lib/arco/arco-icon.min.js"></script>
 <script src="/static/lib/axios.min.js"></script>
-<script type="text/babel" src="/static/app/{{viewPath}}"></script>
+{% if viewScript %}
+{% for script in viewScript %}
+<script type="text/babel" src="/static/app/{{script}}"></script>
+{% endfor %}
+{% endif %}
+
 <script type="text/babel">
     ReactDOM.render(
         < {{viewName}}/>,

@@ -10,7 +10,7 @@ const queryMenuData = () => {
     {
       recordId: '0',
       menuTitle: "首页",
-      menuUrl: '',
+      menuUrl: '/index.view',
       menuType: 'func',
     },
     {
@@ -20,7 +20,8 @@ const queryMenuData = () => {
       children: [{
         recordId: '1.1',
         menuTitle: "应用管理",
-        menuUrl: '',
+        menuUrl: '/rbac/v1/app/index.view',
+        menuType: 'func'
       }, {
         recordId: '1.2',
         menuTitle: "组织管理",
@@ -100,50 +101,6 @@ function BmbpMenu() {
       ))
     }
   </Menu >
-  // < Menu
-  //   defaultOpenKeys={['0']}
-  //   defaultSelectedKeys={['0_2']}
-  // >
-  //   <SubMenu
-  //     key='0'
-  //     title={
-  //       <div>
-  //         <arcoicon.IconApps /> Navigation 1
-  //       </div>
-  //     }
-  //   >
-  //     <MenuItem key='0_0'>Menu 1</MenuItem>
-  //     <MenuItem key='0_1'>Menu 2</MenuItem>
-  //     <MenuItem key='0_2'>Menu 3</MenuItem>
-  //     <MenuItem key='0_3'>Menu 4</MenuItem>
-  //   </SubMenu>
-  //   <SubMenu
-  //     key='1'
-  //     title={
-  //       <div>
-  //         <arcoicon.IconBug /> Navigation 2
-  //       </div>
-  //     }
-  //   >
-  //     <MenuItem key='1_0'>Menu 1</MenuItem>
-  //     <MenuItem key='1_1'>Menu 2</MenuItem>
-  //     <MenuItem key='1_2'>Menu 3</MenuItem>
-  //   </SubMenu>
-  //   <SubMenu
-  //     key='2'
-  //     title={
-  //       <div>
-  //         <arcoicon.IconBulb /> Navigation 3
-  //       </div>
-  //     }
-  //   >
-  //     <MenuItem key='2_0'>Menu 1</MenuItem>
-  //     <MenuItem key='2_1'>Menu 2</MenuItem>
-  //   </SubMenu>
-  //   <MenuItem renderItemInTooltip={() => 'NAVIGATION-4'}>
-  //     <arcoicon.IconBook /> Navigation 4
-  //   </MenuItem>
-  // </Menu >
 }
 
 const SettingMenu = (

@@ -10,9 +10,9 @@ use tera::Context;
 pub async fn login_view(_req: &mut Request, res: &mut Response) {
     let mut ctx = Context::new();
     ctx.insert("appTitle", APP_TITLE);
-    ctx.insert("viewPath", "login/login.js");
+    ctx.insert("viewScript", vec!["login/login.js"].as_slice());
+    ctx.insert("viewCss", vec!["login.css"].as_slice());
     ctx.insert("viewName", "LoginView");
-    ctx.insert("viewCss", "login.css");
     let te = BMBP_TEMPLATE.render("page.html", &ctx).unwrap();
     res.render(Text::Html(&te))
 }

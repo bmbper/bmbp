@@ -1,8 +1,9 @@
-
 const onToolBarAddBtnClick = () => {
-  arco.Message.info("新增功能开发中...");
+  AppPageIns.setRecordId('');
+  AppPageIns.setAddFormVisible(true);
 }
 const onToolBarDelBtnClick = () => {
+  arco.Message.info("rows:" + JSON.stringify(AppPageIns.selectedRowKeys));
   arco.Message.info("删除功能开发中...");
 }
 const onToolBarImportBtnClick = () => {
@@ -16,7 +17,7 @@ const onToolBarPrintBtnClick = () => {
 }
 
 const onSearchFormQueryBtnClick = () => {
-  var queryData = pageData.formRef.current.getFieldsValue();
+  var queryData = AppPageIns.formRef.current.getFieldsValue();
   onQueryGridData(queryData);
 }
 
@@ -72,30 +73,33 @@ const onQueryGridData = (queryData) => {
       recordStatus: '0',
     },
   ];
-  pageData.setPagination({ ...pageData.pagination, total: data.length });
-  pageData.setGridData(data);
+  AppPageIns.setPagination({ ...AppPageIns.pagination, total: data.length });
+  AppPageIns.setGridData(data);
 
   arco.Message.info("查询表结构数据：" + JSON.stringify(queryData));
 }
 
 const onGridPageChange = (page) => {
-  pageData.setPagination({ ...pageData.pagination, pageSize: page.pageSize });
+  AppPageIns.setPagination({ ...AppPageIns.pagination, pageSize: page.pageSize });
 }
 
 const onSearchFormRestBtnClick = () => {
-  pageData.formRef.current.resetFields();
+  AppPageIns.formRef.current.resetFields();
 }
 
 const onRowEditBtnClick = (record) => {
-  arco.Message.info("编辑功能开发中..." + record.appTitle);
+  AppPageIns.setRecordId(record.recordId);
+  AppPageIns.setEditFormVisible(true);
 }
 
 const onRowConfigBtnClick = (record) => {
-  arco.Message.info("配置功能开发中..." + record.appTitle);
+  AppPageIns.setRecordId(record.recordId);
+  AppPageIns.setConfigFormVisible(true);
 }
 
 const onRowInfoBtnClick = (record) => {
-  arco.Message.info("查看功能开发中..." + record.appTitle);
+  AppPageIns.setRecordId(record.recordId);
+  AppPageIns.setInfoFormVisible(true);
 }
 
 const onRowDelBtnClick = (record) => {
@@ -110,14 +114,14 @@ const onRowDisableBtnClick = (record) => {
   arco.Message.info("停用功能开发中..." + record.appTitle);
 }
 
-const pageData = {
+const AppPageIns = {
   formRef: null,
   setPagination: null,
   pagination: null,
 };
 
 function SearchForm() {
-  pageData.formRef = React.useRef();
+  AppPageIns.formRef = React.useRef();
   const searchBtnStyle = {
     marginRight: "8px",
     padding: "0 10px"
@@ -132,7 +136,7 @@ function SearchForm() {
     labelAlign: 'right'
   };
   return <div>
-    <arco.Form ref={pageData.formRef} {...formItemLayout}>
+    <arco.Form ref={AppPageIns.formRef} {...formItemLayout}>
       <arco.Grid.Row gutter={24}>
         <arco.Grid.Col span={7}>
           <arco.Form.Item field="appCode" label='应用编码'>
@@ -145,7 +149,7 @@ function SearchForm() {
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={7}>
-          <arco.Form.Item field="appType" label='应用类型'>
+          <arco.Form.Item field="appType" label='应用类型' allowClear>
             <arco.Select placeholder='请选择应用类型'>
               <arco.Select.Option key={'1'} value={'1'}>内置应用</arco.Select.Option>
               <arco.Select.Option key={'2'} value={'2'}>集成应用</arco.Select.Option>
@@ -153,7 +157,7 @@ function SearchForm() {
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={7}>
-          <arco.Form.Item field="recordStatus" label='应用状态'>
+          <arco.Form.Item field="recordStatus" label='应用状态' allowClear>
             <arco.Select placeholder='请选择应用状态'>
               <arco.Select.Option key={'1'} value={'1'}>开发中</arco.Select.Option>
               <arco.Select.Option key={'2'} value={'2'}>已发布</arco.Select.Option>
@@ -170,12 +174,12 @@ function SearchForm() {
   </div >;
 }
 
-function GridTable() {
+function GridTable(props) {
   // 初始化查询函数
   React.useEffect(() => {
     onQueryGridData({});
   }, []);
-  const [selectedRowKeys, setSelectedRowKeys] = React.useState([]);
+
   const [pagination, setPagination] = React.useState({
     sizeCanChange: true,
     showTotal: true,
@@ -184,10 +188,10 @@ function GridTable() {
     current: 1,
     pageSizeChangeResetCurrent: true,
   });
-  pageData.setPagination = setPagination;
-  pageData.pagination = pagination;
+  AppPageIns.setPagination = setPagination;
+  AppPageIns.pagination = pagination;
   const [gridData, setGridData] = React.useState([]);
-  pageData.setGridData = setGridData;
+  AppPageIns.setGridData = setGridData;
 
   const columns = [
     {
@@ -239,7 +243,10 @@ function GridTable() {
               <div className="bmbp-grid-row-action-more">
                 {record.recordStatus == '0' ? <arco.Button type='text' size={'mini'} onClick={() => onRowDisableBtnClick(record)}>上线</arco.Button> : <arco.Button type='text' size={'mini'} onClick={() => onRowEnableBtnClick(record)}>下线</arco.Button>}
                 <arco.Button type='text' size={'mini'} onClick={() => onRowInfoBtnClick(record)}>查看</arco.Button>
-                <arco.Button type='text' size={'mini'} onClick={() => onRowDelBtnClick(record)} status='danger'>删除</arco.Button>
+                <arco.Popconfirm focusLock title='删除确认' content='数据删除之后，无法恢复，是否继续?'>
+                  <arco.Button type='text' size={'mini'} onClick={() => onRowDelBtnClick(record)} status='danger'>删除</arco.Button>
+                </arco.Popconfirm>
+
               </div>
             }
           >
@@ -253,9 +260,9 @@ function GridTable() {
 
   return <arco.Table
     rowSelection={{
-      type: 'checkbox', checkAll: true, fixed: true, selectedRowKeys: selectedRowKeys,
+      type: 'checkbox', checkAll: true, fixed: true, selectedRowKeys: props.selectedRowKeys,
       onChange: (selectedRowKeys, _) => {
-        setSelectedRowKeys(selectedRowKeys);
+        AppPageIns.setSelectedRowKeys(selectedRowKeys);
       },
     }}
     rowKey={'recordId'} columns={columns} data={gridData} pagination={pagination} onChange={onGridPageChange} />;
@@ -263,6 +270,33 @@ function GridTable() {
 
 
 function AppPage() {
+  // 新增应用表单
+  const [addFormVisible, setAddFormVisible] = React.useState(false);
+  AppPageIns.addFormVisible = addFormVisible;
+  AppPageIns.setAddFormVisible = setAddFormVisible;
+  // 编辑应用表单
+  const [editFormVisible, setEditFormVisible] = React.useState(false);
+  AppPageIns.editFormVisible = editFormVisible;
+  AppPageIns.setEditFormVisible = setEditFormVisible;
+  // 配置应用表单
+  const [configFormVisible, setConfigFormVisible] = React.useState(false);
+  AppPageIns.configFormVisible = configFormVisible;
+  AppPageIns.setConfigFormVisible = setConfigFormVisible;
+  // 查看应用详情表单
+  const [infoFormVisible, setInfoFormVisible] = React.useState(false);
+  AppPageIns.infoFormVisible = infoFormVisible;
+  AppPageIns.setInfoFormVisible = setInfoFormVisible;
+
+  // 应用记录ID
+  const [recordId, setRecordId] = React.useState('');
+  AppPageIns.recordId = recordId;
+  AppPageIns.setRecordId = setRecordId;
+
+  // 表格选择记录
+  const [selectedRowKeys, setSelectedRowKeys] = React.useState([]);
+  AppPageIns.selectedRowKeys = selectedRowKeys;
+  AppPageIns.setSelectedRowKeys = setSelectedRowKeys;
+
   return <div className="bmbp-page-body">
     <div className="bmbp-page-serach-form">
       <SearchForm />
@@ -270,7 +304,12 @@ function AppPage() {
     <div className="bmbp-page-serach-toolbar">
       <div className="bmbp-page-serach-toolbar-left">
         <arco.Button type='primary' onClick={onToolBarAddBtnClick}>新增</arco.Button>
-        <arco.Button type='secondary' onClick={onToolBarDelBtnClick}>删除</arco.Button>
+        {
+          AppPageIns.selectedRowKeys && AppPageIns.selectedRowKeys.length > 0 ? <arco.Popconfirm focusLock title='删除确认' content='数据删除之后，无法恢复，是否继续?' onOk={() => { onToolBarDelBtnClick() }}>
+            <arco.Button type='secondary' >删除</arco.Button>
+          </arco.Popconfirm> : null
+        }
+
       </div>
       <div className="bmbp-page-serach-toolbar-right">
         <arco.Button type='secondary' icon={<arcoicon.IconImport />} onClick={onToolBarImportBtnClick}></arco.Button>
@@ -279,14 +318,17 @@ function AppPage() {
       </div>
     </div>
     <div className="bmbp-page-serach-grid">
-      <GridTable />
+      <GridTable selectedRowKeys={selectedRowKeys} />
     </div>
-  </div>;
+    <AppAddForm title={'新增应用'} visible={addFormVisible} recordId={recordId} />
+    <AppEditForm title={'编辑应用'} visible={editFormVisible} recordId={recordId} />
+    <AppConfigForm title={'配置应用'} visible={configFormVisible} recordId={recordId} />
+    <AppInfoForm title={'查看应用'} visible={infoFormVisible} recordId={recordId} />
+  </div >;
 }
 
 
 // 登录界面的APPView
 function RbacAppView() {
-
   return <AppPage />;
 }
