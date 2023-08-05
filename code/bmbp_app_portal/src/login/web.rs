@@ -10,7 +10,7 @@ use super::model::BmbpUserInfo;
 use super::service::LoginService;
 
 #[handler]
-pub async fn login(req: &mut Request, res: &mut Response) -> BmbpResp<RespVo<BmbpUserInfo>> {
+pub async fn login(req: &mut Request, _res: &mut Response) -> BmbpResp<RespVo<BmbpUserInfo>> {
     let login_user = req.parse_json::<LoginUser>().await.unwrap();
     let data = LoginService::do_login(&login_user).await?;
     Ok(RespVo::ok_data(data))

@@ -108,5 +108,5 @@ const onGridPageChange = (page) => {
 }
 
 const queryTreeData = () => {
-  return [{ organTitle: '集团总公司', organCode: '1', children: [{ organTitle: '部门1', organCode: '1.1' }, { organTitle: '部门3', organCode: '1.2' }] }]
+  return [{ organTitle: '配置中心', organCode: '1', resType: 'app', children: [{ organTitle: '部门1', organCode: '1.1' }, { organTitle: '部门3', organCode: '1.2' }] }]
 }

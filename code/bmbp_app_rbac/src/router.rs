@@ -1,5 +1,7 @@
 use crate::app::app_router;
 use crate::organ::organ_router;
+use crate::res::res_menu_router;
+use crate::role::role_router;
 use crate::user::user_router;
 use salvo::Router;
 pub fn build_rbac_router() -> Router {
@@ -7,4 +9,6 @@ pub fn build_rbac_router() -> Router {
         .push(Router::with_path("/organ").push(organ_router()))
         .push(Router::with_path("/user").push(user_router()))
         .push(Router::with_path("/app").push(app_router()))
+        .push(Router::with_path("/role").push(role_router()))
+        .push(Router::with_path("/res").push(res_menu_router()))
 }

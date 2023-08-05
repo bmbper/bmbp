@@ -4,7 +4,7 @@ mod app;
 mod organ;
 mod privilege;
 mod proxy;
-mod resource;
+mod res;
 mod role;
 mod role_privilege;
 mod role_user;

@@ -10,7 +10,10 @@ use tera::Context;
 pub async fn portal_view(_req: &mut Request, res: &mut Response) {
     let mut ctx = Context::new();
     ctx.insert("appTitle", APP_TITLE);
-    ctx.insert("viewScript", vec!["portal/portal.js"].as_slice());
+    ctx.insert(
+        "viewScript",
+        vec!["portal/portal.js", "portal/api.js"].as_slice(),
+    );
     ctx.insert("viewName", "PortalView");
     ctx.insert("viewCss", vec!["portal/portal.css"].as_slice());
     let te = BMBP_TEMPLATE.render("page.html", &ctx).unwrap();

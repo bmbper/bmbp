@@ -75,8 +75,8 @@ const onQueryGridData = (queryData) => {
       recordStatus: '0',
     }
   ];
-  AppIns.setPagination({ ...AppIns.pagination, total: data.length });
-  AppIns.setGridData(data);
+  PageAppIns.setPagination({ ...PageAppIns.pagination, total: data.length });
+  PageAppIns.setGridData(data);
   arco.Message.info("查询表结构数据：" + JSON.stringify(queryData));
 }
 
@@ -94,17 +94,17 @@ const onToolBarPrintBtnClick = () => {
 }
 
 const onSearchFormQueryBtnClick = () => {
-  var queryData = AppIns.formRef.current.getFieldsValue();
+  var queryData = PageAppIns.formRef.current.getFieldsValue();
   onQueryGridData(queryData);
 }
 
 const onSearchFormRestBtnClick = () => {
-  AppIns.formRef.current.resetFields();
+  PageAppIns.formRef.current.resetFields();
 }
 
 /// 列表分页大小变化
 const onGridPageChange = (page) => {
-  AppIns.setPagination({ ...AppIns.pagination, pageSize: page.pageSize });
+  PageAppIns.setPagination({ ...PageAppIns.pagination, pageSize: page.pageSize });
 }
 
 const queryTreeData = () => {

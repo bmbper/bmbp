@@ -5,6 +5,7 @@ use salvo::Router;
 pub fn organ_router() -> Router {
     let organ_view_router =
         Router::new().push(Router::with_path("index.view").get(organ_index_view));
+
     let organ_api_router = Router::new()
         .push(
             Router::with_path("/find/tree")

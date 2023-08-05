@@ -1,9 +1,9 @@
 const AppIns = {};
-const OrganView = () => {
-  return <OrganPage />
+const PageView = () => {
+  return <ResMenuPage />
 }
 
-const OrganPage = () => {
+const ResMenuPage = () => {
   return <div className="bmbp-page-tree-grid-body">
     <OrganTreeLeft />
     <OrganGridRight />
@@ -41,8 +41,7 @@ const OrganTreeLeft = () => {
   const treeData = queryTreeData();
   return <div className="bmbp-page-tree-grid-tree">
     <div className="bmbp-page-tree-grid-tree-title">
-      <div style={titleStyle}><span>组织机构</span></div>
-      <div style={addStyle}><arco.Button icon={<arcoicon.IconPlus style={{ color: '#165dff' }} />} onClick={() => onAddRootOrgan()} /></div>
+      <div style={titleStyle}><span>应用菜单</span></div>
       <div style={refreshStyle}><arco.Button icon={<arcoicon.IconRefresh style={{ color: '#165dff' }} />} onClick={() => onRefreshOrganTree()} /></div>
     </div>
     <div style={{ display: 'block', padding: '5px 2px' }}>
@@ -59,30 +58,32 @@ const OrganTreeLeft = () => {
 const buildTreeNodeActionBar = (node) => {
   console.log(node);
   return <div>
-    <arco.Popover
-      trigger='hover' position='right'
-      content={
-        <div className="bmbp-action-more">
-          <arco.Button size={'mini'} onClick={() => onAddOrganChild(node.dataRef)}>新增</arco.Button>
-          <arco.Button size={'mini'} onClick={() => onEditOrganInfo(node.dataRef)}>配置</arco.Button>
-          <arco.Button size={'mini'} onClick={() => onEditOrgan(node.dataRef)}>编辑</arco.Button>
-          <arco.Button size={'mini'} onClick={() => onInfoOrgan(node.dataRef)}>查看</arco.Button>
-          <arco.Button size={'mini'} onClick={() => onChangeOrganParent(node.dataRef)}>变更上级</arco.Button>
-          {node.recordStatus == '0' ? <arco.Button size={'mini'} onClick={() => onDisableOrgan(node.dataRef)}>停用</arco.Button> : <arco.Button size={'mini'} onClick={() => onEnableOrgan(node.dataRef)}>启用</arco.Button>}
-          {node.childrenData && node.childrenData.length > 0 ? null : <arco.Popconfirm focusLock title='删除确认' content='数据删除之后，无法恢复，是否继续?' onOk={() => { onDeleteOrgan(node.dataRef) }}><arco.Button size={'mini'}>删除</arco.Button></arco.Popconfirm>
-          }
-        </div>
-      }>
-      <arcoicon.IconMore
-        style={{
-          position: 'absolute',
-          right: 8,
-          fontSize: 12,
-          top: 10,
-          color: '#165dff',
-        }}
-      />
-    </arco.Popover >
+    {
+      node.dataRef.resType == "app" ? null : <arco.Popover
+        trigger='hover' position='right'
+        content={
+          <div className="bmbp-action-more">
+            <arco.Button size={'mini'} onClick={() => onAddOrganChild(node.dataRef)}>新增</arco.Button>
+            <arco.Button size={'mini'} onClick={() => onEditOrganInfo(node.dataRef)}>配置</arco.Button>
+            <arco.Button size={'mini'} onClick={() => onEditOrgan(node.dataRef)}>编辑</arco.Button>
+            <arco.Button size={'mini'} onClick={() => onInfoOrgan(node.dataRef)}>查看</arco.Button>
+            <arco.Button size={'mini'} onClick={() => onChangeOrganParent(node.dataRef)}>变更上级</arco.Button>
+            {node.dataRef.recordStatus == '0' ? <arco.Button size={'mini'} onClick={() => onDisableOrgan(node.dataRef)}>停用</arco.Button> : <arco.Button size={'mini'} onClick={() => onEnableOrgan(node.dataRef)}>启用</arco.Button>}
+            {node.dataRef.childrenData && node.childrenData.length > 0 ? null : <arco.Popconfirm focusLock title='删除确认' content='数据删除之后，无法恢复，是否继续?' onOk={() => { onDeleteOrgan(node.dataRef) }}><arco.Button size={'mini'}>删除</arco.Button></arco.Popconfirm>
+            }
+          </div>
+        }>
+        <arcoicon.IconMore
+          style={{
+            position: 'absolute',
+            right: 8,
+            fontSize: 12,
+            top: 10,
+            color: '#165dff',
+          }}
+        />
+      </arco.Popover >
+    }
   </div >
 }
 const buildTreeData = (treeData) => {

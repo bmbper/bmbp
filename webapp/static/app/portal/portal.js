@@ -3,73 +3,18 @@ const logoClick = () => {
   alert("/login.click")
 }
 
-
-const queryMenuData = () => {
-
-  return [
-    {
-      recordId: '0',
-      menuTitle: "首页",
-      menuUrl: '/index.view',
-      menuType: 'func',
-    },
-    {
-      recordId: '1',
-      menuTitle: "权限管理",
-      menuUrl: '',
-      children: [{
-        recordId: '1.1',
-        menuTitle: "应用管理",
-        menuUrl: '/rbac/v1/app/index.view',
-        menuType: 'func'
-      }, {
-        recordId: '1.2',
-        menuTitle: "组织管理",
-        menuUrl: '',
-      }, {
-        recordId: '1.3',
-        menuTitle: "用户管理",
-        menuUrl: '',
-      }
-      ]
-    },
-    {
-      recordId: '2',
-      menuTitle: "XX管理",
-      menuUrl: '',
-      children: [{
-        recordId: '2.1',
-        menuTitle: "CC管理",
-        menuUrl: '',
-        children: [
-          {
-            recordId: '2.1.1',
-            menuTitle: "CC管理-子菜单",
-            menuUrl: '',
-          }
-
-        ]
-      }, {
-        recordId: '2.2',
-        menuTitle: "二级功能",
-        menuUrl: '',
-        menuType: 'func'
-      }
-      ]
-    },
-    {
-      recordId: '3',
-      menuTitle: "功能管理",
-      menuUrl: '',
-      menuType: 'func',
-      children: []
-    }
-  ]
-
+const onNavMenuClick = (menu) => {
+  console.log(menu);
+  console.log(menu.menuUrl);
+  if (menu.menuUrl) {
+    AppIns.setCurrentMenuPath(menu.menuUrl);
+    let menuTitlePath = menu.menuTitlePath || "//";
+    menuTitlePath = menuTitlePath.substring(1, menuTitlePath.length - 1);
+    AppIns.setBreadItem(menuTitlePath.split("/"));
+  }
 }
 
 function subMenuCom(data) {
-  debugger;
   return data.children.map((subMenu, index) => {
     <MenuItem key={subMenu.recordId}>{subMenu.menuTitle}</MenuItem>
   });
@@ -79,16 +24,15 @@ function BmbpMenu() {
   const Menu = arco.Menu;
   const SubMenu = arco.Menu.SubMenu;
   const MenuItem = arco.Menu.Item;
-  const menuData = queryMenuData();
   return <Menu>
     {
       /// 三级菜单渲染
-      menuData.map((menu) => (
-        menu.menuType == 'func' ? <MenuItem key={menu.recordId}>{menu.menuTitle}</MenuItem> : <SubMenu key={menu.recordId} title={menu.menuTitle}>{
+      AppIns.menuData && AppIns.menuData.map((menu) => (
+        menu.menuType == 'func' ? <MenuItem onClick={() => onNavMenuClick(menu)} key={menu.recordId}>{menu.menuTitle}</MenuItem> : <SubMenu onClick={() => onNavMenuClick(menu)} key={menu.recordId} title={menu.menuTitle}>{
           menu.children ? menu.children.map((sub) => (
-            sub.menuType == 'func' ? <MenuItem key={sub.recordId}>{sub.menuTitle}</MenuItem> : <SubMenu key={sub.recordId} title={sub.menuTitle}>{
+            sub.menuType == 'func' ? <MenuItem onClick={() => onNavMenuClick(sub)} key={sub.recordId}>{sub.menuTitle}</MenuItem> : <SubMenu onClick={() => onNavMenuClick(sub)} key={sub.recordId} title={sub.menuTitle}>{
               sub.children ? sub.children.map((third) => (
-                <MenuItem key={third.recordId}>
+                <MenuItem onClick={() => onNavMenuClick(third)} key={third.recordId}>
                   {third.menuTitle}
                 </MenuItem>
               )) : <div></div>
@@ -127,7 +71,7 @@ function HeaderPage() {
     </div>
     <div className="bmbp-layout-header-title">
       <span>
-        Bmbp开发运维护系统
+        教学案例
       </span>
     </div>
     <div className="bmbp-layout-header-nav">
@@ -176,15 +120,17 @@ function CenterPage() {
   return <div className="bmbp-layout-center">
     <div className="bmbp-layout-center-header">
       <arco.Breadcrumb>
-        <arco.Breadcrumb.Item>系统管理</arco.Breadcrumb.Item>
-        <arco.Breadcrumb.Item>
-          权限管理
-        </arco.Breadcrumb.Item>
-        <arco.Breadcrumb.Item>应用管理</arco.Breadcrumb.Item>
+        {
+          AppIns.breadItem && AppIns.breadItem.map(
+            (item) => (
+              <arco.Breadcrumb.Item>{item}</arco.Breadcrumb.Item>
+            )
+          )
+        }
       </arco.Breadcrumb>
     </div>
     <div className="bmbp-layout-center-body">
-      <iframe className="bmbp-layout-center-body-content" src="/rbac/v1/organ/index.view" />
+      <iframe className="bmbp-layout-center-body-content" src={AppIns.currentMenuPath} />
     </div>
   </div>;
 }
@@ -213,7 +159,42 @@ function FullPage() {
     </div>
   </div>;
 }
+const AppIns = {};
 // 主页面的APPView
 function PortalView() {
+  const [currentMenuPath, setCurrentMenuPath] = React.useState("");
+  const [menuData, setMenuData] = React.useState([]);
+  const [breadItem, setBreadItem] = React.useState([]);
+  AppIns.currentMenuPath = currentMenuPath;
+  AppIns.setCurrentMenuPath = setCurrentMenuPath;
+  AppIns.menuData = menuData;
+  AppIns.setMenuData = setMenuData;
+  AppIns.breadItem = breadItem;
+  AppIns.setBreadItem = setBreadItem;
+
+  React.useEffect(() => {
+    let tempData = queryMenuData()
+    setMenuData(tempData);
+    loadFirstFunc(tempData);
+  }, []);
+
   return <FullPage />;
+}
+
+const loadFirstFunc = (menuData) => {
+  if (menuData && menuData.length > 0) {
+    for (let item of menuData) {
+      if (item.menuType == 'func' && item.menuUrl) {
+        onNavMenuClick(item);
+        return true;
+      } else {
+        if (item.children && item.children.length > 0) {
+          if (loadFirstFunc(item.children)) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
 }

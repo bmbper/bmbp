@@ -50,10 +50,9 @@ html,div,span{
 .bmbp-layout-header-title > span{
     width: 172px;
     height: 48px;
-    text-align: center;
     line-height:48px;
     display: flex;
-    justify-content: center;
+    justify-content: start;
     align-items: center;
     color: #1D2129;
     font-size: 16px;
