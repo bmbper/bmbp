@@ -1,4 +1,4 @@
-use salvo::{writing::Json, Piece};
+use salvo::{http::ParseError, writing::Json, Piece};
 
 use crate::RespVo;
 
@@ -82,5 +82,14 @@ impl Piece for BmbpError {
     fn render(self, res: &mut salvo::Response) {
         let vo: RespVo<String> = RespVo::fail_msg(format!("{}:{}", self.name(), self.msg).as_str());
         res.render(Json(vo));
+    }
+}
+
+impl From<ParseError> for BmbpError {
+    fn from(value: ParseError) -> Self {
+        BmbpError {
+            kind: BmbpErrorKind::ApiService,
+            msg: value.to_string(),
+        }
     }
 }

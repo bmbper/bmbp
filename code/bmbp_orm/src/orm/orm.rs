@@ -512,7 +512,8 @@ impl Orm {
         let rs_1 = match gen_rs {
             None => None,
             Some(v) => {
-                let js = serde_json::to_string(&v).unwrap().clone();
+                let js = serde_json::to_string_pretty(&v).unwrap().clone();
+                tracing::info!("{}", js);
                 let rs = serde_json::from_str(&js);
                 rs.unwrap()
             }

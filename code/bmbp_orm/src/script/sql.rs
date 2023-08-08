@@ -1,3 +1,5 @@
+use crate::util::snake_to_camel;
+
 /// SQL脚本构建器，Mybatis的动态SQL构建器
 /// 复杂语法需要自己手动编写片断之后 组装到SQL当中
 /// 构建器仅负责SQL组装，具体解析法由SqlParser解析器负责
@@ -193,6 +195,16 @@ impl BmbpScriptSql {
     pub fn select_slice(&mut self, field_slice: &[&str]) -> &mut Self {
         for field in field_slice {
             self.select_fields.push(field.to_string());
+        }
+        self
+    }
+    pub fn select_slice_alias(&mut self, field_slice: &[String]) -> &mut Self {
+        for field in field_slice {
+            self.select_fields.push(format!(
+                "{} AS \"{}\"",
+                field.clone(),
+                snake_to_camel(field.to_string())
+            ));
         }
         self
     }

@@ -6,6 +6,8 @@ use serde::Serialize;
 use crate::BmbpHashMap;
 use crate::BmbpValue;
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
 pub struct BmbpBaseModel {
     /// 记录主键
     record_id: Option<String>,

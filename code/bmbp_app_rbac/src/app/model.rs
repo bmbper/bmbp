@@ -1,5 +1,8 @@
-use bmbp_app_common::{BmbpBaseModel, BmbpHashMap, BmbpValue};
+use bmbp_app_common::{BmbpBaseModel, BmbpHashMap, BmbpValue, PageParams};
 use serde::{Deserialize, Serialize};
+
+/// AppQueryParams 应用查询类型
+pub type AppQueryParams = PageParams<BmbpRbacApp>;
 
 /// BmbpRbacApp 应用信息
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
@@ -18,7 +21,7 @@ pub struct BmbpRbacApp {
     /// 应用密钥
     app_secret_key: Option<String>,
     /// 应用类型
-    app_type: BmbpRbacAppType,
+    app_type: Option<String>,
 }
 
 impl From<&BmbpRbacApp> for BmbpValue {
@@ -81,7 +84,7 @@ impl BmbpRbacApp {
         self
     }
     pub fn set_app_type(&mut self, app_type: BmbpRbacAppType) -> &mut Self {
-        self.app_type = app_type;
+        self.app_type = Some(app_type.to_string());
         self
     }
 
@@ -107,13 +110,14 @@ impl BmbpRbacApp {
         self.app_secret_key.as_ref()
     }
 
-    pub fn get_app_type(&self) -> &BmbpRbacAppType {
-        &self.app_type
+    pub fn get_app_type(&self) -> Option<&String> {
+        self.app_type.as_ref()
     }
 }
 
 /// 应用类型
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 #[serde(untagged)]
 pub enum BmbpRbacAppType {
     /// 内部模块应用
@@ -138,9 +142,63 @@ impl ToString for BmbpRbacAppType {
         }
     }
 }
+impl From<String> for BmbpRbacAppType {
+    fn from(value: String) -> Self {
+        if value.eq_ignore_ascii_case("MODULE") {
+            return BmbpRbacAppType::MODULE;
+        }
+
+        if value.eq_ignore_ascii_case("SSO") {
+            return BmbpRbacAppType::SSO;
+        }
+
+        if value.eq_ignore_ascii_case("LINK") {
+            return BmbpRbacAppType::LINK;
+        }
+
+        return BmbpRbacAppType::MODULE;
+    }
+}
 
 impl From<&BmbpRbacAppType> for BmbpValue {
     fn from(value: &BmbpRbacAppType) -> Self {
         BmbpValue::from(value.to_string())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::app::model::BmbpRbacApp;
+
+    #[test]
+    pub fn test_serde_der() {
+        let json = r#"
+            [
+              {
+                "recordSign": "1",
+                "recordLevel": "0",
+                "appTitle": "1",
+                "recordUpdateTime": "1",
+                "appType": "sso",
+                "recordId": "111",
+                "recordCreateTime": "1",
+                "appCode": "111",
+                "recordOwnerUser": "1",
+                "recordUpdateUser": "1",
+                "recordStatus": "0",
+                "recordRemark": "1",
+                "appKey": "1",
+                "appSecrectKey": "1",
+                "recordNum": null,
+                "recordOwnerOrg": "1",
+                "recordFlag": "0",
+                "recordCreateUser": "1"
+              }
+            ]
+
+            "#;
+
+        let d: Vec<BmbpRbacApp> = serde_json::from_str(json).unwrap();
+        println!("{:?}", d);
     }
 }
