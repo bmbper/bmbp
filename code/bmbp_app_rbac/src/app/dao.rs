@@ -32,7 +32,10 @@ impl RbacAppDao {
         Ok(rs)
     }
 
-    pub(crate) async fn find_info(to_script: &String, params: &BmbpHashMap) -> Option<BmbpHashMap> {
+    pub(crate) async fn find_info(
+        script_sql: &String,
+        script_params: &BmbpHashMap,
+    ) -> BmbpResp<Option<BmbpHashMap>> {
         let rs = bmbp_orm_ins::BmbpORM
             .await
             .script_query_one(script_sql, script_params)

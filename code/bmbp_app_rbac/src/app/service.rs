@@ -12,7 +12,7 @@ impl RbacAppService {
     pub(crate) async fn find_page(params: &AppQueryParams) -> BmbpResp<PageVo<BmbpHashMap>> {
         let query_script = RbacAppScript::query_script();
         let query_params = BmbpHashMap::new();
-        if let Some(app) = params.get_params() {}
+        if let Some(_) = params.get_params() {}
         let page_vo = RbacAppDao::find_page(
             &query_script.to_script(),
             &query_params,
@@ -23,7 +23,7 @@ impl RbacAppService {
         Ok(page_vo)
     }
 
-    pub(crate) async fn find_list(params: &BmbpRbacApp) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
+    pub(crate) async fn find_list(_params: &BmbpRbacApp) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
         let query_script = RbacAppScript::query_script();
         let query_params = BmbpHashMap::new();
         let page_vo = RbacAppDao::find_list(&query_script.to_script(), &query_params).await?;

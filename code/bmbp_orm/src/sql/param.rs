@@ -1,4 +1,3 @@
-use std::borrow::Borrow;
 use std::collections::HashMap;
 
 use serde_json::Value;
@@ -21,7 +20,7 @@ impl DynamicSQLParam {
         self
     }
     pub fn get_k_params(&self) -> &HashMap<String, Value> {
-        self.k_params.borrow()
+        &self.k_params
     }
     pub fn set_p_params(&mut self, params: Vec<Value>) -> &mut Self {
         self.p_params = params;

@@ -3,23 +3,28 @@
 pub fn snake_to_camel(snake_string: String) -> String {
     case_style::CaseStyle::from_snakecase(snake_string).to_camelcase()
 }
+#[allow(dead_code)]
 pub fn camel_to_snake(camel_string: String) -> String {
     case_style::CaseStyle::from_camelcase(camel_string)
         .to_snakecase()
         .to_string()
 }
+#[allow(dead_code)]
 pub fn camel_to_snake_upper(camel_string: String) -> String {
     case_style::CaseStyle::from_camelcase(camel_string)
         .to_snakecase()
         .to_string()
         .to_uppercase()
 }
+#[allow(dead_code)]
 pub fn zero_fill_left(number: i32, len: i32) -> String {
     return char_fill_left('0', number, len);
 }
+#[allow(dead_code)]
 pub fn zero_fill_right(number: i32, len: i32) -> String {
     return char_fill_right('0', number, len);
 }
+#[allow(dead_code)]
 pub fn char_fill_left(ch: char, number: i32, len: i32) -> String {
     let number_str = number.to_string();
     let left_zero: i32 = len - (number_str.len() as i32);
@@ -31,6 +36,7 @@ pub fn char_fill_left(ch: char, number: i32, len: i32) -> String {
     zero_char.append(&mut number_str_char);
     return zero_char.iter().collect();
 }
+#[allow(dead_code)]
 pub fn char_fill_right(ch: char, number: i32, len: i32) -> String {
     let number_str = number.to_string();
     let left_zero: i32 = len - (number_str.len() as i32);

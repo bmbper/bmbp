@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 use serde::{Deserialize, Serialize};
 
 /// BMBP配置信息
@@ -9,8 +7,8 @@ pub struct Bmbp {
 }
 
 impl Bmbp {
-    pub fn bmbp(&self) -> &Option<BmbpItem> {
-        self.bmbp.borrow()
+    pub fn bmbp(&self) -> Option<&BmbpItem> {
+        self.bmbp.as_ref()
     }
 }
 
@@ -22,11 +20,11 @@ pub struct BmbpItem {
 }
 
 impl BmbpItem {
-    pub fn app(&self) -> &Option<BmbpItemApp> {
-        self.app.borrow()
+    pub fn app(&self) -> Option<&BmbpItemApp> {
+        self.app.as_ref()
     }
-    pub fn db(&self) -> &Option<BmbpItemDb> {
-        self.db.borrow()
+    pub fn db(&self) -> Option<&BmbpItemDb> {
+        self.db.as_ref()
     }
 }
 

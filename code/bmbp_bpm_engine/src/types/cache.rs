@@ -1,4 +1,3 @@
-use std::borrow::{Borrow, BorrowMut};
 use std::collections::HashMap;
 
 /// BmbpCacheItem 缓存对象
@@ -16,7 +15,7 @@ pub struct BmbpCacheItem<T> {
 
 impl<T> BmbpCacheItem<T> {
     pub fn data(&self) -> &T {
-        self.data.borrow()
+        &self.data
     }
 }
 
@@ -32,7 +31,7 @@ impl<T> BmbpCache<T> {
     }
 
     pub fn store(&self) -> &HashMap<String, BmbpCacheItem<T>> {
-        self.store.borrow()
+        &self.store
     }
 
     pub fn set(&mut self, key: String, t: T) {
@@ -48,7 +47,7 @@ impl<T> BmbpCache<T> {
     pub fn get(&self, key: String) -> Option<&T> {
         let item = self.store.get(key.as_str());
         return match item {
-            Some(data) => Some(data.data.borrow()),
+            Some(data) => Some(&data.data),
             None => None,
         };
     }
@@ -56,7 +55,7 @@ impl<T> BmbpCache<T> {
     pub fn get_mut(&mut self, key: String) -> Option<&mut T> {
         let item = self.store.get_mut(key.as_str());
         return match item {
-            Some(data) => Some(data.data.borrow_mut()),
+            Some(data) => Some(&mut data.data),
             None => None,
         };
     }

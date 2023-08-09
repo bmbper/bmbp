@@ -52,7 +52,7 @@ impl OrganService {
         organ_op: Option<BmbpRbacOrgan>,
     ) -> BmbpResp<Option<Vec<BmbpRbacOrgan>>> {
         if organ_op.is_none() {
-            return Err(BmbpError::api("指定的节点不存在".to_string()));
+            return Err(BmbpError::api("指定的节点不存在"));
         }
         let organ_info = organ_op.unwrap();
 
@@ -65,9 +65,7 @@ impl OrganService {
             );
             query_script_sql.filter("organ_code_path = #{organ_code_path}");
         } else {
-            return Err(BmbpError::api(
-                "指定的节点数据异常,请联系管理员".to_string(),
-            ));
+            return Err(BmbpError::api("指定的节点数据异常,请联系管理员"));
         }
 
         let organ_list_op =
@@ -243,7 +241,7 @@ impl OrganService {
     /// 更新组织,仅允许更新组织名称
     pub async fn update_organ(organ: &mut BmbpRbacOrgan) -> BmbpResp<usize> {
         if organ.get_organ_title().is_none() || organ.get_organ_title().unwrap().is_empty() {
-            return Err(BmbpError::api("组织名称不能为空".to_string()));
+            return Err(BmbpError::api("组织名称不能为空"));
         }
         let _: bool = Self::check_same_organ_title(organ).await?;
 
@@ -260,7 +258,7 @@ impl OrganService {
         };
 
         if old_organ.is_none() {
-            return Err(BmbpError::api("指定的组织机构不存在，无法更新".to_string()));
+            return Err(BmbpError::api("指定的组织机构不存在，无法更新"));
         }
 
         let old_organ_info = old_organ.unwrap();
@@ -301,12 +299,12 @@ impl OrganService {
     ) -> BmbpResp<usize> {
         let organ_op = Self::find_organ_by_id(record_id).await?;
         if organ_op.is_none() {
-            return Err(BmbpError::api("指定的组织机构不存在".to_string()));
+            return Err(BmbpError::api("指定的组织机构不存在"));
         }
 
         let organ_parent_op = Self::find_organ_by_organ_code(record_id).await?;
         if organ_parent_op.is_none() {
-            return Err(BmbpError::api("指定的上级组织机构不存在".to_string()));
+            return Err(BmbpError::api("指定的上级组织机构不存在"));
         }
 
         let script_sql = OrganScript::update_parent_script();
@@ -359,21 +357,21 @@ impl OrganService {
         if organ.get_base_model().get_record_id().is_none()
             || organ.get_base_model().get_record_id().unwrap().is_empty()
         {
-            return Err(BmbpError::api("组织主键不能为空".to_string()));
+            return Err(BmbpError::api("组织主键不能为空"));
         }
 
         if organ.get_organ_title().is_none() || organ.get_organ_title().unwrap().is_empty() {
-            return Err(BmbpError::api("组织名称不能为空".to_string()));
+            return Err(BmbpError::api("组织名称不能为空"));
         }
 
         if organ.get_organ_code().is_none() || organ.get_organ_code().unwrap().is_empty() {
-            return Err(BmbpError::api("组织编码不能为空".to_string()));
+            return Err(BmbpError::api("组织编码不能为空"));
         }
 
         if organ.get_organ_parent_code().is_none()
             || organ.get_organ_parent_code().unwrap().is_empty()
         {
-            return Err(BmbpError::api("组织上级不能为空".to_string()));
+            return Err(BmbpError::api("组织上级不能为空"));
         }
         Ok(true)
     }
@@ -382,11 +380,11 @@ impl OrganService {
         if let Some(organ_code) = organ.get_organ_code() {
             let organ_info_op = Self::find_organ_by_organ_code(organ_code).await?;
             match organ_info_op {
-                Some(_) => Err(BmbpError::api("存在相同编码的组织机构".to_string())),
+                Some(_) => Err(BmbpError::api("存在相同编码的组织机构")),
                 None => Ok(true),
             }
         } else {
-            Err(BmbpError::api("组织机构编码不允许为空".to_string()))
+            Err(BmbpError::api("组织机构编码不允许为空"))
         }
     }
     // 判断是否包含相同的数据关联
@@ -394,11 +392,11 @@ impl OrganService {
         if let Some(record_id) = organ.get_base_model().get_record_id() {
             let organ_info_op = Self::find_organ_by_id(record_id).await?;
             match organ_info_op {
-                Some(_) => Err(BmbpError::api("存在相同主键的组织机构".to_string())),
+                Some(_) => Err(BmbpError::api("存在相同主键的组织机构")),
                 None => Ok(true),
             }
         } else {
-            Err(BmbpError::api("组织机构主键不允许为空".to_string()))
+            Err(BmbpError::api("组织机构主键不允许为空"))
         }
     }
 
@@ -407,11 +405,11 @@ impl OrganService {
         if let Some(organ_data_id) = organ.get_organ_data_id() {
             let organ_info_op = Self::find_organ_by_organ_data_id(organ_data_id).await?;
             match organ_info_op {
-                Some(_) => Err(BmbpError::api("存在相同数据主键的组织机构".to_string())),
+                Some(_) => Err(BmbpError::api("存在相同数据主键的组织机构")),
                 None => Ok(true),
             }
         } else {
-            Err(BmbpError::api("组织机构数据主键不允许为空".to_string()))
+            Err(BmbpError::api("组织机构数据主键不允许为空"))
         }
     }
     /// 判断是否包含相同组织
@@ -439,9 +437,7 @@ impl OrganService {
         let organ_info_op =
             OrganDao::find_organ_info(&script_sql.to_script(), &script_params).await?;
         match organ_info_op {
-            Some(_) => Err(BmbpError::api(
-                "同一层级下存在相同名称的组织机构".to_string(),
-            )),
+            Some(_) => Err(BmbpError::api("同一层级下存在相同名称的组织机构")),
             None => Ok(true),
         }
     }

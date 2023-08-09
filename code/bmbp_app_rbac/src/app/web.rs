@@ -36,10 +36,28 @@ pub async fn find_app_info(
     req: &mut Request,
     _res: &mut Response,
 ) -> BmbpResp<RespVo<BmbpHashMap>> {
-    let record_id = req.param::<String>("recordId").as_ref();
+    let record_id = req.param::<String>("recordId");
     if record_id.is_none() {
-        return Err(BmbpError::api("无效的主键ID".to_string()));
+        return Err(BmbpError::api("无效的主键ID"));
     }
-    let rs = RbacAppService::find_info(record_id.unwrap()).await?;
+    let rs = RbacAppService::find_info(record_id.as_ref().unwrap()).await?;
     Ok(RespVo::ok_option(rs))
+}
+
+#[handler]
+pub async fn save_app(_req: &mut Request, _res: &mut Response) -> BmbpResp<RespVo<BmbpHashMap>> {
+    return Err(BmbpError::api("保存接口未实现"));
+}
+
+#[handler]
+pub async fn publish_app(_req: &mut Request, _res: &mut Response) -> BmbpResp<RespVo<BmbpHashMap>> {
+    return Err(BmbpError::api("发布接口未实现"));
+}
+
+#[handler]
+pub async fn un_publish_app(
+    _req: &mut Request,
+    _res: &mut Response,
+) -> BmbpResp<RespVo<BmbpHashMap>> {
+    return Err(BmbpError::api("下线接口未实现"));
 }
