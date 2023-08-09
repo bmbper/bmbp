@@ -70,7 +70,7 @@ impl<'a> TableBuilder<'a> {
     fn valid(&self) -> BmbpResp<()> {
         let table_slice = self.get_table();
         if table_slice.is_empty() {
-            return Err(BmbpError::dyn_sql("表结构不能为空".to_string()));
+            return Err(BmbpError::orm("表结构不能为空"));
         }
         Ok(())
     }
@@ -88,7 +88,7 @@ impl<'a> TableBuilder<'a> {
             raw_table = raw_table + " AS " + table.table_alias();
         }
         if raw_table.is_empty() {
-            return Err(BmbpError::dyn_sql("表名称不能为空".to_string()));
+            return Err(BmbpError::orm("表名称不能为空"));
         }
         Ok(raw_table)
     }

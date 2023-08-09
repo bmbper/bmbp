@@ -64,7 +64,7 @@ impl BmbpConnectionPool {
             conn_id_op = self.idel_conn_id.lock().await.pop();
             let end_now = OffsetDateTime::now_utc().second();
             if end_now - cur_now >= 5 {
-                return Err(BmbpError::orm("获取数据库连接池超时:5秒".to_string()));
+                return Err(BmbpError::orm("获取数据库连接池超时:5秒"));
             }
             tokio::time::sleep(Duration::from_millis(100)).await;
         }

@@ -20,7 +20,7 @@ impl LoginService {
         };
         // TODO 替换成实际验证
         if (!username.eq("zhangguokai")) || (!password.eq("zhangguokai")) {
-            return Err(BmbpError::api("用户名或密码不正确".to_string()));
+            return Err(BmbpError::api("用户名或密码不正确"));
         }
 
         let mut user_info = BmbpUserInfo::default();

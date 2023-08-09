@@ -106,53 +106,53 @@ impl Orm {
         &self,
         orm: &mut BmbpOrmSQL,
     ) -> BmbpResp<PageVo<Option<BmbpHashMap>>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn dynamic_query_list(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<Option<BmbpHashMap>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn dynamic_query_one(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<Option<BmbpHashMap>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn dynamic_query_value(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<BmbpValue> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn dynamic_insert(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn dynamic_update(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn dynamic_delete(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn dynamic_execute(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn dynamic_execute_ddl(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn dynamic_execute_dml(&self, orm: &mut BmbpOrmSQL) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 
     pub async fn batch_dynamic_insert(&self, orm: &mut [BmbpOrmSQL]) -> BmbpResp<Vec<usize>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_dynamic_update(&self, orm: &mut [BmbpOrmSQL]) -> BmbpResp<Vec<usize>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_dynamic_delete(&self, orm: &mut [BmbpOrmSQL]) -> BmbpResp<Vec<usize>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_dynamic_execute(&self, orm: &mut [BmbpOrmSQL]) -> BmbpResp<Vec<usize>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_dynamic_delete_dml(&self, orm: &mut [BmbpOrmSQL]) -> BmbpResp<Vec<usize>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_dynamic_execute_ddl(&self, orm: &mut [BmbpOrmSQL]) -> BmbpResp<Vec<usize>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 }
 
@@ -202,7 +202,7 @@ impl Orm {
     }
 
     pub async fn raw_query_one(&self, sql: &String) -> BmbpResp<Option<BmbpHashMap>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 
     pub async fn raw_query_one_with_params(
@@ -217,7 +217,7 @@ impl Orm {
     }
 
     pub async fn raw_query_value(&self, sql: &String) -> BmbpResp<Option<BmbpValue>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 
     pub async fn raw_query_value_with_params(
@@ -225,7 +225,7 @@ impl Orm {
         sql: &String,
         params: &[BmbpValue],
     ) -> BmbpResp<Option<BmbpValue>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 
     pub async fn raw_insert(&self, sql: &String) -> BmbpResp<usize> {
@@ -252,11 +252,11 @@ impl Orm {
         sql: &String,
         params: &[&[BmbpValue]],
     ) -> BmbpResp<PageVo<usize>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 
     pub async fn batch_raw_insert(&self, sql: &[String]) -> BmbpResp<PageVo<usize>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 
     pub async fn batch_raw_insert_with_params(
@@ -264,18 +264,18 @@ impl Orm {
         sql: &[String],
         params: &[&[BmbpValue]],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 
     pub async fn batch_raw_insert_with_slice(
         &self,
         batch_sql_params: &[(&String, &[BmbpValue])],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 
     pub async fn raw_update(&self, sql: &String) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 
     pub async fn raw_update_with_params(
@@ -294,11 +294,11 @@ impl Orm {
         sql: &String,
         params: &[&[BmbpValue]],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 
     pub async fn batch_raw_update(&self, sql: &[String]) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 
     pub async fn batch_raw_update_with_params(
@@ -306,24 +306,24 @@ impl Orm {
         sql: &[String],
         params: &[BmbpValue],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 
     pub async fn batch_raw_update_with_slice(
         &self,
         batch_sql_prams: &[&(String, &[BmbpValue])],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn raw_delete(&self, sql: &String) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn raw_delete_with_params(
         &self,
         sql: &String,
         params: &[BmbpValue],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 
     pub async fn raw_delete_batch_with_params(
@@ -331,29 +331,29 @@ impl Orm {
         sql: &String,
         params: &[&[BmbpValue]],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_raw_delete(&self, sql: &[String]) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_raw_delete_with_prams(
         &self,
         sql: &[String],
         params: &[&[BmbpValue]],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_raw_delete_with_slice(
         &self,
         batch_sql_params: &[&(String, &[BmbpValue])],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn raw_execute_ddl(&self, sql: &String) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_raw_execute_ddl(&self, sql: &[String]) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 }
 
@@ -394,7 +394,7 @@ impl Orm {
         script: &String,
         params: &BmbpHashMap,
     ) -> BmbpResp<Option<BmbpValue>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 
     pub async fn script_insert(&self, script: &String, params: &BmbpHashMap) -> BmbpResp<usize> {
@@ -407,20 +407,20 @@ impl Orm {
         script: &String,
         params: &[&BmbpHashMap],
     ) -> BmbpResp<Option<BmbpValue>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_script_insert(
         &self,
         script: &[String],
         params: &[&BmbpHashMap],
     ) -> BmbpResp<Option<BmbpValue>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_script_insert_slice(
         &self,
         batch_script_params: &[&(String, &BmbpHashMap)],
     ) -> BmbpResp<Option<BmbpValue>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn script_update(&self, script: &String, params: &BmbpHashMap) -> BmbpResp<usize> {
         let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
@@ -431,63 +431,63 @@ impl Orm {
         script: &String,
         params: &[&BmbpHashMap],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_script_update(
         &self,
         script: &[String],
         params: &[&BmbpHashMap],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_script_update_slice(
         &self,
         batch_script_params: &[&(String, &BmbpHashMap)],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn script_delete(&self, script: &String, params: &BmbpHashMap) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn script_insert_delete(
         &self,
         script: &String,
         params: &[&BmbpHashMap],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_script_delete(
         &self,
         script: &[String],
         params: &[&BmbpHashMap],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_script_delete_slice(
         &self,
         batch_script_params: &[&(String, &BmbpHashMap)],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn script_execute(
         &self,
         script: &String,
         params: &BmbpHashMap,
     ) -> BmbpResp<Option<BmbpValue>> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_script_execute(
         &self,
         script: &[String],
         params: &[&BmbpHashMap],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
     pub async fn batch_script_execute_slice(
         &self,
         batch_script_params: &[&(String, &BmbpHashMap)],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现".to_string()))
+        Err(BmbpError::orm("方法未实现"))
     }
 }
 

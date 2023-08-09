@@ -46,7 +46,7 @@ impl BmbpPgConnect {
                 let box_conn: Box<dyn BmbpConn + Send + Sync + 'static> = Box::new(conn);
                 Ok(RwLock::new(box_conn))
             }
-            Err(e) => Err(BmbpError::orm(format!("{:#?}", e))),
+            Err(e) => Err(BmbpError::orm(format!("{:#?}", e).as_str())),
         }
     }
     fn database_url(ds: Arc<BmbpDataSource>) -> String {
@@ -113,7 +113,7 @@ impl BmbpConn for BmbpPgConnect {
                 page_inner.set_row_total(total_count as usize);
                 None
             }
-            Err(err) => Some(Err(BmbpError::orm(err.to_string()))),
+            Err(err) => Some(Err(BmbpError::orm(err.to_string().as_str()))),
         };
         if err.is_some() {
             return err.unwrap();
@@ -160,7 +160,7 @@ impl BmbpConn for BmbpPgConnect {
                 }
                 Ok(value_rows)
             }
-            Err(err) => Err(BmbpError::orm(err.to_string())),
+            Err(err) => Err(BmbpError::orm(err.to_string().as_str())),
         }
     }
 
@@ -192,7 +192,7 @@ impl BmbpConn for BmbpPgConnect {
             Err(err) => {
                 let err_msg = err.to_string();
                 tracing::error!("{}", err_msg);
-                Err(BmbpError::orm(err_msg))
+                Err(BmbpError::orm(err_msg.as_str()))
             }
         }
     }
@@ -228,7 +228,7 @@ impl BmbpConn for BmbpPgConnect {
             .await;
         match execute_rs {
             Ok(row_count) => Ok(row_count as usize),
-            Err(err) => Err(BmbpError::orm(err.to_string())),
+            Err(err) => Err(BmbpError::orm(err.to_string().as_str())),
         }
     }
 
@@ -272,7 +272,7 @@ impl BmbpConn for BmbpPgConnect {
             .await;
         match execute_rs {
             Ok(row_count) => Ok(row_count as usize),
-            Err(err) => Err(BmbpError::orm(err.to_string())),
+            Err(err) => Err(BmbpError::orm(err.to_string().as_str())),
         }
     }
     async fn raw_insert(&mut self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
@@ -291,7 +291,7 @@ impl BmbpConn for BmbpPgConnect {
             .await;
         match execute_rs {
             Ok(row_count) => Ok(row_count as usize),
-            Err(err) => Err(BmbpError::orm(err.to_string())),
+            Err(err) => Err(BmbpError::orm(err.to_string().as_str())),
         }
     }
 
@@ -315,7 +315,7 @@ impl BmbpConn for BmbpPgConnect {
             .await;
         match execute_rs {
             Ok(rows) => Ok(Some(to_bmbp_vec(rows.as_slice()))),
-            Err(err) => Err(BmbpError::orm(err.to_string())),
+            Err(err) => Err(BmbpError::orm(err.to_string().as_str())),
         }
     }
     async fn raw_find_page(
@@ -346,7 +346,7 @@ impl BmbpConn for BmbpPgConnect {
                 pager.set_row_total(row_total as usize);
             }
             Err(err) => {
-                return Err(BmbpError::orm(err.to_string()));
+                return Err(BmbpError::orm(err.to_string().as_str()));
             }
         }
 
@@ -386,7 +386,7 @@ impl BmbpConn for BmbpPgConnect {
                 pager.set_data(vo_list);
                 Ok(pager)
             }
-            Err(err) => Err(BmbpError::orm(err.to_string())),
+            Err(err) => Err(BmbpError::orm(err.to_string().as_str())),
         }
     }
 
@@ -419,7 +419,7 @@ impl BmbpConn for BmbpPgConnect {
                 };
                 Ok(rs)
             }
-            Err(err) => Err(BmbpError::orm(err.to_string())),
+            Err(err) => Err(BmbpError::orm(err.to_string().as_str())),
         }
     }
 }

@@ -4,34 +4,32 @@ use crate::RespVo;
 
 #[derive(Debug)]
 pub enum BmbpErrorKind {
-    EMPTY,
+    API,
+    SERVICE,
+    DAO,
+    SCRIPT,
     ORM,
-    DynSQL,
-    ApiService,
-    Model,
+    UTIL,
+    OTHER,
 }
 
 impl ToString for BmbpErrorKind {
     fn to_string(&self) -> String {
         match self {
-            BmbpErrorKind::EMPTY => "".to_string(),
+            BmbpErrorKind::API => "API".to_string(),
+            BmbpErrorKind::SERVICE => "SERVICE".to_string(),
+            BmbpErrorKind::DAO => "DAO".to_string(),
+            BmbpErrorKind::SCRIPT => "SCRIPT".to_string(),
             BmbpErrorKind::ORM => "ORM".to_string(),
-            BmbpErrorKind::ApiService => "apiService".to_string(),
-            BmbpErrorKind::DynSQL => "DynSql".to_string(),
-            BmbpErrorKind::Model => "Model".to_string(),
+            BmbpErrorKind::UTIL => "UTIL".to_string(),
+            BmbpErrorKind::OTHER => "OTHER".to_string(),
         }
     }
 }
 
 impl BmbpErrorKind {
     pub fn name(&self) -> String {
-        match self {
-            BmbpErrorKind::EMPTY => "".to_string(),
-            BmbpErrorKind::ORM => "ORM".to_string(),
-            BmbpErrorKind::ApiService => "ApiService".to_string(),
-            BmbpErrorKind::DynSQL => "DynSQL".to_string(),
-            BmbpErrorKind::Model => "Model".to_string(),
-        }
+        self.to_string()
     }
 }
 
@@ -45,27 +43,45 @@ impl BmbpError {
     pub fn name(&self) -> String {
         self.kind.name()
     }
-    pub fn orm(msg: String) -> Self {
+    pub fn api(msg: &str) -> Self {
+        BmbpError {
+            kind: BmbpErrorKind::API,
+            msg: msg.to_string(),
+        }
+    }
+    pub fn service(msg: &str) -> Self {
+        BmbpError {
+            kind: BmbpErrorKind::SERVICE,
+            msg: msg.to_string(),
+        }
+    }
+    pub fn dao(msg: &str) -> Self {
+        BmbpError {
+            kind: BmbpErrorKind::DAO,
+            msg: msg.to_string(),
+        }
+    }
+    pub fn script(msg: &str) -> Self {
+        BmbpError {
+            kind: BmbpErrorKind::SCRIPT,
+            msg: msg.to_string(),
+        }
+    }
+    pub fn orm(msg: &str) -> Self {
         BmbpError {
             kind: BmbpErrorKind::ORM,
-            msg,
+            msg: msg.to_string(),
         }
     }
-    pub fn api(msg: String) -> Self {
+    pub fn util(msg: &str) -> Self {
         BmbpError {
-            kind: BmbpErrorKind::ApiService,
-            msg,
+            kind: BmbpErrorKind::UTIL,
+            msg: msg.to_string(),
         }
     }
-    pub fn dyn_sql(msg: String) -> Self {
+    pub fn other(msg: &str) -> Self {
         BmbpError {
-            kind: BmbpErrorKind::DynSQL,
-            msg,
-        }
-    }
-    pub fn valid(msg: &str) -> Self {
-        BmbpError {
-            kind: BmbpErrorKind::Model,
+            kind: BmbpErrorKind::OTHER,
             msg: msg.to_string(),
         }
     }
@@ -88,7 +104,7 @@ impl Piece for BmbpError {
 impl From<ParseError> for BmbpError {
     fn from(value: ParseError) -> Self {
         BmbpError {
-            kind: BmbpErrorKind::ApiService,
+            kind: BmbpErrorKind::API,
             msg: value.to_string(),
         }
     }

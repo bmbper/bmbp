@@ -36,28 +36,28 @@ impl BmbpDynamicSQL {
     pub fn as_query_mut(&mut self) -> BmbpResp<&mut BmbpQuerySQL> {
         match self {
             BmbpDynamicSQL::Query(query) => Ok(query),
-            _ => Err(BmbpError::orm("不是查询类型SQL".to_string())),
+            _ => Err(BmbpError::orm("不是查询类型SQL")),
         }
     }
 
     pub fn as_insert_mut(&mut self) -> BmbpResp<&mut BmbpInsertSQL> {
         match self {
             BmbpDynamicSQL::Insert(insert) => Ok(insert),
-            _ => Err(BmbpError::orm("不是新增类型SQL".to_string())),
+            _ => Err(BmbpError::orm("不是新增类型SQL")),
         }
     }
 
     pub fn as_update_mut(&mut self) -> BmbpResp<&mut BmbpUpdateSQL> {
         match self {
             BmbpDynamicSQL::Update(update) => Ok(update),
-            _ => Err(BmbpError::orm("不是更新类型SQL".to_string())),
+            _ => Err(BmbpError::orm("不是更新类型SQL")),
         }
     }
 
     pub fn as_delete_mut(&mut self) -> BmbpResp<&mut BmbpDeleteSQL> {
         match self {
             BmbpDynamicSQL::Delete(delete) => Ok(delete),
-            _ => Err(BmbpError::orm("不是删除类型SQL".to_string())),
+            _ => Err(BmbpError::orm("不是删除类型SQL")),
         }
     }
 

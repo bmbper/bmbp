@@ -85,13 +85,13 @@ impl<'a> RawUpdateBuilder<'a> {
         if !raw_field_vec.is_empty() {
             Ok(raw_field_vec.join(","))
         } else {
-            Err(BmbpError::dyn_sql("请指定要更新的字段".to_string()))
+            Err(BmbpError::orm("请指定要更新的字段"))
         }
     }
     fn build_update_field(&self, field: &DmlField) -> BmbpResp<String> {
         let column = field.get_field();
         if column.is_empty() {
-            return Err(BmbpError::dyn_sql("请指定要更新的字段".to_string()));
+            return Err(BmbpError::orm("请指定要更新的字段"));
         }
         let value = match field.get_value() {
             DMLFieldValue::SCRIPT(v) => {
