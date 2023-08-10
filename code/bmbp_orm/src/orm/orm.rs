@@ -29,7 +29,6 @@ impl Orm {
         self.data_source.clone()
     }
 }
-
 /// ORM 方法 逐步废弃
 impl Orm {
     pub async fn find_page(
@@ -202,7 +201,7 @@ impl Orm {
     }
 
     pub async fn raw_query_one(&self, sql: &String) -> BmbpResp<Option<BmbpHashMap>> {
-        Err(BmbpError::orm("方法未实现"))
+        self.raw_query_one_with_params(sql, vec![].as_slice()).await
     }
 
     pub async fn raw_query_one_with_params(
@@ -323,7 +322,10 @@ impl Orm {
         sql: &String,
         params: &[BmbpValue],
     ) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现"))
+        let conn = self.pool.get_conn().await?;
+        let row_count = conn.raw_delete(sql, params).await;
+        conn.release().await;
+        row_count
     }
 
     pub async fn raw_delete_batch_with_params(
@@ -447,7 +449,8 @@ impl Orm {
         Err(BmbpError::orm("方法未实现"))
     }
     pub async fn script_delete(&self, script: &String, params: &BmbpHashMap) -> BmbpResp<usize> {
-        Err(BmbpError::orm("方法未实现"))
+        let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
+        self.raw_delete_with_params(&sql, params.as_slice()).await
     }
     pub async fn script_insert_delete(
         &self,

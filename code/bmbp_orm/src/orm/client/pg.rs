@@ -256,26 +256,17 @@ impl BmbpConn for BmbpPgConnect {
         Ok(0)
     }
 
+    async fn raw_delete(&mut self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
+        self.raw_execute(sql, params).await
+    }
     async fn raw_update(&mut self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
-        let pg_param = from_bmbp_value_to_pg_params(params);
-        let pg_params_ref = pg_param
-            .iter()
-            .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
-            .collect::<Vec<&(dyn ToSql + Sync)>>();
-        debug!("pg_sql:{}", sql);
-        debug!("pa_params:{:#?}", pg_params_ref);
-        let execute_rs = self
-            .client
-            .lock()
-            .await
-            .execute(sql.as_str(), pg_params_ref.as_slice())
-            .await;
-        match execute_rs {
-            Ok(row_count) => Ok(row_count as usize),
-            Err(err) => Err(BmbpError::orm(err.to_string().as_str())),
-        }
+        self.raw_execute(sql, params).await
     }
     async fn raw_insert(&mut self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
+        self.raw_execute(sql, params).await
+    }
+
+    async fn raw_execute(&mut self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
         let pg_param = from_bmbp_value_to_pg_params(params);
         let pg_params_ref = pg_param
             .iter()

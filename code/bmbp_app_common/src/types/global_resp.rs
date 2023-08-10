@@ -58,7 +58,6 @@ where
         self.data.as_ref()
     }
 }
-
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
 #[repr(i8)]
 pub enum RespCode {

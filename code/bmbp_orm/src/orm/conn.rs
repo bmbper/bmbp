@@ -48,10 +48,16 @@ pub trait BmbpConn {
     async fn batch_execute(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize>;
     async fn batch_execute_ddl(&mut self, ddl_vec: &[(String, &[Value])]) -> BmbpResp<usize>;
     async fn batch_execute_dml(&mut self, dml_vec: &[(String, &[Value])]) -> BmbpResp<usize>;
+    async fn raw_insert(&mut self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
+        Ok(0)
+    }
     async fn raw_update(&mut self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
         Ok(0)
     }
-    async fn raw_insert(&mut self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
+    async fn raw_delete(&mut self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
+        Ok(0)
+    }
+    async fn raw_execute(&mut self, sql: &String, params: &[BmbpValue]) -> BmbpResp<usize> {
         Ok(0)
     }
     async fn raw_find_list(
@@ -61,7 +67,6 @@ pub trait BmbpConn {
     ) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
         Ok(None)
     }
-
     async fn raw_find_page(
         &mut self,
         sql: &String,
@@ -71,7 +76,6 @@ pub trait BmbpConn {
     ) -> BmbpResp<PageVo<BmbpHashMap>> {
         Ok(PageVo::new())
     }
-
     async fn raw_find_one(
         &mut self,
         sql: &String,

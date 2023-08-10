@@ -3,10 +3,10 @@ html,body{
 }
 
 .bmbp-page-body{
-    width:  100% ;
+    width: calc(100% - 20px);
     height: 100vh;
-    margin:  5px;
-    padding: 0px;
+    margin:  0px;
+    padding: 5px;
     background: #FFFFFF;
 }
 

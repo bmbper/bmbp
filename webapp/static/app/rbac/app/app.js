@@ -18,70 +18,14 @@ const onToolBarPrintBtnClick = () => {
 
 const onSearchFormQueryBtnClick = () => {
   var queryData = AppPageIns.formRef.current.getFieldsValue();
-  onQueryGridData(queryData);
+  onQueryAppPageData(queryData);
 }
 
 const onSearchFormRestBtnClick = () => {
   AppPageIns.formRef.current.resetFields();
 }
 
-const onQueryGridData = (queryData) => {
-  queryData = queryData || {}
-  let data = [
-    {
-      recordId: '1',
-      appCode: '1',
-      appTitle: 'Jane Doe',
-      appKey: 23000,
-      appType: '32 Park Road, London',
-      recordStatus: '1',
-    },
-    {
-      recordId: '2',
-      appCode: '2',
-      appTitle: 'Jane Doe',
-      appKey: 23000,
-      appType: '32 Park Road, London',
-      recordStatus: '0',
-    },
-    {
-      recordId: '3',
-      appCode: '2',
-      appTitle: 'Jane Doe',
-      appKey: 23000,
-      appType: '32 Park Road, London',
-      recordStatus: '0',
-    },
-    {
-      recordId: '4',
-      appCode: '2',
-      appTitle: 'Jane Doe',
-      appKey: 23000,
-      appType: '32 Park Road, London',
-      recordStatus: '0',
-    },
-    {
-      recordId: '5',
-      appCode: '2',
-      appTitle: 'Jane Doe',
-      appKey: 23000,
-      appType: '32 Park Road, London',
-      recordStatus: '0',
-    },
-    {
-      recordId: '6',
-      appCode: '2',
-      appTitle: 'Jane Doe',
-      appKey: 23000,
-      appType: '32 Park Road, London',
-      recordStatus: '0',
-    },
-  ];
-  AppPageIns.setPagination({ ...AppPageIns.pagination, total: data.length });
-  AppPageIns.setGridData(data);
 
-  arco.Message.info("查询表结构数据：" + JSON.stringify(queryData));
-}
 
 const onGridPageChange = (page) => {
   AppPageIns.setPagination({ ...AppPageIns.pagination, pageSize: page.pageSize });
@@ -102,17 +46,7 @@ const onRowInfoBtnClick = (record) => {
   AppPageIns.setInfoFormVisible(true);
 }
 
-const onRowDelBtnClick = (record) => {
-  arco.Message.info("删除功能开发中..." + record.appTitle);
-}
 
-const onRowEnableBtnClick = (record) => {
-  arco.Message.info("启用功能开发中..." + record.appTitle);
-}
-
-const onRowDisableBtnClick = (record) => {
-  arco.Message.info("停用功能开发中..." + record.appTitle);
-}
 
 const AppPageIns = {
   formRef: null,
@@ -155,8 +89,9 @@ const SearchForm = () => {
         <arco.Grid.Col span={7}>
           <arco.Form.Item field="appType" label='应用类型' allowClear>
             <arco.Select placeholder='请选择应用类型'>
-              <arco.Select.Option key={'1'} value={'1'}>内置应用</arco.Select.Option>
-              <arco.Select.Option key={'2'} value={'2'}>集成应用</arco.Select.Option>
+              <arco.Select.Option key={'1'} value={'module'}>内置应用</arco.Select.Option>
+              <arco.Select.Option key={'2'} value={'sso'}>单点应用</arco.Select.Option>
+              <arco.Select.Option key={'3'} value={'link'}>链接应用</arco.Select.Option>
             </arco.Select>
           </arco.Form.Item>
         </arco.Grid.Col>
@@ -181,7 +116,7 @@ const SearchForm = () => {
 const GridTable = (props) => {
   // 初始化查询函数
   React.useEffect(() => {
-    onQueryGridData({});
+    onQueryAppPageData({});
   }, []);
 
   const [pagination, setPagination] = React.useState({
@@ -212,25 +147,38 @@ const GridTable = (props) => {
     },
     {
       title: '应用密钥',
-      dataIndex: 'appSeecretKey',
+      dataIndex: 'appSecrectKey',
     },
     {
       title: '应用类型',
       dataIndex: 'appType',
+      render: (_, record) => {
+        if (record.appType == 'module') {
+          return <arco.Tag style={{ color: '#165dff' }}>平台应用</arco.Tag>
+        }
+        if (record.recordStatus == 'sso') {
+          return <arco.Tag style={{ color: '#7bc616' }}> 单点应用</arco.Tag >
+        }
+        if (record.recordStatus == 'link') {
+          return <arco.Tag style={{ color: '#ff5722' }} > 连接应用</arco.Tag >
+        }
+        return <arco.Tag > 其它应用</arco.Tag >
+      }
     },
     {
       title: '应用状态',
       dataIndex: 'recordStatus',
       render: (_, record) => {
         if (record.recordStatus == '0') {
-          return <arco.Tag style={{ color: '#165dff' }}>开发中</arco.Tag>
+          return <arco.Tag color={'#165dff'} >开发中</arco.Tag>
         }
         if (record.recordStatus == '1') {
-          return <arco.Tag style={{ color: '#7bc616' }}> 已发布</arco.Tag >
+          return <arco.Tag color={'#00b42a'} > 已上线</arco.Tag >
         }
         if (record.recordStatus == '2') {
-          return <arco.Tag style={{ color: '#ff5722' }} > 已下线</arco.Tag >
+          return <arco.Tag color={'#ff5722'} > 已下线</arco.Tag >
         }
+        return <arco.Tag >未知</arco.Tag >
       }
     },
     {
@@ -245,7 +193,7 @@ const GridTable = (props) => {
             trigger='hover' position='left'
             content={
               <div className="bmbp-action-more">
-                {record.recordStatus == '0' ? <arco.Button type='text' size={'mini'} onClick={() => onRowDisableBtnClick(record)}>上线</arco.Button> : <arco.Button type='text' size={'mini'} onClick={() => onRowEnableBtnClick(record)}>下线</arco.Button>}
+                {buildRowStatusAction(record)}
                 <arco.Button type='text' size={'mini'} onClick={() => onRowInfoBtnClick(record)}>查看</arco.Button>
                 <arco.Popconfirm focusLock title='删除确认' content='数据删除之后，无法恢复，是否继续?' onOk={() => { onRowDelBtnClick(record) }}>
                   <arco.Button type='text' size={'mini'} status='danger'>删除</arco.Button>
@@ -335,4 +283,16 @@ const AppPage = () => {
 // 登录界面的APPView
 function RbacAppView() {
   return <AppPage />;
+}
+
+
+const buildRowStatusAction = (record) => {
+  if (record.recordStatus == "0") {
+    return <arco.Button type='text' size={'mini'} onClick={() => onRowEnableBtnClick(record)}>上线</arco.Button>;
+  } else if (record.recordStatus == "1") {
+    return <arco.Button type='text' size={'mini'} onClick={() => onRowDisableBtnClick(record)}>下线</arco.Button>;
+  } else {
+    return <arco.Button type='text' size={'mini'} onClick={() => onRowReStartBtnClick(record)}>重启开发</arco.Button>;
+  }
+
 }

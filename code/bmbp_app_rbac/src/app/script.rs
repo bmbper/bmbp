@@ -1,24 +1,16 @@
-use bmbp_app_common::BmbpBaseModel;
 use bmbp_orm_ins::BmbpScriptSql;
+
+use super::model::BmbpRbacApp;
 
 /// RbacAppScript  应用的SQL脚本
 pub struct RbacAppScript;
 
 impl RbacAppScript {
     pub fn get_table_name() -> String {
-        "bmbp_rbac_app".to_string()
+        BmbpRbacApp::orm_table_name()
     }
     pub fn get_table_columns() -> Vec<String> {
-        let mut base_fields = BmbpBaseModel::get_fields();
-        let rbac_app_field = vec![
-            "app_code".to_string(),
-            "app_title".to_string(),
-            "app_key".to_string(),
-            "app_secrect_key".to_string(),
-            "app_type".to_string(),
-        ];
-        base_fields.extend_from_slice(rbac_app_field.as_slice());
-        base_fields
+        BmbpRbacApp::orm_table_column_name()
     }
 }
 
@@ -29,5 +21,20 @@ impl RbacAppScript {
         let columns = Self::get_table_columns();
         query_script.select_slice_alias(columns.as_slice());
         query_script
+    }
+
+    pub(crate) fn update_script_for_status() -> BmbpScriptSql {
+        let mut update_scirpt = BmbpScriptSql::new();
+        update_scirpt.update(Self::get_table_name().as_str());
+        update_scirpt.set_value("record_status", "#{recordStatus}");
+        update_scirpt.filter("record_id = #{recordId}");
+        update_scirpt
+    }
+
+    pub(crate) fn delete_script_by_reocrd_id() -> BmbpScriptSql {
+        let mut delete_scirpt = BmbpScriptSql::new();
+        delete_scirpt.delete(Self::get_table_name().as_str());
+        delete_scirpt.filter("record_id = #{recordId}");
+        delete_scirpt
     }
 }
