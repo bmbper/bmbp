@@ -1,5 +1,8 @@
 use crate::app::dao::RbacAppDao;
-use bmbp_app_common::{BmbpHashMap, BmbpResp, BmbpValue, PageParams, PageVo};
+use bmbp_app_common::{
+    BmbpError, BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, PageParams, PageVo, ValidRule,
+    ValidType,
+};
 use bmbp_app_utils::is_empty_prop;
 
 use super::script::RbacAppScript;
@@ -56,17 +59,37 @@ impl RbacAppService {
         Ok(row_count)
     }
 
-    pub(crate) async fn save_app(params: &mut BmbpHashMap) -> BmbpResp<&mut BmbpHashMap> {
+    pub(crate) async fn save_app(params: &mut BmbpHashMap) -> BmbpResp<usize> {
         if is_empty_prop(params, "recordId") {
             Self::insert_app(params).await
         } else {
             Self::update_app(params).await
         }
     }
-    pub(crate) async fn insert_app(params: &mut BmbpHashMap) -> BmbpResp<&mut BmbpHashMap> {
-        RbacAppDao::insert_app(params).await
+    pub(crate) async fn insert_app(params: &mut BmbpHashMap) -> BmbpResp<usize> {
+        let valid_rule = vec![
+            FieldValidRule(
+                "appCode".to_string(),
+                ValidRule(ValidType::NotEmpty, "应用编码不能为空!".to_string()),
+            ),
+            FieldValidRule(
+                "appTitle".to_string(),
+                ValidRule(ValidType::NotEmpty, "应用标题不能为空!".to_string()),
+            ),
+            FieldValidRule(
+                "appKey".to_string(),
+                ValidRule(ValidType::NotEmpty, "应用标识不能为空!".to_string()),
+            ),
+            FieldValidRule(
+                "appSecrectKey".to_string(),
+                ValidRule(ValidType::NotEmpty, "应用密钥不能为空!".to_string()),
+            ),
+        ];
+
+        let script = RbacAppScript::insert_script();
+        RbacAppDao::insert_app(&script.to_script(), params).await
     }
-    pub(crate) async fn update_app(params: &mut BmbpHashMap) -> BmbpResp<&mut BmbpHashMap> {
-        RbacAppDao::update_app(params).await
+    pub(crate) async fn update_app(params: &mut BmbpHashMap) -> BmbpResp<usize> {
+        RbacAppDao::update_app(&"".to_string(), params).await
     }
 }

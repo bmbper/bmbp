@@ -10,6 +10,7 @@ pub enum BmbpErrorKind {
     SCRIPT,
     ORM,
     UTIL,
+    VALID,
     OTHER,
 }
 
@@ -23,6 +24,7 @@ impl ToString for BmbpErrorKind {
             BmbpErrorKind::ORM => "ORM".to_string(),
             BmbpErrorKind::UTIL => "UTIL".to_string(),
             BmbpErrorKind::OTHER => "OTHER".to_string(),
+            BmbpErrorKind::VALID => "VALID".to_string(),
         }
     }
 }
@@ -82,6 +84,12 @@ impl BmbpError {
     pub fn other(msg: &str) -> Self {
         BmbpError {
             kind: BmbpErrorKind::OTHER,
+            msg: msg.to_string(),
+        }
+    }
+    pub fn valid(msg: &str) -> Self {
+        BmbpError {
+            kind: BmbpErrorKind::VALID,
             msg: msg.to_string(),
         }
     }

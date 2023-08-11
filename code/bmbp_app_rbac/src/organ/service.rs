@@ -219,9 +219,9 @@ impl OrganService {
         let _: bool = Self::check_same_organ_organ_code(organ).await?;
         let _: bool = Self::check_same_organ_data_id(organ).await?;
         let _: bool = Self::check_same_organ_title(organ).await?;
-        let bmbp_hash_map = BmbpHashMap::from(organ);
+        let mut bmbp_hash_map = BmbpHashMap::from(organ);
         let script_insert = OrganScript::insert_script();
-        OrganDao::insert(&script_insert.to_script(), &bmbp_hash_map).await
+        OrganDao::insert(&script_insert.to_script(), &mut bmbp_hash_map).await
     }
 
     fn build_insert_default_value(organ: &mut BmbpRbacOrgan) {

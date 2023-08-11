@@ -46,8 +46,8 @@ pub async fn find_app_info(
 #[handler]
 pub async fn save_app(req: &mut Request, _res: &mut Response) -> BmbpResp<RespVo<BmbpHashMap>> {
     let mut params = req.parse_json::<BmbpHashMap>().await?;
-    let rs = RbacAppService::save_app(&mut params).await?;
-    Ok(RespVo::ok_data(rs.clone()))
+    let _ = RbacAppService::save_app(&mut params).await?;
+    Ok(RespVo::ok_data(params))
 }
 
 #[handler]

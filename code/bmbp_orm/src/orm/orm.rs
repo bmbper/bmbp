@@ -399,9 +399,13 @@ impl Orm {
         Err(BmbpError::orm("方法未实现"))
     }
 
-    pub async fn script_insert(&self, script: &String, params: &BmbpHashMap) -> BmbpResp<usize> {
+    pub async fn script_insert(
+        &self,
+        script: &String,
+        script_params: &BmbpHashMap,
+    ) -> BmbpResp<usize> {
         println!("===>script sql:{:#?}", script);
-        let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
+        let (sql, params) = ScriptUtil::parse_from_map(script, script_params.clone());
         self.raw_insert_with_params(&sql, params.as_slice()).await
     }
     pub async fn script_insert_batch(
@@ -424,14 +428,18 @@ impl Orm {
     ) -> BmbpResp<Option<BmbpValue>> {
         Err(BmbpError::orm("方法未实现"))
     }
-    pub async fn script_update(&self, script: &String, params: &BmbpHashMap) -> BmbpResp<usize> {
-        let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
+    pub async fn script_update(
+        &self,
+        script: &String,
+        script_params: &BmbpHashMap,
+    ) -> BmbpResp<usize> {
+        let (sql, params) = ScriptUtil::parse_from_map(script, script_params.clone());
         self.raw_update_with_params(&sql, params.as_slice()).await
     }
     pub async fn script_insert_update(
         &self,
         script: &String,
-        params: &[&BmbpHashMap],
+        script_params: &[&BmbpHashMap],
     ) -> BmbpResp<usize> {
         Err(BmbpError::orm("方法未实现"))
     }

@@ -3,7 +3,8 @@ const RbacApi = {
   publishUrl: "/rbac/v1/app/enable/",
   unPublishUrl: "/rbac/v1/app/disable/",
   reDevelophUrl: "/rbac/v1/app/restart/",
-  deleteUrl: "/rbac/v1/app/delete/"
+  deleteUrl: "/rbac/v1/app/delete/",
+  saveUrl: "/rbac/v1/app/save"
 }
 const onQueryAppPageData = (queryParams) => {
   queryParams = queryParams || {}
@@ -56,6 +57,17 @@ const onRowDelBtnClick = (record) => {
   BmbpHttp.post(RbacApi.deleteUrl + record.recordId, {}).then((resp) => {
     if (resp.code == 0) {
       arco.Message.info("应用删除成功");
+      onQueryAppPageData({});
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+
+const saveAppInfo = (formData) => {
+  BmbpHttp.post(RbacApi.saveUrl, formData).then((resp) => {
+    if (resp.code == 0) {
+      arco.Message.info("保存应用成功");
       onQueryAppPageData({});
     } else {
       arco.Message.error(resp.msg);

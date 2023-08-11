@@ -272,7 +272,7 @@ const AppPage = () => {
     <div className="bmbp-page-serach-grid">
       <GridTable selectedRowKeys={selectedRowKeys} />
     </div>
-    <AppAddForm title={'新增应用'} visible={addFormVisible} recordId={recordId} />
+    <AppAddFormDialog title={'新增应用'} visible={addFormVisible} recordId={recordId} />
     <AppEditForm title={'编辑应用'} visible={editFormVisible} recordId={recordId} />
     <AppConfigForm title={'配置应用'} visible={configFormVisible} recordId={recordId} />
     <AppInfoForm title={'查看应用'} visible={infoFormVisible} recordId={recordId} />

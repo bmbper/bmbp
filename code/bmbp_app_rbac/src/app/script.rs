@@ -1,6 +1,6 @@
-use bmbp_orm_ins::BmbpScriptSql;
-
 use super::model::BmbpRbacApp;
+use bmbp_app_utils::snake_to_camel;
+use bmbp_orm_ins::BmbpScriptSql;
 
 /// RbacAppScript  应用的SQL脚本
 pub struct RbacAppScript;
@@ -36,5 +36,17 @@ impl RbacAppScript {
         delete_scirpt.delete(Self::get_table_name().as_str());
         delete_scirpt.filter("record_id = #{recordId}");
         delete_scirpt
+    }
+    pub(crate) fn insert_script() -> BmbpScriptSql {
+        let mut insert_script = BmbpScriptSql::new();
+        insert_script.insert_into(Self::get_table_name().as_str());
+        for item in Self::get_table_columns() {
+            insert_script.insert_value(
+                item.as_str(),
+                format!("#{{{}}}", snake_to_camel(item.to_string())).as_str(),
+            );
+        }
+
+        insert_script
     }
 }

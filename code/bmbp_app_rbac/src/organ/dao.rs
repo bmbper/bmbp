@@ -56,7 +56,7 @@ impl OrganDao {
 
     pub(crate) async fn insert(
         script_sql: &String,
-        script_params: &BmbpHashMap,
+        script_params: &mut BmbpHashMap,
     ) -> BmbpResp<usize> {
         bmbp_orm_ins::BmbpORM
             .await

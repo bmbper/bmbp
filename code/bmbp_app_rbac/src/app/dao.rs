@@ -63,10 +63,16 @@ impl RbacAppDao {
             .await?;
         Ok(rs)
     }
-    pub(crate) async fn insert_app(_params: &mut BmbpHashMap) -> BmbpResp<&mut BmbpHashMap> {
-        Err(BmbpError::dao("保存未实现"))
+    pub(crate) async fn insert_app(
+        script_sql: &String,
+        script_params: &BmbpHashMap,
+    ) -> BmbpResp<usize> {
+        Err(BmbpError::dao("未实现"))
     }
-    pub(crate) async fn update_app(_params: &mut BmbpHashMap) -> BmbpResp<&mut BmbpHashMap> {
-        Err(BmbpError::dao("更新未实现"))
+    pub(crate) async fn update_app(
+        script_sql: &String,
+        script_params: &BmbpHashMap,
+    ) -> BmbpResp<usize> {
+        Err(BmbpError::dao("未实现"))
     }
 }
