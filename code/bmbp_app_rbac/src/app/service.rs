@@ -3,7 +3,8 @@ use bmbp_app_common::{
     BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, PageParams, PageVo, ValidRule, ValidType,
 };
 use bmbp_app_utils::{
-    add_insert_default_value, add_update_default_value, is_empty_prop, valid_field_rule_slice,
+    add_insert_default_value, add_update_default_value, is_empty_prop, valid_field_rule,
+    valid_field_rule_slice,
 };
 
 use super::script::RbacAppScript;
@@ -76,8 +77,38 @@ impl RbacAppService {
         RbacAppDao::insert_app(&script.to_script(), params).await
     }
     pub(crate) async fn update_app(params: &mut BmbpHashMap) -> BmbpResp<usize> {
+        let record_id_valid_rule = FieldValidRule(
+            "recordId".to_string(),
+            ValidRule(ValidType::NotEmpty, "主键不允许为空".to_string()),
+        );
+        if let Some(err) = valid_field_rule(params, &record_id_valid_rule) {
+            return Err(err);
+        }
+        let mut script = RbacAppScript::update_script();
         add_update_default_value(params);
-        RbacAppDao::update_app(&"".to_string(), params).await
+        if !is_empty_prop(params, "appCode") {
+            script.set_value("app_code", "#{appCode}");
+        }
+        if !is_empty_prop(params, "appTitle") {
+            script.set_value("app_title", "#{appTitle}");
+        }
+        if !is_empty_prop(params, "appKey") {
+            script.set_value("app_key", "#{appKey}");
+        }
+        if !is_empty_prop(params, "appType") {
+            script.set_value("app_type", "#{appType}");
+        }
+        if !is_empty_prop(params, "appSecrectKey") {
+            script.set_value("app_secrect_key", "#{appSecrectKey}");
+        }
+        if !is_empty_prop(params, "recordNum") {
+            script.set_value("record_num", "#{recordNum}");
+        }
+        if !is_empty_prop(params, "recordRemark") {
+            script.set_value("record_remark", "#{recordRemark}");
+        }
+
+        RbacAppDao::update_app(&script.to_script(), params).await
     }
 
     /// 验证应用新增数据

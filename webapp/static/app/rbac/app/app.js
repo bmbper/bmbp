@@ -1,7 +1,4 @@
-const onToolBarAddBtnClick = () => {
-  AppPageIns.setRecordId('');
-  AppPageIns.setAddFormVisible(true);
-}
+
 const onToolBarDelBtnClick = () => {
   arco.Message.info("rows:" + JSON.stringify(AppPageIns.selectedRowKeys));
   arco.Message.info("删除功能开发中...");
@@ -31,25 +28,15 @@ const onGridPageChange = (page) => {
   AppPageIns.setPagination({ ...AppPageIns.pagination, pageSize: page.pageSize });
 }
 
-const onRowEditBtnClick = (record) => {
-  AppPageIns.setRecordId(record.recordId);
-  AppPageIns.setEditFormVisible(true);
-}
 
 const onRowConfigBtnClick = (record) => {
   AppPageIns.setRecordId(record.recordId);
   AppPageIns.setConfigFormVisible(true);
 }
 
-const onRowInfoBtnClick = (record) => {
-  AppPageIns.setRecordId(record.recordId);
-  AppPageIns.setInfoFormVisible(true);
-}
-
 
 
 const AppPageIns = {
-  formRef: null,
   setPagination: null,
   pagination: null,
 };
@@ -148,10 +135,12 @@ const GridTable = (props) => {
     {
       title: '应用密钥',
       dataIndex: 'appSecrectKey',
+      width: '320px',
     },
     {
       title: '应用类型',
       dataIndex: 'appType',
+      width: 80,
       render: (_, record) => {
         if (record.appType == 'module') {
           return <arco.Tag style={{ color: '#165dff' }}>平台应用</arco.Tag>
@@ -168,6 +157,7 @@ const GridTable = (props) => {
     {
       title: '应用状态',
       dataIndex: 'recordStatus',
+      width: 100,
       render: (_, record) => {
         if (record.recordStatus == '0') {
           return <arco.Tag color={'#165dff'} >开发中</arco.Tag>
@@ -182,8 +172,10 @@ const GridTable = (props) => {
       }
     },
     {
-      title: '显示顺序',
+      title: '顺序',
       dataIndex: 'recordNum',
+      width: 80,
+      align: 'center'
     },
     {
       title: '操作',
@@ -224,6 +216,11 @@ const GridTable = (props) => {
 
 
 const AppPage = () => {
+
+  // 表单关联b}
+  const [appFormRef, setAppFormRef] = React.useState(React.useRef());
+  AppPageIns.appFormRef = appFormRef;
+  AppPageIns.setAppFormRef = setAppFormRef;
   // 新增应用表单
   const [addFormVisible, setAddFormVisible] = React.useState(false);
   AppPageIns.addFormVisible = addFormVisible;
@@ -275,9 +272,9 @@ const AppPage = () => {
       <GridTable selectedRowKeys={selectedRowKeys} />
     </div>
     <AppAddFormDialog title={'新增应用'} visible={addFormVisible} recordId={recordId} />
-    <AppEditForm title={'编辑应用'} visible={editFormVisible} recordId={recordId} />
+    <AppEditFormDialog title={'编辑应用'} visible={editFormVisible} recordId={recordId} />
     <AppConfigForm title={'配置应用'} visible={configFormVisible} recordId={recordId} />
-    <AppInfoForm title={'查看应用'} visible={infoFormVisible} recordId={recordId} />
+    <AppInfoFormDialog title={'查看应用'} visible={infoFormVisible} recordId={recordId} />
   </div >;
 }
 

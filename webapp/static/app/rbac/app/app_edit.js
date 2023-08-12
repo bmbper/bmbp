@@ -1,37 +1,34 @@
 
-
-
 const AppAddFormDialog = (props) => {
-  AppPageIns.addAppFormRef = React.useRef();
-  React.useEffect(() => {
-
-
-  }, []);
   return <arco.Modal
     title={props.title}
     visible={props.visible}
     autoFocus={false}
     focusLock={true}
     onOk={() => {
-      AppPageIns.addAppFormRef.current.validate().then((formData) => {
+      AppPageIns.appFormRef.current.validate().then((formData) => {
         saveAppInfo(formData);
       }).catch((_) => {
       });
     }}
     onCancel={() => {
-      AppPageIns.addAppFormRef.current.resetFields();
+      AppPageIns.appFormRef.current.resetFields();
       AppPageIns.setAddFormVisible(false);
     }}
   >
-    <AppAddForm />
+    <AppFormView />
   </arco.Modal>
 }
 
-
-const AppAddForm = () => {
+const AppFormView = () => {
   return <div>
-    <arco.Form ref={AppPageIns.addAppFormRef}>
+    <arco.Form ref={AppPageIns.appFormRef}>
       <arco.Grid.Row gutter={24}>
+        <arco.Grid.Col span={24}>
+          <arco.Form.Item field="recordId" label='应用主键' hidden={true}>
+            <arco.Input placeholder='' />
+          </arco.Form.Item>
+        </arco.Grid.Col>
         <arco.Grid.Col span={24}>
           <arco.Form.Item field="appCode" label='应用编码' rules={[{ required: true, message: '应用编码不能为空' }, { minLength: 4, maxLength: 32, message: '应用编码长度4到32' }]}>
             <arco.Input placeholder='请输入应用编码' />
@@ -73,35 +70,45 @@ const AppAddForm = () => {
         </arco.Grid.Col>
       </arco.Grid.Row>
     </arco.Form>
-  </div>;
+  </div >;
 }
 
 
-
-const AppEditForm = (props) => {
+const AppEditFormDialog = (props) => {
   return <arco.Modal
     title={props.title}
     visible={props.visible}
     autoFocus={false}
     focusLock={true}
-    onOk={() => AppPageIns.setEditFormVisible(false)}
-    onCancel={() => AppPageIns.setEditFormVisible(false)}
+    onOk={() => {
+      AppPageIns.appFormRef.current.validate().then((formData) => {
+        saveAppInfo(formData, AppPageIns.setEditFormVisible);
+      }).catch((_) => {
+      });
+    }}
+    onCancel={() => {
+      AppPageIns.appFormRef.current.resetFields();
+      AppPageIns.setEditFormVisible(false);
+    }}
   >
-    <div> edit Form:{props.recordId}</div>
+    <AppFormView />
   </arco.Modal>
 }
 
 
-const AppInfoForm = (props) => {
+const AppInfoFormDialog = (props) => {
   return <arco.Modal
     title={props.title}
     visible={props.visible}
     autoFocus={false}
     focusLock={true}
-    onOk={() => AppPageIns.setInfoFormVisible(false)}
-    onCancel={() => AppPageIns.setInfoFormVisible(false)}
+    footer={null}
+    onCancel={() => {
+      AppPageIns.appFormRef.current.resetFields();
+      AppPageIns.setInfoFormVisible(false);
+    }}
   >
-    <div> Info Form:{props.recordId}</div>
+    <AppFormView />
   </arco.Modal>
 }
 

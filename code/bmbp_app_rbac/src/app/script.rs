@@ -50,4 +50,13 @@ impl RbacAppScript {
 
         insert_script
     }
+    pub(crate) fn update_script() -> BmbpScriptSql {
+        let mut update_script = BmbpScriptSql::new();
+        update_script.update(&Self::get_table_name());
+        update_script
+            .set_value("record_update_time", "#{recordUpdateTime}")
+            .set_value("record_update_user", "#{recordUpdateUser}");
+        update_script.filter("record_id = #{recordId}");
+        update_script
+    }
 }

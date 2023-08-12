@@ -1,5 +1,6 @@
 const RbacApi = {
   queryPageUrl: "/rbac/v1/app/find/page",
+  queryInfoUrl: "/rbac/v1/app/find/info/",
   publishUrl: "/rbac/v1/app/enable/",
   unPublishUrl: "/rbac/v1/app/disable/",
   reDevelophUrl: "/rbac/v1/app/restart/",
@@ -51,7 +52,23 @@ const onRowReStartBtnClick = (record) => {
     }
   });
 }
+const onToolBarAddBtnClick = () => {
+  AppPageIns.setRecordId('');
+  AppPageIns.setAddFormVisible(true);
+  AppPageIns.appFormRef.current.setFieldsValue({});
 
+}
+const onRowEditBtnClick = (record) => {
+  onQueryAppInfoData(record.recordId).then((resp) => {
+    if (resp.code == 0) {
+      AppPageIns.setRecordId(record.recordId);
+      AppPageIns.setEditFormVisible(true);
+      AppPageIns.appFormRef.current.setFieldsValue(resp.data);
+    }
+  })
+
+
+}
 
 const onRowDelBtnClick = (record) => {
   BmbpHttp.post(RbacApi.deleteUrl + record.recordId, {}).then((resp) => {
@@ -64,14 +81,29 @@ const onRowDelBtnClick = (record) => {
   });
 }
 
-const saveAppInfo = (formData) => {
+const onRowInfoBtnClick = (record) => {
+  onQueryAppInfoData(record.recordId).then((resp) => {
+    if (resp.code == 0) {
+      AppPageIns.setRecordId(record.recordId);
+      AppPageIns.setInfoFormVisible(true);
+      AppPageIns.appFormRef.current.setFieldsValue(resp.data);
+    }
+  })
+
+}
+
+const saveAppInfo = (formData, set_model) => {
   BmbpHttp.post(RbacApi.saveUrl, formData).then((resp) => {
     if (resp.code == 0) {
-      arco.Message.info("保存应用成功");
-      AppPageIns.setAddFormVisible(false);
+      arco.Message.info(resp.msg);
+      set_model(false);
       onQueryAppPageData({});
     } else {
       arco.Message.error(resp.msg);
     }
   });
+}
+
+const onQueryAppInfoData = (recordId) => {
+  return BmbpHttp.get(RbacApi.queryInfoUrl + recordId, {});
 }

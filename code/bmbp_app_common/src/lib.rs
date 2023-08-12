@@ -31,12 +31,10 @@ fn build_development_template() -> Tera {
     tp
 }
 
-#[allow(non_snake_case)]
 #[derive(RustEmbed)]
 #[folder = "../../webapp/template/"]
 pub struct EmbedTemplate;
 
-#[allow(non_camel_case_types)]
 #[derive(RustEmbed)]
 #[folder = "../../webapp/static/"]
 pub struct EmbedStatic;
