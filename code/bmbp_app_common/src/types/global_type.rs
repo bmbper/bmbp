@@ -7,7 +7,7 @@ use serde_json::Value;
 #[serde(untagged)]
 pub enum BmbpValue {
     String(String),
-    Int(i16),
+    Int(i32),
     BigInt(i128),
     Float(f32),
     BigFloat(f64),
@@ -37,37 +37,25 @@ impl From<&str> for BmbpValue {
 
 impl From<i8> for BmbpValue {
     fn from(value: i8) -> Self {
-        BmbpValue::Int(value as i16)
+        BmbpValue::Int(value as i32)
     }
 }
 
 impl From<u8> for BmbpValue {
     fn from(value: u8) -> Self {
-        BmbpValue::Int(value as i16)
-    }
-}
-
-impl From<i16> for BmbpValue {
-    fn from(value: i16) -> Self {
-        BmbpValue::Int(value)
-    }
-}
-
-impl From<u16> for BmbpValue {
-    fn from(value: u16) -> Self {
-        BmbpValue::Int(value as i16)
+        BmbpValue::Int(value as i32)
     }
 }
 
 impl From<i32> for BmbpValue {
     fn from(value: i32) -> Self {
-        BmbpValue::BigInt(value as i128)
+        BmbpValue::Int(value)
     }
 }
 
 impl From<u32> for BmbpValue {
     fn from(value: u32) -> Self {
-        BmbpValue::BigInt(value as i128)
+        BmbpValue::Int(value as i32)
     }
 }
 
@@ -121,37 +109,25 @@ impl From<f64> for BmbpValue {
 
 impl From<&i8> for BmbpValue {
     fn from(value: &i8) -> Self {
-        BmbpValue::Int(value.clone() as i16)
+        BmbpValue::Int(value.clone() as i32)
     }
 }
 
 impl From<&u8> for BmbpValue {
     fn from(value: &u8) -> Self {
-        BmbpValue::Int(value.clone() as i16)
-    }
-}
-
-impl From<&i16> for BmbpValue {
-    fn from(value: &i16) -> Self {
-        BmbpValue::Int(value.clone())
-    }
-}
-
-impl From<&u16> for BmbpValue {
-    fn from(value: &u16) -> Self {
-        BmbpValue::Int(value.clone() as i16)
+        BmbpValue::Int(value.clone() as i32)
     }
 }
 
 impl From<&i32> for BmbpValue {
     fn from(value: &i32) -> Self {
-        BmbpValue::BigInt(value.clone() as i128)
+        BmbpValue::Int(value.clone())
     }
 }
 
 impl From<&u32> for BmbpValue {
     fn from(value: &u32) -> Self {
-        BmbpValue::BigInt(value.clone() as i128)
+        BmbpValue::Int(value.clone() as i32)
     }
 }
 
@@ -522,7 +498,7 @@ impl BmbpValue {
             _ => None,
         }
     }
-    pub fn raw_int(&self) -> Option<&i16> {
+    pub fn raw_int(&self) -> Option<&i32> {
         match self {
             BmbpValue::Int(v) => Some(v),
             _ => None,

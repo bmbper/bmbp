@@ -1,9 +1,10 @@
 use crate::app::dao::RbacAppDao;
 use bmbp_app_common::{
-    BmbpError, BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, PageParams, PageVo, ValidRule,
-    ValidType,
+    BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, PageParams, PageVo, ValidRule, ValidType,
 };
-use bmbp_app_utils::is_empty_prop;
+use bmbp_app_utils::{
+    add_insert_default_value, add_update_default_value, is_empty_prop, valid_field_rule_slice,
+};
 
 use super::script::RbacAppScript;
 
@@ -67,6 +68,22 @@ impl RbacAppService {
         }
     }
     pub(crate) async fn insert_app(params: &mut BmbpHashMap) -> BmbpResp<usize> {
+        if let Some(err) = Self::valid_insert_app_data(params) {
+            return Err(err);
+        }
+        add_insert_default_value(params);
+        let script = RbacAppScript::insert_script();
+        RbacAppDao::insert_app(&script.to_script(), params).await
+    }
+    pub(crate) async fn update_app(params: &mut BmbpHashMap) -> BmbpResp<usize> {
+        add_update_default_value(params);
+        RbacAppDao::update_app(&"".to_string(), params).await
+    }
+
+    /// 验证应用新增数据
+    fn valid_insert_app_data(
+        params: &mut std::collections::HashMap<String, BmbpValue>,
+    ) -> Option<bmbp_app_common::BmbpError> {
         let valid_rule = vec![
             FieldValidRule(
                 "appCode".to_string(),
@@ -85,11 +102,6 @@ impl RbacAppService {
                 ValidRule(ValidType::NotEmpty, "应用密钥不能为空!".to_string()),
             ),
         ];
-
-        let script = RbacAppScript::insert_script();
-        RbacAppDao::insert_app(&script.to_script(), params).await
-    }
-    pub(crate) async fn update_app(params: &mut BmbpHashMap) -> BmbpResp<usize> {
-        RbacAppDao::update_app(&"".to_string(), params).await
+        valid_field_rule_slice(params, valid_rule.as_slice())
     }
 }

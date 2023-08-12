@@ -439,7 +439,10 @@ fn from_bmbp_value_to_pg_params(
             BmbpValue::Bool(v) => {
                 pg_params.push(Box::new(v.clone()));
             }
-            BmbpValue::NULL => {}
+            BmbpValue::NULL => {
+                let v: Option<String> = None;
+                pg_params.push(Box::new(v));
+            }
             BmbpValue::Map(_) => {}
             BmbpValue::Array(_) => {}
         }

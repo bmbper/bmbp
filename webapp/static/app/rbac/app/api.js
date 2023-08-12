@@ -68,6 +68,7 @@ const saveAppInfo = (formData) => {
   BmbpHttp.post(RbacApi.saveUrl, formData).then((resp) => {
     if (resp.code == 0) {
       arco.Message.info("保存应用成功");
+      AppPageIns.setAddFormVisible(false);
       onQueryAppPageData({});
     } else {
       arco.Message.error(resp.msg);

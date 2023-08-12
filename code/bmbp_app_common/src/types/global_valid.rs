@@ -29,6 +29,14 @@ impl ValidRule {
 
 /// FieldValidRule 一个字段一个规则
 pub struct FieldValidRule(pub String, pub ValidRule);
+impl FieldValidRule {
+    pub fn field(&self) -> &String {
+        &self.0
+    }
+    pub fn rule(&self) -> &ValidRule {
+        &self.1
+    }
+}
 
 /// FieldValidRules 一个字段匹配多个规则
 pub struct FieldValidRules(pub String, pub Vec<ValidRule>);

@@ -10,12 +10,14 @@ const TAG_START: char = '{';
 const TAG_END: char = '}';
 const ESCAPE_TAG: char = '\\';
 
+#[derive(Debug)]
 enum TokenType {
     COUNT,
     REPLACE,
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 enum TokenVisitType {
     KEY,
     POSITION,
@@ -23,11 +25,13 @@ enum TokenVisitType {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 struct Token {
     _type: TokenType,
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 struct ScriptToken {
     name: String,
     _type: TokenType,
@@ -36,6 +40,7 @@ struct ScriptToken {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 enum TokenState {
     EMPTY = 0,
     COUNT = 1,
@@ -73,7 +78,7 @@ impl ScriptUtil {
         let mut values = BmbpVec::new();
         let mut sql = script.clone();
         for (idx, item) in script_token.as_slice().into_iter().enumerate() {
-            sql = sql.replace(&item.name, &format!("${}::text", values.len() + 1));
+            sql = sql.replace(&item.name, &format!("${}", values.len() + 1));
             values.push(item.visit_value.clone());
         }
         (sql, values)
@@ -115,7 +120,7 @@ impl ScriptUtil {
         }
         script_tokens.visit_value = mp_value.clone();
     }
-    /// token 提取标签   
+    /// token 提取标签
     fn parse_script_token(vars_names: &[String]) -> Vec<ScriptToken> {
         let mut token_vec = vec![];
         for item in vars_names {

@@ -404,7 +404,6 @@ impl Orm {
         script: &String,
         script_params: &BmbpHashMap,
     ) -> BmbpResp<usize> {
-        println!("===>script sql:{:#?}", script);
         let (sql, params) = ScriptUtil::parse_from_map(script, script_params.clone());
         self.raw_insert_with_params(&sql, params.as_slice()).await
     }

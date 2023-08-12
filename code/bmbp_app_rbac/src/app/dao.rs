@@ -1,4 +1,4 @@
-use bmbp_app_common::{BmbpError, BmbpResp};
+use bmbp_app_common::BmbpResp;
 use bmbp_app_common::{BmbpHashMap, PageVo};
 
 pub struct RbacAppDao;
@@ -67,12 +67,20 @@ impl RbacAppDao {
         script_sql: &String,
         script_params: &BmbpHashMap,
     ) -> BmbpResp<usize> {
-        Err(BmbpError::dao("未实现"))
+        let rs = bmbp_orm_ins::BmbpORM
+            .await
+            .script_insert(script_sql, script_params)
+            .await?;
+        Ok(rs)
     }
     pub(crate) async fn update_app(
         script_sql: &String,
         script_params: &BmbpHashMap,
     ) -> BmbpResp<usize> {
-        Err(BmbpError::dao("未实现"))
+        let rs = bmbp_orm_ins::BmbpORM
+            .await
+            .script_update(script_sql, script_params)
+            .await?;
+        Ok(rs)
     }
 }

@@ -62,6 +62,11 @@ const AppAddForm = () => {
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
+          <arco.Form.Item field="recordNum" label='显示顺序' allowClear rules={[{ required: true, message: '显示顺序不能为空' }]}>
+            <arco.InputNumber placeholder='顺序' />
+          </arco.Form.Item>
+        </arco.Grid.Col>
+        <arco.Grid.Col span={24}>
           <arco.Form.Item field="recordRemark" label='应用说明' allowClear rules={[{ maxLength: 255, message: '应用说明最长255' }]}>
             <arco.Input.TextArea placeholder='输入应用说明' style={{ minHeight: 64 }} />
           </arco.Form.Item>

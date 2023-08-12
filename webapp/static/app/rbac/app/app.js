@@ -182,23 +182,25 @@ const GridTable = (props) => {
       }
     },
     {
+      title: '显示顺序',
+      dataIndex: 'recordNum',
+    },
+    {
       title: '操作',
       dataIndex: 'op',
       width: '120px',
       render: (_, record) => {
         return <div className="bmbp-grid-row-action">
           <arco.Button type='text' size={'mini'} onClick={() => onRowConfigBtnClick(record)}>配置</arco.Button>
-          <arco.Button type='text' size={'mini'} onClick={() => onRowEditBtnClick(record)}>编辑</arco.Button>
+          <arco.Button type='text' size={'mini'} onClick={() => onRowInfoBtnClick(record)}>查看</arco.Button>
           <arco.Popover
             trigger='hover' position='left'
             content={
               <div className="bmbp-action-more">
                 {buildRowStatusAction(record)}
-                <arco.Button type='text' size={'mini'} onClick={() => onRowInfoBtnClick(record)}>查看</arco.Button>
                 <arco.Popconfirm focusLock title='删除确认' content='数据删除之后，无法恢复，是否继续?' onOk={() => { onRowDelBtnClick(record) }}>
                   <arco.Button type='text' size={'mini'} status='danger'>删除</arco.Button>
                 </arco.Popconfirm>
-
               </div>
             }
           >
@@ -288,7 +290,11 @@ function RbacAppView() {
 
 const buildRowStatusAction = (record) => {
   if (record.recordStatus == "0") {
-    return <arco.Button type='text' size={'mini'} onClick={() => onRowEnableBtnClick(record)}>上线</arco.Button>;
+    return <React.Fragment>
+      <arco.Button type='text' size={'mini'} onClick={() => onRowEditBtnClick(record)}>编辑</arco.Button>
+      <arco.Button type='text' size={'mini'} onClick={() => onRowEnableBtnClick(record)}>上线</arco.Button>
+    </React.Fragment>
+
   } else if (record.recordStatus == "1") {
     return <arco.Button type='text' size={'mini'} onClick={() => onRowDisableBtnClick(record)}>下线</arco.Button>;
   } else {

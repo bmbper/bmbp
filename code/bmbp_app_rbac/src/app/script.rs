@@ -20,6 +20,7 @@ impl RbacAppScript {
         query_script.from(Self::get_table_name().as_str());
         let columns = Self::get_table_columns();
         query_script.select_slice_alias(columns.as_slice());
+        query_script.order_by("record_num asc");
         query_script
     }
 

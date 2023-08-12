@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 use bmbp_app_common::BmbpBaseModelTrait;
+use bmbp_app_common::{BmbpHashMap, BmbpValue};
 
 use crate::crypto::md5_encode;
-use crate::date_time_now;
+use crate::{date_time_now, is_empty_prop, simple_uuid_upper};
 
 pub fn insert_decorate<'a, T>(data: &mut T)
 where
@@ -54,4 +55,51 @@ where
     let is_valid = old_sign.eq(data.get_base_r_sign());
     data.set_base_r_sign(old_sign);
     is_valid
+}
+
+pub fn add_insert_default_value(params: &mut BmbpHashMap) {
+    if is_empty_prop(params, "recordId") {
+        params.insert("recordId".to_string(), BmbpValue::from(simple_uuid_upper()));
+    }
+
+    if is_empty_prop(params, "recordLevel") {
+        params.insert("recordLevel".to_string(), BmbpValue::from("0"));
+    }
+
+    if is_empty_prop(params, "recordStatus") {
+        params.insert("recordStatus".to_string(), BmbpValue::from("0"));
+    }
+
+    if is_empty_prop(params, "recordFlag") {
+        params.insert("recordFlag".to_string(), BmbpValue::from("0"));
+    }
+
+    params.insert("recordCreateUser".to_string(), BmbpValue::from("0"));
+    params.insert(
+        "recordCreateTime".to_string(),
+        BmbpValue::from(date_time_now()),
+    );
+    params.insert("recordUpdateUser".to_string(), BmbpValue::from("0"));
+    params.insert(
+        "recordUpdateTime".to_string(),
+        BmbpValue::from(date_time_now()),
+    );
+
+    if is_empty_prop(params, "recordOwnerOrg") {
+        params.insert("recordOwnerOrg".to_string(), BmbpValue::from("_"));
+    }
+    if is_empty_prop(params, "recordOwnerUser") {
+        params.insert("recordOwnerUser".to_string(), BmbpValue::from("_"));
+    }
+    if is_empty_prop(params, "recordSign") {
+        params.insert("recordSign".to_string(), BmbpValue::from("_"));
+    }
+}
+
+pub fn add_update_default_value(params: &mut BmbpHashMap) {
+    params.insert("recordUpdateUser".to_string(), BmbpValue::from("0"));
+    params.insert(
+        "recordUpdateTime".to_string(),
+        BmbpValue::from(date_time_now()),
+    );
 }

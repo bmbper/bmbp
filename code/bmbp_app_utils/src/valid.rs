@@ -3,9 +3,22 @@ use bmbp_app_common::{
     ValidRule,
 };
 
-///valid_field_rule 单属性 单规则校验
-pub fn valid_field_rule(_params: &BmbpHashMap, _rule: &FieldValidRule) -> Option<BmbpError> {
+///valid_field_rule 单属性 单规则校验 - 批量
+pub fn valid_field_rule_slice(params: &BmbpHashMap, rules: &[FieldValidRule]) -> Option<BmbpError> {
+    for rule in rules {
+        let valid_rs = valid_field_rule(params, rule);
+        if valid_rs.is_some() {
+            return valid_rs;
+        }
+    }
     None
+}
+
+///valid_field_rule 单属性 单规则校验
+pub fn valid_field_rule(params: &BmbpHashMap, rule: &FieldValidRule) -> Option<BmbpError> {
+    let field = rule.field();
+    let rule = rule.rule();
+    valid_field_value(params, field, rule)
 }
 /// valid_fields_rule 多属性单规则校验
 pub fn valid_fields_rule(params: &BmbpHashMap, rule: &FieldsValidRule) -> Option<BmbpError> {
@@ -69,7 +82,7 @@ fn valid_value_not_empty(value: Option<&BmbpValue>, msg: &String) -> Option<Bmbp
     }
     None
 }
-#[allow(dead_code)]
+#[allow(unused)]
 fn valid_value_size(
     value: Option<&BmbpValue>,
     msg: &String,
@@ -78,7 +91,7 @@ fn valid_value_size(
 ) -> Option<BmbpError> {
     None
 }
-#[allow(dead_code)]
+#[allow(unused)]
 fn valid_value_length(
     value: Option<&BmbpValue>,
     msg: &String,
@@ -87,7 +100,7 @@ fn valid_value_length(
 ) -> Option<BmbpError> {
     None
 }
-#[allow(dead_code)]
+#[allow(unused)]
 fn valid_value_format(
     value: Option<&BmbpValue>,
     msg: &String,
@@ -95,6 +108,7 @@ fn valid_value_format(
 ) -> Option<BmbpError> {
     None
 }
+#[allow(unused)]
 fn valid_value_regex(value: Option<&BmbpValue>, msg: &String, regex: &String) -> Option<BmbpError> {
     None
 }
