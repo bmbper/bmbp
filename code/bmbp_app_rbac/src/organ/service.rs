@@ -37,7 +37,7 @@ impl OrganService {
         }
         let current_organ = organ_op.unwrap();
         if let Some(organ_code_path) = current_organ.get("organCodePath") {
-            Self::find_organ_tree_by_organ_code_path(&organ_code_path.to_string());
+            Self::find_organ_tree_by_organ_code_path(&organ_code_path.to_string()).await
         } else {
             Err(BmbpError::service("指定的结点数据异常，请联系管理员"))
         }
