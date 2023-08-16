@@ -2,18 +2,16 @@ use bmbp_app_common::BmbpHashMap;
 use bmbp_app_common::BmbpResp;
 use bmbp_app_common::PageVo;
 
-use super::model::BmbpRbacOrgan;
-
 pub struct OrganDao();
 #[allow(dead_code)]
 impl OrganDao {
     pub(crate) async fn find_organ_tree(
         sql_scirpt: &String,
         params: &BmbpHashMap,
-    ) -> BmbpResp<Option<Vec<BmbpRbacOrgan>>> {
+    ) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
         bmbp_orm_ins::BmbpORM
             .await
-            .generate_script_query_list::<BmbpRbacOrgan>(sql_scirpt, params)
+            .script_query_list(sql_scirpt, params)
             .await
     }
 
@@ -22,10 +20,10 @@ impl OrganDao {
         script_params: &BmbpHashMap,
         page_no: &usize,
         page_size: &usize,
-    ) -> BmbpResp<PageVo<BmbpRbacOrgan>> {
+    ) -> BmbpResp<PageVo<BmbpHashMap>> {
         bmbp_orm_ins::BmbpORM
             .await
-            .generate_script_query_page(
+            .script_query_page(
                 script_sql,
                 script_params,
                 page_no.clone(),
@@ -37,20 +35,20 @@ impl OrganDao {
     pub(crate) async fn find_organ_list(
         script_sql: &String,
         script_params: &BmbpHashMap,
-    ) -> BmbpResp<Option<Vec<BmbpRbacOrgan>>> {
+    ) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
         bmbp_orm_ins::BmbpORM
             .await
-            .generate_script_query_list::<BmbpRbacOrgan>(script_sql, script_params)
+            .script_query_list(script_sql, script_params)
             .await
     }
 
     pub(crate) async fn find_organ_info(
         script_sql: &String,
         script_params: &BmbpHashMap,
-    ) -> BmbpResp<Option<BmbpRbacOrgan>> {
+    ) -> BmbpResp<Option<BmbpHashMap>> {
         bmbp_orm_ins::BmbpORM
             .await
-            .generate_script_query_one::<BmbpRbacOrgan>(script_sql, script_params)
+            .script_query_one(script_sql, script_params)
             .await
     }
 

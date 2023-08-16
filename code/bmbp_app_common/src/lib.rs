@@ -9,7 +9,7 @@ use tera::Tera;
 pub use utils::*;
 
 /// 全局的模板
-pub static BMBP_TEMPLATE: Lazy<Tera> = Lazy::new(|| build_development_template());
+pub static BMBP_TEMPLATE: Lazy<Tera> = Lazy::new(|| build_production_template());
 
 #[allow(dead_code)]
 fn build_production_template() -> Tera {

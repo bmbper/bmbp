@@ -2,8 +2,6 @@ use bmbp_app_common::BmbpBaseModel;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::organ::BmbpRbacOrganType;
-
 #[allow(dead_code)]
 #[derive(Default, Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -69,8 +67,6 @@ pub struct BmbpRbacDataScopeOrgInfo {
     scope_code: Option<String>,
     /// 组织编码
     organ_code: Option<String>,
-    /// 组织类型 分组、单位、部门、岗位、人员
-    organ_type: BmbpRbacOrganType,
 }
 
 #[allow(dead_code)]

@@ -1,31 +1,16 @@
-use bmbp_app_common::BmbpBaseModel;
 use bmbp_orm_ins::BmbpScriptSql;
+
+use super::BmbpRbacOrgan;
 
 pub(crate) struct OrganScript();
 
 impl OrganScript {
     /// 获取组织机构信息表
     fn get_organ_table_name() -> String {
-        "bmbp_rbac_organ".to_string()
+        BmbpRbacOrgan::orm_table_name()
     }
     fn get_organ_table_columns() -> Vec<String> {
-        let base_field = BmbpBaseModel::get_fields();
-        let organ_fields = Self::get_organ_fields();
-        let mut fields = vec![];
-        fields.extend_from_slice(base_field.as_slice());
-        fields.extend_from_slice(organ_fields.as_slice());
-        fields
-    }
-    fn get_organ_fields() -> Vec<String> {
-        vec![
-            "organ_code".to_string(),
-            "organ_parent_code".to_string(),
-            "organ_title".to_string(),
-            "organ_code_path".to_string(),
-            "organ_title_path".to_string(),
-            "organ_data_id".to_string(),
-            "organ_type".to_string(),
-        ]
+        BmbpRbacOrgan::orm_table_column_name()
     }
 }
 
@@ -35,7 +20,7 @@ impl OrganScript {
         let mut query_script = BmbpScriptSql::new();
         query_script.from(Self::get_organ_table_name().as_str());
         let columns = Self::get_organ_table_columns();
-        query_script.select_string_slice(columns.as_slice());
+        query_script.select_slice_alias(columns.as_slice());
         query_script
     }
     pub(crate) fn insert_script() -> BmbpScriptSql {
@@ -53,25 +38,25 @@ impl OrganScript {
     }
     pub(crate) fn update_status_script() -> BmbpScriptSql {
         let mut script = Self::update_script();
-        script.set("record_status = #{record_status}");
-        script.filter("record_id = #{record_id}");
+        script.set("record_status = #{recordStatus}");
+        script.filter("record_id = #{recordId}");
         script
     }
     pub(crate) fn update_parent_script() -> BmbpScriptSql {
         let mut script = Self::update_script();
         script.set("organ_parent_code = #{organ_parent_code}");
-        script.filter("record_id = #{record_id}");
+        script.filter("record_id = #{recordId}");
         script
     }
     pub(crate) fn delete_script_by_id() -> BmbpScriptSql {
         let mut script = Self::delete_script();
-        script.filter("record_id in (#{record_id})");
+        script.filter("record_id in (#{recordId})");
         script
     }
     pub(crate) fn delete_script() -> BmbpScriptSql {
         let mut script = BmbpScriptSql::new();
         script.delete(Self::get_organ_table_name().as_str());
-        script.filter("record_id in (#{record_id})");
+        script.filter("record_id in (#{recordId})");
         script
     }
 }

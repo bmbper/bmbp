@@ -542,6 +542,22 @@ impl BmbpValue {
     }
 }
 
+impl ToString for BmbpValue {
+    fn to_string(&self) -> String {
+        match self {
+            BmbpValue::String(v) => v.to_string(),
+            BmbpValue::Int(v) => v.to_string(),
+            BmbpValue::BigInt(v) => v.to_string(),
+            BmbpValue::Float(v) => v.to_string(),
+            BmbpValue::BigFloat(v) => v.to_string(),
+            BmbpValue::Bool(v) => v.to_string(),
+            BmbpValue::Map(v) => "".to_string(),
+            BmbpValue::Array(v) => "".to_string(),
+            BmbpValue::NULL => "".to_string(),
+        }
+    }
+}
+
 pub type BmbpVec = Vec<BmbpValue>;
 pub type BmbpHashMap = HashMap<String, BmbpValue>;
 

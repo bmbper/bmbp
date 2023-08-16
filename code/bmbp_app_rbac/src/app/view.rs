@@ -13,7 +13,7 @@ pub async fn app_index_view(_req: &mut Request, res: &mut Response) {
         "viewScript",
         vec![
             "rbac/app/app.js",
-            "rbac/app/app_edit.js",
+            "rbac/app/app_form.js",
             "rbac/app/app_config.js",
             "rbac/app/app_info.js",
             "rbac/app/api.js",
