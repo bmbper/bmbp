@@ -19,14 +19,14 @@ impl OrganService {
     /// 查询指定ID下的组织机构树
     pub async fn find_organ_tree_start_with_id(id: &String) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
         let current_node = Self::find_organ_by_id(id).await?;
-        Self::find_organ_one(&current_node).await
+        Self::find_organ_tree_start_with_organ(current_node).await
     }
     ///查询指定编码的组织机构树
     pub async fn find_organ_tree_start_with_code(
         code: &String,
     ) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
         let current_node = Self::find_organ_by_organ_code(code).await?;
-        Self::find_organ_one(current_node).await
+        Self::find_organ_tree_start_with_organ(current_node).await
     }
     /// 查询指定组织的组织机构树
     async fn find_organ_tree_start_with_organ(
@@ -41,13 +41,12 @@ impl OrganService {
         } else {
             Err(BmbpError::service("指定的结点数据异常，请联系管理员"))
         }
-        Err(BmbpError::service("服务未实现"))
     }
     /// 查询指定编码路径的组织机构树
     pub async fn find_organ_tree_by_organ_code_path(
         organ_code_path: &String,
     ) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
-        let query_script = OrganScript::query_script();
+        let mut query_script = OrganScript::query_script();
         let mut query_params = BmbpHashMap::new();
         if !organ_code_path.is_empty() {
             query_script.filter("organ_code_path like concat(#{organCodePath},'%'");
@@ -85,7 +84,7 @@ impl OrganService {
     }
 
     /// 查询组织详情-> 多个参数
-    pub async fn find_organ_one(organ: &BmbpHashMap) -> BmbpResp<Option<BmbpHashMap>> {
+    pub async fn find_organ_one(organ_op: Option<BmbpHashMap>) -> BmbpResp<Option<BmbpHashMap>> {
         Err(BmbpError::service("服务未实现"))
     }
     /// 查询组织详情-通过R_ID
