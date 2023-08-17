@@ -14,7 +14,7 @@ serde_yaml = "0.9"
 # 异步递归
 async-recursion = "1"
 futures = { version = "0.3", features = ["thread-pool"] }
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1.32.0", features = ["full"] }
 # 并发MAP
 dashmap = "5"
 # 全局变量

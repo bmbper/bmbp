@@ -13,7 +13,7 @@ bmbp_app_common = { path = "../bmbp_app_common" }
 bmbp_app_utils = { path = "../bmbp_app_utils" }
 
 salvo = { version = "0.50.5", features  =["full"] }
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1.32.0", features = ["full"] }
 
 tera = "1"
 reqwest = "0.11"
