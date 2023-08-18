@@ -1,5 +1,11 @@
+const OrganApi = {
+  queryTreeUrl: '/rbac/v1/organ/find/tree',
+  queryPageUrl: '/rbac/v1/organ/find/page',
+  saveUrl: '/rbac/v1/organ/save'
+}
+
 const onAddRootOrgan = () => {
-  arco.Message.info("增加根节点");
+  AppIns.setAddRootOrganFormShow(true);
 }
 const onRefreshOrganTree = () => {
   arco.Message.info("树刷新事件");
@@ -36,50 +42,6 @@ const onEditOrganInfo = (organ) => {
   arco.Message.info("配置组织明细信息");
 }
 
-const onQueryGridData = (queryData) => {
-  queryData = queryData || {}
-  let data = [
-    {
-      recordId: '1',
-      organTitle: '集团公司',
-      organTitlePath: '/集团公司/',
-      organType: 'unit',
-      recordStatus: '1',
-    },
-    {
-      recordId: '2',
-      organTitle: '部门',
-      organTitlePath: '/集团公司/部门',
-      organType: 'dept',
-      recordStatus: '1',
-    },
-    {
-      recordId: '3',
-      organTitle: '部门2',
-      organTitlePath: '/集团公司/部门2',
-      organType: 'dept',
-      recordStatus: '0',
-    },
-    {
-      recordId: '4',
-      organTitle: '部门4',
-      organTitlePath: '/集团公司/部门4',
-      organType: 'dept',
-      recordStatus: '0',
-    },
-    {
-      recordId: '5',
-      organTitle: '员工',
-      organTitlePath: '/集团公司/部门2/员工',
-      organType: 'post',
-      recordStatus: '0',
-    }
-  ];
-  AppIns.setPagination({ ...AppIns.pagination, total: data.length });
-  AppIns.setGridData(data);
-  arco.Message.info("查询表结构数据：" + JSON.stringify(queryData));
-}
-
 const onBatchDeleteOrgan = (organIds) => {
   arco.Message.info("批量删除组织节点:" + JSON.stringify(organIds));
 }
@@ -95,7 +57,7 @@ const onToolBarPrintBtnClick = () => {
 
 const onSearchFormQueryBtnClick = () => {
   var queryData = AppIns.formRef.current.getFieldsValue();
-  onQueryGridData(queryData);
+  onQueryPageData(queryData);
 }
 
 const onSearchFormRestBtnClick = () => {
@@ -107,6 +69,25 @@ const onGridPageChange = (page) => {
   AppIns.setPagination({ ...AppIns.pagination, pageSize: page.pageSize });
 }
 
-const queryTreeData = () => {
-  return [{ organTitle: '集团总公司', organCode: '1', children: [{ organTitle: '部门1', organCode: '1.1' }, { organTitle: '部门3', organCode: '1.2' }] }]
+const onQueryTreeData = () => {
+  BmbpHttp.post(OrganApi.queryTreeUrl, {}).then((resp) => {
+    if (resp.code == 0) {
+      AppIns.setOrganTreeData(resp.data);
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+
+const onQueryPageData = (queryParams) => {
+  queryParams = queryParams || {}
+  BmbpHttp.post(OrganApi.queryPageUrl, queryParams).then((resp) => {
+    if (resp.code == 0) {
+      let respData = resp.data;
+      AppIns.setPagination({ ...AppIns.pagination, total: respData.rowTotal });
+      AppIns.setOrganGridData(respData.data);
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
 }

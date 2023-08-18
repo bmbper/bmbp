@@ -1,14 +1,15 @@
 use bmbp_app_common::BmbpError;
 use bmbp_app_common::BmbpHashMap;
 use bmbp_app_common::BmbpResp;
+use bmbp_app_common::PageParams;
 use bmbp_app_common::PageVo;
 use bmbp_app_common::RespVo;
 use salvo::handler;
-use salvo::writing::Json;
 use salvo::Request;
 use salvo::Response;
 
 use super::service::OrganService;
+use super::BmbpRbacOrgan;
 
 /// 根据参数查询组织机构树
 #[handler]
@@ -23,27 +24,41 @@ pub async fn find_organ_tree(
 /// 查询指定REOCORD_ID开始的组织机构树
 #[handler]
 pub async fn find_organ_tree_start_with_id(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
 ) -> BmbpResp<RespVo<Option<Vec<BmbpHashMap>>>> {
-    Err(BmbpError::api("接口未实现"))
+    let record_id = req.param::<String>("id");
+    if record_id.is_none() {
+        return Err(BmbpError::api("请指定组织ID"));
+    }
+
+    let rs = OrganService::find_organ_tree_start_with_id(&record_id.unwrap()).await?;
+    Ok(RespVo::ok_data(rs))
 }
 
 /// 查询指定ORGAN_CODE开始的组织机构树
 #[handler]
 pub async fn find_organ_tree_start_with_code(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
 ) -> BmbpResp<RespVo<Option<Vec<BmbpHashMap>>>> {
-    Err(BmbpError::api("接口未实现"))
+    let organ_code = req.param::<String>("code");
+    if organ_code.is_none() {
+        return Err(BmbpError::api("请指定组织编码c}"));
+    }
+
+    let rs = OrganService::find_organ_tree_start_with_code(&organ_code.unwrap()).await?;
+    Ok(RespVo::ok_data(rs))
 }
 /// 分页查询组织机构列表
 #[handler]
 pub async fn find_organ_page(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
 ) -> BmbpResp<RespVo<PageVo<BmbpHashMap>>> {
-    Err(BmbpError::api("接口未实现"))
+    let params = req.parse_json::<PageParams<BmbpHashMap>>().await?;
+    let rs = OrganService::find_organ_page(&params).await?;
+    Ok(RespVo::ok_data(rs))
 }
 
 /// 分页查询指定ORGAN_PARENT_CODE组织下的机构列表

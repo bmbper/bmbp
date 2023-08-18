@@ -1,5 +1,39 @@
 const AppIns = {};
 const OrganView = () => {
+  //组织树数据
+  const [organTreeData, setOrganTreeData] = React.useState([]);
+  AppIns.organTreeData = organTreeData;
+  AppIns.setOrganTreeData = setOrganTreeData;
+
+  const [organGridData, setOrganGridData] = React.useState([]);
+  AppIns.organGridData = organGridData;
+  AppIns.setOrganGridData = setOrganGridData;
+
+  const [pagination, setPagination] = React.useState({
+    sizeCanChange: true,
+    showTotal: true,
+    total: 0,
+    pageSize: 10,
+    current: 1,
+    pageSizeChangeResetCurrent: true,
+  });
+  AppIns.setPagination = setPagination;
+  AppIns.pagination = pagination;
+
+
+  const [selectedRowKeys, setSelectedRowKeys] = React.useState([]);
+  AppIns.selectedRowKeys = selectedRowKeys;
+  AppIns.setSelectedRowKeys = setSelectedRowKeys;
+
+
+  const [addRootOrganFormShow, setAddRootOrganFormShow] = React.useState(false);
+  AppIns.addRootOrganFormShow = addRootOrganFormShow;
+  AppIns.setAddRootOrganFormShow = setAddRootOrganFormShow;
+
+  React.useEffect(() => {
+    onQueryTreeData();
+    onQueryPageData();
+  }, []);
   return <OrganPage />
 }
 
@@ -7,6 +41,7 @@ const OrganPage = () => {
   return <div className="bmbp-page-tree-grid-body">
     <OrganTreeLeft />
     <OrganGridRight />
+    <AddRootOrganDialog title="新增组织" visible={AppIns.addRootOrganFormShow} />
   </div>;
 }
 const OrganTreeLeft = () => {
@@ -38,7 +73,6 @@ const OrganTreeLeft = () => {
     justifyContent: 'center',
     padding: 0
   }
-  const treeData = queryTreeData();
   return <div className="bmbp-page-tree-grid-tree">
     <div className="bmbp-page-tree-grid-tree-title">
       <div style={titleStyle}><span>组织机构</span></div>
@@ -50,9 +84,8 @@ const OrganTreeLeft = () => {
     </div>
     <arco.Tree showLine blockNode onSelect={(node) => { onOrganTreeNodeClick(node) }}
       renderExtra={(node) => buildTreeNodeActionBar(node)}
-
     > {
-        buildTreeData(treeData)
+        buildTreeData()
       } </arco.Tree>
   </div>;
 }
@@ -85,7 +118,12 @@ const buildTreeNodeActionBar = (node) => {
     </arco.Popover >
   </div >
 }
-const buildTreeData = (treeData) => {
+const buildTreeData = () => {
+  let treeData = AppIns.organTreeData || [];
+  if (!treeData || treeData.length == 0) {
+    return null;
+  }
+  debugger;
   return treeData.map((item) => {
     const { children, organCode, organTitle, ...rest } = item;
     return (
@@ -98,9 +136,7 @@ const buildTreeData = (treeData) => {
 
 
 const OrganGridRight = () => {
-  const [selectedRowKeys, setSelectedRowKeys] = React.useState([]);
-  AppIns.selectedRowKeys = selectedRowKeys;
-  AppIns.setSelectedRowKeys = setSelectedRowKeys;
+
   return <div className="bmbp-page-tree-grid-grid">
     <div>
       <div className="bmbp-page-serach-form">
@@ -123,7 +159,7 @@ const OrganGridRight = () => {
         </div>
       </div>
       <div className="bmbp-page-serach-grid">
-        <GridTable selectedRowKeys={selectedRowKeys} />
+        <GridTable />
       </div>
     </div>
   </div>;
@@ -181,25 +217,7 @@ const SearchForm = () => {
   </div >;
 }
 
-const GridTable = (props) => {
-  // 初始化查询函数
-  React.useEffect(() => {
-    onQueryGridData({});
-  }, []);
-
-  const [pagination, setPagination] = React.useState({
-    sizeCanChange: true,
-    showTotal: true,
-    total: 0,
-    pageSize: 10,
-    current: 1,
-    pageSizeChangeResetCurrent: true,
-  });
-  AppIns.setPagination = setPagination;
-  AppIns.pagination = pagination;
-  const [gridData, setGridData] = React.useState([]);
-  AppIns.setGridData = setGridData;
-
+const GridTable = () => {
   const columns = [
     {
       title: '组织名称',
@@ -276,10 +294,10 @@ const GridTable = (props) => {
 
   return <arco.Table
     rowSelection={{
-      type: 'checkbox', checkAll: true, fixed: true, selectedRowKeys: props.selectedRowKeys,
+      type: 'checkbox', checkAll: true, fixed: true, selectedRowKeys: AppIns.selectedRowKeys,
       onChange: (selectedRowKeys, _) => {
         AppIns.setSelectedRowKeys(selectedRowKeys);
       },
     }}
-    rowKey={'recordId'} columns={columns} data={gridData} pagination={pagination} onChange={onGridPageChange} />;
+    rowKey={'recordId'} columns={columns} data={AppIns.organGridData} pagination={AppIns.pagination} onChange={onGridPageChange} />;
 }

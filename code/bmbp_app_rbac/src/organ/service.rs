@@ -2,7 +2,7 @@ use super::{dao::OrganDao, script::OrganScript};
 use bmbp_app_common::{
     BmbpError, BmbpHashMap, BmbpResp, BmbpValue, PageParams, PageVo, ROOT_TREE_NODE,
 };
-use bmbp_app_utils::{is_empty_prop, HashMapTreeBuilder};
+use bmbp_app_utils::HashMapTreeBuilder;
 
 /// 服务声明
 pub struct OrganService();
@@ -67,9 +67,19 @@ impl OrganService {
 
     /// 分页查询组织列表
     pub async fn find_organ_page(
-        page_params: &PageParams<BmbpHashMap>,
+        params: &PageParams<BmbpHashMap>,
     ) -> BmbpResp<PageVo<BmbpHashMap>> {
-        Err(BmbpError::service("服务未实现"))
+        let query_script = OrganScript::query_script();
+        let query_params = BmbpHashMap::new();
+        if let Some(_) = params.get_params() {}
+        let page_vo = OrganDao::find_organ_page(
+            &query_script.to_script(),
+            &query_params,
+            params.get_page_no(),
+            params.get_page_size(),
+        )
+        .await?;
+        Ok(page_vo)
     }
 
     /// 查询组织列表
