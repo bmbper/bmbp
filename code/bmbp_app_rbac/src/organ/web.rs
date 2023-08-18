@@ -9,7 +9,6 @@ use salvo::Request;
 use salvo::Response;
 
 use super::service::OrganService;
-use super::BmbpRbacOrgan;
 
 /// 根据参数查询组织机构树
 #[handler]
@@ -74,7 +73,7 @@ pub async fn find_organ_page_by_parent(
 #[handler]
 pub async fn find_organ_list(
     _req: &mut Request,
-    res: &mut Response,
+    _res: &mut Response,
 ) -> BmbpResp<RespVo<Option<Vec<BmbpHashMap>>>> {
     Err(BmbpError::api("接口未实现"))
 }

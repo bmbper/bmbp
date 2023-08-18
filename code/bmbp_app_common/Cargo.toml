@@ -20,3 +20,5 @@ rust-embed="6.8.1"
 salvo = { version = "0.50.5",features=["default","serve-static"]}
 uuid = {version = "1.4.0",features=["serde","v4"]}
 tokio = { version = "1.32.0", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

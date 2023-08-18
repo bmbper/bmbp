@@ -1,9 +1,8 @@
 const doLogin = (formData) => {
   axios.post('/api/v1/login.do', formData)
     .then(function(resp) {
-      const loginData = resp.data;
-      if (loginData.code == 0) {
-        let userInfo = loginData.data;
+      if (resp.code == 0) {
+        let userInfo = resp.data;
         let token = userInfo.token;
         window.location.href = "/portal.view?token=" + token;
       } else {

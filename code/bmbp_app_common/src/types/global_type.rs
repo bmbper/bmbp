@@ -551,8 +551,8 @@ impl ToString for BmbpValue {
             BmbpValue::Float(v) => v.to_string(),
             BmbpValue::BigFloat(v) => v.to_string(),
             BmbpValue::Bool(v) => v.to_string(),
-            BmbpValue::Map(v) => "".to_string(),
-            BmbpValue::Array(v) => "".to_string(),
+            BmbpValue::Map(_v) => "".to_string(),
+            BmbpValue::Array(_v) => "".to_string(),
             BmbpValue::NULL => "".to_string(),
         }
     }

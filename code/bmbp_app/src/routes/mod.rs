@@ -1,3 +1,4 @@
+use bmbp_app_common::build_common_router;
 use bmbp_app_file::build_file_router;
 use bmbp_app_portal::build_home_router;
 use bmbp_app_rbac::build_rbac_router;
@@ -7,6 +8,9 @@ pub fn init_webapp_router() -> Router {
     let mut router = Router::new();
 
     // 构建全局静态文件路由
+    let common_router = build_common_router();
+    router = router.push(common_router);
+
     let static_file_router = build_file_router();
     router = router.push(static_file_router);
 
