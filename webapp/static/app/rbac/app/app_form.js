@@ -7,7 +7,7 @@ const AppAddFormDialog = (props) => {
     focusLock={true}
     onOk={() => {
       AppPageIns.appFormRef.current.validate().then((formData) => {
-        saveAppInfo(formData);
+        saveAppInfo(formData, AppPageIns.setAddFormVisible);
       }).catch((_) => {
       });
     }}

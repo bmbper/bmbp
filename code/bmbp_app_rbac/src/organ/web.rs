@@ -106,11 +106,10 @@ pub async fn find_organ_info_by_code(
 
 /// 保存组织机构
 #[handler]
-pub async fn save_organ(
-    _req: &mut Request,
-    _res: &mut Response,
-) -> BmbpResp<RespVo<Option<BmbpHashMap>>> {
-    Err(BmbpError::api("接口未实现"))
+pub async fn save_organ(req: &mut Request, _res: &mut Response) -> BmbpResp<RespVo<BmbpHashMap>> {
+    let mut params = req.parse_json::<BmbpHashMap>().await?;
+    let _ = OrganService::save_organ(&mut params).await?;
+    Ok(RespVo::ok_data(params))
 }
 /// 插入组织机构
 #[handler]

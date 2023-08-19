@@ -1,8 +1,12 @@
 use super::{dao::OrganDao, script::OrganScript};
 use bmbp_app_common::{
-    BmbpError, BmbpHashMap, BmbpResp, BmbpValue, PageParams, PageVo, ROOT_TREE_NODE,
+    BmbpError, BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, PageParams, PageVo, ValidRule,
+    ValidType, ROOT_TREE_NODE,
 };
-use bmbp_app_utils::HashMapTreeBuilder;
+use bmbp_app_utils::{
+    add_insert_default_value, add_update_default_value, is_empty_prop, simple_uuid_upper,
+    valid_field_rule, valid_field_rule_slice, HashMapTreeBuilder,
+};
 
 /// 服务声明
 pub struct OrganService();
@@ -111,13 +115,80 @@ impl OrganService {
     ) -> BmbpResp<Option<BmbpHashMap>> {
         Err(BmbpError::service("服务未实现"))
     }
-    /// 保存组织
-    pub async fn save_organ(organ: &mut BmbpHashMap) -> BmbpResp<usize> {
-        Err(BmbpError::service("服务未实现"))
+
+    pub(crate) async fn save_organ(params: &mut BmbpHashMap) -> BmbpResp<usize> {
+        if is_empty_prop(params, "recordId") {
+            Self::insert_organ(params).await
+        } else {
+            Self::update_organ(params).await
+        }
     }
-    /// 新增组织
-    pub async fn insert_organ(organ: &mut BmbpHashMap) -> BmbpResp<usize> {
-        Err(BmbpError::service("服务未实现"))
+    pub(crate) async fn insert_organ(params: &mut BmbpHashMap) -> BmbpResp<usize> {
+        if let Some(err) = Self::valid_insert_organ_data(params) {
+            return Err(err);
+        }
+        add_insert_default_value(params);
+        if is_empty_prop(params, "organParentCode") {
+            params.insert(
+                "organParentCode".to_string(),
+                BmbpValue::from(ROOT_TREE_NODE),
+            );
+        }
+
+        if is_empty_prop(params, "organCode") {
+            params.insert(
+                "organCode".to_string(),
+                BmbpValue::from(simple_uuid_upper()),
+            );
+        }
+        if is_empty_prop(params, "organDataId") {
+            params.insert(
+                "organDataId".to_string(),
+                BmbpValue::from(simple_uuid_upper()),
+            );
+        }
+        // 计算organCodePath,organTitlePath
+        params.insert("organCodePath".to_string(), BmbpValue::from("code"));
+        params.insert("organTitlePath".to_string(), BmbpValue::from("code"));
+
+        let script = OrganScript::insert_script();
+        OrganDao::insert(&script.to_script(), params).await
+    }
+    pub(crate) async fn update_organ(params: &mut BmbpHashMap) -> BmbpResp<usize> {
+        let record_id_valid_rule = FieldValidRule(
+            "recordId".to_string(),
+            ValidRule(ValidType::NotEmpty, "主键不允许为空".to_string()),
+        );
+        if let Some(err) = valid_field_rule(params, &record_id_valid_rule) {
+            return Err(err);
+        }
+        let mut script = OrganScript::update_script();
+        add_update_default_value(params);
+        if !is_empty_prop(params, "organTitle") {
+            script.set_value("organ_title", "#{organTitle}");
+        }
+        if !is_empty_prop(params, "recordNum") {
+            script.set_value("record_num", "#{record_num}");
+        }
+
+        OrganDao::update(&script.to_script(), params).await
+    }
+
+    /// 验证应用新增数据
+    fn valid_insert_organ_data(
+        params: &mut std::collections::HashMap<String, BmbpValue>,
+    ) -> Option<bmbp_app_common::BmbpError> {
+        let valid_rule = vec![
+            FieldValidRule(
+                "organTitle".to_string(),
+                ValidRule(ValidType::NotEmpty, "组织名称不能为空!".to_string()),
+            ),
+            FieldValidRule(
+                "organType".to_string(),
+                ValidRule(ValidType::NotEmpty, r#"组织类型不能为空!"#.to_string()),
+            ),
+        ];
+        valid_field_rule_slice(params, valid_rule.as_slice())
     }
 
     /// 更新组织状态

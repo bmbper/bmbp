@@ -1,3 +1,4 @@
+use bmbp_app_utils::snake_to_camel;
 use bmbp_orm_ins::BmbpScriptSql;
 
 use super::BmbpRbacOrgan;
@@ -24,12 +25,16 @@ impl OrganScript {
         query_script
     }
     pub(crate) fn insert_script() -> BmbpScriptSql {
-        let mut insert = BmbpScriptSql::new();
-        insert.insert_into(Self::get_organ_table_name().as_str());
-        for field in Self::get_organ_table_columns().as_slice() {
-            insert.insert_value(field, format!("#{}", field).as_str());
+        let mut insert_script = BmbpScriptSql::new();
+        insert_script.insert_into(Self::get_organ_table_name().as_str());
+        for item in Self::get_organ_table_columns() {
+            insert_script.insert_value(
+                item.as_str(),
+                format!("#{{{}}}", snake_to_camel(item.to_string())).as_str(),
+            );
         }
-        insert
+
+        insert_script
     }
     pub(crate) fn update_script() -> BmbpScriptSql {
         let mut update = BmbpScriptSql::new();

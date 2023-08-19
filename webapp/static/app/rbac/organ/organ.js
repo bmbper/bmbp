@@ -4,11 +4,11 @@ const OrganView = () => {
   const [organTreeData, setOrganTreeData] = React.useState([]);
   AppIns.organTreeData = organTreeData;
   AppIns.setOrganTreeData = setOrganTreeData;
-
+  /// 组织列表数据
   const [organGridData, setOrganGridData] = React.useState([]);
   AppIns.organGridData = organGridData;
   AppIns.setOrganGridData = setOrganGridData;
-
+  /// 组织分页数据
   const [pagination, setPagination] = React.useState({
     sizeCanChange: true,
     showTotal: true,
@@ -20,15 +20,53 @@ const OrganView = () => {
   AppIns.setPagination = setPagination;
   AppIns.pagination = pagination;
 
-
+  /// 组织列表多选数据
   const [selectedRowKeys, setSelectedRowKeys] = React.useState([]);
   AppIns.selectedRowKeys = selectedRowKeys;
   AppIns.setSelectedRowKeys = setSelectedRowKeys;
 
+  /// 组织新增窗口显示
+  const [organFromDailogTitle, setOrganFromDailogTitle] = React.useState("");
+  AppIns.organFromDailogTitle = organFromDailogTitle;
+  AppIns.setOrganFromDailogTitle = setOrganFromDailogTitle;
 
-  const [addRootOrganFormShow, setAddRootOrganFormShow] = React.useState(false);
-  AppIns.addRootOrganFormShow = addRootOrganFormShow;
-  AppIns.setAddRootOrganFormShow = setAddRootOrganFormShow;
+  /// 组织新增窗口显示
+  const [initOrganValue, setInitOrganValue] = React.useState({});
+  AppIns.initOrganValue = initOrganValue;
+  AppIns.setInitOrganValue = setInitOrganValue;
+
+  const [addOrganFormShow, setAddOrganFormShow] = React.useState(false);
+  AppIns.addOrganFormShow = addOrganFormShow;
+  AppIns.setAddOrganFormShow = setAddOrganFormShow;
+
+  /// 组织编辑窗口显示
+  const [editOrganFormShow, setEditOrganFormShow] = React.useState(false);
+  AppIns.editOrganFormShow = editOrganFormShow;
+  AppIns.setEditOrganFormShow = setEditOrganFormShow;
+
+  /// 组织配置窗口
+  const [configOrganFormShow, setConfigOrganFormShow] = React.useState(false);
+  AppIns.configOrganFormShow = configOrganFormShow;
+  AppIns.setConfigOrganFormShow = setConfigOrganFormShow;
+
+  /// 组织详情窗口显示
+  const [infoOrganFormShow, setInfoOrganFormShow] = React.useState(false);
+  AppIns.infoOrganFormShow = infoOrganFormShow;
+  AppIns.setInfoOrganFormShow = setInfoOrganFormShow;
+
+  // 组织新增、编辑表单
+  const [organFormRef, setOrganFormRef] = React.useState(React.useRef());
+  AppIns.organFormRef = organFormRef;
+  AppIns.setOrganFormRef = setOrganFormRef;
+
+  // 组织配置表单
+  const organConfigRef = React.useRef();
+  AppIns.organConfigRef = organConfigRef;
+
+  // 组织详情表单
+  const organFromInfoRef = React.useRef();
+  AppIns.organFromInfoRef = organFromInfoRef;
+
 
   React.useEffect(() => {
     onQueryTreeData();
@@ -41,7 +79,7 @@ const OrganPage = () => {
   return <div className="bmbp-page-tree-grid-body">
     <OrganTreeLeft />
     <OrganGridRight />
-    <AddRootOrganDialog title="新增组织" visible={AppIns.addRootOrganFormShow} />
+    <AddRootOrganDialog title={AppIns.organFromDailogTitle} visible={AppIns.addOrganFormShow} />
   </div>;
 }
 const OrganTreeLeft = () => {
@@ -90,7 +128,6 @@ const OrganTreeLeft = () => {
   </div>;
 }
 const buildTreeNodeActionBar = (node) => {
-  console.log(node);
   return <div>
     <arco.Popover
       trigger='hover' position='right'

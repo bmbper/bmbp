@@ -5,10 +5,12 @@ const OrganApi = {
 }
 
 const onAddRootOrgan = () => {
-  AppIns.setAddRootOrganFormShow(true);
+  AppIns.setOrganFromDailogTitle("新增组织");
+  AppIns.setInitOrganValue({ parentOrganTitle: "", parentOrganCode: "0" });
+  AppIns.setAddOrganFormShow(true);
 }
 const onRefreshOrganTree = () => {
-  arco.Message.info("树刷新事件");
+  onQueryTreeData({});
 }
 const onOrganTreeNodeClick = (organ) => {
   arco.Message.info("组织节点点击");
@@ -17,7 +19,9 @@ const onChangeOrganParent = (organ) => {
   arco.Message.info("变更组织上级");
 }
 const onAddOrganChild = (organ) => {
-  arco.Message.info("增加下级节点");
+  AppIns.setOrganFromDailogTitle("新增下级组织");
+  AppIns.setInitOrganValue({ parentOrganTitle: organ.organTitle, parentOrganCode: organ.organCode });
+  AppIns.setAddOrganFormShow(true);
 }
 const onEditOrgan = (organ) => {
   arco.Message.info("编辑组织节点");
@@ -86,6 +90,20 @@ const onQueryPageData = (queryParams) => {
       let respData = resp.data;
       AppIns.setPagination({ ...AppIns.pagination, total: respData.rowTotal });
       AppIns.setOrganGridData(respData.data);
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+
+
+const saveOrganInfo = (formData, set_model) => {
+  BmbpHttp.post(OrganApi.saveUrl, formData).then((resp) => {
+    if (resp.code == 0) {
+      arco.Message.info(resp.msg);
+      set_model(false);
+      onQueryPageData({});
+      onQueryTreeData({});
     } else {
       arco.Message.error(resp.msg);
     }

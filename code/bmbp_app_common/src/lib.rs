@@ -21,8 +21,7 @@ pub static BMBP_TEMPLATE: Lazy<Tera> = Lazy::new(|| {
         build_development_template()
     }
 });
-
-#[allow(dead_code)]
+/// 生产模式下 二进制包的模板
 fn build_production_template() -> Tera {
     let mut tp = Tera::default();
     for file in EmbedTemplate::iter() {
@@ -34,18 +33,19 @@ fn build_production_template() -> Tera {
     tp.autoescape_on(vec![".html"]);
     tp
 }
-#[allow(dead_code)]
+/// 开发模式下的模板
 fn build_development_template() -> Tera {
     let mut tp = Tera::new("webapp/template/**/*").unwrap();
     tp.autoescape_on(vec![".html"]);
     tp.full_reload().unwrap();
     tp
 }
-
+/// 模板文件嵌入
 #[derive(RustEmbed)]
 #[folder = "../../webapp/template/"]
 pub struct EmbedTemplate;
 
+/// 静态文件嵌入
 #[derive(RustEmbed)]
 #[folder = "../../webapp/static/"]
 pub struct EmbedStatic;
@@ -64,6 +64,10 @@ pub fn build_common_router() -> Router {
 
 fn is_production() -> bool {
     let env = global_hash_map_vars("bmbp_app".to_string(), "app_env".to_string());
-    tracing::info!("app_env:{},is_prod:{}", env,env.eq_ignore_ascii_case("prod"));
+    tracing::info!(
+        "app_env:{},is_prod:{}",
+        env,
+        env.eq_ignore_ascii_case("prod")
+    );
     env.eq_ignore_ascii_case("prod")
 }

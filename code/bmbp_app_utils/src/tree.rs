@@ -152,8 +152,8 @@ impl HashMapTreeBuilder {
         tree_children: &str,
     ) -> Vec<BmbpHashMap> {
         // 构建TreeNode关联列表
-        let mut node_map = {
-            let mut node_list: HashMap<String, TreeHashMapNodeRef> = HashMap::new();
+        let node_map = {
+            let mut tree_node_map: HashMap<String, TreeHashMapNodeRef> = HashMap::new();
             for item in data_list.as_slice() {
                 let node_ref = TreeHashMapNodeRef {
                     parent: RwLock::new(None),
@@ -163,12 +163,12 @@ impl HashMapTreeBuilder {
                 let tree_code_rs = item.get(tree_code);
                 match tree_code_rs {
                     Some(code) => {
-                        node_list.insert(code.to_string(), node_ref);
+                        tree_node_map.insert(code.to_string(), node_ref);
                     }
                     None => {}
                 }
             }
-            node_list
+            tree_node_map
         };
         // 关联上下级关系
         for item in data_list.as_slice() {
@@ -186,7 +186,11 @@ impl HashMapTreeBuilder {
             let parent_node = {
                 if let Some(tree_parent_code) = item.get(tree_parent) {
                     let tree_parent_code_string = tree_parent_code.to_string();
-                    Some(node_map.get(tree_parent_code_string.as_str()).unwrap())
+                    let tree_parent_rs = node_map.get(tree_parent_code_string.as_str());
+                    match tree_parent_rs {
+                        Some(v) => Some(v),
+                        None => None,
+                    }
                 } else {
                     None
                 }
