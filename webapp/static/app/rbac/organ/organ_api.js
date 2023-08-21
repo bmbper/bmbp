@@ -1,27 +1,30 @@
 const OrganApi = {
   queryTreeUrl: '/rbac/v1/organ/find/tree',
   queryPageUrl: '/rbac/v1/organ/find/page',
-  saveUrl: '/rbac/v1/organ/save'
+  saveUrl: '/rbac/v1/organ/save',
+  removeUrl: '/rbac/v1/organ/remove/id/',
+  disableUrl: '/rbac/v1/organ/disable/id/',
+  enableUrl: '/rbac/v1/organ/enable/id/'
 }
 
 const onAddRootOrgan = () => {
   AppIns.setOrganFromDailogTitle("新增组织");
-  AppIns.setInitOrganValue({ parentOrganTitle: "", parentOrganCode: "0" });
   AppIns.setAddOrganFormShow(true);
+  AppIns.setInitOrganValue({ organParentTitle: "", organParentCode: "0" });
 }
 const onRefreshOrganTree = () => {
   onQueryTreeData({});
 }
 const onOrganTreeNodeClick = (organ) => {
-  arco.Message.info("组织节点点击");
+  onQueryPageData({ organParentCode: organ.organCode });
 }
 const onChangeOrganParent = (organ) => {
   arco.Message.info("变更组织上级");
 }
 const onAddOrganChild = (organ) => {
   AppIns.setOrganFromDailogTitle("新增下级组织");
-  AppIns.setInitOrganValue({ parentOrganTitle: organ.organTitle, parentOrganCode: organ.organCode });
   AppIns.setAddOrganFormShow(true);
+  AppIns.setInitOrganValue({ organParentTitle: organ.organTitle, organParentCode: organ.organCode });
 }
 const onEditOrgan = (organ) => {
   arco.Message.info("编辑组织节点");
@@ -30,15 +33,34 @@ const onInfoOrgan = (organ) => {
   arco.Message.info("查看组织节点");
 }
 const onEnableOrgan = (organ) => {
-  arco.Message.info("启用组织节点");
+  BmbpHttp.post(OrganApi.enableUrl + organ.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      onQueryPageData({});
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
 }
 
 const onDisableOrgan = (organ) => {
-  arco.Message.info("停用组织节点");
+  BmbpHttp.post(OrganApi.disableUrl + organ.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      onQueryPageData({});
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
 }
 
 const onDeleteOrgan = (organ) => {
-  arco.Message.info("删除组织节点");
+  BmbpHttp.post(OrganApi.removeUrl + organ.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      onQueryPageData({});
+      onQueryTreeData({});
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
 }
 
 
@@ -85,6 +107,8 @@ const onQueryTreeData = () => {
 
 const onQueryPageData = (queryParams) => {
   queryParams = queryParams || {}
+  queryParams.pageNo = AppIns.pagination.current;
+  queryParams.pageSize = AppIns.pagination.pageSize;
   BmbpHttp.post(OrganApi.queryPageUrl, queryParams).then((resp) => {
     if (resp.code == 0) {
       let respData = resp.data;

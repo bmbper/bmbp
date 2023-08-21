@@ -43,7 +43,7 @@ pub async fn find_organ_tree_start_with_code(
 ) -> BmbpResp<RespVo<Option<Vec<BmbpHashMap>>>> {
     let organ_code = req.param::<String>("code");
     if organ_code.is_none() {
-        return Err(BmbpError::api("请指定组织编码c}"));
+        return Err(BmbpError::api("请指定组织编码"));
     }
 
     let rs = OrganService::find_organ_tree_start_with_code(&organ_code.unwrap()).await?;
@@ -146,19 +146,28 @@ pub async fn update_organ_parent(
 }
 /// 启用指定RECORD_ID的组织机构
 #[handler]
-pub async fn enable_organ_by_id(
-    _req: &mut Request,
-    _res: &mut Response,
-) -> BmbpResp<RespVo<Option<usize>>> {
-    Err(BmbpError::api("接口未实现"))
+pub async fn enable_organ_by_id(req: &mut Request, _res: &mut Response) -> BmbpResp<RespVo<usize>> {
+    let record_id = req.param::<String>("recordId");
+    if record_id.is_none() {
+        return Err(BmbpError::api("无效的主键ID"));
+    }
+    let rs =
+        OrganService::update_organ_status(record_id.as_ref().unwrap(), &"0".to_string()).await?;
+    Ok(RespVo::ok_data(rs))
 }
 /// 停用指定RECORD_ID的组织机构
 #[handler]
 pub async fn disable_organ_by_id(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
-) -> BmbpResp<RespVo<Option<usize>>> {
-    Err(BmbpError::api("接口未实现"))
+) -> BmbpResp<RespVo<usize>> {
+    let record_id = req.param::<String>("recordId");
+    if record_id.is_none() {
+        return Err(BmbpError::api("无效的主键ID"));
+    }
+    let rs =
+        OrganService::update_organ_status(record_id.as_ref().unwrap(), &"-1".to_string()).await?;
+    Ok(RespVo::ok_data(rs))
 }
 /// 删除组织机构
 #[handler]
@@ -170,11 +179,13 @@ pub async fn remove_organ(
 }
 /// 删除指定RECORD_ID的组织机构
 #[handler]
-pub async fn remove_organ_by_id(
-    _req: &mut Request,
-    _res: &mut Response,
-) -> BmbpResp<RespVo<Option<usize>>> {
-    Err(BmbpError::api("接口未实现"))
+pub async fn remove_organ_by_id(req: &mut Request, _res: &mut Response) -> BmbpResp<RespVo<usize>> {
+    let record_id = req.param::<String>("recordId");
+    if record_id.is_none() {
+        return Err(BmbpError::api("指定的记录无效"));
+    }
+    let rs = OrganService::remove_organ_by_id(record_id.as_ref().unwrap()).await?;
+    Ok(RespVo::ok_data(rs))
 }
 
 /// 批量删除指定RECORD_ID的组织机构

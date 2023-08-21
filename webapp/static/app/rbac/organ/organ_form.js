@@ -7,6 +7,7 @@ const AddRootOrganDialog = (props) => {
     onOk={() => {
       AppIns.organFormRef.current.validate().then((formData) => {
         saveOrganInfo(formData, AppIns.setAddOrganFormShow);
+        AppIns.organFormRef.current.resetFields();
       }).catch((_) => {
       });
     }}
@@ -20,20 +21,22 @@ const AddRootOrganDialog = (props) => {
 }
 
 const OrganFormView = () => {
-
+  React.useEffect(() => {
+    AppIns.organFormRef.current.setFieldsValue(AppIns.initOrganValue);
+  }, [AppIns.initOrganValue]);
   return <div>
-    <arco.Form ref={AppIns.organFormRef} initialValues={AppIns.initOrganValue}>
+    <arco.Form ref={AppIns.organFormRef}>
       <arco.Grid.Row gutter={24}>
         <arco.Grid.Col span={24}>
           <arco.Form.Item field="recordId" label='主键' hidden={true}>
             <arco.Input placeholder='' />
           </arco.Form.Item>
-          <arco.Form.Item field="parentOrganCode" label='上级组织编码' hidden={true}>
+          <arco.Form.Item field="organParentCode" label='上级组织编码' hidden={true}>
             <arco.Input placeholder='' />
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
-          <arco.Form.Item field="parentOrganTitle" label='上级组织'>
+          <arco.Form.Item field="organParentTitle" label='上级组织'>
             <arco.Input disabled={true} />
           </arco.Form.Item>
         </arco.Grid.Col>

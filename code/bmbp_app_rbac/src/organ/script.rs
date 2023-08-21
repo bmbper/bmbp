@@ -54,14 +54,13 @@ impl OrganScript {
         script
     }
     pub(crate) fn delete_script_by_id() -> BmbpScriptSql {
-        let mut script = Self::delete_script();
-        script.filter("record_id in (#{recordId})");
-        script
+        let mut delete_script = Self::delete_script();
+        delete_script.filter("record_id = #{recordId}");
+        delete_script
     }
     pub(crate) fn delete_script() -> BmbpScriptSql {
         let mut script = BmbpScriptSql::new();
         script.delete(Self::get_organ_table_name().as_str());
-        script.filter("record_id in (#{recordId})");
         script
     }
 }

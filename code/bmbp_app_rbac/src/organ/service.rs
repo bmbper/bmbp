@@ -58,6 +58,8 @@ impl OrganService {
                 "organCodePath".to_string(),
                 BmbpValue::from(organ_code_path),
             );
+            query_script.order_by("organ_parent_code asc");
+            query_script.order_by("record_num asc");
         }
         let organ_tree_rs =
             OrganDao::find_organ_list(&query_script.to_script(), &query_params).await?;
@@ -73,9 +75,22 @@ impl OrganService {
     pub async fn find_organ_page(
         params: &PageParams<BmbpHashMap>,
     ) -> BmbpResp<PageVo<BmbpHashMap>> {
-        let query_script = OrganScript::query_script();
-        let query_params = BmbpHashMap::new();
-        if let Some(_) = params.get_params() {}
+        let mut query_script = OrganScript::query_script();
+        query_script.order_by("organ_parent_code asc");
+        query_script.order_by("record_num asc");
+        let mut query_params = BmbpHashMap::new();
+        if let Some(organ_params) = params.get_params() {
+            if !is_empty_prop(organ_params, "organParentCode") {
+                let parent_code = organ_params.get("organParentCode").unwrap().to_string();
+                if let Some(parent_node) = Self::find_organ_by_organ_code(&parent_code).await? {
+                    let organ_code_path = parent_node.get("organCodePath").unwrap();
+                    query_script.filter("organ_code_path like concat(#{organCodePath}::TEXT,'%')");
+                    query_params.insert("organCodePath".to_string(), organ_code_path.clone());
+                } else {
+                    return Err(BmbpError::service("上级组织不存在"));
+                }
+            }
+        }
         let page_vo = OrganDao::find_organ_page(
             &query_script.to_script(),
             &query_params,
@@ -107,7 +122,11 @@ impl OrganService {
     }
     /// 查询组织详情-通过ORGAN-CODE
     pub async fn find_organ_by_organ_code(organ_code: &String) -> BmbpResp<Option<BmbpHashMap>> {
-        Err(BmbpError::service("服务未实现"))
+        let mut script = OrganScript::query_script();
+        script.filter("organ_code = #{organCode}");
+        let mut script_params = BmbpHashMap::new();
+        script_params.insert("organCode".to_string(), BmbpValue::from(organ_code));
+        OrganDao::find_organ_info(&script.to_script(), &script_params).await
     }
     /// 查询组织详情-通过ORGAN_DATA_ID
     pub async fn find_organ_by_organ_data_id(
@@ -128,11 +147,14 @@ impl OrganService {
             return Err(err);
         }
         add_insert_default_value(params);
+        let mut organ_parent_code = ROOT_TREE_NODE.to_string();
         if is_empty_prop(params, "organParentCode") {
             params.insert(
                 "organParentCode".to_string(),
                 BmbpValue::from(ROOT_TREE_NODE),
             );
+        } else {
+            organ_parent_code = params.get("organParentCode").unwrap().to_string();
         }
 
         if is_empty_prop(params, "organCode") {
@@ -147,9 +169,38 @@ impl OrganService {
                 BmbpValue::from(simple_uuid_upper()),
             );
         }
-        // 计算organCodePath,organTitlePath
-        params.insert("organCodePath".to_string(), BmbpValue::from("code"));
-        params.insert("organTitlePath".to_string(), BmbpValue::from("code"));
+
+        // 当前编码
+        let current_code = params.get("organCode").unwrap().to_string();
+        // 当前名称
+        let current_title = params.get("organTitle").unwrap().to_string();
+
+        let mut current_organ_code_path = "".to_string();
+        let mut current_organ_title_path = "".to_string();
+
+        // 根节点为父节点
+        if organ_parent_code.eq(&ROOT_TREE_NODE.to_string()) {
+            current_organ_code_path = format!("/{}/", current_code);
+            current_organ_title_path = format!("/{}/", current_title);
+        } else {
+            if let Some(parent_organ) = Self::find_organ_by_organ_code(&organ_parent_code).await? {
+                let parent_code_path = parent_organ.get("organCodePath").unwrap().to_string();
+                let parent_title_path = parent_organ.get("organTitlePath").unwrap().to_string();
+                current_organ_code_path = format!("{}{}/", parent_code_path, current_code);
+                current_organ_title_path = format!("{}{}/", parent_title_path, current_title);
+            } else {
+                return Err(BmbpError::service("指定的上级组织不存在"));
+            }
+        }
+
+        params.insert(
+            "organCodePath".to_string(),
+            BmbpValue::from(current_organ_code_path),
+        );
+        params.insert(
+            "organTitlePath".to_string(),
+            BmbpValue::from(current_organ_title_path),
+        );
 
         let script = OrganScript::insert_script();
         OrganDao::insert(&script.to_script(), params).await
@@ -192,8 +243,12 @@ impl OrganService {
     }
 
     /// 更新组织状态
-    pub async fn update_organ_status(id: String, status: String) -> BmbpResp<usize> {
-        Err(BmbpError::service("服务未实现"))
+    pub async fn update_organ_status(id: &String, status: &String) -> BmbpResp<usize> {
+        let script = OrganScript::update_status_script();
+        let mut script_params = BmbpHashMap::new();
+        script_params.insert("recordId".to_string(), BmbpValue::from(id));
+        script_params.insert("recordStatus".to_string(), BmbpValue::from(status));
+        OrganDao::delete(&script.to_script(), &script_params).await
     }
     /// 更新组织上级
     pub async fn update_organ_parent_by_record_id(
@@ -203,12 +258,10 @@ impl OrganService {
         Err(BmbpError::service("服务未实现"))
     }
     /// 删除组织
-    pub async fn remove_organ_by_id(id: String) -> BmbpResp<usize> {
+    pub async fn remove_organ_by_id(id: &String) -> BmbpResp<usize> {
         let script = OrganScript::delete_script_by_id();
         let mut script_params = BmbpHashMap::new();
-        let id_vec: Vec<String> = id.split(",").map(|v| format!("'{}'", v)).collect();
-        let ids = format!("({})", id_vec.join(","));
-        script_params.insert("record_id".to_string(), BmbpValue::from(ids));
+        script_params.insert("recordId".to_string(), BmbpValue::from(id));
         OrganDao::delete(&script.to_script(), &script_params).await
     }
     /// 删除组织

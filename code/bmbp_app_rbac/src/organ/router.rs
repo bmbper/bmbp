@@ -39,13 +39,13 @@ pub fn organ_router() -> Router {
         .push(Router::with_path("/save").post(save_organ))
         .push(Router::with_path("/insert").post(insert_organ))
         .push(Router::with_path("/update").post(update_organ))
-        .push(Router::with_path("/update/id/<id>").post(update_organ_by_id))
-        .push(Router::with_path("/update/parent/<id>/<parent>").post(update_organ_parent))
-        .push(Router::with_path("/enable/id/<id>").post(enable_organ_by_id))
-        .push(Router::with_path("/disable/id/<id>").post(disable_organ_by_id))
+        .push(Router::with_path("/update/id/<recordId>").post(update_organ_by_id))
+        .push(Router::with_path("/update/parent/<recordId>/<parent>").post(update_organ_parent))
+        .push(Router::with_path("/enable/id/<recordId>").post(enable_organ_by_id))
+        .push(Router::with_path("/disable/id/<recordId>").post(disable_organ_by_id))
         .push(Router::with_path("/remove").post(remove_organ))
-        .push(Router::with_path("/remove/id/<id>").post(remove_organ_by_id))
-        .push(Router::with_path("/remove/batch/id/<id>").post(batch_remove_organ_by_id));
+        .push(Router::with_path("/remove/id/<recordId>").post(remove_organ_by_id))
+        .push(Router::with_path("/remove/batch/id/<recordId>").post(batch_remove_organ_by_id));
 
     Router::new().push(organ_view_router).push(organ_api_router)
 }

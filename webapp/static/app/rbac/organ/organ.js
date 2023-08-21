@@ -4,6 +4,11 @@ const OrganView = () => {
   const [organTreeData, setOrganTreeData] = React.useState([]);
   AppIns.organTreeData = organTreeData;
   AppIns.setOrganTreeData = setOrganTreeData;
+
+  const [currentOrganCode, setCurrentOrganCode] = React.useState("");
+  AppIns.currentOrganCode = currentOrganCode;
+  AppIns.setCurrentOrganCode = setCurrentOrganCode;
+
   /// 组织列表数据
   const [organGridData, setOrganGridData] = React.useState([]);
   AppIns.organGridData = organGridData;
@@ -120,10 +125,10 @@ const OrganTreeLeft = () => {
     <div style={{ display: 'block', padding: '5px 2px' }}>
       <arco.Input.Search style={{ background: '#FFFFFF' }} />
     </div>
-    <arco.Tree showLine blockNode onSelect={(node) => { onOrganTreeNodeClick(node) }}
+    <arco.Tree showLine blockNode onSelect={(keys, ext) => { onOrganTreeNodeClick(ext.node.props.dataRef) }}
       renderExtra={(node) => buildTreeNodeActionBar(node)}
     > {
-        buildTreeData()
+        buildTreeData(AppIns.organTreeData)
       } </arco.Tree>
   </div>;
 }
@@ -155,17 +160,16 @@ const buildTreeNodeActionBar = (node) => {
     </arco.Popover >
   </div >
 }
-const buildTreeData = () => {
-  let treeData = AppIns.organTreeData || [];
-  if (!treeData || treeData.length == 0) {
+const buildTreeData = (treeData) => {
+  let organTreeData = treeData || [];
+  if (!organTreeData || organTreeData.length == 0) {
     return null;
   }
-  debugger;
-  return treeData.map((item) => {
-    const { children, organCode, organTitle, ...rest } = item;
+  return organTreeData.map((item) => {
+    const { organChildren, organCode, organTitle, ...rest } = item;
     return (
       <arco.Tree.Node key={organCode} title={organTitle} {...rest} dataRef={item}>
-        {children ? buildTreeData(item.children) : null}
+        {organChildren ? buildTreeData(item.organChildren) : null}
       </arco.Tree.Node>
     );
   });
@@ -294,7 +298,7 @@ const GridTable = () => {
         if (record.recordStatus == '0') {
           return <arco.Tag style={{ color: '#165dff' }}>正常</arco.Tag>
         }
-        if (record.recordStatus == '1') {
+        if (record.recordStatus == '-1') {
           return <arco.Tag style={{ color: '#7bc616' }}> 已停用</arco.Tag >
         }
       }
