@@ -312,10 +312,8 @@ impl OrganService {
                         .filter(|x| !x.is_empty())
                         .map(|x| x.to_string())
                         .collect::<Vec<String>>();
-                    let codes = format!("'{}'", trim_organ_code.join("','"));
-                    tracing::info!("code:{}", codes);
-                    // 启用 向上记叻
-                    script.filter(format!("organ_code in ({})", codes).as_str());
+                    script.filter("organ_code = ANY(#{organCode})");
+                    script_params.insert("organCode".to_string(), BmbpValue::from(trim_organ_code));
                 }
             }
 

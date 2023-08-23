@@ -272,8 +272,8 @@ impl BmbpConn for BmbpPgConnect {
             .iter()
             .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
             .collect::<Vec<&(dyn ToSql + Sync)>>();
-        debug!("pg_sql:{}", sql);
-        debug!("pa_params:{:#?}", pg_params_ref);
+        tracing::debug!("pg_sql:{}", sql);
+        tracing::debug!("pa_params:{:#?}", pg_params_ref);
         let execute_rs = self
             .client
             .lock()
@@ -282,7 +282,10 @@ impl BmbpConn for BmbpPgConnect {
             .await;
         match execute_rs {
             Ok(row_count) => Ok(row_count as usize),
-            Err(err) => Err(BmbpError::orm(err.to_string().as_str())),
+            Err(err) => {
+                tracing::error!("error:{:#?}", err);
+                Err(BmbpError::orm(err.to_string().as_str()))
+            }
         }
     }
 
@@ -444,7 +447,25 @@ fn from_bmbp_value_to_pg_params(
                 pg_params.push(Box::new(v));
             }
             BmbpValue::Map(_) => {}
-            BmbpValue::Array(_) => {}
+            BmbpValue::Array(v) => {
+                if v.len() == 0 {
+                    let pg: Vec<String> = vec![];
+                    pg_params.push(Box::new(pg));
+                } else {
+                    let typ = v.get(0).unwrap().v_type();
+                    match typ.as_str() {
+                        "string" => {
+                            let mut pg: Vec<String> = vec![];
+                            for item in v {
+                                pg.push(item.to_string());
+                            }
+                            pg_params.push(Box::new(pg));
+                        }
+                        "int" => {}
+                        _ => {}
+                    }
+                }
+            }
         }
     }
     pg_params
@@ -466,7 +487,7 @@ fn to_pg_prams(params: &[Value]) -> Vec<Box<(dyn ToSql + Send + Sync + 'static)>
                 }
             }
             Value::String(v) => pg_params.push(Box::new(v.to_string())),
-            Value::Array(_) => {}
+            Value::Array(v) => {}
             _ => {}
         }
     }

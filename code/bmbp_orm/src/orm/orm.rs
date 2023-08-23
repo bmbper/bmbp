@@ -370,8 +370,6 @@ impl Orm {
         page_size: usize,
     ) -> BmbpResp<PageVo<BmbpHashMap>> {
         let (sql, params) = ScriptUtil::parse_from_map(script, params.clone());
-        tracing::info!("sql:{}", sql);
-        tracing::info!("params:{:#?}", params);
         self.raw_query_page_with_params(&sql, params.as_slice(), page_no, page_size)
             .await
     }
