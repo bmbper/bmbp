@@ -1,4 +1,4 @@
-use super::{dao::OrganDao, script::OrganScript};
+use super::{dao::OrganDao, find_organ_info_by_id, script::OrganScript};
 use bmbp_app_common::{
     BmbpError, BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, PageParams, PageVo, ValidRule,
     ValidType, ROOT_TREE_NODE,
@@ -114,11 +114,26 @@ impl OrganService {
 
     /// 查询组织详情-> 多个参数
     pub async fn find_organ_one(organ_op: Option<BmbpHashMap>) -> BmbpResp<Option<BmbpHashMap>> {
+        if organ_op.is_none() {
+            return Err(BmbpError::service("请指定查询信息"));
+        }
+        let organ = organ_op.unwrap();
+        if !is_empty_prop(&organ, "recordId") {
+            return Self::find_organ_by_id(&organ.get("recordId").unwrap().to_string()).await;
+        }
+        if !is_empty_prop(&organ, "organCode") {
+            return Self::find_organ_by_organ_code(&organ.get("organCode").unwrap().to_string())
+                .await;
+        }
         Err(BmbpError::service("服务未实现"))
     }
     /// 查询组织详情-通过R_ID
     pub async fn find_organ_by_id(r_id: &String) -> BmbpResp<Option<BmbpHashMap>> {
-        Err(BmbpError::service("服务未实现"))
+        let mut script = OrganScript::query_script();
+        script.filter("record_id = #{recordId}");
+        let mut script_params = BmbpHashMap::new();
+        script_params.insert("recordId".to_string(), BmbpValue::from(r_id));
+        OrganDao::find_organ_info(&script.to_script(), &script_params).await
     }
     /// 查询组织详情-通过ORGAN-CODE
     pub async fn find_organ_by_organ_code(organ_code: &String) -> BmbpResp<Option<BmbpHashMap>> {
@@ -132,9 +147,14 @@ impl OrganService {
     pub async fn find_organ_by_organ_data_id(
         organ_data_id: &String,
     ) -> BmbpResp<Option<BmbpHashMap>> {
-        Err(BmbpError::service("服务未实现"))
+        let mut script = OrganScript::query_script();
+        script.filter("organ_data_id = #{organDataId}");
+        let mut script_params = BmbpHashMap::new();
+        script_params.insert("organDataId".to_string(), BmbpValue::from(organ_data_id));
+        OrganDao::find_organ_info(&script.to_script(), &script_params).await
     }
 
+    /// save_organ 保存组织
     pub(crate) async fn save_organ(params: &mut BmbpHashMap) -> BmbpResp<usize> {
         if is_empty_prop(params, "recordId") {
             Self::insert_organ(params).await
@@ -142,11 +162,18 @@ impl OrganService {
             Self::update_organ(params).await
         }
     }
+
+    /// 插入组织
     pub(crate) async fn insert_organ(params: &mut BmbpHashMap) -> BmbpResp<usize> {
+        /// 组织数据校验
         if let Some(err) = Self::valid_insert_organ_data(params) {
             return Err(err);
         }
+
+        /// 新增默认值
         add_insert_default_value(params);
+
+        /// 计算组织树信息
         let mut organ_parent_code = ROOT_TREE_NODE.to_string();
         if is_empty_prop(params, "organParentCode") {
             params.insert(
@@ -177,6 +204,14 @@ impl OrganService {
 
         let mut current_organ_code_path = "".to_string();
         let mut current_organ_title_path = "".to_string();
+
+        /// 判断是否有重复组织
+        if !Self::check_same_organ_title(params, false).await? {
+            return Err(BmbpError::service("已存在相同名称的组织"));
+        }
+        let _ = Self::check_same_organ_organ_code(params).await?;
+        let _ = Self::check_same_organ_record_id(params).await?;
+        let _ = Self::check_same_organ_data_id(params).await?;
 
         // 根节点为父节点
         if organ_parent_code.eq(&ROOT_TREE_NODE.to_string()) {
@@ -244,11 +279,52 @@ impl OrganService {
 
     /// 更新组织状态
     pub async fn update_organ_status(id: &String, status: &String) -> BmbpResp<usize> {
-        let script = OrganScript::update_status_script();
-        let mut script_params = BmbpHashMap::new();
-        script_params.insert("recordId".to_string(), BmbpValue::from(id));
-        script_params.insert("recordStatus".to_string(), BmbpValue::from(status));
-        OrganDao::delete(&script.to_script(), &script_params).await
+        if let Some(organ) = Self::find_organ_by_id(id).await? {
+            if is_empty_prop(&organ, "organCodePath") {
+                return Err(BmbpError::service(
+                    format!("异常的的组织数据:{}，请联系管理员！", id).as_str(),
+                ));
+            }
+            if is_empty_prop(&organ, "organCode") {
+                return Err(BmbpError::service(
+                    format!("异常的的组织数据:{}，请联系管理员！", id).as_str(),
+                ));
+            }
+            tracing::info!("organ:{:#?}", organ.get("organCode").unwrap().clone());
+            let mut script = OrganScript::update_status_script();
+            let mut script_params = BmbpHashMap::new();
+            script_params.insert("recordStatus".to_string(), BmbpValue::from(status));
+            match status.as_str() {
+                "-1" => {
+                    //停用 向下停用
+                    script.filter("organ_code_path like concat(#{organCodePath}::TEXT,'%')");
+                    script_params.insert(
+                        "organCodePath".to_string(),
+                        organ.get("organCodePath").unwrap().clone(),
+                    );
+                }
+                _ => {
+                    let organ_code_path = organ.get("organCodePath").unwrap().to_string();
+                    let organ_code_array: Vec<String> =
+                        organ_code_path.split("/").map(|x| x.to_string()).collect();
+                    let trim_organ_code = organ_code_array
+                        .iter()
+                        .filter(|x| !x.is_empty())
+                        .map(|x| x.to_string())
+                        .collect::<Vec<String>>();
+                    let codes = format!("'{}'", trim_organ_code.join("','"));
+                    tracing::info!("code:{}", codes);
+                    // 启用 向上记叻
+                    script.filter(format!("organ_code in ({})", codes).as_str());
+                }
+            }
+
+            OrganDao::update(&script.to_script(), &script_params).await
+        } else {
+            return Err(BmbpError::service(
+                format!("请定的组织无效:{}", id).as_str(),
+            ));
+        }
     }
     /// 更新组织上级
     pub async fn update_organ_parent_by_record_id(
@@ -271,29 +347,43 @@ impl OrganService {
 }
 
 /// 校验逻辑
-#[allow(dead_code)]
-#[allow(unused)]
 impl OrganService {
-    /// 保存时的数据校验
-    pub fn valid_insert_organ(organ: &mut BmbpHashMap) -> BmbpResp<bool> {
-        Err(BmbpError::service("服务未实现"))
-    }
     /// 判断是否包含相同的数据关联
     pub async fn check_same_organ_organ_code(organ: &mut BmbpHashMap) -> BmbpResp<bool> {
-        Err(BmbpError::service("服务未实现"))
+        Ok(true)
     }
     // 判断是否包含相同的数据关联
     pub async fn check_same_organ_record_id(organ: &mut BmbpHashMap) -> BmbpResp<bool> {
-        Err(BmbpError::service("服务未实现"))
+        Ok(true)
     }
 
     /// 判断是否包含相同的数据关联
     pub async fn check_same_organ_data_id(organ: &mut BmbpHashMap) -> BmbpResp<bool> {
-        Err(BmbpError::service("服务未实现"))
+        Ok(true)
     }
     /// 判断是否包含相同组织
-    pub async fn check_same_organ_title(organ: &mut BmbpHashMap) -> BmbpResp<bool> {
-        Err(BmbpError::service("服务未实现"))
+    pub async fn check_same_organ_title(
+        organ: &mut BmbpHashMap,
+        is_update: bool,
+    ) -> BmbpResp<bool> {
+        if is_empty_prop(organ, "organTitle") {
+            return Err(BmbpError::service("组织名称不允许为空"));
+        }
+        if is_empty_prop(organ, "organParentCode") {
+            return Err(BmbpError::service("组织上级不允许为空"));
+        }
+
+        let mut script = OrganScript::query_script();
+        script.filter("organ_title = #{organTitle}");
+        script.filter("organ_parent_code = #{organParentCode}");
+        if is_update {
+            if is_empty_prop(organ, "recordId") {
+                return Err(BmbpError::service("请指定待更新的组织标识"));
+            }
+            script.filter("record_id != #{recordId}");
+        }
+        let organ_rs = OrganDao::find_organ_info(&script.to_script(), &organ).await?;
+        Ok(organ_rs.is_none())
     }
     /// 判断是否包含下级
     pub async fn check_organ_has_children(organ: &mut BmbpHashMap) -> BmbpResp<bool> {

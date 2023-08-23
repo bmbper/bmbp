@@ -435,6 +435,8 @@ impl Orm {
         script_params: &BmbpHashMap,
     ) -> BmbpResp<usize> {
         let (sql, params) = ScriptUtil::parse_from_map(script, script_params.clone());
+        tracing::info!("sql:{}", sql);
+        tracing::info!("params:{:#?}", params);
         self.raw_update_with_params(&sql, params.as_slice()).await
     }
     pub async fn script_insert_update(

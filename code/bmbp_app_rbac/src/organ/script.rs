@@ -44,7 +44,6 @@ impl OrganScript {
     pub(crate) fn update_status_script() -> BmbpScriptSql {
         let mut script = Self::update_script();
         script.set("record_status = #{recordStatus}");
-        script.filter("record_id = #{recordId}");
         script
     }
     pub(crate) fn update_parent_script() -> BmbpScriptSql {

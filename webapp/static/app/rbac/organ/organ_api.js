@@ -16,7 +16,7 @@ const onRefreshOrganTree = () => {
   onQueryTreeData({});
 }
 const onOrganTreeNodeClick = (organ) => {
-  onQueryPageData({ organParentCode: organ.organCode });
+  AppIns.setCurrentOrganCode(organ.organCode);
 }
 const onChangeOrganParent = (organ) => {
   arco.Message.info("变更组织上级");
@@ -35,7 +35,9 @@ const onInfoOrgan = (organ) => {
 const onEnableOrgan = (organ) => {
   BmbpHttp.post(OrganApi.enableUrl + organ.recordId, {}).then((resp) => {
     if (resp.code == 0) {
+      arco.Message.info(resp.msg);
       onQueryPageData({});
+      onQueryTreeData({});
     } else {
       arco.Message.error(resp.msg);
     }
@@ -45,7 +47,9 @@ const onEnableOrgan = (organ) => {
 const onDisableOrgan = (organ) => {
   BmbpHttp.post(OrganApi.disableUrl + organ.recordId, {}).then((resp) => {
     if (resp.code == 0) {
+      arco.Message.info(resp.msg);
       onQueryPageData({});
+      onQueryTreeData({});
     } else {
       arco.Message.error(resp.msg);
     }
@@ -82,8 +86,7 @@ const onToolBarPrintBtnClick = () => {
 }
 
 const onSearchFormQueryBtnClick = () => {
-  var queryData = AppIns.formRef.current.getFieldsValue();
-  onQueryPageData(queryData);
+  onQueryPageData({});
 }
 
 const onSearchFormRestBtnClick = () => {
@@ -109,6 +112,11 @@ const onQueryPageData = (queryParams) => {
   queryParams = queryParams || {}
   queryParams.pageNo = AppIns.pagination.current;
   queryParams.pageSize = AppIns.pagination.pageSize;
+  let searchFormData = AppIns.searchFormRef.current.getFieldsValue();
+  if (AppIns.currentOrganCode) {
+    queryParams.organParentCode = AppIns.currentOrganCode;
+  }
+  Object.assign(queryParams, searchFormData);
   BmbpHttp.post(OrganApi.queryPageUrl, queryParams).then((resp) => {
     if (resp.code == 0) {
       let respData = resp.data;

@@ -207,7 +207,7 @@ const OrganGridRight = () => {
 }
 
 const SearchForm = () => {
-  AppIns.formRef = React.useRef();
+  AppIns.searchFormRef = React.useRef();
 
   const searchBtnStyle = {
     marginRight: "4px",
@@ -223,7 +223,7 @@ const SearchForm = () => {
     labelAlign: 'right'
   };
   return <div>
-    <arco.Form ref={AppIns.formRef} {...formItemLayout}>
+    <arco.Form ref={AppIns.searchFormRef} {...formItemLayout}>
       <arco.Grid.Row gutter={24}>
         <arco.Grid.Col span={7}>
           <arco.Form.Item field="organTitle" label='组织名称'>
@@ -259,6 +259,9 @@ const SearchForm = () => {
 }
 
 const GridTable = () => {
+  React.useEffect(() => {
+    onQueryPageData();
+  }, [AppIns.currentOrganCode]);
   const columns = [
     {
       title: '组织名称',
