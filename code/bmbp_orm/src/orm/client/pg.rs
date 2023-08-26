@@ -487,7 +487,7 @@ fn to_pg_prams(params: &[Value]) -> Vec<Box<(dyn ToSql + Send + Sync + 'static)>
                 }
             }
             Value::String(v) => pg_params.push(Box::new(v.to_string())),
-            Value::Array(v) => {}
+            Value::Array(_) => {}
             _ => {}
         }
     }
