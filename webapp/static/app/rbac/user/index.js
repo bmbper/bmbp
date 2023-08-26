@@ -1,12 +1,114 @@
-const PageAppIns = {};
+const AppIns = {};
 const PageView = () => {
-  return <UserPage />
+  //组织树数据
+  const [organTreeData, setOrganTreeData] = React.useState([]);
+  AppIns.organTreeData = organTreeData;
+  AppIns.setOrganTreeData = setOrganTreeData;
+
+  const [currentOrganCode, setCurrentOrganCode] = React.useState("");
+  AppIns.currentOrganCode = currentOrganCode;
+  AppIns.setCurrentOrganCode = setCurrentOrganCode;
+
+  /// 组织列表数据
+  const [organGridData, setOrganGridData] = React.useState([]);
+  AppIns.organGridData = organGridData;
+  AppIns.setOrganGridData = setOrganGridData;
+  /// 组织分页数据
+  const [pagination, setPagination] = React.useState({
+    sizeCanChange: true,
+    showTotal: true,
+    total: 0,
+    pageSize: 10,
+    current: 1,
+    pageSizeChangeResetCurrent: true,
+  });
+  AppIns.setPagination = setPagination;
+  AppIns.pagination = pagination;
+
+  /// 组织列表多选数据
+  const [selectedRowKeys, setSelectedRowKeys] = React.useState([]);
+  AppIns.selectedRowKeys = selectedRowKeys;
+  AppIns.setSelectedRowKeys = setSelectedRowKeys;
+
+  /// 组织新增窗口显示
+  const [organFromDailogTitle, setOrganFromDailogTitle] = React.useState("");
+  AppIns.organFromDailogTitle = organFromDailogTitle;
+  AppIns.setOrganFromDailogTitle = setOrganFromDailogTitle;
+
+  /// 组织新增窗口显示
+  const [initOrganValue, setInitOrganValue] = React.useState({});
+  AppIns.initOrganValue = initOrganValue;
+  AppIns.setInitOrganValue = setInitOrganValue;
+
+  const [addOrganFormShow, setAddOrganFormShow] = React.useState(false);
+  AppIns.addOrganFormShow = addOrganFormShow;
+  AppIns.setAddOrganFormShow = setAddOrganFormShow;
+
+  /// 组织编辑窗口显示
+  const [editOrganFormShow, setEditOrganFormShow] = React.useState(false);
+  AppIns.editOrganFormShow = editOrganFormShow;
+  AppIns.setEditOrganFormShow = setEditOrganFormShow;
+
+  /// 组织配置窗口
+  const [configOrganFormShow, setConfigOrganFormShow] = React.useState(false);
+  AppIns.configOrganFormShow = configOrganFormShow;
+  AppIns.setConfigOrganFormShow = setConfigOrganFormShow;
+
+  /// 组织详情窗口显示
+  const [infoOrganFormShow, setInfoOrganFormShow] = React.useState(false);
+  AppIns.infoOrganFormShow = infoOrganFormShow;
+  AppIns.setInfoOrganFormShow = setInfoOrganFormShow;
+  /// 组织选择框显示
+  const [changeParentOrganShow, setChangeParentOrganShow] = React.useState(false);
+  AppIns.changeParentOrganShow = changeParentOrganShow;
+  AppIns.setChangeParentOrganShow = setChangeParentOrganShow;
+  /// 组织弹窗选择树
+  const [parentOrganTreeRef, setParentOrganTreeRef] = React.useState(React.useRef());
+  AppIns.parentOrganTreeRef = parentOrganTreeRef;
+  AppIns.setParentOrganTreeRef = setParentOrganTreeRef;
+  const [treeParentData, setTreeParentData] = React.useState([]);
+  AppIns.treeParentData = treeParentData;
+  AppIns.setTreeParentData = setTreeParentData;
+
+  // 组织新增、编辑表单
+  const [organFormRef, setOrganFormRef] = React.useState(React.useRef());
+  AppIns.organFormRef = organFormRef;
+  AppIns.setOrganFormRef = setOrganFormRef;
+
+  const [organEditFormRef, setOrganEditFormRef] = React.useState(React.useRef());
+  AppIns.organEditFormRef = organEditFormRef;
+  AppIns.setOrganEditFormRef = setOrganEditFormRef;
+
+  const [organInfoFormRef, setOrganInfoFormRef] = React.useState(React.useRef());
+  AppIns.organInfoFormRef = organInfoFormRef;
+  AppIns.setOrganInfoFormRef = setOrganInfoFormRef;
+
+
+
+  // 组织配置表单
+  const organConfigRef = React.useRef();
+  AppIns.organConfigRef = organConfigRef;
+
+  // 组织详情表单
+  const organFromInfoRef = React.useRef();
+  AppIns.organFromInfoRef = organFromInfoRef;
+
+
+  React.useEffect(() => {
+    onQueryTreeData();
+    onQueryPageData();
+  }, []);
+  return <OrganPage />
 }
 
-const UserPage = () => {
+const OrganPage = () => {
   return <div className="bmbp-page-tree-grid-body">
     <OrganTreeLeft />
     <UserGridRight />
+    <AddRootOrganDialog title={AppIns.organFromDailogTitle} visible={AppIns.addOrganFormShow} />
+    <EditOrganDialog title={AppIns.organFromDailogTitle} visible={AppIns.editOrganFormShow} />
+    <InfoOrganDialog title={AppIns.organFromDailogTitle} visible={AppIns.infoOrganFormShow} />
+    <ChangeParentOrganDialog title={AppIns.organFromDailogTitle} visible={AppIns.changeParentOrganShow} />
   </div>;
 }
 const OrganTreeLeft = () => {
@@ -26,7 +128,18 @@ const OrganTreeLeft = () => {
     alignItems: 'center',
     justifyContent: 'center',
   }
-  const treeData = queryTreeData();
+  const addStyle = {
+    position: 'absolute',
+    top: '0px',
+    right: '36px',
+    width: '36px',
+    height: '36px',
+    lineHeight: '36px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 0
+  }
   return <div className="bmbp-page-tree-grid-tree">
     <div className="bmbp-page-tree-grid-tree-title">
       <div style={titleStyle}><span>组织机构</span></div>
@@ -35,19 +148,22 @@ const OrganTreeLeft = () => {
     <div style={{ display: 'block', padding: '5px 2px' }}>
       <arco.Input.Search style={{ background: '#FFFFFF' }} />
     </div>
-    <arco.Tree showLine blockNode onSelect={(node) => { onOrganTreeNodeClick(node) }}>
-      {
-        buildTreeData(treeData)
+    <arco.Tree showLine blockNode onSelect={(keys, ext) => { onOrganTreeNodeClick(ext.node.props.dataRef) }}
+    > {
+        buildTreeData(AppIns.organTreeData)
       } </arco.Tree>
   </div>;
 }
-
 const buildTreeData = (treeData) => {
-  return treeData.map((item) => {
-    const { children, organCode, organTitle, ...rest } = item;
+  let organTreeData = treeData || [];
+  if (!organTreeData || organTreeData.length == 0) {
+    return null;
+  }
+  return organTreeData.map((item) => {
+    const { organChildren, organCode, organTitle, ...rest } = item;
     return (
       <arco.Tree.Node key={organCode} title={organTitle} {...rest} dataRef={item}>
-        {children ? buildTreeData(item.children) : null}
+        {organChildren ? buildTreeData(item.organChildren) : null}
       </arco.Tree.Node>
     );
   });
@@ -55,9 +171,7 @@ const buildTreeData = (treeData) => {
 
 
 const UserGridRight = () => {
-  const [selectedRowKeys, setSelectedRowKeys] = React.useState([]);
-  PageAppIns.selectedRowKeys = selectedRowKeys;
-  PageAppIns.setSelectedRowKeys = setSelectedRowKeys;
+
   return <div className="bmbp-page-tree-grid-grid">
     <div>
       <div className="bmbp-page-serach-form">
@@ -67,7 +181,7 @@ const UserGridRight = () => {
         <div className="bmbp-page-serach-toolbar-left">
           <arco.Button type='primary' onClick={() => { onAddRootOrgan() }}>新增</arco.Button>
           {
-            PageAppIns.selectedRowKeys && PageAppIns.selectedRowKeys.length > 0 ? <arco.Popconfirm focusLock title='删除确认' content='数据删除之后，无法恢复，是否继续?' onOk={() => { onBatchDeleteOrgan(PageAppIns.selectedRowKeys) }}>
+            AppIns.selectedRowKeys && AppIns.selectedRowKeys.length > 0 ? <arco.Popconfirm focusLock title='删除确认' content='数据删除之后，无法恢复，是否继续?' onOk={() => { onBatchDeleteOrgan(AppIns.selectedRowKeys) }}>
               <arco.Button type='secondary' >删除</arco.Button>
             </arco.Popconfirm> : null
           }
@@ -80,14 +194,14 @@ const UserGridRight = () => {
         </div>
       </div>
       <div className="bmbp-page-serach-grid">
-        <GridTable selectedRowKeys={selectedRowKeys} />
+        <GridTable />
       </div>
     </div>
   </div>;
 }
 
 const SearchForm = () => {
-  PageAppIns.formRef = React.useRef();
+  AppIns.searchFormRef = React.useRef();
 
   const searchBtnStyle = {
     marginRight: "4px",
@@ -103,16 +217,24 @@ const SearchForm = () => {
     labelAlign: 'right'
   };
   return <div>
-    <arco.Form ref={PageAppIns.formRef} {...formItemLayout}>
+    <arco.Form ref={AppIns.searchFormRef} {...formItemLayout}>
       <arco.Grid.Row gutter={24}>
         <arco.Grid.Col span={7}>
           <arco.Form.Item field="userName" label='用户名称'>
-            <arco.Input placeholder='用户名称' />
+            <arco.Input placeholder='请输入用户名称' />
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={7}>
-          <arco.Form.Item field="nickName" label='用户昵称'>
-            <arco.Input placeholder="用户昵称" />
+          <arco.Form.Item field="userNickName" label='显示名称'>
+            <arco.Input placeholder='请输入用户显示名称' />
+          </arco.Form.Item>
+        </arco.Grid.Col>
+        <arco.Grid.Col span={7}>
+          <arco.Form.Item field="recordStatus" label='用户状态' allowClear>
+            <arco.Select placeholder='请选择用户状态'>
+              <arco.Select.Option key={'1'} value={'1'}>正常</arco.Select.Option>
+              <arco.Select.Option key={'0'} value={'0'}>已停用</arco.Select.Option>
+            </arco.Select>
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={3}>
@@ -124,65 +246,32 @@ const SearchForm = () => {
   </div >;
 }
 
-const GridTable = (props) => {
-  // 初始化查询函数
+const GridTable = () => {
   React.useEffect(() => {
-    onQueryGridData({});
-  }, []);
-
-  const [pagination, setPagination] = React.useState({
-    sizeCanChange: true,
-    showTotal: true,
-    total: 0,
-    pageSize: 10,
-    current: 1,
-    pageSizeChangeResetCurrent: true,
-  });
-  PageAppIns.setPagination = setPagination;
-  PageAppIns.pagination = pagination;
-  const [gridData, setGridData] = React.useState([]);
-  PageAppIns.setGridData = setGridData;
-
+    onQueryPageData();
+  }, [AppIns.currentOrganCode]);
   const columns = [
     {
-      title: '组织名称',
-      dataIndex: 'organTitle',
+      title: '用户名称',
+      dataIndex: 'userName',
     },
     {
-      title: '组织类型',
-      dataIndex: 'organType',
-      width: 120,
-      render: (_, record) => {
-        switch (record.organType) {
-          case 'units':
-            return <arco.Tag>分组</arco.Tag>
-          case 'unit':
-            return <arco.Tag>单位</arco.Tag>
-          case 'dept':
-            return <arco.Tag>部门</arco.Tag>
-          case 'post':
-            return <arco.Tag>岗位</arco.Tag>
-          case 'person':
-            return <arco.Tag>人员</arco.Tag>
-          default:
-            return <arco.Tag>未知</arco.Tag>
-        }
-
-      }
+      title: '显示名称',
+      dataIndex: 'userNickName',
     },
     {
-      title: '组织路径',
+      title: '所属组织',
       dataIndex: 'organTitlePath',
     },
     {
-      title: '组织状态',
+      title: '用户状态',
       dataIndex: 'recordStatus',
       width: 120,
       render: (_, record) => {
         if (record.recordStatus == '0') {
           return <arco.Tag style={{ color: '#165dff' }}>正常</arco.Tag>
         }
-        if (record.recordStatus == '1') {
+        if (record.recordStatus == '-1') {
           return <arco.Tag style={{ color: '#7bc616' }}> 已停用</arco.Tag >
         }
       }
@@ -193,15 +282,15 @@ const GridTable = (props) => {
       width: '120px',
       render: (_, record) => {
         return <div className="bmbp-grid-row-action">
-          <arco.Button type='text' size={'mini'} onClick={() => onAddOrganChild(record)}>新增</arco.Button>
+          <arco.Button type='text' size={'mini'} onClick={() => onEditOrgan(record)}>编辑</arco.Button>
           <arco.Button type='text' size={'mini'} onClick={() => onEditOrganInfo(record)}>配置</arco.Button>
           <arco.Popover
             trigger='hover' position='left'
             content={
               <div className="bmbp-action-more">
-                <arco.Button size={'mini'} onClick={() => onEditOrgan(record)}>编辑</arco.Button>
+                <arco.Button size={'mini'} onClick={() => onInfoOrgan(record)}>重置密码</arco.Button>
                 <arco.Button size={'mini'} onClick={() => onInfoOrgan(record)}>查看</arco.Button>
-                <arco.Button size={'mini'} onClick={() => onChangeOrganParent(record)}>变更上级</arco.Button>
+                <arco.Button size={'mini'} onClick={() => onChangeOrganParent(record)}>变更组织</arco.Button>
                 {record.recordStatus == '0' ? <arco.Button size={'mini'} onClick={() => onDisableOrgan(record)}>停用</arco.Button> : <arco.Button size={'mini'} onClick={() => onEnableOrgan(record)}>启用</arco.Button>}
                 <arco.Popconfirm focusLock title='删除确认' content='数据删除之后，无法恢复，是否继续?' onOk={() => { onDeleteOrgan(record) }}>
                   <arco.Button size={'mini'} status='danger'>删除</arco.Button>
@@ -219,10 +308,10 @@ const GridTable = (props) => {
 
   return <arco.Table
     rowSelection={{
-      type: 'checkbox', checkAll: true, fixed: true, selectedRowKeys: props.selectedRowKeys,
+      type: 'checkbox', checkAll: true, fixed: true, selectedRowKeys: AppIns.selectedRowKeys,
       onChange: (selectedRowKeys, _) => {
-        PageAppIns.setSelectedRowKeys(selectedRowKeys);
+        AppIns.setSelectedRowKeys(selectedRowKeys);
       },
     }}
-    rowKey={'recordId'} columns={columns} data={gridData} pagination={pagination} onChange={onGridPageChange} />;
+    rowKey={'recordId'} columns={columns} data={AppIns.organGridData} pagination={AppIns.pagination} onChange={onGridPageChange} />;
 }
