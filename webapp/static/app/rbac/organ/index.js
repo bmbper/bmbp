@@ -1,5 +1,5 @@
 const AppIns = {};
-const OrganView = () => {
+const PageView = () => {
   //组织树数据
   const [organTreeData, setOrganTreeData] = React.useState([]);
   AppIns.organTreeData = organTreeData;

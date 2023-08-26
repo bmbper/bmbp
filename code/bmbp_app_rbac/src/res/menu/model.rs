@@ -1,7 +1,7 @@
 use bmbp_app_common::BmbpBaseModel;
-use serde::Deserialize;
-use serde::Serialize;
-
+use serde::{Deserialize, Serialize};
+use std::string::ToString;
+/// 菜单机构
 #[allow(dead_code)]
 #[derive(Default, Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -12,7 +12,7 @@ pub struct BmbpRbacMenu {
     base: BmbpBaseModel,
     /// 菜单编码
     menu_code: Option<String>,
-    /// 菜单上级编码
+    /// 上级菜单编码
     menu_parent_code: Option<String>,
     /// 菜单名称
     menu_title: Option<String>,
@@ -20,47 +20,34 @@ pub struct BmbpRbacMenu {
     menu_code_path: Option<String>,
     /// 菜单名称路径
     menu_title_path: Option<String>,
+    /// 惟一数据标识
+    menu_url: Option<String>,
     /// 菜单类型
-    menu_type: BmbpMenuType,
-    /// 菜单角色
+    menu_type: Option<String>,
+    /// 下级菜单
     menu_children: Option<Vec<BmbpRbacMenu>>,
-
-    /// 菜单路由类型
-    route_type: BmbpRouteType,
 }
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum BmbpMenuType {
-    MODULE,
-    FUNC,
-}
-impl Default for BmbpMenuType {
-    fn default() -> Self {
-        BmbpMenuType::MODULE
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum BmbpRouteType {
-    URL,
-    ROUTE,
-}
-impl Default for BmbpRouteType {
-    fn default() -> Self {
-        BmbpRouteType::ROUTE
-    }
-}
-
 #[allow(dead_code)]
-#[derive(Default, Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
-pub struct BmbpRbacRoleExtend {
-    /// 公共信息
-    #[serde(flatten)]
-    base: BmbpBaseModel,
-    /// 角色编码
-    role_code: Option<String>,
-    /// 互斥角色编码
-    exclusive_role_code: Option<String>,
+impl BmbpRbacMenu {
+    pub fn new() -> Self {
+        BmbpRbacMenu::default()
+    }
+    pub fn orm_table_name() -> String {
+        "bmbp_rbac_menu".to_string()
+    }
+
+    pub fn orm_table_column_name() -> Vec<String> {
+        let mut base_fields = BmbpBaseModel::get_fields();
+        let rbac_app_field = vec![
+            "menu_code".to_string(),
+            "menu_parent_code".to_string(),
+            "menu_title".to_string(),
+            "menu_code_path".to_string(),
+            "menu_title_path".to_string(),
+            "menu_url".to_string(),
+            "menu_type".to_string(),
+        ];
+        base_fields.extend_from_slice(rbac_app_field.as_slice());
+        base_fields
+    }
 }

@@ -12,13 +12,13 @@ pub async fn organ_index_view(_req: &mut Request, res: &mut Response) {
     ctx.insert(
         "viewScript",
         vec![
-            "rbac/organ/organ.js",
-            "rbac/organ/organ_form.js",
-            "rbac/organ/organ_api.js",
+            "rbac/organ/index.js",
+            "rbac/organ/form.js",
+            "rbac/organ/api.js",
         ]
         .as_slice(),
     );
-    ctx.insert("viewName", "OrganView");
+    ctx.insert("viewName", "PageView");
     let te = BMBP_TEMPLATE.render("page.html", &ctx).unwrap();
     res.render(Text::Html(&te))
 }

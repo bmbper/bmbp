@@ -1,87 +1,88 @@
-const onAddRootOrgan = () => {
-  arco.Message.info("增加根节点");
-}
-const onRefreshOrganTree = () => {
-  arco.Message.info("树刷新事件");
-}
-const onOrganTreeNodeClick = (organ) => {
-  arco.Message.info("组织节点点击");
-}
-const onChangeOrganParent = (organ) => {
-  arco.Message.info("变更组织上级");
-}
-const onAddOrganChild = (organ) => {
-  arco.Message.info("增加下级节点");
-}
-const onEditOrgan = (organ) => {
-  arco.Message.info("编辑组织节点");
-}
-const onInfoOrgan = (organ) => {
-  arco.Message.info("查看组织节点");
-}
-const onEnableOrgan = (organ) => {
-  arco.Message.info("启用组织节点");
+const MenuApi = {
+  queryTreeUrl: '/rbac/v1/res/menu/find/tree',
+  queryTreeWithOutMenuUrl: '/rbac/v1/res/menu/find/tree/with/out/id/',
+  queryPageUrl: '/rbac/v1/res/menu/find/page',
+  queryInfoUrl: '/rbac/v1/res/menu/find/info/id/',
+  saveUrl: '/rbac/v1/res/menu/save',
+  changeParentUrl: '/rbac/v1/res/menu/update/parent/',
+  removeUrl: '/rbac/v1/res/menu/remove/id/',
+  disableUrl: '/rbac/v1/res/menu/disable/id/',
+  enableUrl: '/rbac/v1/res/menu/enable/id/'
 }
 
-const onDisableOrgan = (organ) => {
-  arco.Message.info("停用组织节点");
+const onAddRootMenu = () => {
+  AppIns.setMenuFromDailogTitle("新增菜单");
+  AppIns.setAddMenuFormShow(true);
+  AppIns.setInitMenuValue({ menuParentTitle: "", menuParentCode: "0" });
 }
-
-const onDeleteOrgan = (organ) => {
-  arco.Message.info("删除组织节点");
+const onRefreshMenuTree = () => {
+  onQueryTreeData({});
 }
-
-
-const onEditOrganInfo = (organ) => {
-  arco.Message.info("配置组织明细信息");
+const onMenuTreeNodeClick = (menu) => {
+  AppIns.setCurrentMenuCode(menu.menuCode);
 }
-
-const onQueryGridData = (queryData) => {
-  queryData = queryData || {}
-  let data = [
-    {
-      recordId: '1',
-      organTitle: '集团公司',
-      organTitlePath: '/集团公司/',
-      organType: 'unit',
-      recordStatus: '1',
-    },
-    {
-      recordId: '2',
-      organTitle: '部门',
-      organTitlePath: '/集团公司/部门',
-      organType: 'dept',
-      recordStatus: '1',
-    },
-    {
-      recordId: '3',
-      organTitle: '部门2',
-      organTitlePath: '/集团公司/部门2',
-      organType: 'dept',
-      recordStatus: '0',
-    },
-    {
-      recordId: '4',
-      organTitle: '部门4',
-      organTitlePath: '/集团公司/部门4',
-      organType: 'dept',
-      recordStatus: '0',
-    },
-    {
-      recordId: '5',
-      organTitle: '员工',
-      organTitlePath: '/集团公司/部门2/员工',
-      organType: 'post',
-      recordStatus: '0',
+const onChangeMenuParent = (menu) => {
+  AppIns.setMenuFromDailogTitle("选择上级");
+  AppIns.setInitMenuValue({ recordId: menu.recordId });
+  AppIns.setChangeParentMenuShow(true);
+}
+const onAddMenuChild = (menu) => {
+  AppIns.setMenuFromDailogTitle("新增下级菜单");
+  AppIns.setAddMenuFormShow(true);
+  AppIns.setInitMenuValue({ menuParentTitle: menu.menuTitle, menuParentCode: menu.menuCode });
+}
+const onEditMenu = (menu) => {
+  AppIns.setMenuFromDailogTitle("编辑菜单");
+  AppIns.setEditMenuFormShow(true);
+  AppIns.setInitMenuValue({ recordId: menu.recordId });
+}
+const onInfoMenu = (menu) => {
+  AppIns.setMenuFromDailogTitle("查看菜单");
+  AppIns.setInfoMenuFormShow(true);
+  AppIns.setInitMenuValue({ recordId: menu.recordId });
+}
+const onEnableMenu = (menu) => {
+  BmbpHttp.post(MenuApi.enableUrl + menu.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      arco.Message.info(resp.msg);
+      onQueryPageData({});
+      onQueryTreeData({});
+    } else {
+      arco.Message.error(resp.msg);
     }
-  ];
-  AppIns.setPagination({ ...AppIns.pagination, total: data.length });
-  AppIns.setGridData(data);
-  arco.Message.info("查询表结构数据：" + JSON.stringify(queryData));
+  });
 }
 
-const onBatchDeleteOrgan = (organIds) => {
-  arco.Message.info("批量删除组织节点:" + JSON.stringify(organIds));
+const onDisableMenu = (menu) => {
+  BmbpHttp.post(MenuApi.disableUrl + menu.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      arco.Message.info(resp.msg);
+      onQueryPageData({});
+      onQueryTreeData({});
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+
+const onDeleteMenu = (menu) => {
+  BmbpHttp.post(MenuApi.removeUrl + menu.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      onQueryPageData({});
+      onQueryTreeData({});
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+
+
+const onEditMenuInfo = (menu) => {
+  arco.Message.info("配置菜单明细信息");
+}
+
+const onBatchDeleteMenu = (menuIds) => {
+  arco.Message.info("批量删除菜单节点:" + JSON.stringify(menuIds));
 }
 const onToolBarImportBtnClick = () => {
   arco.Message.info("导入功能开发中...");
@@ -94,8 +95,7 @@ const onToolBarPrintBtnClick = () => {
 }
 
 const onSearchFormQueryBtnClick = () => {
-  var queryData = AppIns.formRef.current.getFieldsValue();
-  onQueryGridData(queryData);
+  onQueryPageData({});
 }
 
 const onSearchFormRestBtnClick = () => {
@@ -107,6 +107,78 @@ const onGridPageChange = (page) => {
   AppIns.setPagination({ ...AppIns.pagination, pageSize: page.pageSize });
 }
 
-const queryTreeData = () => {
-  return [{ organTitle: '配置中心', organCode: '1', resType: 'app', children: [{ organTitle: '部门1', organCode: '1.1' }, { organTitle: '部门3', organCode: '1.2' }] }]
+const onQueryTreeData = () => {
+  BmbpHttp.post(MenuApi.queryTreeUrl, {}).then((resp) => {
+    if (resp.code == 0) {
+      AppIns.setMenuTreeData(resp.data);
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+
+const onQueryPageData = (queryParams) => {
+  queryParams = queryParams || {}
+  queryParams.pageNo = AppIns.pagination.current;
+  queryParams.pageSize = AppIns.pagination.pageSize;
+  let searchFormData = AppIns.searchFormRef.current.getFieldsValue();
+  if (AppIns.currentMenuCode) {
+    queryParams.menuParentCode = AppIns.currentMenuCode;
+  }
+  Object.assign(queryParams, searchFormData);
+  BmbpHttp.post(MenuApi.queryPageUrl, queryParams).then((resp) => {
+    if (resp.code == 0) {
+      let respData = resp.data;
+      AppIns.setPagination({ ...AppIns.pagination, total: respData.rowTotal });
+      AppIns.setMenuGridData(respData.data);
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+
+const onQueryMenuInfo = (recordId, formRef) => {
+  BmbpHttp.post(MenuApi.queryInfoUrl + recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      formRef.setFieldsValue(resp.data);
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+
+const saveMenuInfo = (formData, set_model) => {
+  BmbpHttp.post(MenuApi.saveUrl, formData).then((resp) => {
+    if (resp.code == 0) {
+      arco.Message.info(resp.msg);
+      set_model(false);
+      onQueryPageData({});
+      onQueryTreeData({});
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+
+/// 查询排除节点的菜单结构数据
+const onQueryTreeDataWithOutRecordId = () => {
+  BmbpHttp.get(MenuApi.queryTreeWithOutMenuUrl + AppIns.initMenuValue.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      AppIns.setTreeParentData(resp.data);
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+
+const onSaveMenuParentChange = (recordId, menuParentCode) => {
+  BmbpHttp.post(MenuApi.changeParentUrl + recordId + "/" + menuParentCode, {}).then((resp) => {
+    if (resp.code == 0) {
+      arco.Message.info(resp.msg);
+      onQueryTreeData({});
+      onQueryPageData({});
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
 }
