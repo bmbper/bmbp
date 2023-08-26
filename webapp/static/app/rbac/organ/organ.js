@@ -58,11 +58,32 @@ const OrganView = () => {
   const [infoOrganFormShow, setInfoOrganFormShow] = React.useState(false);
   AppIns.infoOrganFormShow = infoOrganFormShow;
   AppIns.setInfoOrganFormShow = setInfoOrganFormShow;
+  /// 组织选择框显示
+  const [changeParentOrganShow, setChangeParentOrganShow] = React.useState(false);
+  AppIns.changeParentOrganShow = changeParentOrganShow;
+  AppIns.setChangeParentOrganShow = setChangeParentOrganShow;
+  /// 组织弹窗选择树
+  const [parentOrganTreeRef, setParentOrganTreeRef] = React.useState(React.useRef());
+  AppIns.parentOrganTreeRef = parentOrganTreeRef;
+  AppIns.setParentOrganTreeRef = setParentOrganTreeRef;
+  const [treeParentData, setTreeParentData] = React.useState([]);
+  AppIns.treeParentData = treeParentData;
+  AppIns.setTreeParentData = setTreeParentData;
 
   // 组织新增、编辑表单
   const [organFormRef, setOrganFormRef] = React.useState(React.useRef());
   AppIns.organFormRef = organFormRef;
   AppIns.setOrganFormRef = setOrganFormRef;
+
+  const [organEditFormRef, setOrganEditFormRef] = React.useState(React.useRef());
+  AppIns.organEditFormRef = organEditFormRef;
+  AppIns.setOrganEditFormRef = setOrganEditFormRef;
+
+  const [organInfoFormRef, setOrganInfoFormRef] = React.useState(React.useRef());
+  AppIns.organInfoFormRef = organInfoFormRef;
+  AppIns.setOrganInfoFormRef = setOrganInfoFormRef;
+
+
 
   // 组织配置表单
   const organConfigRef = React.useRef();
@@ -85,6 +106,9 @@ const OrganPage = () => {
     <OrganTreeLeft />
     <OrganGridRight />
     <AddRootOrganDialog title={AppIns.organFromDailogTitle} visible={AppIns.addOrganFormShow} />
+    <EditOrganDialog title={AppIns.organFromDailogTitle} visible={AppIns.editOrganFormShow} />
+    <InfoOrganDialog title={AppIns.organFromDailogTitle} visible={AppIns.infoOrganFormShow} />
+    <ChangeParentOrganDialog title={AppIns.organFromDailogTitle} visible={AppIns.changeParentOrganShow} />
   </div>;
 }
 const OrganTreeLeft = () => {

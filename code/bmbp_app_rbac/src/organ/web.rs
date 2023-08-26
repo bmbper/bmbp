@@ -35,6 +35,19 @@ pub async fn find_organ_tree_start_with_id(
     Ok(RespVo::ok_data(rs))
 }
 
+#[handler]
+pub async fn find_organ_tree_with_out_id(
+    req: &mut Request,
+    _res: &mut Response,
+) -> BmbpResp<RespVo<Option<Vec<BmbpHashMap>>>> {
+    // 要排除的组织ID
+    let mut with_out_organ_id = "".to_string();
+    if let Some(id) = req.param::<String>("id") {
+        with_out_organ_id = id.to_string();
+    }
+    let rs = OrganService::find_organ_tree_with_out_id(&with_out_organ_id).await?;
+    Ok(RespVo::ok_data(rs))
+}
 /// 查询指定ORGAN_CODE开始的组织机构树
 #[handler]
 pub async fn find_organ_tree_start_with_code(
@@ -90,18 +103,28 @@ pub async fn find_organ_list_by_parent(
 /// 查询指定RECORD_ID组织机构详情
 #[handler]
 pub async fn find_organ_info_by_id(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
 ) -> BmbpResp<RespVo<Option<BmbpHashMap>>> {
-    Err(BmbpError::api("接口未实现"))
+    let record_id = req.param::<String>("recordId");
+    if record_id.is_none() {
+        return Err(BmbpError::api("无效的主键ID"));
+    }
+    let rs = OrganService::find_organ_by_id(record_id.as_ref().unwrap()).await?;
+    Ok(RespVo::ok_data(rs))
 }
 /// 查询指定RECORD_CODE的组织机构详情
 #[handler]
 pub async fn find_organ_info_by_code(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
 ) -> BmbpResp<RespVo<Option<BmbpHashMap>>> {
-    Err(BmbpError::api("接口未实现"))
+    let organ_code = req.param::<String>("organCode");
+    if organ_code.is_none() {
+        return Err(BmbpError::api("无效的组织编码"));
+    }
+    let rs = OrganService::find_organ_by_organ_code(organ_code.as_ref().unwrap()).await?;
+    Ok(RespVo::ok_data(rs))
 }
 
 /// 保存组织机构
@@ -139,10 +162,23 @@ pub async fn update_organ_by_id(
 /// 更新组织机构的上级信息
 #[handler]
 pub async fn update_organ_parent(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
-) -> BmbpResp<RespVo<Option<BmbpHashMap>>> {
-    Err(BmbpError::api("接口未实现"))
+) -> BmbpResp<RespVo<usize>> {
+    let record_id = req.param::<String>("recordId");
+    if record_id.is_none() {
+        return Err(BmbpError::api("请指定待变更的主键"));
+    }
+    let organ_parent_code = req.param::<String>("parent");
+    if organ_parent_code.is_none() {
+        return Err(BmbpError::api("请指定待变更的上级组织"));
+    }
+    let rs = OrganService::update_organ_parent_by_record_id(
+        &record_id.unwrap(),
+        &organ_parent_code.unwrap(),
+    )
+    .await?;
+    Ok(RespVo::ok_data(rs))
 }
 /// 启用指定RECORD_ID的组织机构
 #[handler]

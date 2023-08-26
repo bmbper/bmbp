@@ -46,12 +46,7 @@ impl OrganScript {
         script.set("record_status = #{recordStatus}");
         script
     }
-    pub(crate) fn update_parent_script() -> BmbpScriptSql {
-        let mut script = Self::update_script();
-        script.set("organ_parent_code = #{organ_parent_code}");
-        script.filter("record_id = #{recordId}");
-        script
-    }
+
     pub(crate) fn delete_script_by_id() -> BmbpScriptSql {
         let mut delete_script = Self::delete_script();
         delete_script.filter("record_id = #{recordId}");
@@ -60,6 +55,26 @@ impl OrganScript {
     pub(crate) fn delete_script() -> BmbpScriptSql {
         let mut script = BmbpScriptSql::new();
         script.delete(Self::get_organ_table_name().as_str());
+        script
+    }
+
+    pub(crate) fn update_parent_script() -> BmbpScriptSql {
+        let mut script = Self::update_script();
+        script.set("organ_parent_code = #{organParentCode}");
+        script.filter("record_id = #{recordId}");
+        script
+    }
+    pub(crate) fn update_title_path_script() -> BmbpScriptSql {
+        let mut script = Self::update_script();
+        script.set("organ_title_path = CONCAT( #{newOrganTitlePath}::TEXT,  RIGHT(ORGAN_TITLE_PATH,  LENGTH(ORGAN_TITLE_PATH) - LENGTH(#{oldOrganParentTitlePath})))");
+        script.filter("organ_title_path like CONCAT(#{currentOrganTitlePath}::TEXT,'%')");
+
+        script
+    }
+    pub(crate) fn update_code_path_script() -> BmbpScriptSql {
+        let mut script = Self::update_script();
+        script.set("organ_code_path = CONCAT( #{newOrganCodePath}::TEXT,  RIGHT(ORGAN_CODE_PATH,  LENGTH(ORGAN_CODE_PATH) - LENGTH(#{oldOrganParentCodePath})))");
+        script.filter("organ_code_path like CONCAT(#{currentOrganCodePath}::TEXT,'%')");
         script
     }
 }

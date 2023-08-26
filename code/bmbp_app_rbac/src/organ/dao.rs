@@ -5,16 +5,6 @@ use bmbp_app_common::PageVo;
 pub struct OrganDao();
 #[allow(dead_code)]
 impl OrganDao {
-    pub(crate) async fn find_organ_tree(
-        sql_scirpt: &String,
-        params: &BmbpHashMap,
-    ) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
-        bmbp_orm_ins::BmbpORM
-            .await
-            .script_query_list(sql_scirpt, params)
-            .await
-    }
-
     pub(crate) async fn find_organ_page(
         script_sql: &String,
         script_params: &BmbpHashMap,

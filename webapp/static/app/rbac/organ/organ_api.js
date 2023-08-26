@@ -1,7 +1,10 @@
 const OrganApi = {
   queryTreeUrl: '/rbac/v1/organ/find/tree',
+  queryTreeWithOutOrganUrl: '/rbac/v1/organ/find/tree/with/out/id/',
   queryPageUrl: '/rbac/v1/organ/find/page',
+  queryInfoUrl: '/rbac/v1/organ/find/info/id/',
   saveUrl: '/rbac/v1/organ/save',
+  changeParentUrl: '/rbac/v1/organ/update/parent/',
   removeUrl: '/rbac/v1/organ/remove/id/',
   disableUrl: '/rbac/v1/organ/disable/id/',
   enableUrl: '/rbac/v1/organ/enable/id/'
@@ -19,7 +22,9 @@ const onOrganTreeNodeClick = (organ) => {
   AppIns.setCurrentOrganCode(organ.organCode);
 }
 const onChangeOrganParent = (organ) => {
-  arco.Message.info("变更组织上级");
+  AppIns.setOrganFromDailogTitle("选择上级");
+  AppIns.setInitOrganValue({ recordId: organ.recordId });
+  AppIns.setChangeParentOrganShow(true);
 }
 const onAddOrganChild = (organ) => {
   AppIns.setOrganFromDailogTitle("新增下级组织");
@@ -27,10 +32,14 @@ const onAddOrganChild = (organ) => {
   AppIns.setInitOrganValue({ organParentTitle: organ.organTitle, organParentCode: organ.organCode });
 }
 const onEditOrgan = (organ) => {
-  arco.Message.info("编辑组织节点");
+  AppIns.setOrganFromDailogTitle("编辑组织");
+  AppIns.setEditOrganFormShow(true);
+  AppIns.setInitOrganValue({ recordId: organ.recordId });
 }
 const onInfoOrgan = (organ) => {
-  arco.Message.info("查看组织节点");
+  AppIns.setOrganFromDailogTitle("查看组织");
+  AppIns.setInfoOrganFormShow(true);
+  AppIns.setInitOrganValue({ recordId: organ.recordId });
 }
 const onEnableOrgan = (organ) => {
   BmbpHttp.post(OrganApi.enableUrl + organ.recordId, {}).then((resp) => {
@@ -128,6 +137,15 @@ const onQueryPageData = (queryParams) => {
   });
 }
 
+const onQueryOrganInfo = (recordId, formRef) => {
+  BmbpHttp.post(OrganApi.queryInfoUrl + recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      formRef.setFieldsValue(resp.data);
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
 
 const saveOrganInfo = (formData, set_model) => {
   BmbpHttp.post(OrganApi.saveUrl, formData).then((resp) => {
@@ -136,6 +154,29 @@ const saveOrganInfo = (formData, set_model) => {
       set_model(false);
       onQueryPageData({});
       onQueryTreeData({});
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+
+/// 查询排除节点的组织结构数据
+const onQueryTreeDataWithOutRecordId = () => {
+  BmbpHttp.get(OrganApi.queryTreeWithOutOrganUrl + AppIns.initOrganValue.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      AppIns.setTreeParentData(resp.data);
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+
+const onSaveOrganParentChange = (recordId, organParentCode) => {
+  BmbpHttp.post(OrganApi.changeParentUrl + recordId + "/" + organParentCode, {}).then((resp) => {
+    if (resp.code == 0) {
+      arco.Message.info(resp.msg);
+      onQueryTreeData({});
+      onQueryPageData({});
     } else {
       arco.Message.error(resp.msg);
     }

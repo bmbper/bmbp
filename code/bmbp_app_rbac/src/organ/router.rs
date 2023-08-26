@@ -13,6 +13,7 @@ pub fn organ_router() -> Router {
                 .get(find_organ_tree),
         )
         .push(Router::with_path("/find/tree/id/<id>").get(find_organ_tree_start_with_id))
+        .push(Router::with_path("/find/tree/with/out/id/<id>").get(find_organ_tree_with_out_id))
         .push(Router::with_path("/find/tree/code/<code>").post(find_organ_tree_start_with_code))
         .push(Router::with_path("/find/page").post(find_organ_page))
         .push(Router::with_path("/find/page/parent/<parent>").post(find_organ_page_by_parent))
@@ -27,12 +28,12 @@ pub fn organ_router() -> Router {
                 .get(find_organ_list_by_parent),
         )
         .push(
-            Router::with_path("/find/info/id/<id>")
+            Router::with_path("/find/info/id/<recordId>")
                 .post(find_organ_info_by_id)
                 .get(find_organ_info_by_id),
         )
         .push(
-            Router::with_path("/find/info/code/<organ_code>")
+            Router::with_path("/find/info/code/<organCode>")
                 .post(find_organ_info_by_code)
                 .get(find_organ_info_by_code),
         )

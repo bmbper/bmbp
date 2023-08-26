@@ -1,4 +1,4 @@
-use super::{dao::OrganDao, find_organ_info_by_id, script::OrganScript};
+use super::{dao::OrganDao, script::OrganScript};
 use bmbp_app_common::{
     BmbpError, BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, PageParams, PageVo, ValidRule,
     ValidType, ROOT_TREE_NODE,
@@ -58,11 +58,34 @@ impl OrganService {
                 "organCodePath".to_string(),
                 BmbpValue::from(organ_code_path),
             );
-            query_script.order_by("organ_parent_code asc");
             query_script.order_by("record_num asc");
         }
         let organ_tree_rs =
             OrganDao::find_organ_list(&query_script.to_script(), &query_params).await?;
+        match organ_tree_rs {
+            Some(organ_list) => Ok(Some(HashMapTreeBuilder::build_tree_by_name(
+                organ_list, "organ",
+            ))),
+            None => Ok(None),
+        }
+    }
+
+    pub(crate) async fn find_organ_tree_with_out_id(
+        with_out_organ_id: &String,
+    ) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
+        let organ_code = {
+            if let Some(organ) = Self::find_organ_by_id(with_out_organ_id).await? {
+                organ.get("organCode").unwrap().to_string()
+            } else {
+                "".to_string()
+            }
+        };
+        tracing::info!("排除节点：{}", organ_code);
+        let mut script = OrganScript::query_script();
+        script.filter("organ_code_path not like concat('%/',#{organCode}::TEXT,'/%')");
+        let mut script_params = BmbpHashMap::new();
+        script_params.insert("organCode".to_string(), BmbpValue::from(organ_code));
+        let organ_tree_rs = OrganDao::find_organ_list(&script.to_script(), &script_params).await?;
         match organ_tree_rs {
             Some(organ_list) => Ok(Some(HashMapTreeBuilder::build_tree_by_name(
                 organ_list, "organ",
@@ -223,6 +246,9 @@ impl OrganService {
                 let parent_title_path = parent_organ.get("organTitlePath").unwrap().to_string();
                 current_organ_code_path = format!("{}{}/", parent_code_path, current_code);
                 current_organ_title_path = format!("{}{}/", parent_title_path, current_title);
+                // 继承上级节点状态
+                let record_status = parent_organ.get("recordStatus").unwrap();
+                params.insert("recordStatus".to_string(), record_status.clone());
             } else {
                 return Err(BmbpError::service("指定的上级组织不存在"));
             }
@@ -248,16 +274,56 @@ impl OrganService {
         if let Some(err) = valid_field_rule(params, &record_id_valid_rule) {
             return Err(err);
         }
-        let mut script = OrganScript::update_script();
-        add_update_default_value(params);
-        if !is_empty_prop(params, "organTitle") {
-            script.set_value("organ_title", "#{organTitle}");
-        }
-        if !is_empty_prop(params, "recordNum") {
-            script.set_value("record_num", "#{record_num}");
+
+        // 旧标题
+        let mut old_organ_title = "".to_string();
+        let mut old_organ_title_path = "".to_string();
+        let mut old_organ_parent = "".to_string();
+        // 新标题
+        let new_organ_title = params.get("organTitle").unwrap().to_string();
+        // 旧标题路径
+        if let Some(organ) =
+            Self::find_organ_by_id(&params.get("recordId").unwrap().to_string()).await?
+        {
+            old_organ_title = organ.get("organTitle").unwrap().to_string();
+            old_organ_title_path = organ.get("organTitlePath").unwrap().to_string();
+            old_organ_parent = organ.get("organParentCode").unwrap().to_string();
+        } else {
+            return Err(BmbpError::service("指定更新的组织不存在！"));
         }
 
-        OrganDao::update(&script.to_script(), params).await
+        let mut script = OrganScript::update_script();
+        add_update_default_value(params);
+        if !is_empty_prop(params, "recordNum") {
+            script.set_value("record_num", "#{recordNum}");
+        }
+        script.filter("record_id = #{recordId}");
+        let mut row_count = 0;
+        // 组织名称发生变更，更新底层路径
+        if !is_empty_prop(params, "organTitle") && !new_organ_title.eq(&old_organ_title) {
+            script.set_value("organ_title", "#{organTitle}");
+
+            // 计算OrganTitlePath
+            let old_title_length = old_organ_title.len();
+            let old_title_path_length = old_organ_title_path.len();
+            let sub_length = old_title_path_length - old_title_length - 1;
+            // 计算新路径
+            let parent_path = &old_organ_title_path[0..sub_length];
+            let new_organ_title_path = format!("{}{}/", parent_path, new_organ_title);
+            script.set_value("organ_title_path", "#{organTitlePath}");
+            params.insert(
+                "organTitlePath".to_string(),
+                BmbpValue::from(new_organ_title_path),
+            );
+            row_count = OrganDao::update(&script.to_script(), &params).await?;
+            let record_id = params.get("recordId").unwrap().to_string();
+            row_count = row_count
+                + Self::update_organ_parent_by_record_id(&record_id, &old_organ_parent).await?;
+        } else {
+            row_count = OrganDao::update(&script.to_script(), &params).await?;
+        }
+
+        Ok(row_count)
     }
 
     /// 验证应用新增数据
@@ -329,7 +395,94 @@ impl OrganService {
         record_id: &String,
         parent: &String,
     ) -> BmbpResp<usize> {
-        Err(BmbpError::service("服务未实现"))
+        let current_organ = {
+            if let Some(organ) = Self::find_organ_by_id(record_id).await? {
+                organ
+            } else {
+                return Err(BmbpError::service("待变更的组织节点不存在"));
+            }
+        };
+
+        let new_parent_organ = {
+            if let Some(organ) = Self::find_organ_by_organ_code(parent).await? {
+                organ
+            } else {
+                return Err(BmbpError::service("指定的上级组织节点不存在"));
+            }
+        };
+        // 当前节点属性
+        let current_organ_code = current_organ.get("organCode").unwrap().to_string();
+        let current_organ_title = current_organ.get("organTitle").unwrap().to_string();
+        let current_organ_code_path = current_organ.get("organCodePath").unwrap().to_string();
+        let current_organ_title_path = current_organ.get("organTitlePath").unwrap().to_string();
+        // 计算原父点属性
+        let organ_title_length = format!("{}/", current_organ_title).len();
+        let organ_code_length = format!("{}/", current_organ_code).len();
+        let current_organ_code_path_length = current_organ_code_path.len();
+        let current_organ_title_path_length = current_organ_title_path.len();
+        let old_parent_organ_cdoe_path =
+            &current_organ_code_path[0..(current_organ_code_path_length - organ_code_length)];
+        let old_parent_organ_title_path =
+            &current_organ_title_path[0..(current_organ_title_path_length - organ_title_length)];
+        let parent_organ_code_path = new_parent_organ.get("organCodePath").unwrap().to_string();
+        let parent_organ_title_path = new_parent_organ.get("organTitlePath").unwrap().to_string();
+        /// 还没有事务
+        // 更新organPathentCode
+        let update_parent_script = OrganScript::update_parent_script();
+        let mut update_parent_script_params = BmbpHashMap::new();
+        update_parent_script_params.insert("recordId".to_string(), BmbpValue::from(record_id));
+        update_parent_script_params.insert("organParentCode".to_string(), BmbpValue::from(parent));
+
+        // 更新自身及下级标题路径
+        let mut update_organ_title_path_script = OrganScript::update_title_path_script();
+        let mut update_organ_title_path_script_params = BmbpHashMap::new();
+        update_organ_title_path_script_params.insert(
+            "newOrganTitlePath".to_string(),
+            BmbpValue::from(parent_organ_title_path),
+        );
+        update_organ_title_path_script_params.insert(
+            "oldOrganParentTitlePath".to_string(),
+            BmbpValue::from(old_parent_organ_title_path),
+        );
+        update_organ_title_path_script_params.insert(
+            "currentOrganTitlePath".to_string(),
+            BmbpValue::from(current_organ_title_path),
+        );
+
+        // 更新自身及下级编码路径
+        let mut update_organ_code_path_script = OrganScript::update_code_path_script();
+
+        let mut update_organ_code_path_script_params = BmbpHashMap::new();
+        update_organ_code_path_script_params.insert(
+            "newOrganCodePath".to_string(),
+            BmbpValue::from(parent_organ_code_path),
+        );
+        update_organ_code_path_script_params.insert(
+            "oldOrganParentCodePath".to_string(),
+            BmbpValue::from(old_parent_organ_cdoe_path),
+        );
+        update_organ_code_path_script_params.insert(
+            "currentOrganCodePath".to_string(),
+            BmbpValue::from(current_organ_code_path),
+        );
+        let mut row_count = OrganDao::update(
+            &update_parent_script.to_script(),
+            &update_parent_script_params,
+        )
+        .await?;
+        row_count = row_count
+            + OrganDao::update(
+                &update_organ_title_path_script.to_script(),
+                &update_organ_title_path_script_params,
+            )
+            .await?;
+        row_count = row_count
+            + OrganDao::update(
+                &update_organ_code_path_script.to_script(),
+                &update_organ_code_path_script_params,
+            )
+            .await?;
+        Ok(row_count)
     }
     /// 删除组织
     pub async fn remove_organ_by_id(id: &String) -> BmbpResp<usize> {
