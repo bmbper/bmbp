@@ -1,7 +1,7 @@
 use bmbp_app_common::BmbpBaseModel;
-use serde::Deserialize;
-use serde::Serialize;
-
+use serde::{Deserialize, Serialize};
+use std::string::ToString;
+/// 组织机构
 #[allow(dead_code)]
 #[derive(Default, Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -10,60 +10,44 @@ pub struct BmbpRbacRole {
     /// 公共信息
     #[serde(flatten)]
     base: BmbpBaseModel,
-    /// 角色编码
+    /// 组织编码
     role_code: Option<String>,
-    /// 角色上级编码
+    /// 上级组织编码
     role_parent_code: Option<String>,
-    /// 角色名称
+    /// 组织名称
     role_title: Option<String>,
-    /// 角色编码路径
+    /// 组织编码路径
     role_code_path: Option<String>,
-    /// 角色名称路径
+    /// 组织名称路径
     role_title_path: Option<String>,
-    /// 角色类型
-    role_type: BmbpRoleType,
-    /// 下级角色
+    /// 惟一数据标识
+    role_data_id: Option<String>,
+    /// 组织类型
+    role_type: Option<String>,
+    /// 下级组织
     role_children: Option<Vec<BmbpRbacRole>>,
-    // 授权数量
-    role_user_count: Option<usize>,
-    // 解色关联类型，授权时是否授予关联角色
-    role_ref_type: BmbpRoleRefType,
 }
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum BmbpRoleType {
-    ADMIN,
-    NORMAL,
-}
-impl Default for BmbpRoleType {
-    fn default() -> Self {
-        BmbpRoleType::NORMAL
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum BmbpRoleRefType {
-    PARENT,
-    CHILD,
-    ALL,
-    ONLY,
-}
-impl Default for BmbpRoleRefType {
-    fn default() -> Self {
-        BmbpRoleRefType::ALL
-    }
-}
-
 #[allow(dead_code)]
-#[derive(Default, Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
-pub struct BmbpRbacRoleExtend {
-    /// 公共信息
-    #[serde(flatten)]
-    base: BmbpBaseModel,
-    /// 角色编码
-    role_code: Option<String>,
-    /// 互斥角色编码
-    exclusive_role_code: Option<String>,
+impl BmbpRbacRole {
+    pub fn new() -> Self {
+        BmbpRbacRole::default()
+    }
+    pub fn orm_table_name() -> String {
+        "bmbp_rbac_role".to_string()
+    }
+
+    pub fn orm_table_column_name() -> Vec<String> {
+        let mut base_fields = BmbpBaseModel::get_fields();
+        let rbac_app_field = vec![
+            "role_code".to_string(),
+            "role_parent_code".to_string(),
+            "role_title".to_string(),
+            "role_code_path".to_string(),
+            "role_title_path".to_string(),
+            "role_data_id".to_string(),
+            "role_type".to_string(),
+        ];
+        base_fields.extend_from_slice(rbac_app_field.as_slice());
+        base_fields
+    }
 }
