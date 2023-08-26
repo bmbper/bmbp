@@ -229,12 +229,18 @@ impl OrganService {
         let mut current_organ_title_path = "".to_string();
 
         /// 判断是否有重复组织
-        if !Self::check_same_organ_title(params, false).await? {
+        if Self::has_same_title_organ(params, false).await? {
             return Err(BmbpError::service("已存在相同名称的组织"));
         }
-        let _ = Self::check_same_organ_organ_code(params).await?;
-        let _ = Self::check_same_organ_record_id(params).await?;
-        let _ = Self::check_same_organ_data_id(params).await?;
+        if Self::has_same_organ_code_organ(params).await? {
+            return Err(BmbpError::service("已存在相同编码的组织"));
+        }
+        if Self::has_same_record_id_organ(params).await? {
+            return Err(BmbpError::service("已存在相同主简的组织"));
+        }
+        if Self::has_same_data_id_organ(params).await? {
+            return Err(BmbpError::service("已存在相同数据标识的组织"));
+        }
 
         // 根节点为父节点
         if organ_parent_code.eq(&ROOT_TREE_NODE.to_string()) {
@@ -486,10 +492,25 @@ impl OrganService {
     }
     /// 删除组织
     pub async fn remove_organ_by_id(id: &String) -> BmbpResp<usize> {
-        let script = OrganScript::delete_script_by_id();
-        let mut script_params = BmbpHashMap::new();
-        script_params.insert("recordId".to_string(), BmbpValue::from(id));
-        OrganDao::delete(&script.to_script(), &script_params).await
+        if let Some(organ) = Self::find_organ_by_id(id).await? {
+            if Self::current_organ_has_children(&organ).await? {
+                return Err(BmbpError::service("指定的组织存在下级节点，无法删除"));
+            }
+
+            if Self::currrent_organ_has_user(&organ).await? {
+                return Err(BmbpError::service("指定的组织存在用户，无法删除"));
+            }
+
+            if Self::current_organ_has_data(&organ).await? {
+                return Err(BmbpError::service("指定的组织存在业务数据，无法删除"));
+            }
+            let script = OrganScript::delete_script_by_id();
+            let mut script_params = BmbpHashMap::new();
+            script_params.insert("recordId".to_string(), BmbpValue::from(id));
+            OrganDao::delete(&script.to_script(), &script_params).await
+        } else {
+            Err(BmbpError::service("指定的组织不存在，无法删除!"))
+        }
     }
     /// 删除组织
     pub async fn remove_organ(params: &BmbpHashMap) -> BmbpResp<usize> {
@@ -500,23 +521,20 @@ impl OrganService {
 /// 校验逻辑
 impl OrganService {
     /// 判断是否包含相同的数据关联
-    pub async fn check_same_organ_organ_code(organ: &mut BmbpHashMap) -> BmbpResp<bool> {
-        Ok(true)
+    pub async fn has_same_organ_code_organ(_organ: &mut BmbpHashMap) -> BmbpResp<bool> {
+        Ok(false)
     }
     // 判断是否包含相同的数据关联
-    pub async fn check_same_organ_record_id(organ: &mut BmbpHashMap) -> BmbpResp<bool> {
-        Ok(true)
+    pub async fn has_same_record_id_organ(_organ: &mut BmbpHashMap) -> BmbpResp<bool> {
+        Ok(false)
     }
 
     /// 判断是否包含相同的数据关联
-    pub async fn check_same_organ_data_id(organ: &mut BmbpHashMap) -> BmbpResp<bool> {
-        Ok(true)
+    pub async fn has_same_data_id_organ(_organ: &mut BmbpHashMap) -> BmbpResp<bool> {
+        Ok(false)
     }
     /// 判断是否包含相同组织
-    pub async fn check_same_organ_title(
-        organ: &mut BmbpHashMap,
-        is_update: bool,
-    ) -> BmbpResp<bool> {
+    pub async fn has_same_title_organ(organ: &mut BmbpHashMap, is_update: bool) -> BmbpResp<bool> {
         if is_empty_prop(organ, "organTitle") {
             return Err(BmbpError::service("组织名称不允许为空"));
         }
@@ -534,19 +552,18 @@ impl OrganService {
             script.filter("record_id != #{recordId}");
         }
         let organ_rs = OrganDao::find_organ_info(&script.to_script(), &organ).await?;
-        Ok(organ_rs.is_none())
+        Ok(organ_rs.is_some())
     }
     /// 判断是否包含下级
-    pub async fn check_organ_has_children(organ: &mut BmbpHashMap) -> BmbpResp<bool> {
-        Ok(true)
+    pub async fn current_organ_has_children(_organ: &BmbpHashMap) -> BmbpResp<bool> {
+        Ok(false)
     }
     /// 判断是否关联用户
-    pub async fn check_organ_has_user(organ: &mut BmbpHashMap) -> BmbpResp<bool> {
-        Ok(true)
+    pub async fn currrent_organ_has_user(_organ: &BmbpHashMap) -> BmbpResp<bool> {
+        Ok(false)
     }
     /// 判断是否关联业务
-    #[allow(dead_code)]
-    pub async fn check_organ_has_data(organ: &mut BmbpHashMap) -> BmbpResp<bool> {
-        Ok(true)
+    pub async fn current_organ_has_data(_organ: &BmbpHashMap) -> BmbpResp<bool> {
+        Ok(false)
     }
 }
