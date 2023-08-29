@@ -56,7 +56,7 @@ const MenuFormView = () => {
         <arco.Grid.Col span={24}>
           <arco.Form.Item field="menuType" label='菜单类型' allowClear rules={[{ required: true, message: '菜单类型不能为空' }]} >
             <arco.Select placeholder='请选择菜单类型'>
-              <arco.Select.Option key={'1'} value={'module}'}>模块</arco.Select.Option>
+              <arco.Select.Option key={'1'} value={'module'}>模块</arco.Select.Option>
               <arco.Select.Option key={'2'} value={'func'}>功能</arco.Select.Option>
             </arco.Select>
           </arco.Form.Item>
@@ -132,7 +132,7 @@ const EditMenuFormView = () => {
         <arco.Grid.Col span={24}>
           <arco.Form.Item field="menuType" label='菜单类型' allowClear rules={[{ required: true, message: '菜单类型不能为空' }]} >
             <arco.Select placeholder='请选择菜单类型'>
-              <arco.Select.Option key={'1'} value={'module}'}>模块</arco.Select.Option>
+              <arco.Select.Option key={'1'} value={'module'}>模块</arco.Select.Option>
               <arco.Select.Option key={'2'} value={'func'}>功能</arco.Select.Option>
             </arco.Select>
           </arco.Form.Item>
@@ -202,7 +202,7 @@ const InfoMenuFormView = () => {
         <arco.Grid.Col span={24}>
           <arco.Form.Item field="menuType" label='菜单类型' allowClear rules={[{ required: true, message: '菜单类型不能为空' }]} >
             <arco.Select placeholder='请选择菜单类型'>
-              <arco.Select.Option key={'1'} value={'module}'}>模块</arco.Select.Option>
+              <arco.Select.Option key={'1'} value={'module'}>模块</arco.Select.Option>
               <arco.Select.Option key={'2'} value={'func'}>功能</arco.Select.Option>
             </arco.Select>
           </arco.Form.Item>

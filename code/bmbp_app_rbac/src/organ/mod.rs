@@ -9,5 +9,6 @@ mod view;
 mod web;
 pub use model::*;
 pub use router::*;
+pub use service::OrganService;
 pub use view::*;
 pub use web::*;
