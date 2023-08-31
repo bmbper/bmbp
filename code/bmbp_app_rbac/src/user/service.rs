@@ -1,6 +1,6 @@
 use bmbp_app_common::{
     BmbpError, BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, PageParams, PageVo, ValidRule,
-    ValidType,
+    ValidType, DEFAULT_PASSWORD,
 };
 use bmbp_app_curd::{CurdDaoTrait, CurdScript};
 use bmbp_app_utils::{
@@ -13,6 +13,7 @@ use crate::organ::OrganService;
 use super::{dao::UserDao, script::UserScript};
 
 pub struct UserService;
+
 impl UserService {
     /// 分页查询组织列表
     pub async fn find_user_page(params: &PageParams<BmbpHashMap>) -> BmbpResp<PageVo<BmbpHashMap>> {
@@ -29,7 +30,7 @@ impl UserService {
     }
     /// 查询组织详情-通过R_ID
     pub async fn find_user_by_id(r_id: &String) -> BmbpResp<Option<BmbpHashMap>> {
-        let mut script = UserScript::query_info_script();
+        let script = UserScript::query_info_script();
         let mut script_params = BmbpHashMap::new();
         script_params.insert("recordId".to_string(), BmbpValue::from(r_id));
         UserDao::find_info(&script.to_script(), &script_params).await
@@ -147,9 +148,13 @@ impl UserService {
             Err(BmbpError::service("指定的用户不存在，无法删除!"))
         }
     }
-    /// 删除组织
-    pub async fn remove_user(_params: &BmbpHashMap) -> BmbpResp<usize> {
-        Err(BmbpError::service("服务未实现"))
+
+    pub(crate) async fn reset_user_password(record_id: &String) -> BmbpResp<usize> {
+        let script = UserScript::reset_password_script();
+        let mut script_params = BmbpHashMap::new();
+        script_params.insert("recordId".to_string(), BmbpValue::from(record_id));
+        script_params.insert("password".to_string(), BmbpValue::from(DEFAULT_PASSWORD));
+        UserDao::update(&script.to_script(), &script_params).await
     }
 }
 

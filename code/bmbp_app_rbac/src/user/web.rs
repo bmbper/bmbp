@@ -42,10 +42,15 @@ pub async fn find_user_info_by_name(
 
 #[handler]
 pub async fn reset_user_password(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
-) -> BmbpResp<RespVo<Option<BmbpHashMap>>> {
-    Err(BmbpError::api("接口未实现"))
+) -> BmbpResp<RespVo<usize>> {
+    let record_id = req.param::<String>("recordId");
+    if record_id.is_none() {
+        return Err(BmbpError::api("请指定重置密码的用户"));
+    }
+    let row_count = UserService::reset_user_password(&record_id.unwrap()).await?;
+    Ok(RespVo::ok_data(row_count))
 }
 #[handler]
 pub async fn save_user(req: &mut Request, _res: &mut Response) -> BmbpResp<RespVo<BmbpHashMap>> {

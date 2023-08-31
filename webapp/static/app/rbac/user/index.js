@@ -1,20 +1,30 @@
-const AppIns = {};
+// 页面上下文，用于页面全局操作
+// 作用相当于Redux的简化版
+const PageContext = {};
+// 页面视图
 const PageView = () => {
-  //组织树数据
-  const [organTreeData, setOrganTreeData] = React.useState([]);
-  AppIns.organTreeData = organTreeData;
-  AppIns.setOrganTreeData = setOrganTreeData;
-
-  const [currentOrganCode, setCurrentOrganCode] = React.useState("");
-  AppIns.currentOrganCode = currentOrganCode;
-  AppIns.setCurrentOrganCode = setCurrentOrganCode;
-
-  /// 组织列表数据
-  const [organGridData, setOrganGridData] = React.useState([]);
-  AppIns.organGridData = organGridData;
-  AppIns.setOrganGridData = setOrganGridData;
-  /// 组织分页数据
-  const [pagination, setPagination] = React.useState({
+  //左侧树数据
+  const [leftTreeData, setLeftTreeData] = React.useState([]);
+  PageContext.leftTreeData = leftTreeData;
+  PageContext.setLeftTreeData = setLeftTreeData;
+  // 左侧树选中节点数据
+  const [leftTreeSelectNode, setLeftTreeSelectNode] = React.useState({});
+  PageContext.leftTreeSelectNode = leftTreeSelectNode;
+  PageContext.setLeftTreeSelectNode = setLeftTreeSelectNode;
+  /// 右侧列表数据
+  const [rightGridData, setRightGridData] = React.useState([]);
+  PageContext.rightGridData = rightGridData;
+  PageContext.setRightGridData = setRightGridData;
+  // 右侧查询表单
+  const [searchFormRef, setSearchFormRef] = React.useState(React.useRef());
+  PageContext.searchFormRef = searchFormRef;
+  PageContext.setSearchFormRef = setSearchFormRef;
+  /// 右侧列表多选数据
+  const [gridSelectedKeys, setGridSelectedKeys] = React.useState([]);
+  PageContext.gridSelectedKeys = gridSelectedKeys;
+  PageContext.setGridSelectedKeys = setGridSelectedKeys;
+  /// 分页配置
+  const [pageConfig, setPageConfig] = React.useState({
     sizeCanChange: true,
     showTotal: true,
     total: 0,
@@ -22,100 +32,82 @@ const PageView = () => {
     current: 1,
     pageSizeChangeResetCurrent: true,
   });
-  AppIns.setPagination = setPagination;
-  AppIns.pagination = pagination;
+  PageContext.pageConfig = pageConfig;
+  PageContext.setPageConfig = setPageConfig;
 
-  /// 组织列表多选数据
-  const [selectedRowKeys, setSelectedRowKeys] = React.useState([]);
-  AppIns.selectedRowKeys = selectedRowKeys;
-  AppIns.setSelectedRowKeys = setSelectedRowKeys;
+  /// 窗口标题
+  const [formTitle, setFormTitle] = React.useState("");
+  PageContext.formTitle = formTitle;
+  PageContext.setFormTitle = setFormTitle;
 
-  /// 组织新增窗口显示
-  const [organFromDailogTitle, setOrganFromDailogTitle] = React.useState("");
-  AppIns.organFromDailogTitle = organFromDailogTitle;
-  AppIns.setOrganFromDailogTitle = setOrganFromDailogTitle;
+  /// 表单数据
+  const [initFormValue, setInitFormValue] = React.useState({});
+  PageContext.initFormValue = initFormValue;
+  PageContext.setInitFormValue = setInitFormValue;
 
-  /// 组织新增窗口显示
-  const [initOrganValue, setInitOrganValue] = React.useState({});
-  AppIns.initOrganValue = initOrganValue;
-  AppIns.setInitOrganValue = setInitOrganValue;
+  // 新增表单
+  const [addFormShow, setAddFormShow] = React.useState(false);
+  PageContext.addFormShow = addFormShow;
+  PageContext.setAddFormShow = setAddFormShow;
+  const [addFormRef, setAddFormRef] = React.useState(React.useRef());
+  PageContext.addFormRef = addFormRef;
+  PageContext.setAddFormRef = setAddFormRef;
+  /// 编辑表单
+  const [editFormShow, setEditFormShow] = React.useState(false);
+  PageContext.editFormShow = editFormShow;
+  PageContext.setEditFormShow = setEditFormShow;
+  const [editFormRef, setEditFormRef] = React.useState(React.useRef());
+  PageContext.editFormRef = editFormRef;
+  PageContext.setEditFormRef = setEditFormRef;
+  /// 详情表单
+  const [infoFormShow, setInfoFormShow] = React.useState(false);
+  PageContext.infoFormShow = infoFormShow;
+  PageContext.setInfoFormShow = setInfoFormShow;
+  const [infoFormRef, setInfoFormRef] = React.useState(React.useRef());
+  PageContext.infoFormRef = infoFormRef;
+  PageContext.setInfoFormRef = setInfoFormRef;
+  /// 配置表单
+  const [configFormShow, setConfigFormShow] = React.useState(false);
+  PageContext.configFormShow = configFormShow;
+  PageContext.setConfigFormShow = setConfigFormShow;
+  const [configFormRef, setConfigFormRef] = React.useState(React.useRef());
+  PageContext.configFormRef = configFormRef;
+  PageContext.setConfigFormRef = setConfigFormRef;
 
-  const [addOrganFormShow, setAddOrganFormShow] = React.useState(false);
-  AppIns.addOrganFormShow = addOrganFormShow;
-  AppIns.setAddOrganFormShow = setAddOrganFormShow;
-
-  /// 组织编辑窗口显示
-  const [editOrganFormShow, setEditOrganFormShow] = React.useState(false);
-  AppIns.editOrganFormShow = editOrganFormShow;
-  AppIns.setEditOrganFormShow = setEditOrganFormShow;
-
-  /// 组织配置窗口
-  const [configOrganFormShow, setConfigOrganFormShow] = React.useState(false);
-  AppIns.configOrganFormShow = configOrganFormShow;
-  AppIns.setConfigOrganFormShow = setConfigOrganFormShow;
-
-  /// 组织详情窗口显示
-  const [infoOrganFormShow, setInfoOrganFormShow] = React.useState(false);
-  AppIns.infoOrganFormShow = infoOrganFormShow;
-  AppIns.setInfoOrganFormShow = setInfoOrganFormShow;
-  /// 组织选择框显示
-  const [changeParentOrganShow, setChangeParentOrganShow] = React.useState(false);
-  AppIns.changeParentOrganShow = changeParentOrganShow;
-  AppIns.setChangeParentOrganShow = setChangeParentOrganShow;
-  /// 组织弹窗选择树
-  const [parentOrganTreeRef, setParentOrganTreeRef] = React.useState(React.useRef());
-  AppIns.parentOrganTreeRef = parentOrganTreeRef;
-  AppIns.setParentOrganTreeRef = setParentOrganTreeRef;
-  const [treeParentData, setTreeParentData] = React.useState([]);
-  AppIns.treeParentData = treeParentData;
-  AppIns.setTreeParentData = setTreeParentData;
-
-  // 组织新增、编辑表单
-  const [organFormRef, setOrganFormRef] = React.useState(React.useRef());
-  AppIns.organFormRef = organFormRef;
-  AppIns.setOrganFormRef = setOrganFormRef;
-
-  const [organEditFormRef, setOrganEditFormRef] = React.useState(React.useRef());
-  AppIns.organEditFormRef = organEditFormRef;
-  AppIns.setOrganEditFormRef = setOrganEditFormRef;
-
-  const [organInfoFormRef, setOrganInfoFormRef] = React.useState(React.useRef());
-  AppIns.organInfoFormRef = organInfoFormRef;
-  AppIns.setOrganInfoFormRef = setOrganInfoFormRef;
-
-
-
-  // 组织配置表单
-  const organConfigRef = React.useRef();
-  AppIns.organConfigRef = organConfigRef;
-
-  // 组织详情表单
-  const organFromInfoRef = React.useRef();
-  AppIns.organFromInfoRef = organFromInfoRef;
-
+  /// 变更组织-弹出树
+  const [changeOrganShow, setChangeOrganShow] = React.useState(false);
+  PageContext.changeOrganShow = changeOrganShow;
+  PageContext.setChangeOrganShow = setChangeOrganShow;
+  const [changeOrganTreeRef, setChangeOrganTreeRef] = React.useState(React.useRef());
+  PageContext.changeOrganTreeRef = changeOrganTreeRef;
+  PageContext.setChangeOrganTreeRef = setChangeOrganTreeRef;
+  const [changeOrganTreeData, setChangeOrganTreeData] = React.useState([]);
+  PageContext.changeOrganTreeData = changeOrganTreeData;
+  PageContext.setChangeOrganTreeData = setChangeOrganTreeData;
 
   React.useEffect(() => {
-    onQueryTreeData();
-    onQueryPageData();
+    // 查询左侧树
+    onQueryLeftTreeData();
+    onQueryRightGridData();
   }, []);
-  return <OrganPage />
+  return <TreeGridPage />
 }
 
-const OrganPage = () => {
+const TreeGridPage = () => {
   return <div className="bmbp-page-tree-grid-body">
-    <OrganTreeLeft />
-    <UserGridRight />
-    <AddRootOrganDialog title={AppIns.organFromDailogTitle} visible={AppIns.addOrganFormShow} />
-    <EditOrganDialog title={AppIns.organFromDailogTitle} visible={AppIns.editOrganFormShow} />
-    <InfoOrganDialog title={AppIns.organFromDailogTitle} visible={AppIns.infoOrganFormShow} />
-    <ChangeParentOrganDialog title={AppIns.organFromDailogTitle} visible={AppIns.changeParentOrganShow} />
+    <LeftTreePanel />
+    <RightGridPanel />
+    <AddFormDialog title={PageContext.formTitle} visible={PageContext.addFormShow} />
+    <EditFormDialog title={PageContext.formTitle} visible={PageContext.editFormShow} />
+    <InfoFormDialog title={PageContext.formTitle} visible={PageContext.infoFormShow} />
+    <ConfigFormDialog title={PageContext.formTitle} visible={PageContext.configFormShow} />
+    <ChangeOrganDialog title={PageContext.formTitle} visible={PageContext.changeOrganShow} />
   </div>;
 }
-const OrganTreeLeft = () => {
+const LeftTreePanel = () => {
   const titleStyle = {
     with: '100%', lineHeight: '32px', textAlign: 'left', height: '32px', padding: '2px 5px',
     fontWeight: '500'
-
   };
   const refreshStyle = {
     position: 'absolute',
@@ -128,50 +120,38 @@ const OrganTreeLeft = () => {
     alignItems: 'center',
     justifyContent: 'center',
   }
-  const addStyle = {
-    position: 'absolute',
-    top: '0px',
-    right: '36px',
-    width: '36px',
-    height: '36px',
-    lineHeight: '36px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 0
-  }
   return <div className="bmbp-page-tree-grid-tree">
     <div className="bmbp-page-tree-grid-tree-title">
       <div style={titleStyle}><span>组织机构</span></div>
-      <div style={refreshStyle}><arco.Button icon={<arcoicon.IconRefresh style={{ color: '#165dff' }} />} onClick={() => onRefreshOrganTree()} /></div>
+      <div style={refreshStyle}><arco.Button icon={<arcoicon.IconRefresh style={{ color: '#165dff' }} />} onClick={() => onRefreshLeftTreeData()} /></div>
     </div>
     <div style={{ display: 'block', padding: '5px 2px' }}>
       <arco.Input.Search style={{ background: '#FFFFFF' }} />
     </div>
-    <arco.Tree showLine blockNode onSelect={(keys, ext) => { onOrganTreeNodeClick(ext.node.props.dataRef) }}
+    <arco.Tree showLine blockNode onSelect={(_, ext) => { onLeftTreeNodeClick(ext.node.props.dataRef) }}
     > {
-        buildTreeData(AppIns.organTreeData)
+        buildLeftTreeNode(PageContext.leftTreeData)
       } </arco.Tree>
   </div>;
 }
-const buildTreeData = (treeData) => {
-  let organTreeData = treeData || [];
-  if (!organTreeData || organTreeData.length == 0) {
+const buildLeftTreeNode = (treeData) => {
+  let tempData = treeData || [];
+  if (!tempData || tempData.length == 0) {
     return null;
   }
-  return organTreeData.map((item) => {
+
+  return tempData.map((item) => {
     const { organChildren, organCode, organTitle, ...rest } = item;
     return (
       <arco.Tree.Node key={organCode} title={organTitle} {...rest} dataRef={item}>
-        {organChildren ? buildTreeData(item.organChildren) : null}
+        {organChildren ? buildLeftTreeNode(item.organChildren) : null}
       </arco.Tree.Node>
     );
   });
 }
 
 
-const UserGridRight = () => {
-
+const RightGridPanel = () => {
   return <div className="bmbp-page-tree-grid-grid">
     <div>
       <div className="bmbp-page-serach-form">
@@ -179,9 +159,11 @@ const UserGridRight = () => {
       </div>
       <div className="bmbp-page-serach-toolbar">
         <div className="bmbp-page-serach-toolbar-left">
-          <arco.Button type='primary' onClick={() => { onAddRootOrgan() }}>新增</arco.Button>
           {
-            AppIns.selectedRowKeys && AppIns.selectedRowKeys.length > 0 ? <arco.Popconfirm focusLock title='删除确认' content='数据删除之后，无法恢复，是否继续?' onOk={() => { onBatchDeleteOrgan(AppIns.selectedRowKeys) }}>
+            PageContext.leftTreeSelectNode.recordId ? <arco.Button type='primary' onClick={() => { onAddForm() }}>新增</arco.Button> : null
+          }
+          {
+            PageContext.gridSelectedKeys && PageContext.gridSelectedKeys.length > 0 ? <arco.Popconfirm focusLock title='删除确认' content='数据删除之后，无法恢复，是否继续?' onOk={() => { onBatchDelete(PageContext.gridSelectedKeys) }}>
               <arco.Button type='secondary' >删除</arco.Button>
             </arco.Popconfirm> : null
           }
@@ -200,57 +182,12 @@ const UserGridRight = () => {
   </div>;
 }
 
-const SearchForm = () => {
-  AppIns.searchFormRef = React.useRef();
-
-  const searchBtnStyle = {
-    marginRight: "4px",
-    padding: "0 5px"
-  };
-  const formItemLayout = {
-    labelCol: {
-      span: 8,
-    },
-    wrapperCol: {
-      span: 16,
-    },
-    labelAlign: 'right'
-  };
-  return <div>
-    <arco.Form ref={AppIns.searchFormRef} {...formItemLayout}>
-      <arco.Grid.Row gutter={24}>
-        <arco.Grid.Col span={7}>
-          <arco.Form.Item field="userName" label='用户名称'>
-            <arco.Input placeholder='请输入用户名称' />
-          </arco.Form.Item>
-        </arco.Grid.Col>
-        <arco.Grid.Col span={7}>
-          <arco.Form.Item field="userNickName" label='显示名称'>
-            <arco.Input placeholder='请输入用户显示名称' />
-          </arco.Form.Item>
-        </arco.Grid.Col>
-        <arco.Grid.Col span={7}>
-          <arco.Form.Item field="recordStatus" label='用户状态' allowClear>
-            <arco.Select placeholder='请选择用户状态'>
-              <arco.Select.Option key={'1'} value={'1'}>正常</arco.Select.Option>
-              <arco.Select.Option key={'0'} value={'0'}>已停用</arco.Select.Option>
-            </arco.Select>
-          </arco.Form.Item>
-        </arco.Grid.Col>
-        <arco.Grid.Col span={3}>
-          <arco.Button type='primary' style={searchBtnStyle} onClick={() => { onSearchFormQueryBtnClick() }}>查询</arco.Button>
-          <arco.Button type='secondary' style={searchBtnStyle} onClick={() => { onSearchFormRestBtnClick() }}>重置</arco.Button>
-        </arco.Grid.Col>
-      </arco.Grid.Row>
-    </arco.Form>
-  </div >;
-}
 
 const GridTable = () => {
   React.useEffect(() => {
-    onQueryPageData();
-  }, [AppIns.currentOrganCode]);
-  const columns = [
+    onQueryRightGridData();
+  }, [PageContext.leftTreeSelectNode]);
+  const gridColumns = [
     {
       title: '用户名称',
       dataIndex: 'userName',
@@ -282,17 +219,17 @@ const GridTable = () => {
       width: '120px',
       render: (_, record) => {
         return <div className="bmbp-grid-row-action">
-          <arco.Button type='text' size={'mini'} onClick={() => onEditOrgan(record)}>编辑</arco.Button>
-          <arco.Button type='text' size={'mini'} onClick={() => onEditOrganInfo(record)}>配置</arco.Button>
+          <arco.Button type='text' size={'mini'} onClick={() => onEditForm(record)}>编辑</arco.Button>
+          <arco.Button type='text' size={'mini'} onClick={() => onConfigForm(record)}>配置</arco.Button>
           <arco.Popover
             trigger='hover' position='left'
             content={
               <div className="bmbp-action-more">
-                <arco.Button size={'mini'} onClick={() => onInfoOrgan(record)}>重置密码</arco.Button>
-                <arco.Button size={'mini'} onClick={() => onInfoOrgan(record)}>查看</arco.Button>
-                <arco.Button size={'mini'} onClick={() => onChangeOrganParent(record)}>变更组织</arco.Button>
-                {record.recordStatus == '0' ? <arco.Button size={'mini'} onClick={() => onDisableOrgan(record)}>停用</arco.Button> : <arco.Button size={'mini'} onClick={() => onEnableOrgan(record)}>启用</arco.Button>}
-                <arco.Popconfirm focusLock title='删除确认' content='数据删除之后，无法恢复，是否继续?' onOk={() => { onDeleteOrgan(record) }}>
+                <arco.Button size={'mini'} onClick={() => onInfoForm(record)}>查看</arco.Button>
+                <arco.Button size={'mini'} onClick={() => onResetPasswordEvent(record)}>重置密码</arco.Button>
+                <arco.Button size={'mini'} onClick={() => onChangeOrganEvent(record)}>变更组织</arco.Button>
+                {record.recordStatus == '0' ? <arco.Button size={'mini'} onClick={() => onDisableEvent(record)}>停用</arco.Button> : <arco.Button size={'mini'} onClick={() => onEnableEvent(record)}>启用</arco.Button>}
+                <arco.Popconfirm focusLock title='删除确认' content='数据删除之后，无法恢复，是否继续?' onOk={() => { onDeleteEvent(record) }}>
                   <arco.Button size={'mini'} status='danger'>删除</arco.Button>
                 </arco.Popconfirm>
               </div>
@@ -308,10 +245,10 @@ const GridTable = () => {
 
   return <arco.Table
     rowSelection={{
-      type: 'checkbox', checkAll: true, fixed: true, selectedRowKeys: AppIns.selectedRowKeys,
+      type: 'checkbox', checkAll: true, fixed: true, selectedRowKeys: PageContext.gridSelectedKeys,
       onChange: (selectedRowKeys, _) => {
-        AppIns.setSelectedRowKeys(selectedRowKeys);
+        PageContext.setGridSelectedKeys(selectedRowKeys);
       },
     }}
-    rowKey={'recordId'} columns={columns} data={AppIns.organGridData} pagination={AppIns.pagination} onChange={onGridPageChange} />;
+    rowKey={'recordId'} columns={gridColumns} data={PageContext.rightGridData} pagination={PageContext.pageConfig} onChange={() => { onGridPageConfigChange() }} />;
 }

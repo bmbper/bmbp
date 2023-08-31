@@ -1,7 +1,7 @@
 use bmbp_app_common::BmbpBaseModel;
 use serde::{Deserialize, Serialize};
 use std::string::ToString;
-/// 组织机构
+/// 系统账号
 #[allow(dead_code)]
 #[derive(Default, Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]

@@ -1,87 +1,65 @@
-const OrganApi = {
-  queryTreeUrl: '/rbac/v1/organ/find/tree',
-  queryTreeWithOutOrganUrl: '/rbac/v1/organ/find/tree/with/out/id/',
-  queryPageUrl: '/rbac/v1/organ/find/page',
-  queryInfoUrl: '/rbac/v1/organ/find/info/id/',
-  saveUrl: '/rbac/v1/organ/save',
-  changeParentUrl: '/rbac/v1/organ/update/parent/',
-  removeUrl: '/rbac/v1/organ/remove/id/',
-  disableUrl: '/rbac/v1/organ/disable/id/',
-  enableUrl: '/rbac/v1/organ/enable/id/'
+const PageApi = {
+  queryOrganTreeUrl: '/rbac/v1/organ/find/tree',
+  queryPageUrl: '/rbac/v1/user/find/page',
+  queryUserInfoUrl: '/rbac/v1/user/find/info/id/',
+  saveUserUrl: '/rbac/v1/user/save',
+  changeUserOrganUrl: '/rbac/v1/user/update/organ/',
+  removeUserUrl: '/rbac/v1/user/remove/id/',
+  disableUserUrl: '/rbac/v1/user/disable/id/',
+  enableUserUrl: '/rbac/v1/user/enable/id/',
+  resetUserPasswordUrl: '/rbac/v1/user/update/reset/password/id/'
 }
-
-const onAddRootOrgan = () => {
-  AppIns.setOrganFromDailogTitle("新增组织");
-  AppIns.setAddOrganFormShow(true);
-  AppIns.setInitOrganValue({ organParentTitle: "", organParentCode: "0" });
-}
-const onRefreshOrganTree = () => {
-  onQueryTreeData({});
-}
-const onOrganTreeNodeClick = (organ) => {
-  AppIns.setCurrentOrganCode(organ.organCode);
-}
-const onChangeOrganParent = (organ) => {
-  AppIns.setOrganFromDailogTitle("选择上级");
-  AppIns.setInitOrganValue({ recordId: organ.recordId });
-  AppIns.setChangeParentOrganShow(true);
-}
-const onAddOrganChild = (organ) => {
-  AppIns.setOrganFromDailogTitle("新增下级组织");
-  AppIns.setAddOrganFormShow(true);
-  AppIns.setInitOrganValue({ organParentTitle: organ.organTitle, organParentCode: organ.organCode });
-}
-const onEditOrgan = (organ) => {
-  AppIns.setOrganFromDailogTitle("编辑组织");
-  AppIns.setEditOrganFormShow(true);
-  AppIns.setInitOrganValue({ recordId: organ.recordId });
-}
-const onInfoOrgan = (organ) => {
-  AppIns.setOrganFromDailogTitle("查看组织");
-  AppIns.setInfoOrganFormShow(true);
-  AppIns.setInitOrganValue({ recordId: organ.recordId });
-}
-const onEnableOrgan = (organ) => {
-  BmbpHttp.post(OrganApi.enableUrl + organ.recordId, {}).then((resp) => {
+const onQueryLeftTreeData = () => {
+  BmbpHttp.post(PageApi.queryOrganTreeUrl, {}).then((resp) => {
     if (resp.code == 0) {
-      arco.Message.info(resp.msg);
-      onQueryPageData({});
-      onQueryTreeData({});
+      PageContext.setLeftTreeData(resp.data);
     } else {
       arco.Message.error(resp.msg);
     }
   });
 }
-
-const onDisableOrgan = (organ) => {
-  BmbpHttp.post(OrganApi.disableUrl + organ.recordId, {}).then((resp) => {
+const onRefreshLeftTreeData = () => {
+  onQueryLeftTreeData({});
+}
+const onLeftTreeNodeClick = (nodeData) => {
+  PageContext.setLeftTreeSelectNode(nodeData);
+}
+const onQueryRightGridData = (queryParams) => {
+  queryParams = queryParams || {}
+  queryParams.pageNo = PageContext.pageConfig.current;
+  queryParams.pageSize = PageContext.pageConfig.pageSize;
+  let searchFormData = PageContext.searchFormRef.current.getFieldsValue();
+  if (PageContext.leftTreeSelectNode) {
+    queryParams.organCode = PageContext.leftTreeSelectNode.organCode;
+  }
+  Object.assign(queryParams, searchFormData);
+  BmbpHttp.post(PageApi.queryPageUrl, queryParams).then((resp) => {
     if (resp.code == 0) {
-      arco.Message.info(resp.msg);
-      onQueryPageData({});
-      onQueryTreeData({});
+      let respData = resp.data;
+      PageContext.setPageConfig({ ...PageContext.pageConfig, total: respData.rowTotal });
+      PageContext.setRightGridData(respData.data);
     } else {
       arco.Message.error(resp.msg);
     }
   });
 }
-
-const onDeleteOrgan = (organ) => {
-  BmbpHttp.post(OrganApi.removeUrl + organ.recordId, {}).then((resp) => {
-    if (resp.code == 0) {
-      onQueryPageData({});
-      onQueryTreeData({});
-    } else {
-      arco.Message.error(resp.msg);
-    }
-  });
+const onGridPageConfigChange = (page) => {
+  PageContext.setPagination({ ...PageContext.pagination, pageSize: page.pageSize });
 }
 
-
-const onEditOrganInfo = (organ) => {
-  arco.Message.info("配置组织明细信息");
+const onSearchFormQueryEvent = () => {
+  onQueryRightGridData({});
 }
 
-const onBatchDeleteOrgan = (organIds) => {
+const onSearchFormRestEvent = () => {
+  PageContext.formRef.current.resetFields();
+}
+const onAddForm = () => {
+  PageContext.setOrganFromDailogTitle("新增组织");
+  PageContext.setAddOrganFormShow(true);
+  PageContext.setInitOrganValue({ organParentTitle: "", organParentCode: "0" });
+}
+const onBatchDeleteEvent = (organIds) => {
   arco.Message.info("批量删除组织节点:" + JSON.stringify(organIds));
 }
 const onToolBarImportBtnClick = () => {
@@ -93,52 +71,71 @@ const onToolBarExportBtnClick = () => {
 const onToolBarPrintBtnClick = () => {
   arco.Message.info("打印功能开发中...");
 }
-
-const onSearchFormQueryBtnClick = () => {
-  onQueryPageData({});
+const onEditForm = (formValue) => {
+  PageContext.setOrganFromDailogTitle("编辑组织");
+  PageContext.setEditOrganFormShow(true);
+  PageContext.setInitOrganValue({ recordId: formValue.recordId });
 }
-
-const onSearchFormRestBtnClick = () => {
-  AppIns.formRef.current.resetFields();
+const onInfoForm = (formValue) => {
+  PageContext.setOrganFromDailogTitle("查看组织");
+  PageContext.setInfoOrganFormShow(true);
+  PageContext.setInitOrganValue({ recordId: formValue.recordId });
 }
-
-/// 列表分页大小变化
-const onGridPageChange = (page) => {
-  AppIns.setPagination({ ...AppIns.pagination, pageSize: page.pageSize });
+const onConfigForm = (formValue) => {
+  PageContext.setOrganFromDailogTitle("查看组织");
+  PageContext.setInfoOrganFormShow(true);
+  PageContext.setInitOrganValue({ recordId: formValue.recordId });
 }
-
-const onQueryTreeData = () => {
-  BmbpHttp.post(OrganApi.queryTreeUrl, {}).then((resp) => {
+const onEnableEvent = (organ) => {
+  BmbpHttp.post(PageApi.enableUserUrl + organ.recordId, {}).then((resp) => {
     if (resp.code == 0) {
-      AppIns.setOrganTreeData(resp.data);
+      arco.Message.info(resp.msg);
+      onQueryRightGridData({});
+      onQueryLeftTreeData({});
     } else {
       arco.Message.error(resp.msg);
     }
   });
 }
-
-const onQueryPageData = (queryParams) => {
-  queryParams = queryParams || {}
-  queryParams.pageNo = AppIns.pagination.current;
-  queryParams.pageSize = AppIns.pagination.pageSize;
-  let searchFormData = AppIns.searchFormRef.current.getFieldsValue();
-  if (AppIns.currentOrganCode) {
-    queryParams.organParentCode = AppIns.currentOrganCode;
-  }
-  Object.assign(queryParams, searchFormData);
-  BmbpHttp.post(OrganApi.queryPageUrl, queryParams).then((resp) => {
+const onDisableEvent = (organ) => {
+  BmbpHttp.post(PageApi.disableUserUrl + organ.recordId, {}).then((resp) => {
     if (resp.code == 0) {
-      let respData = resp.data;
-      AppIns.setPagination({ ...AppIns.pagination, total: respData.rowTotal });
-      AppIns.setOrganGridData(respData.data);
+      arco.Message.info(resp.msg);
+      onQueryRightGridData({});
+      onQueryLeftTreeData({});
     } else {
       arco.Message.error(resp.msg);
     }
   });
 }
+const onDeleteEvent = (organ) => {
+  BmbpHttp.post(PageApi.removeUserUrl + organ.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      onQueryRightGridData({});
+      onQueryLeftTreeData({});
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+const onResetPasswordEvent = (organ) => {
+  BmbpHttp.post(PageApi.removeUserUrl + organ.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      onQueryRightGridData({});
+      onQueryLeftTreeData({});
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+const onChangeOrganEvent = (organ) => {
+  PageContext.setOrganFromDailogTitle("选择上级");
+  PageContext.setInitOrganValue({ recordId: organ.recordId });
+  PageContext.setChangeParentOrganShow(true);
+}
 
-const onQueryOrganInfo = (recordId, formRef) => {
-  BmbpHttp.post(OrganApi.queryInfoUrl + recordId, {}).then((resp) => {
+const onQueryFormInfo = (recordId, formRef) => {
+  BmbpHttp.post(PageApi.queryUserInfoUrl + recordId, {}).then((resp) => {
     if (resp.code == 0) {
       formRef.setFieldsValue(resp.data);
     } else {
@@ -147,36 +144,34 @@ const onQueryOrganInfo = (recordId, formRef) => {
   });
 }
 
-const saveOrganInfo = (formData, set_model) => {
-  BmbpHttp.post(OrganApi.saveUrl, formData).then((resp) => {
+const onSaveFormInfo = (formData, set_model) => {
+  BmbpHttp.post(PageApi.saveUserUrl, formData).then((resp) => {
     if (resp.code == 0) {
       arco.Message.info(resp.msg);
       set_model(false);
-      onQueryPageData({});
-      onQueryTreeData({});
+      onQueryRightGridData({});
+      onQueryLeftTreeData({});
     } else {
       arco.Message.error(resp.msg);
     }
   });
 }
 
-/// 查询排除节点的组织结构数据
-const onQueryTreeDataWithOutRecordId = () => {
-  BmbpHttp.get(OrganApi.queryTreeWithOutOrganUrl + AppIns.initOrganValue.recordId, {}).then((resp) => {
+const onQueryChangeOrganTreeData = () => {
+  BmbpHttp.get(PageApi.queryTreeWithOutOrganUrl + PageContext.initOrganValue.recordId, {}).then((resp) => {
     if (resp.code == 0) {
-      AppIns.setTreeParentData(resp.data);
+      PageContext.setTreeParentData(resp.data);
     } else {
       arco.Message.error(resp.msg);
     }
   });
 }
-
-const onSaveOrganParentChange = (recordId, organParentCode) => {
-  BmbpHttp.post(OrganApi.changeParentUrl + recordId + "/" + organParentCode, {}).then((resp) => {
+const onSaveOrganChangeInfo = (recordId, organParentCode) => {
+  BmbpHttp.post(PageApi.changeUserOrganUrl + recordId + "/" + organParentCode, {}).then((resp) => {
     if (resp.code == 0) {
       arco.Message.info(resp.msg);
-      onQueryTreeData({});
-      onQueryPageData({});
+      onQueryLeftTreeData({});
+      onQueryRightGridData({});
     } else {
       arco.Message.error(resp.msg);
     }

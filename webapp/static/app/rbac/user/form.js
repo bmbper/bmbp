@@ -1,51 +1,84 @@
-const AddRootOrganDialog = (props) => {
+const SearchForm = () => {
+  const searchBtnStyle = {
+    marginRight: "4px",
+    padding: "0 5px"
+  };
+  const formItemLayout = {
+    labelCol: {
+      span: 8,
+    },
+    wrapperCol: {
+      span: 16,
+    },
+    labelAlign: 'right'
+  };
+  return <div>
+    <arco.Form ref={PageContext.searchFormRef} {...formItemLayout}>
+      <arco.Grid.Row gutter={24}>
+        <arco.Grid.Col span={7}>
+          <arco.Form.Item field="userName" label='用户名称'>
+            <arco.Input placeholder='请输入用户名称' />
+          </arco.Form.Item>
+        </arco.Grid.Col>
+        <arco.Grid.Col span={7}>
+          <arco.Form.Item field="userNickName" label='显示名称'>
+            <arco.Input placeholder='请输入用户显示名称' />
+          </arco.Form.Item>
+        </arco.Grid.Col>
+        <arco.Grid.Col span={7}>
+          <arco.Form.Item field="recordStatus" label='用户状态' allowClear>
+            <arco.Select placeholder='请选择用户状态'>
+              <arco.Select.Option key={'1'} value={'1'}>正常</arco.Select.Option>
+              <arco.Select.Option key={'0'} value={'0'}>已停用</arco.Select.Option>
+            </arco.Select>
+          </arco.Form.Item>
+        </arco.Grid.Col>
+        <arco.Grid.Col span={3}>
+          <arco.Button type='primary' style={searchBtnStyle} onClick={() => { onSearchFormQueryEvent() }}>查询</arco.Button>
+          <arco.Button type='secondary' style={searchBtnStyle} onClick={() => { onSearchFormRestEvent() }}>重置</arco.Button>
+        </arco.Grid.Col>
+      </arco.Grid.Row>
+    </arco.Form>
+  </div >;
+}
+
+const AddFormDialog = (props) => {
   return <arco.Modal
     title={props.title}
     visible={props.visible}
     autoFocus={false}
     focusLock={true}
     onOk={() => {
-      AppIns.organFormRef.current.validate().then((formData) => {
-        saveOrganInfo(formData, AppIns.setAddOrganFormShow);
-        AppIns.organFormRef.current.resetFields();
+      PageContext.addFormRef.current.validate().then((formData) => {
+        onSaveFormInfo(formData, PageContext.setAddFormShow);
+        PageContext.addFormRef.current.resetFields();
       }).catch((_) => {
       });
     }}
     onCancel={() => {
-      AppIns.organFormRef.current.resetFields();
-      AppIns.setAddOrganFormShow(false);
+      PageContext.addFormRef.current.resetFields();
+      PageContext.setAddFormShow(false);
     }}
   >
-    <OrganFormView />
+    <AddFormView />
   </arco.Modal>
 }
 
-const OrganFormView = () => {
+const AddFormView = () => {
   React.useEffect(() => {
-    if (AppIns.initOrganValue) {
-      if (AppIns.initOrganValue.recordId) {
-        onQueryOrganInfo(AppIns.initOrganValue.recordId);
-      } else {
-        AppIns.organFormRef.current.setFieldsValue(AppIns.initOrganValue);
-      }
+    if (PageContext.initFormValue) {
+      PageContext.addFormRef.current.setFieldsValue(PageContext.initFormValue);
     }
-
-
-  }, [AppIns.initOrganValue]);
+  }, [PageContext.initFormValue]);
   return <div>
-    <arco.Form ref={AppIns.organFormRef}>
+    <arco.Form ref={PageContext.addFormRef}>
       <arco.Grid.Row gutter={24}>
         <arco.Grid.Col span={24}>
           <arco.Form.Item field="recordId" label='主键' hidden={true}>
             <arco.Input placeholder='' />
           </arco.Form.Item>
-          <arco.Form.Item field="organParentCode" label='上级组织编码' hidden={true}>
+          <arco.Form.Item field="organCode" label='组织编码' hidden={true}>
             <arco.Input placeholder='' />
-          </arco.Form.Item>
-        </arco.Grid.Col>
-        <arco.Grid.Col span={24}>
-          <arco.Form.Item field="organParentTitle" label='上级组织'>
-            <arco.Input disabled={true} />
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
@@ -74,40 +107,40 @@ const OrganFormView = () => {
   </div >;
 }
 
-const EditOrganDialog = (props) => {
+const EditFormDialog = (props) => {
   return <arco.Modal
     title={props.title}
     visible={props.visible}
     autoFocus={false}
     focusLock={true}
     onOk={() => {
-      AppIns.organEditFormRef.current.validate().then((formData) => {
-        saveOrganInfo(formData, AppIns.setEditOrganFormShow);
-        AppIns.organEditFormRef.current.resetFields();
+      PageContext.editFormRef.current.validate().then((formData) => {
+        onSaveFormInfo(formData, PageContext.setEditFormShow);
+        PageContext.editFormRef.current.resetFields();
       }).catch((_) => {
       });
     }}
     onCancel={() => {
-      AppIns.organEditFormRef.current.resetFields();
-      AppIns.setEditOrganFormShow(false);
+      PageContext.editFormRef.current.resetFields();
+      PageContext.setEditFormShow(false);
     }}
   >
-    <EditOrganFormView />
+    <EditFormView />
   </arco.Modal>
 }
 
-const EditOrganFormView = () => {
+const EditFormView = () => {
   React.useEffect(() => {
-    if (AppIns.initOrganValue) {
-      if (AppIns.initOrganValue.recordId) {
-        onQueryOrganInfo(AppIns.initOrganValue.recordId, AppIns.organEditFormRef.current);
+    if (PageContext.initFormValue) {
+      if (PageContext.initFormValue.recordId) {
+        onQueryFormInfo(PageContext.initFormValue.recordId, PageContext.editFormRef.current);
       } else {
-        AppIns.organEditFormRef.current.setFieldsValue(AppIns.initOrganValue);
+        PageContext.editFormRef.current.setFieldsValue(PageContext.initFormValue);
       }
     }
-  }, [AppIns.initOrganValue]);
+  }, [PageContext.initFormValue]);
   return <div>
-    <arco.Form ref={AppIns.organEditFormRef}>
+    <arco.Form ref={PageContext.editFormRef}>
       <arco.Grid.Row gutter={24}>
         <arco.Grid.Col span={24}>
           <arco.Form.Item field="recordId" label='主键' hidden={true}>
@@ -143,7 +176,7 @@ const EditOrganFormView = () => {
   </div>;
 }
 
-const InfoOrganDialog = (props) => {
+const InfoFormDialog = (props) => {
   return <arco.Modal
     title={props.title}
     visible={props.visible}
@@ -151,26 +184,26 @@ const InfoOrganDialog = (props) => {
     focusLock={true}
     footer={null}
     onCancel={() => {
-      AppIns.organInfoFormRef.current.resetFields();
-      AppIns.setInfoOrganFormShow(false);
+      PageContext.infoFormRef.current.resetFields();
+      PageContext.setInfoFormShow(false);
     }}
   >
-    <InfoOrganFormView />
+    <InfoFormView />
   </arco.Modal>
 }
 
-const InfoOrganFormView = () => {
+const InfoFormView = () => {
   React.useEffect(() => {
-    if (AppIns.initOrganValue) {
-      if (AppIns.initOrganValue.recordId) {
-        onQueryOrganInfo(AppIns.initOrganValue.recordId, AppIns.organInfoFormRef.current);
+    if (PageContext.initFormValue) {
+      if (PageContext.initFormValue.recordId) {
+        onQueryFormInfo(PageContext.initFormValue.recordId, PageContext.infoFormRef.current);
       } else {
-        AppIns.organInfoFormRef.current.setFieldsValue(AppIns.initOrganValue);
+        PageContext.infoFormRef.current.setFieldsValue(PageContext.initFormValue);
       }
     }
-  }, [AppIns.initOrganValue]);
+  }, [PageContext.initFormValue]);
   return <div>
-    <arco.Form ref={AppIns.organInfoFormRef} disabled={true}>
+    <arco.Form ref={PageContext.infoFormRef} disabled={true}>
       <arco.Grid.Row gutter={24}>
         <arco.Grid.Col span={24}>
           <arco.Form.Item field="recordId" label='主键' hidden={true}>
@@ -207,45 +240,115 @@ const InfoOrganFormView = () => {
 }
 
 
-const ChangeParentOrganDialog = (props) => {
+const ConfigFormDialog = (props) => {
   return <arco.Modal
     title={props.title}
     visible={props.visible}
     autoFocus={false}
     focusLock={true}
     onOk={() => {
-      let recordId = AppIns.initOrganValue.recordId;
-      let organParentCode = AppIns.initOrganValue.organParentCode;
-      onSaveOrganParentChange(recordId, organParentCode);
-      AppIns.setInitOrganValue({});
-      AppIns.setTreeParentData([]);
-      AppIns.setChangeParentOrganShow(false);
+      PageContext.configFormRef.current.validate().then((formData) => {
+        onSaveFormInfo(formData, PageContext.setConfigFormShow);
+        PageContext.configFormRef.current.resetFields();
+      }).catch((_) => {
+      });
+    }}
+    onCancel={() => {
+      PageContext.configFormRef.current.resetFields();
+      PageContext.setConfigFormShow(false);
+    }}
+  >
+    <ConfigFormView />
+  </arco.Modal>
+}
+
+const ConfigFormView = () => {
+  React.useEffect(() => {
+    if (PageContext.initFormValue) {
+      if (PageContext.initFormValue.recordId) {
+        onQueryFormInfo(PageContext.initFormValue.recordId, PageContext.configFormRef.current);
+      } else {
+        PageContext.configFormRef.current.setFieldsValue(PageContext.initFormValue);
+      }
+    }
+  }, [PageContext.initFormValue]);
+  return <div>
+    <arco.Form ref={PageContext.configFormRef}>
+      <arco.Grid.Row gutter={24}>
+        <arco.Grid.Col span={24}>
+          <arco.Form.Item field="recordId" label='主键' hidden={true}>
+            <arco.Input placeholder='' />
+          </arco.Form.Item>
+          <arco.Form.Item field="organParentCode" label='上级组织编码' hidden={true}>
+            <arco.Input placeholder='' />
+          </arco.Form.Item>
+        </arco.Grid.Col>
+        <arco.Grid.Col span={24}>
+          <arco.Form.Item field="organTitle" label='组织名称' rules={[{ required: true, message: '组织名称不能为空' }, { minLength: 2, maxLength: 32, message: '应用编码长度2到32' }]}>
+            <arco.Input placeholder='请输入组织名称' />
+          </arco.Form.Item>
+        </arco.Grid.Col>
+        <arco.Grid.Col span={24}>
+          <arco.Form.Item disabled={true} field="organType" label='组织类型' allowClear rules={[{ required: true, message: '组织类型不能为空' }]} >
+            <arco.Select placeholder='请选择组织类型'>
+              <arco.Select.Option key={'1'} value={'units'}>分组</arco.Select.Option>
+              <arco.Select.Option key={'2'} value={'unit'}>单位</arco.Select.Option>
+              <arco.Select.Option key={'3'} value={'dept'}>部门</arco.Select.Option>
+              <arco.Select.Option key={'4'} value={'post'}>岗位</arco.Select.Option>
+              <arco.Select.Option key={'5'} value={'person'}>人员</arco.Select.Option>
+            </arco.Select>
+          </arco.Form.Item>
+        </arco.Grid.Col>
+        <arco.Grid.Col span={24}>
+          <arco.Form.Item field="recordNum" label='显示顺序' allowClear rules={[{ required: true, message: '显示顺序不能为空' }]}>
+            <arco.InputNumber placeholder='顺序' />
+          </arco.Form.Item>
+        </arco.Grid.Col>
+      </arco.Grid.Row>
+    </arco.Form>
+  </div>;
+}
+
+
+const ChangeOrganDialog = (props) => {
+  return <arco.Modal
+    title={props.title}
+    visible={props.visible}
+    autoFocus={false}
+    focusLock={true}
+    onOk={() => {
+      let recordId = PageContext.initFormValue.recordId;
+      let organCode = PageContext.initFormValue.organCode;
+      onSaveOrganChangeInfo(recordId, organCode);
+      PageContext.setInitFormValue({});
+      PageContext.setChangeOrganTreeData([]);
+      PageContext.setChangeOrganShow(false);
     }}
     onCancel={() => {
       // 清空初始值
-      AppIns.setInitOrganValue({});
-      AppIns.setTreeParentData([]);
-      AppIns.setChangeParentOrganShow(false);
+      PageContext.setInitFormValue({});
+      PageContext.setChangeOrganTreeData([]);
+      PageContext.setChangeOrganShow(false);
     }}
   >
-    <ParentOrganTree />
+    <ChangeOranTreeView />
   </arco.Modal>
 }
-const ParentOrganTree = () => {
+const ChangeOranTreeView = () => {
   React.useEffect(() => {
-    if (AppIns.changeParentOrganShow) {
-      onQueryTreeDataWithOutRecordId();
+    if (PageContext.changeOrganShow) {
+      onQueryChangeOrganTreeData();
     }
-  }, [AppIns.changeParentOrganShow]);
+  }, [PageContext.setChangeOrganShow]);
   const treeFiledNames = {
     key: 'organCode',
     title: 'organTitle',
     children: 'organChildren',
   };
-  return <arco.Tree ref={AppIns.parentOrganTreeRef} showLine blockNode multiple={false} checkStrictly={true} fieldNames={treeFiledNames} treeData={AppIns.treeParentData}
-    onSelect={(keys, evet) => {
+  return <arco.Tree ref={PageContext.changeOrganTreeRef} showLine blockNode multiple={false} checkStrictly={true} fieldNames={treeFiledNames} treeData={PageContext.changeOrganTreeData}
+    onSelect={(keys, _) => {
       let key = keys[0];
-      AppIns.setInitOrganValue({ organParentCode: key, recordId: AppIns.initOrganValue.recordId });
+      PageContext.setInitFromValue({ organCode: key, recordId: PageContext.initFormValue.recordId });
     }}
   ></arco.Tree>;
 }

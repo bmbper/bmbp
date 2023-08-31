@@ -12,6 +12,14 @@ impl UserScript {
         script.filter("record_id = #{recordId}");
         script
     }
+
+    pub(crate) fn reset_password_script() -> BmbpScriptSql {
+        let mut script = BmbpScriptSql::new();
+        script.update(Self::get_organ_table_name().as_str());
+        script.set_value("user_password", "#{password}");
+        script.filter("record_id = #{recordId}");
+        script
+    }
 }
 
 impl CurdScript for UserScript {
