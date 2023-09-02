@@ -11,7 +11,7 @@ pub struct BmbpRbacUser {
     #[serde(flatten)]
     base: BmbpBaseModel,
     /// 组织编码
-    organ_code: Option<String>,
+    organ_id: Option<String>,
     user_name: Option<String>,
     user_nick_name: Option<String>,
     user_password: Option<String>,
@@ -28,9 +28,9 @@ impl BmbpRbacUser {
     pub fn orm_table_column_name() -> Vec<String> {
         let mut base_fields = BmbpBaseModel::get_fields();
         let rbac_app_field = vec![
-            "organ_code".to_string(),
+            "organ_id".to_string(),
             "user_name".to_string(),
-            "user_passowrd".to_string(),
+            "user_password".to_string(),
             "user_nick_name".to_string(),
         ];
         base_fields.extend_from_slice(rbac_app_field.as_slice());

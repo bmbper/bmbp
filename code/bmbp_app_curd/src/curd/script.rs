@@ -34,6 +34,8 @@ pub trait CurdScript {
     fn update_script() -> BmbpScriptSql {
         let mut update = BmbpScriptSql::new();
         update.update(Self::get_organ_table_name().as_str());
+        update.set_value("record_update_user", "#{recordUpdateUser}");
+        update.set_value("record_update_time", "#{recordUpdateTime}");
         update
     }
     fn update_status_script() -> BmbpScriptSql {

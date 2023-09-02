@@ -50,9 +50,12 @@ const AddFormDialog = (props) => {
     focusLock={true}
     onOk={() => {
       PageContext.addFormRef.current.validate().then((formData) => {
-        onSaveFormInfo(formData, PageContext.setAddFormShow);
-        PageContext.addFormRef.current.resetFields();
+        onSaveFormInfo(formData, () => {
+          PageContext.setAddFormShow(false);
+          PageContext.addFormRef.current.resetFields();
+        });
       }).catch((_) => {
+        PageContext.addFormRef.current.resetFields();
       });
     }}
     onCancel={() => {
@@ -77,24 +80,38 @@ const AddFormView = () => {
           <arco.Form.Item field="recordId" label='主键' hidden={true}>
             <arco.Input placeholder='' />
           </arco.Form.Item>
-          <arco.Form.Item field="organCode" label='组织编码' hidden={true}>
+          <arco.Form.Item field="organId" label='组织ID' hidden={true}>
             <arco.Input placeholder='' />
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
-          <arco.Form.Item field="organTitle" label='组织名称' rules={[{ required: true, message: '组织名称不能为空' }, { minLength: 2, maxLength: 32, message: '应用编码长度2到32' }]}>
-            <arco.Input placeholder='请输入组织名称' />
+          <arco.Form.Item field="userName" label='用户名称' rules={[{ required: true, message: '用户名称不能为空' }, { minLength: 4, maxLength: 32, message: '用户名称长度5到32' }]}>
+            <arco.Input placeholder='用户名称：登录系统的惟一标识' />
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
-          <arco.Form.Item field="organType" label='组织类型' allowClear rules={[{ required: true, message: '组织类型不能为空' }]} >
-            <arco.Select placeholder='请选择组织类型'>
-              <arco.Select.Option key={'1'} value={'units'}>分组</arco.Select.Option>
-              <arco.Select.Option key={'2'} value={'unit'}>单位</arco.Select.Option>
-              <arco.Select.Option key={'3'} value={'dept'}>部门</arco.Select.Option>
-              <arco.Select.Option key={'4'} value={'post'}>岗位</arco.Select.Option>
-              <arco.Select.Option key={'5'} value={'person'}>人员</arco.Select.Option>
-            </arco.Select>
+          <arco.Form.Item field="userNickName" label='用户昵称' rules={[{ required: true, message: '用户昵称不能为空' }, { minLength: 2, maxLength: 32, message: '用户昵称长度3到32' }]}>
+            <arco.Input placeholder='用户昵称：系统显示名称' />
+          </arco.Form.Item>
+        </arco.Grid.Col>
+        <arco.Grid.Col span={24}>
+          <arco.Form.Item field="userPassword" label='用户密码' rules={[{ required: true, message: '用户密码不能为空' }, { minLength: 10, maxLength: 10, message: '请设置10位用户密码' }]}>
+            <arco.Input.Password placeholder='用户密码' />
+          </arco.Form.Item>
+        </arco.Grid.Col>
+        <arco.Grid.Col span={24}>
+          <arco.Form.Item field="userPasswordConfirm" label='确认密码' dependencies={['userPassword']}
+            rules={[{ required: true, message: '确认密码不能为空' }, { minLength: 10, maxLength: 10, message: '请设置10确认密码' }, {
+              validator: (value, msg) => {
+                if (!value) {
+                  return msg('请输入确认密码');
+                } else if (PageContext.addFormRef.current.getFieldValue('userPassword') !== value) {
+                  return msg('两次密码输入不一致');
+                }
+                return msg(null);
+              }
+            }]} >
+            <arco.Input.Password placeholder='确认密码' />
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
@@ -115,8 +132,10 @@ const EditFormDialog = (props) => {
     focusLock={true}
     onOk={() => {
       PageContext.editFormRef.current.validate().then((formData) => {
-        onSaveFormInfo(formData, PageContext.setEditFormShow);
-        PageContext.editFormRef.current.resetFields();
+        onSaveFormInfo(formData, () => {
+          PageContext.setEditFormShow(false);
+          PageContext.editFormRef.current.resetFields();
+        });
       }).catch((_) => {
       });
     }}
@@ -133,7 +152,9 @@ const EditFormView = () => {
   React.useEffect(() => {
     if (PageContext.initFormValue) {
       if (PageContext.initFormValue.recordId) {
-        onQueryFormInfo(PageContext.initFormValue.recordId, PageContext.editFormRef.current);
+        onQueryFormInfo(PageContext.initFormValue.recordId, (data) => {
+          PageContext.editFormRef.current.setFieldsValue(data);
+        });
       } else {
         PageContext.editFormRef.current.setFieldsValue(PageContext.initFormValue);
       }
@@ -146,24 +167,18 @@ const EditFormView = () => {
           <arco.Form.Item field="recordId" label='主键' hidden={true}>
             <arco.Input placeholder='' />
           </arco.Form.Item>
-          <arco.Form.Item field="organParentCode" label='上级组织编码' hidden={true}>
+          <arco.Form.Item field="organId" label='组织ID' hidden={true}>
             <arco.Input placeholder='' />
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
-          <arco.Form.Item field="organTitle" label='组织名称' rules={[{ required: true, message: '组织名称不能为空' }, { minLength: 2, maxLength: 32, message: '应用编码长度2到32' }]}>
-            <arco.Input placeholder='请输入组织名称' />
+          <arco.Form.Item field="userName" label='用户名称' rules={[{ required: true, message: '用户名称不能为空' }, { minLength: 4, maxLength: 32, message: '用户名称长度5到32' }]}>
+            <arco.Input placeholder='用户名称：登录系统的惟一标识' />
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
-          <arco.Form.Item disabled={true} field="organType" label='组织类型' allowClear rules={[{ required: true, message: '组织类型不能为空' }]} >
-            <arco.Select placeholder='请选择组织类型'>
-              <arco.Select.Option key={'1'} value={'units'}>分组</arco.Select.Option>
-              <arco.Select.Option key={'2'} value={'unit'}>单位</arco.Select.Option>
-              <arco.Select.Option key={'3'} value={'dept'}>部门</arco.Select.Option>
-              <arco.Select.Option key={'4'} value={'post'}>岗位</arco.Select.Option>
-              <arco.Select.Option key={'5'} value={'person'}>人员</arco.Select.Option>
-            </arco.Select>
+          <arco.Form.Item field="userNickName" label='用户昵称' rules={[{ required: true, message: '用户昵称不能为空' }, { minLength: 2, maxLength: 32, message: '用户昵称长度3到32' }]}>
+            <arco.Input placeholder='用户昵称：系统显示名称' />
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
@@ -196,7 +211,9 @@ const InfoFormView = () => {
   React.useEffect(() => {
     if (PageContext.initFormValue) {
       if (PageContext.initFormValue.recordId) {
-        onQueryFormInfo(PageContext.initFormValue.recordId, PageContext.infoFormRef.current);
+        onQueryFormInfo(PageContext.initFormValue.recordId, (data) => {
+          PageContext.infoFormRef.current.setFieldsValue(data);
+        });
       } else {
         PageContext.infoFormRef.current.setFieldsValue(PageContext.initFormValue);
       }
@@ -209,24 +226,18 @@ const InfoFormView = () => {
           <arco.Form.Item field="recordId" label='主键' hidden={true}>
             <arco.Input placeholder='' />
           </arco.Form.Item>
-          <arco.Form.Item field="organParentCode" label='上级组织编码' hidden={true}>
+          <arco.Form.Item field="organId" label='组织ID' hidden={true}>
             <arco.Input placeholder='' />
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
-          <arco.Form.Item field="organTitle" label='组织名称' rules={[{ required: true, message: '组织名称不能为空' }, { minLength: 2, maxLength: 32, message: '应用编码长度2到32' }]}>
-            <arco.Input placeholder='请输入组织名称' />
+          <arco.Form.Item field="userName" label='用户名称' rules={[{ required: true, message: '用户名称不能为空' }, { minLength: 4, maxLength: 32, message: '用户名称长度5到32' }]}>
+            <arco.Input placeholder='用户名称：登录系统的惟一标识' />
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
-          <arco.Form.Item field="organType" label='组织类型' allowClear rules={[{ required: true, message: '组织类型不能为空' }]} >
-            <arco.Select placeholder='请选择组织类型'>
-              <arco.Select.Option key={'1'} value={'units'}>分组</arco.Select.Option>
-              <arco.Select.Option key={'2'} value={'unit'}>单位</arco.Select.Option>
-              <arco.Select.Option key={'3'} value={'dept'}>部门</arco.Select.Option>
-              <arco.Select.Option key={'4'} value={'post'}>岗位</arco.Select.Option>
-              <arco.Select.Option key={'5'} value={'person'}>人员</arco.Select.Option>
-            </arco.Select>
+          <arco.Form.Item field="userNickName" label='用户昵称' rules={[{ required: true, message: '用户昵称不能为空' }, { minLength: 2, maxLength: 32, message: '用户昵称长度3到32' }]}>
+            <arco.Input placeholder='用户昵称：系统显示名称' />
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
@@ -248,8 +259,11 @@ const ConfigFormDialog = (props) => {
     focusLock={true}
     onOk={() => {
       PageContext.configFormRef.current.validate().then((formData) => {
-        onSaveFormInfo(formData, PageContext.setConfigFormShow);
-        PageContext.configFormRef.current.resetFields();
+        onSaveFormInfo(formData, () => {
+          PageContext.configFormRef.current.resetFields();
+          PageContext.setConfigFormShow(false);
+        });
+
       }).catch((_) => {
       });
     }}
@@ -266,7 +280,9 @@ const ConfigFormView = () => {
   React.useEffect(() => {
     if (PageContext.initFormValue) {
       if (PageContext.initFormValue.recordId) {
-        onQueryFormInfo(PageContext.initFormValue.recordId, PageContext.configFormRef.current);
+        onQueryFormInfo(PageContext.initFormValue.recordId, (data) => {
+          PageContext.configFormRef.current.setFieldsValue(data);
+        });
       } else {
         PageContext.configFormRef.current.setFieldsValue(PageContext.initFormValue);
       }
@@ -279,24 +295,18 @@ const ConfigFormView = () => {
           <arco.Form.Item field="recordId" label='主键' hidden={true}>
             <arco.Input placeholder='' />
           </arco.Form.Item>
-          <arco.Form.Item field="organParentCode" label='上级组织编码' hidden={true}>
+          <arco.Form.Item field="organId" label='组织ID' hidden={true}>
             <arco.Input placeholder='' />
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
-          <arco.Form.Item field="organTitle" label='组织名称' rules={[{ required: true, message: '组织名称不能为空' }, { minLength: 2, maxLength: 32, message: '应用编码长度2到32' }]}>
-            <arco.Input placeholder='请输入组织名称' />
+          <arco.Form.Item field="userName" label='用户名称' rules={[{ required: true, message: '用户名称不能为空' }, { minLength: 4, maxLength: 32, message: '用户名称长度5到32' }]}>
+            <arco.Input placeholder='用户名称：登录系统的惟一标识' />
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
-          <arco.Form.Item disabled={true} field="organType" label='组织类型' allowClear rules={[{ required: true, message: '组织类型不能为空' }]} >
-            <arco.Select placeholder='请选择组织类型'>
-              <arco.Select.Option key={'1'} value={'units'}>分组</arco.Select.Option>
-              <arco.Select.Option key={'2'} value={'unit'}>单位</arco.Select.Option>
-              <arco.Select.Option key={'3'} value={'dept'}>部门</arco.Select.Option>
-              <arco.Select.Option key={'4'} value={'post'}>岗位</arco.Select.Option>
-              <arco.Select.Option key={'5'} value={'person'}>人员</arco.Select.Option>
-            </arco.Select>
+          <arco.Form.Item field="userNickName" label='用户昵称' rules={[{ required: true, message: '用户昵称不能为空' }, { minLength: 2, maxLength: 32, message: '用户昵称长度3到32' }]}>
+            <arco.Input placeholder='用户昵称：系统显示名称' />
           </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
@@ -318,8 +328,8 @@ const ChangeOrganDialog = (props) => {
     focusLock={true}
     onOk={() => {
       let recordId = PageContext.initFormValue.recordId;
-      let organCode = PageContext.initFormValue.organCode;
-      onSaveOrganChangeInfo(recordId, organCode);
+      let organId = PageContext.initFormValue.organId;
+      onSaveOrganChangeInfo(recordId, organId);
       PageContext.setInitFormValue({});
       PageContext.setChangeOrganTreeData([]);
       PageContext.setChangeOrganShow(false);
@@ -341,14 +351,14 @@ const ChangeOranTreeView = () => {
     }
   }, [PageContext.setChangeOrganShow]);
   const treeFiledNames = {
-    key: 'organCode',
+    key: 'recordId',
     title: 'organTitle',
     children: 'organChildren',
   };
   return <arco.Tree ref={PageContext.changeOrganTreeRef} showLine blockNode multiple={false} checkStrictly={true} fieldNames={treeFiledNames} treeData={PageContext.changeOrganTreeData}
     onSelect={(keys, _) => {
       let key = keys[0];
-      PageContext.setInitFromValue({ organCode: key, recordId: PageContext.initFormValue.recordId });
+      PageContext.setInitFormValue({ organId: key, recordId: PageContext.initFormValue.recordId });
     }}
   ></arco.Tree>;
 }

@@ -192,6 +192,33 @@ impl BmbpScriptSql {
         self.select_fields.push(field.to_string());
         self
     }
+
+    pub fn select_alias(&mut self, field: &str) -> &mut Self {
+        self.select_fields.push(format!(
+            "{} AS \"{}\"",
+            field.to_string(),
+            snake_to_camel(field.to_string())
+        ));
+        self
+    }
+    pub fn select_alias_with_table_alias(
+        &mut self,
+        field: &str,
+        table_alais: &String,
+    ) -> &mut Self {
+        let mut split_tag = "";
+        if !table_alais.is_empty() {
+            split_tag = ".";
+        }
+        self.select_fields.push(format!(
+            "{}{}{} AS \"{}\"",
+            table_alais,
+            split_tag,
+            field.to_string(),
+            snake_to_camel(field.to_string())
+        ));
+        self
+    }
     pub fn select_slice(&mut self, field_slice: &[&str]) -> &mut Self {
         for field in field_slice {
             self.select_fields.push(field.to_string());
@@ -202,6 +229,27 @@ impl BmbpScriptSql {
         for field in field_slice {
             self.select_fields.push(format!(
                 "{} AS \"{}\"",
+                field.clone(),
+                snake_to_camel(field.to_string())
+            ));
+        }
+        self
+    }
+
+    pub fn select_slice_alias_with_table_alias(
+        &mut self,
+        field_slice: &[String],
+        table_alais: &String,
+    ) -> &mut Self {
+        let mut split_tag = "";
+        if !table_alais.is_empty() {
+            split_tag = ".";
+        }
+        for field in field_slice {
+            self.select_fields.push(format!(
+                "{}{}{} AS \"{}\"",
+                table_alais,
+                split_tag,
                 field.clone(),
                 snake_to_camel(field.to_string())
             ));

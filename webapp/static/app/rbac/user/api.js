@@ -1,10 +1,10 @@
 const PageApi = {
   queryOrganTreeUrl: '/rbac/v1/organ/find/tree',
   queryPageUrl: '/rbac/v1/user/find/page',
-  queryUserInfoUrl: '/rbac/v1/user/find/info/id/',
-  saveUserUrl: '/rbac/v1/user/save',
+  queryInfoUrl: '/rbac/v1/user/find/info/id/',
+  saveInfoUrl: '/rbac/v1/user/save',
   changeUserOrganUrl: '/rbac/v1/user/update/organ/',
-  removeUserUrl: '/rbac/v1/user/remove/id/',
+  removeUrl: '/rbac/v1/user/remove/id/',
   disableUserUrl: '/rbac/v1/user/disable/id/',
   enableUserUrl: '/rbac/v1/user/enable/id/',
   resetUserPasswordUrl: '/rbac/v1/user/update/reset/password/id/'
@@ -24,14 +24,14 @@ const onRefreshLeftTreeData = () => {
 const onLeftTreeNodeClick = (nodeData) => {
   PageContext.setLeftTreeSelectNode(nodeData);
 }
-const onQueryRightGridData = (queryParams) => {
-  queryParams = queryParams || {}
+const onQueryRightGridData = () => {
+  let queryParams = {};
   queryParams.pageNo = PageContext.pageConfig.current;
   queryParams.pageSize = PageContext.pageConfig.pageSize;
-  let searchFormData = PageContext.searchFormRef.current.getFieldsValue();
   if (PageContext.leftTreeSelectNode) {
-    queryParams.organCode = PageContext.leftTreeSelectNode.organCode;
+    queryParams.organId = PageContext.leftTreeSelectNode.recordId;
   }
+  let searchFormData = PageContext.searchFormRef.current.getFieldsValue();
   Object.assign(queryParams, searchFormData);
   BmbpHttp.post(PageApi.queryPageUrl, queryParams).then((resp) => {
     if (resp.code == 0) {
@@ -44,20 +44,20 @@ const onQueryRightGridData = (queryParams) => {
   });
 }
 const onGridPageConfigChange = (page) => {
-  PageContext.setPagination({ ...PageContext.pagination, pageSize: page.pageSize });
+  PageContext.setPagination({ ...PageContext.pageConfig, pageSize: page.pageSize });
 }
 
 const onSearchFormQueryEvent = () => {
-  onQueryRightGridData({});
+  onQueryRightGridData();
 }
 
 const onSearchFormRestEvent = () => {
   PageContext.formRef.current.resetFields();
 }
 const onAddForm = () => {
-  PageContext.setOrganFromDailogTitle("新增组织");
-  PageContext.setAddOrganFormShow(true);
-  PageContext.setInitOrganValue({ organParentTitle: "", organParentCode: "0" });
+  PageContext.setInitFormValue({ organId: PageContext.leftTreeSelectNode.recordId });
+  PageContext.setFormTitle("新增用户");
+  PageContext.setAddFormShow(true);
 }
 const onBatchDeleteEvent = (organIds) => {
   arco.Message.info("批量删除组织节点:" + JSON.stringify(organIds));
@@ -71,20 +71,20 @@ const onToolBarExportBtnClick = () => {
 const onToolBarPrintBtnClick = () => {
   arco.Message.info("打印功能开发中...");
 }
-const onEditForm = (formValue) => {
-  PageContext.setOrganFromDailogTitle("编辑组织");
-  PageContext.setEditOrganFormShow(true);
-  PageContext.setInitOrganValue({ recordId: formValue.recordId });
+const onEditForm = (record) => {
+  PageContext.setInitFormValue({ recordId: record.recordId });
+  PageContext.setFormTitle("编辑用户");
+  PageContext.setEditFormShow(true);
 }
-const onInfoForm = (formValue) => {
-  PageContext.setOrganFromDailogTitle("查看组织");
-  PageContext.setInfoOrganFormShow(true);
-  PageContext.setInitOrganValue({ recordId: formValue.recordId });
+const onInfoForm = (record) => {
+  PageContext.setInitFormValue({ recordId: record.recordId });
+  PageContext.setFormTitle("查看用户");
+  PageContext.setInfoFormShow(true);
 }
-const onConfigForm = (formValue) => {
-  PageContext.setOrganFromDailogTitle("查看组织");
-  PageContext.setInfoOrganFormShow(true);
-  PageContext.setInitOrganValue({ recordId: formValue.recordId });
+const onConfigForm = (record) => {
+  PageContext.setInitFormValue({ recordId: record.recordId });
+  PageContext.setFormTitle("配置用户");
+  PageContext.setConfigFormShow(true);
 }
 const onEnableEvent = (organ) => {
   BmbpHttp.post(PageApi.enableUserUrl + organ.recordId, {}).then((resp) => {
@@ -97,60 +97,59 @@ const onEnableEvent = (organ) => {
     }
   });
 }
-const onDisableEvent = (organ) => {
-  BmbpHttp.post(PageApi.disableUserUrl + organ.recordId, {}).then((resp) => {
+const onDisableEvent = (record) => {
+  BmbpHttp.post(PageApi.disableUserUrl + record.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      arco.Message.info(resp.msg);
+      onQueryRightGridData();
+      onQueryLeftTreeData();
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+const onDeleteEvent = (record) => {
+  BmbpHttp.post(PageApi.removeUrl + record.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      onQueryRightGridData();
+      onQueryLeftTreeData();
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+const onResetPasswordEvent = (record) => {
+  BmbpHttp.post(PageApi.resetUserPasswordUrl + record.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      arco.Message.info(resp.msg);
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+const onChangeOrganEvent = (record) => {
+  PageContext.setInitFormValue({ recordId: record.recordId });
+  PageContext.setFormTitle("变更组织");
+  PageContext.setChangeOrganShow(true);
+}
+
+const onQueryFormInfo = (recordId, set_form_data) => {
+  BmbpHttp.post(PageApi.queryInfoUrl + recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      set_form_data(resp.data);
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+
+const onSaveFormInfo = (formData, callback) => {
+  BmbpHttp.post(PageApi.saveInfoUrl, formData).then((resp) => {
     if (resp.code == 0) {
       arco.Message.info(resp.msg);
       onQueryRightGridData({});
       onQueryLeftTreeData({});
-    } else {
-      arco.Message.error(resp.msg);
-    }
-  });
-}
-const onDeleteEvent = (organ) => {
-  BmbpHttp.post(PageApi.removeUserUrl + organ.recordId, {}).then((resp) => {
-    if (resp.code == 0) {
-      onQueryRightGridData({});
-      onQueryLeftTreeData({});
-    } else {
-      arco.Message.error(resp.msg);
-    }
-  });
-}
-const onResetPasswordEvent = (organ) => {
-  BmbpHttp.post(PageApi.removeUserUrl + organ.recordId, {}).then((resp) => {
-    if (resp.code == 0) {
-      onQueryRightGridData({});
-      onQueryLeftTreeData({});
-    } else {
-      arco.Message.error(resp.msg);
-    }
-  });
-}
-const onChangeOrganEvent = (organ) => {
-  PageContext.setOrganFromDailogTitle("选择上级");
-  PageContext.setInitOrganValue({ recordId: organ.recordId });
-  PageContext.setChangeParentOrganShow(true);
-}
-
-const onQueryFormInfo = (recordId, formRef) => {
-  BmbpHttp.post(PageApi.queryUserInfoUrl + recordId, {}).then((resp) => {
-    if (resp.code == 0) {
-      formRef.setFieldsValue(resp.data);
-    } else {
-      arco.Message.error(resp.msg);
-    }
-  });
-}
-
-const onSaveFormInfo = (formData, set_model) => {
-  BmbpHttp.post(PageApi.saveUserUrl, formData).then((resp) => {
-    if (resp.code == 0) {
-      arco.Message.info(resp.msg);
-      set_model(false);
-      onQueryRightGridData({});
-      onQueryLeftTreeData({});
+      callback();
     } else {
       arco.Message.error(resp.msg);
     }
@@ -158,16 +157,16 @@ const onSaveFormInfo = (formData, set_model) => {
 }
 
 const onQueryChangeOrganTreeData = () => {
-  BmbpHttp.get(PageApi.queryTreeWithOutOrganUrl + PageContext.initOrganValue.recordId, {}).then((resp) => {
+  BmbpHttp.post(PageApi.queryOrganTreeUrl, {}).then((resp) => {
     if (resp.code == 0) {
-      PageContext.setTreeParentData(resp.data);
+      PageContext.setChangeOrganTreeData(resp.data);
     } else {
       arco.Message.error(resp.msg);
     }
   });
 }
-const onSaveOrganChangeInfo = (recordId, organParentCode) => {
-  BmbpHttp.post(PageApi.changeUserOrganUrl + recordId + "/" + organParentCode, {}).then((resp) => {
+const onSaveOrganChangeInfo = (recordId, organId) => {
+  BmbpHttp.post(PageApi.changeUserOrganUrl + recordId + "/" + organId, {}).then((resp) => {
     if (resp.code == 0) {
       arco.Message.info(resp.msg);
       onQueryLeftTreeData({});

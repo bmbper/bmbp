@@ -7,9 +7,13 @@ pub fn user_router() -> Router {
     let view_router = Router::with_path("/index.view").get(user_index_view);
     let api_router = Router::new()
         .push(Router::with_path("/find/page").post(find_user_page))
-        .push(Router::with_path("/find/info/id/<recrodId>").get(find_user_info_by_id))
+        .push(
+            Router::with_path("/find/info/id/<recordId>")
+                .get(find_user_info_by_id)
+                .post(find_user_info_by_id),
+        )
         .push(Router::with_path("/save").post(save_user))
-        .push(Router::with_path("/update/reset/password/id/<recrodId>").post(reset_user_password))
+        .push(Router::with_path("/update/reset/password/id/<recordId>").post(reset_user_password))
         .push(Router::with_path("/update/organ/<recordId>/<organId>").post(update_user_organ))
         .push(Router::with_path("/enable/id/<recordId>").post(enable_user_by_id))
         .push(Router::with_path("/disable/id/<recordId>").post(disable_user_by_id))

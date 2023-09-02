@@ -123,9 +123,9 @@ impl HashMapTreeBuilder {
         data_list: Vec<BmbpHashMap>,
         tree_name: &str,
     ) -> Vec<BmbpHashMap> {
-        let tree_code: String = tree_name.clone().to_string() + "_code";
-        let tree_parent: String = tree_name.clone().to_string() + "_parent_code";
-        let tree_children: String = tree_name.clone().to_string() + "_children";
+        let tree_code: String = tree_name.to_string() + "_code";
+        let tree_parent: String = tree_name.to_string() + "_parent_code";
+        let tree_children: String = tree_name.to_string() + "_children";
         Self::build_tree_by_code_parent_children(
             data_list,
             tree_code.as_str(),
@@ -135,9 +135,9 @@ impl HashMapTreeBuilder {
     }
 
     pub fn build_tree_by_name(data_list: Vec<BmbpHashMap>, tree_name: &str) -> Vec<BmbpHashMap> {
-        let tree_code = tree_name.clone().to_string() + "Code";
-        let tree_parent = tree_name.clone().to_string() + "ParentCode";
-        let tree_children = tree_name.clone().to_string() + "Children";
+        let tree_code = tree_name.to_string() + "Code";
+        let tree_parent = tree_name.to_string() + "ParentCode";
+        let tree_children = tree_name.to_string() + "Children";
         Self::build_tree_by_code_parent_children(
             data_list,
             tree_code.as_str(),

@@ -186,7 +186,7 @@ const RightGridPanel = () => {
 const GridTable = () => {
   React.useEffect(() => {
     onQueryRightGridData();
-  }, [PageContext.leftTreeSelectNode]);
+  }, [PageContext.leftTreeSelectNode, PageContext.pageConfig.current, PageContext.pageConfig.pageSize]);
   const gridColumns = [
     {
       title: '用户名称',

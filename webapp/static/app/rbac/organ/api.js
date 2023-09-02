@@ -24,7 +24,7 @@ const onOrganTreeNodeClick = (organ) => {
 const onChangeOrganParent = (organ) => {
   AppIns.setOrganFromDailogTitle("选择上级");
   AppIns.setInitOrganValue({ recordId: organ.recordId });
-  AppIns.setChangeParentOrganShow(true);
+  AppIns.setChangeOrganShow(true);
 }
 const onAddOrganChild = (organ) => {
   AppIns.setOrganFromDailogTitle("新增下级组织");

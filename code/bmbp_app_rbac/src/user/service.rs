@@ -4,8 +4,8 @@ use bmbp_app_common::{
 };
 use bmbp_app_curd::{CurdDaoTrait, CurdScript};
 use bmbp_app_utils::{
-    add_insert_default_value, add_update_default_value, is_empty_prop, valid_field_rule,
-    valid_field_rule_slice,
+    add_insert_default_value, add_update_default_value, is_empty_prop, sha2_256_encode_upper,
+    valid_field_rule, valid_field_rule_slice,
 };
 
 use crate::organ::OrganService;
@@ -16,14 +16,30 @@ pub struct UserService;
 
 impl UserService {
     /// 分页查询组织列表
-    pub async fn find_user_page(params: &PageParams<BmbpHashMap>) -> BmbpResp<PageVo<BmbpHashMap>> {
-        let query_script = UserScript::query_script();
-        let query_params = BmbpHashMap::new();
+    pub async fn find_user_page(
+        page_params: &PageParams<BmbpHashMap>,
+    ) -> BmbpResp<PageVo<BmbpHashMap>> {
+        let mut query_script = UserScript::query_script_by_organ();
+        let mut query_params = BmbpHashMap::new();
+        if let Some(user_params) = page_params.get_params() {
+            if !is_empty_prop(user_params, "organId") {
+                let organ_record_id = user_params.get("organId").unwrap().to_string();
+                if let Some(organ) = OrganService::find_organ_by_id(&organ_record_id).await? {
+                    if let Some(organ_code_path) = organ.get("organCodePath") {
+                        query_script
+                            .filter("org.organ_code_path like CONCAT(#{organCodePath}::TEXT,'%')");
+                        query_params.insert("organCodePath".to_string(), organ_code_path.clone());
+                    }
+                } else {
+                    return Err(BmbpError::service("指定的组织不存在！"));
+                }
+            }
+        }
         let page_vo = UserDao::find_page(
             &query_script.to_script(),
             &query_params,
-            params.get_page_no(),
-            params.get_page_size(),
+            page_params.get_page_no(),
+            page_params.get_page_size(),
         )
         .await?;
         Ok(page_vo)
@@ -68,6 +84,13 @@ impl UserService {
             return Err(BmbpError::service("已存在相同主键的用户"));
         }
 
+        // 密码二次加密
+        let password = params.get("userPassword").unwrap().to_string();
+        let encode_password = sha2_256_encode_upper(password);
+        params.insert(
+            "user_password".to_string(),
+            BmbpValue::from(encode_password),
+        );
         let script = UserScript::insert_script();
         UserDao::insert(&script.to_script(), params).await
     }
@@ -80,11 +103,24 @@ impl UserService {
             return Err(err);
         }
 
+        if Self::has_same_name_user(params, true).await? {
+            return Err(BmbpError::service("已存在相同名称的用户"));
+        }
+
         let mut script = UserScript::update_script();
         add_update_default_value(params);
         if !is_empty_prop(params, "recordNum") {
             script.set_value("record_num", "#{recordNum}");
         }
+
+        if !is_empty_prop(params, "userName") {
+            script.set_value("user_name", "#{userName}");
+        }
+
+        if !is_empty_prop(params, "userNickName") {
+            script.set_value("user_nick_name", "#{userNickName}");
+        }
+
         script.filter("record_id = #{recordId}");
         UserDao::update(&script.to_script(), params).await
     }
@@ -95,12 +131,20 @@ impl UserService {
     ) -> Option<bmbp_app_common::BmbpError> {
         let valid_rule = vec![
             FieldValidRule(
-                "userTitle".to_string(),
-                ValidRule(ValidType::NotEmpty, "组织名称不能为空!".to_string()),
+                "organCode".to_string(),
+                ValidRule(ValidType::NotEmpty, "用户所属组织不能为空".to_string()),
             ),
             FieldValidRule(
-                "userType".to_string(),
-                ValidRule(ValidType::NotEmpty, r#"组织类型不能为空!"#.to_string()),
+                "userName".to_string(),
+                ValidRule(ValidType::NotEmpty, "用户名称不能为空!".to_string()),
+            ),
+            FieldValidRule(
+                "userNickName".to_string(),
+                ValidRule(ValidType::NotEmpty, "用户昵称不能为空".to_string()),
+            ),
+            FieldValidRule(
+                "userPassword".to_string(),
+                ValidRule(ValidType::NotEmpty, "用户密码不能为空".to_string()),
             ),
         ];
         valid_field_rule_slice(params, valid_rule.as_slice())
@@ -110,6 +154,7 @@ impl UserService {
     pub async fn update_user_status(id: &String, status: &String) -> BmbpResp<usize> {
         let script = UserScript::update_status_script();
         let mut script_params = BmbpHashMap::new();
+        add_update_default_value(&mut script_params);
         script_params.insert("recordStatus".to_string(), BmbpValue::from(status));
         script_params.insert("recordId".to_string(), BmbpValue::from(id));
         UserDao::update(&script.to_script(), &script_params).await
@@ -117,19 +162,20 @@ impl UserService {
     /// 更新组织上级
     pub async fn update_user_organ_by_record_id(
         record_id: &String,
-        organ_code: &String,
+        organ_id: &String,
     ) -> BmbpResp<usize> {
         let current_user = Self::find_user_by_id(record_id).await?;
         if current_user.is_none() {
             return Err(BmbpError::service("待变更的用户不存在"));
         };
-        let target_organ = OrganService::find_organ_by_organ_code(organ_code).await?;
+        let target_organ = OrganService::find_organ_by_id(organ_id).await?;
         if target_organ.is_none() {
             return Err(BmbpError::service("待变更的组织不存在"));
         }
         let update_script = UserScript::change_organ_script();
         let mut script_params = BmbpHashMap::new();
-        script_params.insert("organCode".to_string(), BmbpValue::from(organ_code));
+        add_update_default_value(&mut script_params);
+        script_params.insert("organId".to_string(), BmbpValue::from(organ_id));
         script_params.insert("recordId".to_string(), BmbpValue::from(record_id));
         let row_count = UserDao::update(&update_script.to_script(), &script_params).await?;
         Ok(row_count)
@@ -152,6 +198,7 @@ impl UserService {
     pub(crate) async fn reset_user_password(record_id: &String) -> BmbpResp<usize> {
         let script = UserScript::reset_password_script();
         let mut script_params = BmbpHashMap::new();
+        add_update_default_value(&mut script_params);
         script_params.insert("recordId".to_string(), BmbpValue::from(record_id));
         script_params.insert("password".to_string(), BmbpValue::from(DEFAULT_PASSWORD));
         UserDao::update(&script.to_script(), &script_params).await

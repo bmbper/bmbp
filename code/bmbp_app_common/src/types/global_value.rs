@@ -13,4 +13,5 @@ pub const RECORD_FLAG_REMOVE: &str = "-1";
 pub const APP_TITLE: &str = "Bmbp信息管理";
 
 ///默认的用户密码
-pub const DEFAULT_PASSWORD: &str = "bmbpigdp.";
+pub const DEFAULT_PASSWORD: &str =
+    "49FDC80CF3DED78752D7A2EB80D1DF92A2B9E2846F874F6BD798E710212D9A9F";
