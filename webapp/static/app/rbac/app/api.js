@@ -5,7 +5,7 @@ const PageApi = {
   disableUrl: "/rbac/v1/app/disable/",
   reStartUrl: "/rbac/v1/app/restart/",
   removeUrl: "/rbac/v1/app/delete/",
-  saveUrl: "/rbac/v1/app/save"
+  saveInfoUrl: "/rbac/v1/app/save"
 }
 
 const onQueryGridData = () => {
@@ -120,8 +120,7 @@ const onSaveFormInfo = (formData, callback) => {
   BmbpHttp.post(PageApi.saveInfoUrl, formData).then((resp) => {
     if (resp.code == 0) {
       arco.Message.info(resp.msg);
-      onQueryGridData({});
-      onQueryLeftTreeData({});
+      onQueryGridData();
       callback();
     } else {
       arco.Message.error(resp.msg);
