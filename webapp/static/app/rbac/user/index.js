@@ -170,9 +170,9 @@ const RightGridPanel = () => {
 
         </div>
         <div className="bmbp-page-serach-toolbar-right">
-          <arco.Button type='secondary' icon={<arcoicon.IconImport />} onClick={() => { onToolBarImportBtnClick() }}></arco.Button>
-          <arco.Button type='secondary' icon={<arcoicon.IconExport />} onClick={() => { onToolBarExportBtnClick() }}></arco.Button>
-          <arco.Button type='secondary' icon={<arcoicon.IconPrinter />} onClick={() => { onToolBarPrintBtnClick() }}></arco.Button>
+          <arco.Button type='secondary' icon={<arcoicon.IconImport />} onClick={() => { onImportEvent() }}></arco.Button>
+          <arco.Button type='secondary' icon={<arcoicon.IconExport />} onClick={() => { onExportEvent() }}></arco.Button>
+          <arco.Button type='secondary' icon={<arcoicon.IconPrinter />} onClick={() => { onPrintEvent() }}></arco.Button>
         </div>
       </div>
       <div className="bmbp-page-serach-grid">

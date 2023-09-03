@@ -11,16 +11,9 @@ pub async fn app_index_view(_req: &mut Request, res: &mut Response) {
     ctx.insert("appTitle", APP_TITLE);
     ctx.insert(
         "viewScript",
-        vec![
-            "rbac/app/app.js",
-            "rbac/app/app_form.js",
-            "rbac/app/app_config.js",
-            "rbac/app/app_info.js",
-            "rbac/app/api.js",
-        ]
-        .as_slice(),
+        vec!["rbac/app/index.js", "rbac/app/form.js", "rbac/app/api.js"].as_slice(),
     );
-    ctx.insert("viewName", "RbacAppView");
+    ctx.insert("viewName", "PageView");
     let te = BMBP_TEMPLATE.render("page.html", &ctx).unwrap();
     res.render(Text::Html(&te))
 }

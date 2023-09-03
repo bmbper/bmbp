@@ -1,109 +1,130 @@
-const RbacApi = {
+const PageApi = {
   queryPageUrl: "/rbac/v1/app/find/page",
   queryInfoUrl: "/rbac/v1/app/find/info/",
-  publishUrl: "/rbac/v1/app/enable/",
-  unPublishUrl: "/rbac/v1/app/disable/",
-  reDevelophUrl: "/rbac/v1/app/restart/",
-  deleteUrl: "/rbac/v1/app/delete/",
+  enableUrl: "/rbac/v1/app/enable/",
+  disableUrl: "/rbac/v1/app/disable/",
+  reStartUrl: "/rbac/v1/app/restart/",
+  removeUrl: "/rbac/v1/app/delete/",
   saveUrl: "/rbac/v1/app/save"
 }
-const onQueryAppPageData = (queryParams) => {
-  queryParams = queryParams || {}
-  BmbpHttp.post(RbacApi.queryPageUrl, queryParams).then((resp) => {
+
+const onQueryGridData = () => {
+  let queryParams = {};
+  queryParams.pageNo = PageContext.pageConfig.current;
+  queryParams.pageSize = PageContext.pageConfig.pageSize;
+  let searchFormData = PageContext.searchFormRef.current.getFieldsValue();
+  Object.assign(queryParams, searchFormData);
+  BmbpHttp.post(PageApi.queryPageUrl, queryParams).then((resp) => {
     if (resp.code == 0) {
       let respData = resp.data;
-      AppPageIns.setPagination({ ...AppPageIns.pagination, total: respData.rowTotal });
-      AppPageIns.setGridData(respData.data);
+      PageContext.setPageConfig({ ...PageContext.pageConfig, total: respData.rowTotal });
+      PageContext.setGridData(respData.data);
     } else {
       arco.Message.error(resp.msg);
     }
   });
 }
-
-const onRowEnableBtnClick = (record) => {
-  BmbpHttp.post(RbacApi.publishUrl + record.recordId, {}).then((resp) => {
-    if (resp.code == 0) {
-      arco.Message.info("应用发布成功");
-      onQueryAppPageData({});
-    } else {
-      arco.Message.error(resp.msg);
-    }
-  });
+const onGridPageConfigChange = (page) => {
+  PageContext.setPagination({ ...PageContext.pageConfig, pageSize: page.pageSize });
 }
-
-const onRowDisableBtnClick = (record) => {
-  BmbpHttp.post(RbacApi.unPublishUrl + record.recordId, {}).then((resp) => {
-    if (resp.code == 0) {
-      arco.Message.info("应用下线成功");
-      onQueryAppPageData({});
-    } else {
-      arco.Message.error(resp.msg);
-    }
-  });
+const onSearchFormQueryEvent = () => {
+  onQueryGridData();
 }
-
-const onRowReStartBtnClick = (record) => {
-  BmbpHttp.post(RbacApi.reDevelophUrl + record.recordId, {}).then((resp) => {
-    if (resp.code == 0) {
-      arco.Message.info("应用重启开发成功");
-      onQueryAppPageData({});
-    } else {
-      arco.Message.error(resp.msg);
-    }
-  });
+const onSearchFormRestEvent = () => {
+  PageContext.formRef.current.resetFields();
 }
-const onToolBarAddBtnClick = () => {
-  AppPageIns.setRecordId('');
-  AppPageIns.setAddFormVisible(true);
-  AppPageIns.appFormRef.current.setFieldsValue({});
-
+const onAddForm = () => {
+  PageContext.setInitFormValue({});
+  PageContext.setFormTitle("新增应用");
+  PageContext.setAddFormShow(true);
 }
-const onRowEditBtnClick = (record) => {
-  onQueryAppInfoData(record.recordId).then((resp) => {
-    if (resp.code == 0) {
-      AppPageIns.setRecordId(record.recordId);
-      AppPageIns.setEditFormVisible(true);
-      AppPageIns.appFormRef.current.setFieldsValue(resp.data);
-    }
-  })
-
-
+const onBatchDeleteEvent = (organIds) => {
+  arco.Message.info("批量删除应用:" + JSON.stringify(organIds));
 }
-
-const onRowDelBtnClick = (record) => {
-  BmbpHttp.post(RbacApi.deleteUrl + record.recordId, {}).then((resp) => {
-    if (resp.code == 0) {
-      arco.Message.info("应用删除成功");
-      onQueryAppPageData({});
-    } else {
-      arco.Message.error(resp.msg);
-    }
-  });
+const onImportEvent = () => {
+  arco.Message.info("导入功能开发中...");
 }
-
-const onRowInfoBtnClick = (record) => {
-  onQueryAppInfoData(record.recordId).then((resp) => {
-    if (resp.code == 0) {
-      AppPageIns.setRecordId(record.recordId);
-      AppPageIns.setInfoFormVisible(true);
-      AppPageIns.appFormRef.current.setFieldsValue(resp.data);
-    }
-  })
-
+const onExportEvent = () => {
+  arco.Message.info("导出功能开发中...");
 }
-
-const saveAppInfo = (formData, set_model) => {
-  BmbpHttp.post(RbacApi.saveUrl, formData).then((resp) => {
+const onPrintEvent = () => {
+  arco.Message.info("打印功能开发中...");
+}
+const onEditForm = (record) => {
+  PageContext.setInitFormValue({ recordId: record.recordId });
+  PageContext.setFormTitle("编辑用户");
+  PageContext.setEditFormShow(true);
+}
+const onInfoForm = (record) => {
+  PageContext.setInitFormValue({ recordId: record.recordId });
+  PageContext.setFormTitle("查看用户");
+  PageContext.setInfoFormShow(true);
+}
+const onConfigForm = (record) => {
+  PageContext.setInitFormValue({ recordId: record.recordId });
+  PageContext.setFormTitle("配置用户");
+  PageContext.setConfigFormShow(true);
+}
+const onEnableEvent = (organ) => {
+  BmbpHttp.post(PageApi.enableUrl + organ.recordId, {}).then((resp) => {
     if (resp.code == 0) {
       arco.Message.info(resp.msg);
-      set_model(false);
-      onQueryAppPageData({});
+      onQueryGridData();
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+const onDisableEvent = (record) => {
+  BmbpHttp.post(PageApi.disableUrl + record.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      arco.Message.info(resp.msg);
+      onQueryGridData();
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+const onDeleteEvent = (record) => {
+  BmbpHttp.post(PageApi.removeUrl + record.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      onQueryGridData();
     } else {
       arco.Message.error(resp.msg);
     }
   });
 }
 
-const onQueryAppInfoData = (recordId) => {
-  return BmbpHttp.get(RbacApi.queryInfoUrl + recordId, {});
+const onRestartEvent = (record) => {
+  BmbpHttp.post(PageApi.reStartUrl + record.recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      onQueryGridData();
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+
+
+const onQueryFormInfo = (recordId, callback) => {
+  BmbpHttp.post(PageApi.queryInfoUrl + recordId, {}).then((resp) => {
+    if (resp.code == 0) {
+      callback(resp.data);
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
+}
+
+const onSaveFormInfo = (formData, callback) => {
+  BmbpHttp.post(PageApi.saveInfoUrl, formData).then((resp) => {
+    if (resp.code == 0) {
+      arco.Message.info(resp.msg);
+      onQueryGridData({});
+      onQueryLeftTreeData({});
+      callback();
+    } else {
+      arco.Message.error(resp.msg);
+    }
+  });
 }

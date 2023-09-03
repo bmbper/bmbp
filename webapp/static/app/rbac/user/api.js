@@ -133,10 +133,10 @@ const onChangeOrganEvent = (record) => {
   PageContext.setChangeOrganShow(true);
 }
 
-const onQueryFormInfo = (recordId, set_form_data) => {
-  BmbpHttp.post(PageApi.queryInfoUrl + recordId, {}).then((resp) => {
+const onQueryFormInfo = (recordId, callback) => {
+  BmbpHttp.get(PageApi.queryInfoUrl + recordId).then((resp) => {
     if (resp.code == 0) {
-      set_form_data(resp.data);
+      callback(resp.data);
     } else {
       arco.Message.error(resp.msg);
     }

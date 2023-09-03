@@ -8,7 +8,11 @@ pub fn app_router() -> Router {
     let api_router = Router::new()
         .push(Router::with_path("/find/page").post(find_app_page))
         .push(Router::with_path("/find/list").post(find_app_list))
-        .push(Router::with_path("/find/info/<recordId>").get(find_app_info))
+        .push(
+            Router::with_path("/find/info/<recordId>")
+                .get(find_app_info)
+                .post(find_app_info),
+        )
         .push(Router::with_path("/save").post(save_app))
         .push(Router::with_path("/enable/<recordId>").post(enable_app))
         .push(Router::with_path("/disable/<recordId>").post(disable_app))
