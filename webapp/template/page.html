@@ -30,6 +30,9 @@
 {% endif %}
 
 <script type="text/babel">
+    {% if pageParams %}
+    const pageParams = {{pageParams}};
+    {% endif %}
     ReactDOM.render(
         < {{viewName}}/>,
         document.querySelector("#root")

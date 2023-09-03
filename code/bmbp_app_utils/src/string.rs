@@ -1,3 +1,5 @@
+use bmbp_app_common::BmbpHashMap;
+
 /// BmbpStringUtil 字符串工具类
 
 pub fn snake_to_camel(snake_string: String) -> String {
@@ -41,4 +43,8 @@ pub fn char_fill_right(ch: char, number: i32, len: i32) -> String {
     let mut number_str_char: Vec<char> = number_str.chars().collect();
     number_str_char.append(&mut zero_char);
     return number_str_char.iter().collect();
+}
+
+pub fn render_to_json_string(value: &BmbpHashMap) -> String {
+    serde_json::to_string_pretty(value).unwrap()
 }

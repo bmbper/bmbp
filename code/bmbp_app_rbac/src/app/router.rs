@@ -4,7 +4,11 @@ use salvo::Router;
 use super::web::*;
 
 pub fn app_router() -> Router {
-    let view_router = Router::with_path("/index.view").get(app_index_view);
+    let view_router = Router::new()
+        .push(Router::with_path("/index.view").get(app_index_view))
+        .push(Router::with_path("/config.view").get(app_config_view))
+        .push(Router::with_path("/base.view").get(app_base_view));
+
     let api_router = Router::new()
         .push(Router::with_path("/find/page").post(find_app_page))
         .push(Router::with_path("/find/list").post(find_app_list))

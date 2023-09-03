@@ -108,7 +108,7 @@ const onGridPageChange = (page) => {
 }
 
 const onQueryTreeData = () => {
-  BmbpHttp.post(MenuApi.queryTreeUrl, {}).then((resp) => {
+  BmbpHttp.post(MenuApi.queryTreeUrl, { appId: pageParams.appId }).then((resp) => {
     if (resp.code == 0) {
       AppIns.setMenuTreeData(resp.data);
     } else {
@@ -121,6 +121,7 @@ const onQueryPageData = (queryParams) => {
   queryParams = queryParams || {}
   queryParams.pageNo = AppIns.pagination.current;
   queryParams.pageSize = AppIns.pagination.pageSize;
+  queryParams.appId = pageParams.appId;
   let searchFormData = AppIns.searchFormRef.current.getFieldsValue();
   if (AppIns.currentMenuCode) {
     queryParams.menuParentCode = AppIns.currentMenuCode;
