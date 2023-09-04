@@ -12,7 +12,10 @@ pub fn menu_router() -> Router {
                 .get(find_menu_tree),
         )
         .push(Router::with_path("/find/tree/id/<id>").get(find_menu_tree_start_with_id))
-        .push(Router::with_path("/find/tree/with/out/id/<id>").get(find_menu_tree_with_out_id))
+        .push(
+            Router::with_path("/find/tree/with/out/app/<appId>/id/<id>")
+                .get(find_menu_tree_with_out_id),
+        )
         .push(Router::with_path("/find/tree/code/<code>").post(find_menu_tree_start_with_code))
         .push(Router::with_path("/find/page").post(find_menu_page))
         .push(Router::with_path("/find/page/parent/<parent>").post(find_menu_page_by_parent))

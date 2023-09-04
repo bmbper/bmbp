@@ -66,14 +66,13 @@ impl MenuScript {
     }
     pub(crate) fn update_title_path_script() -> BmbpScriptSql {
         let mut script = Self::update_script();
-        script.set("menu_title_path = CONCAT( #{newMenuTitlePath}::TEXT,  RIGHT(ORGAN_TITLE_PATH,  LENGTH(ORGAN_TITLE_PATH) - LENGTH(#{oldMenuParentTitlePath})))");
+        script.set("menu_title_path = CONCAT( #{newMenuTitlePath}::TEXT,  RIGHT(MENU_TITLE_PATH,  LENGTH(MENU_TITLE_PATH) - LENGTH(#{oldMenuParentTitlePath})))");
         script.filter("menu_title_path like CONCAT(#{currentMenuTitlePath}::TEXT,'%')");
-
         script
     }
     pub(crate) fn update_code_path_script() -> BmbpScriptSql {
         let mut script = Self::update_script();
-        script.set("menu_code_path = CONCAT( #{newMenuCodePath}::TEXT,  RIGHT(ORGAN_CODE_PATH,  LENGTH(ORGAN_CODE_PATH) - LENGTH(#{oldMenuParentCodePath})))");
+        script.set("menu_code_path = CONCAT( #{newMenuCodePath}::TEXT,  RIGHT(MENU_CODE_PATH,  LENGTH(MENU_CODE_PATH) - LENGTH(#{oldMenuParentCodePath})))");
         script.filter("menu_code_path like CONCAT(#{currentMenuCodePath}::TEXT,'%')");
         script
     }

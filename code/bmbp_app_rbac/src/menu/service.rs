@@ -17,8 +17,12 @@ pub struct MenuService();
 impl MenuService {
     /// 查询菜单树
     pub async fn find_menu_tree(params: &BmbpHashMap) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
+        if is_empty_prop(params, "appId") {
+            return Err(BmbpError::api("请指定应用ID"));
+        }
+        let app_id = params.get("appId").unwrap().to_string();
         let menu_code_path = { "".to_string() };
-        Self::find_menu_tree_by_menu_code_path(&menu_code_path).await
+        Self::find_menu_tree_by_menu_code_path(&app_id, &menu_code_path).await
     }
     /// 查询指定ID下的菜单机构树
     pub async fn find_menu_tree_start_with_id(id: &String) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
@@ -41,17 +45,21 @@ impl MenuService {
         }
         let current_menu = menu_op.unwrap();
         if let Some(menu_code_path) = current_menu.get("menuCodePath") {
-            Self::find_menu_tree_by_menu_code_path(&menu_code_path.to_string()).await
+            let app_id = current_menu.get("appId").unwrap().to_string();
+            Self::find_menu_tree_by_menu_code_path(&app_id, &menu_code_path.to_string()).await
         } else {
             Err(BmbpError::service("指定的结点数据异常，请联系管理员"))
         }
     }
     /// 查询指定编码路径的菜单机构树
     pub async fn find_menu_tree_by_menu_code_path(
+        app_id: &String,
         menu_code_path: &String,
     ) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
         let mut query_script = MenuScript::query_script();
         let mut query_params = BmbpHashMap::new();
+        query_script.filter("app_id = #{appId}");
+        query_params.insert("appId".to_string(), BmbpValue::from(app_id));
         if !menu_code_path.is_empty() {
             query_script.filter("menu_code_path like concat(#{menuCodePath},'%'");
             query_params.insert("menuCodePath".to_string(), BmbpValue::from(menu_code_path));
@@ -68,6 +76,7 @@ impl MenuService {
     }
 
     pub(crate) async fn find_menu_tree_with_out_id(
+        app_id: &String,
         with_out_menu_id: &String,
     ) -> BmbpResp<Option<Vec<BmbpHashMap>>> {
         let menu_code = {
@@ -80,8 +89,10 @@ impl MenuService {
         tracing::info!("排除节点：{}", menu_code);
         let mut script = MenuScript::query_script();
         script.filter("menu_code_path not like concat('%/',#{menuCode}::TEXT,'/%')");
+        script.filter("app_id = #{appId}");
         let mut script_params = BmbpHashMap::new();
         script_params.insert("menuCode".to_string(), BmbpValue::from(menu_code));
+        script_params.insert("appId".to_string(), BmbpValue::from(app_id));
         let menu_tree_rs = MenuDao::find_menu_list(&script.to_script(), &script_params).await?;
         match menu_tree_rs {
             Some(menu_list) => Ok(Some(HashMapTreeBuilder::build_tree_by_name(
@@ -98,6 +109,15 @@ impl MenuService {
         query_script.order_by("record_num asc");
         let mut query_params = BmbpHashMap::new();
         if let Some(menu_params) = params.get_params() {
+            if is_empty_prop(menu_params, "appId") {
+                return Err(BmbpError::service("请指定应用ID！"));
+            }
+            query_script.filter("app_id = #{appId}");
+            query_params.insert(
+                "appId".to_string(),
+                BmbpValue::from(menu_params.get("appId").unwrap().clone()),
+            );
+
             if !is_empty_prop(menu_params, "menuParentCode") {
                 let parent_code = menu_params.get("menuParentCode").unwrap().to_string();
                 if let Some(parent_node) = Self::find_menu_by_menu_code(&parent_code).await? {
@@ -108,6 +128,8 @@ impl MenuService {
                     return Err(BmbpError::service("上级菜单不存在"));
                 }
             }
+        } else {
+            return Err(BmbpError::service("请指定应用ID"));
         }
         let page_vo = MenuDao::find_menu_page(
             &query_script.to_script(),
@@ -326,6 +348,10 @@ impl MenuService {
         params: &mut std::collections::HashMap<String, BmbpValue>,
     ) -> Option<bmbp_app_common::BmbpError> {
         let valid_rule = vec![
+            FieldValidRule(
+                "appId".to_string(),
+                ValidRule(ValidType::NotEmpty, "应用ID不能为空！".to_string()),
+            ),
             FieldValidRule(
                 "menuTitle".to_string(),
                 ValidRule(ValidType::NotEmpty, "菜单名称不能为空!".to_string()),

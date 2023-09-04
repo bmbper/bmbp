@@ -1,5 +1,5 @@
 const PageApi = {
-  appMenuValueUrl: '/rbac/v1/res/menu/index.view',
+  appMenuValueUrl: '/rbac/v1/menu/index.view',
   queryInfoUrl: "/rbac/v1/app/find/info/",
 }
 

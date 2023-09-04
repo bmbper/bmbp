@@ -1,6 +1,7 @@
 pub use router::build_rbac_router;
 
 mod app;
+mod menu;
 mod organ;
 mod privilege;
 mod proxy;

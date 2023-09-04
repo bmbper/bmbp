@@ -38,7 +38,7 @@ const AppBaseInfoView = () => {
       PageContext.infoFormRef.current.setFieldsValue(data);
     });
   }, []);
-  return <div>
+  return <div style={{ width: '600px', margin: '0 auto' }}>
     <arco.Form ref={PageContext.infoFormRef} disabled={true}>
       <arco.Grid.Row gutter={24}>
         <arco.Grid.Col span={24}>

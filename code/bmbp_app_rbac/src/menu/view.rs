@@ -17,9 +17,9 @@ pub async fn menu_index_view(req: &mut Request, res: &mut Response) {
     ctx.insert(
         "viewScript",
         vec![
-            "rbac/res/menu/index.js",
-            "rbac/res/menu/form.js",
-            "rbac/res/menu/api.js",
+            "rbac/menu/index.js",
+            "rbac/menu/form.js",
+            "rbac/menu/api.js",
         ]
         .as_slice(),
     );

@@ -1,22 +1,22 @@
 const MenuApi = {
-  queryTreeUrl: '/rbac/v1/res/menu/find/tree',
-  queryTreeWithOutMenuUrl: '/rbac/v1/res/menu/find/tree/with/out/id/',
-  queryPageUrl: '/rbac/v1/res/menu/find/page',
-  queryInfoUrl: '/rbac/v1/res/menu/find/info/id/',
-  saveUrl: '/rbac/v1/res/menu/save',
-  changeParentUrl: '/rbac/v1/res/menu/update/parent/',
-  removeUrl: '/rbac/v1/res/menu/remove/id/',
-  disableUrl: '/rbac/v1/res/menu/disable/id/',
-  enableUrl: '/rbac/v1/res/menu/enable/id/'
+  queryTreeUrl: '/rbac/v1/menu/find/tree',
+  queryTreeWithOutMenuUrl: '/rbac/v1/menu/find/tree/with/out/',
+  queryPageUrl: '/rbac/v1/menu/find/page',
+  queryInfoUrl: '/rbac/v1/menu/find/info/id/',
+  saveUrl: '/rbac/v1/menu/save',
+  changeParentUrl: '/rbac/v1/menu/update/parent/',
+  removeUrl: '/rbac/v1/menu/remove/id/',
+  disableUrl: '/rbac/v1/menu/disable/id/',
+  enableUrl: '/rbac/v1/menu/enable/id/'
 }
 
 const onAddRootMenu = () => {
   AppIns.setMenuFromDailogTitle("新增菜单");
   AppIns.setAddMenuFormShow(true);
-  AppIns.setInitMenuValue({ menuParentTitle: "", menuParentCode: "0" });
+  AppIns.setInitMenuValue({ menuParentTitle: "", menuParentCode: "0", appId: pageParams.appId });
 }
 const onRefreshMenuTree = () => {
-  onQueryTreeData({});
+  AppIns.setCurrentMenuCode("");
 }
 const onMenuTreeNodeClick = (menu) => {
   AppIns.setCurrentMenuCode(menu.menuCode);
@@ -29,7 +29,7 @@ const onChangeMenuParent = (menu) => {
 const onAddMenuChild = (menu) => {
   AppIns.setMenuFromDailogTitle("新增下级菜单");
   AppIns.setAddMenuFormShow(true);
-  AppIns.setInitMenuValue({ menuParentTitle: menu.menuTitle, menuParentCode: menu.menuCode });
+  AppIns.setInitMenuValue({ menuParentTitle: menu.menuTitle, menuParentCode: menu.menuCode, appId: menu.appId });
 }
 const onEditMenu = (menu) => {
   AppIns.setMenuFromDailogTitle("编辑菜单");
@@ -163,7 +163,7 @@ const saveMenuInfo = (formData, set_model) => {
 
 /// 查询排除节点的菜单结构数据
 const onQueryTreeDataWithOutRecordId = () => {
-  BmbpHttp.get(MenuApi.queryTreeWithOutMenuUrl + AppIns.initMenuValue.recordId, {}).then((resp) => {
+  BmbpHttp.get(MenuApi.queryTreeWithOutMenuUrl + "/app/" + pageParams.appId + "/id/" + AppIns.initMenuValue.recordId, {}).then((resp) => {
     if (resp.code == 0) {
       AppIns.setTreeParentData(resp.data);
     } else {

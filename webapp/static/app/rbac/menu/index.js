@@ -105,7 +105,7 @@ const MenuPage = () => {
   return <div className="bmbp-page-tree-grid-body">
     <MenuTreeLeft />
     <MenuGridRight />
-    <AddRootMenuDialog title={AppIns.menuFromDailogTitle} visible={AppIns.addMenuFormShow} />
+    <AddMenuDialog title={AppIns.menuFromDailogTitle} visible={AppIns.addMenuFormShow} />
     <EditMenuDialog title={AppIns.menuFromDailogTitle} visible={AppIns.editMenuFormShow} />
     <InfoMenuDialog title={AppIns.menuFromDailogTitle} visible={AppIns.infoMenuFormShow} />
     <ChangeParentMenuDialog title={AppIns.menuFromDailogTitle} visible={AppIns.changeParentMenuShow} />

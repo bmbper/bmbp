@@ -1,4 +1,4 @@
-const AddRootMenuDialog = (props) => {
+const AddMenuDialog = (props) => {
   return <arco.Modal
     title={props.title}
     visible={props.visible}
@@ -40,6 +40,9 @@ const MenuFormView = () => {
             <arco.Input placeholder='' />
           </arco.Form.Item>
           <arco.Form.Item field="menuParentCode" label='上级菜单编码' hidden={true}>
+            <arco.Input placeholder='' />
+          </arco.Form.Item>
+          <arco.Form.Item field="appId" label='应用ID' hidden={true}>
             <arco.Input placeholder='' />
           </arco.Form.Item>
         </arco.Grid.Col>
@@ -123,6 +126,9 @@ const EditMenuFormView = () => {
           <arco.Form.Item field="menuParentCode" label='上级菜单编码' hidden={true}>
             <arco.Input placeholder='' />
           </arco.Form.Item>
+          <arco.Form.Item field="appId" label='应用ID' hidden={true}>
+            <arco.Input placeholder='' />
+          </arco.Form.Item>
         </arco.Grid.Col>
         <arco.Grid.Col span={24}>
           <arco.Form.Item field="menuTitle" label='菜单名称' rules={[{ required: true, message: '菜单名称不能为空' }, { minLength: 2, maxLength: 32, message: '应用编码长度2到32' }]}>
@@ -191,6 +197,9 @@ const InfoMenuFormView = () => {
             <arco.Input placeholder='' />
           </arco.Form.Item>
           <arco.Form.Item field="menuParentCode" label='上级菜单编码' hidden={true}>
+            <arco.Input placeholder='' />
+          </arco.Form.Item>
+          <arco.Form.Item field="appId" label='应用ID' hidden={true}>
             <arco.Input placeholder='' />
           </arco.Form.Item>
         </arco.Grid.Col>

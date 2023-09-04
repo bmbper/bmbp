@@ -10,6 +10,8 @@ pub struct BmbpRbacMenu {
     /// 公共信息
     #[serde(flatten)]
     base: BmbpBaseModel,
+    /// 应用ID
+    app_id: Option<String>,
     /// 菜单编码
     menu_code: Option<String>,
     /// 上级菜单编码
@@ -39,6 +41,7 @@ impl BmbpRbacMenu {
     pub fn orm_table_column_name() -> Vec<String> {
         let mut base_fields = BmbpBaseModel::get_fields();
         let rbac_app_field = vec![
+            "app_id".to_string(),
             "menu_code".to_string(),
             "menu_parent_code".to_string(),
             "menu_title".to_string(),
