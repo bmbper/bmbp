@@ -13,7 +13,7 @@ bmbp_orm_ins = { path = "../bmbp_orm_ins" }
 bmbp_app_common = { path = "../bmbp_app_common" }
 bmbp_app_utils = { path = "../bmbp_app_utils" }
 
-salvo = { version = "0.50.5" ,features=["default","serve-static"]}
+salvo = { version = "*" ,features=["default","serve-static","cors"]}
 tokio = { version = "1.32.0", features = ["full"] }
 tera = "1"
 # 序列

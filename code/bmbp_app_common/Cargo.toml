@@ -17,7 +17,7 @@ async-trait = "0.1"
 chrono = "0.4"
 tera = "1.19.0"
 rust-embed="6.8.1"
-salvo = { version = "0.50.5",features=["default","serve-static"]}
+salvo = { version = "*",features=["default","serve-static","cors"]}
 uuid = {version = "1.4.0",features=["serde","v4"]}
 tokio = { version = "1.32.0", features = ["full"] }
 tracing = "0.1"

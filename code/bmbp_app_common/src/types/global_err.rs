@@ -1,4 +1,5 @@
-use salvo::{http::ParseError, writing::Json, Piece};
+use async_trait::async_trait;
+use salvo::{http::ParseError, writing::Json, Depot, Request, Response, Writer};
 
 use crate::RespVo;
 
@@ -102,8 +103,9 @@ impl ToString for BmbpError {
     }
 }
 
-impl Piece for BmbpError {
-    fn render(self, res: &mut salvo::Response) {
+#[async_trait]
+impl Writer for BmbpError {
+    async fn write(self, _req: &mut Request, _depot: &mut Depot, res: &mut Response) {
         let vo: RespVo<String> = RespVo::fail_msg(format!("{}:{}", self.name(), self.msg).as_str());
         res.render(Json(vo));
     }

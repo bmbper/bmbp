@@ -10,5 +10,5 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tracing = "0.1"
 
-salvo = { version = "0.50.5",features=["default","serve-static"] }
+salvo = { version = "*",features=["default","serve-static","cors"] }
 tokio = { version = "1.32.0", features = ["full"] }

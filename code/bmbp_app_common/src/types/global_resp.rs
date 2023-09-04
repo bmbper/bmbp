@@ -1,4 +1,5 @@
-use salvo::{writing::Json, Piece};
+use async_trait::async_trait;
+use salvo::{writing::Json, Depot, Request, Response, Writer};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -205,20 +206,22 @@ where
 /// 定义包含异常的返回类型
 pub type BmbpResp<T> = Result<T, BmbpError>;
 
-impl<T> Piece for RespVo<T>
+#[async_trait]
+impl<T> Writer for RespVo<T>
 where
     T: Clone + Default + Serialize + Send + Sync,
 {
-    fn render(self, res: &mut salvo::Response) {
+    async fn write(self, _req: &mut Request, _depot: &mut Depot, res: &mut Response) {
         res.render(Json(self))
     }
 }
 
-impl<T> Piece for PageVo<T>
+#[async_trait]
+impl<T> Writer for PageVo<T>
 where
     T: Clone + Default + Serialize + Send + Sync,
 {
-    fn render(self, res: &mut salvo::Response) {
+    async fn write(self, _req: &mut Request, _depot: &mut Depot, res: &mut Response) {
         res.render(Json(self))
     }
 }
