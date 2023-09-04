@@ -1,10 +1,14 @@
 use crate::user::web::*;
 use salvo::Router;
 
-use super::view::user_index_view;
+use super::view::{user_base_view, user_config_view, user_index_view};
 
 pub fn user_router() -> Router {
-    let view_router = Router::with_path("/index.view").get(user_index_view);
+    let view_router = Router::new()
+        .push(Router::with_path("/index.view").get(user_index_view))
+        .push(Router::with_path("/config.view").get(user_config_view))
+        .push(Router::with_path("/base.view").get(user_base_view));
+
     let api_router = Router::new()
         .push(Router::with_path("/find/page").post(find_user_page))
         .push(

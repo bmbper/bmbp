@@ -3,7 +3,10 @@ use crate::role::web::*;
 
 use salvo::Router;
 pub fn role_router() -> Router {
-    let role_view_router = Router::new().push(Router::with_path("index.view").get(role_index_view));
+    let view_router = Router::new()
+        .push(Router::with_path("/index.view").get(role_index_view))
+        .push(Router::with_path("/config.view").get(role_config_view))
+        .push(Router::with_path("/base.view").get(role_base_view));
 
     let role_api_router = Router::new()
         .push(
@@ -47,5 +50,5 @@ pub fn role_router() -> Router {
         .push(Router::with_path("/remove/id/<recordId>").post(remove_role_by_id))
         .push(Router::with_path("/remove/batch/id/<recordId>").post(batch_remove_role_by_id));
 
-    Router::new().push(role_view_router).push(role_api_router)
+    Router::new().push(view_router).push(role_api_router)
 }

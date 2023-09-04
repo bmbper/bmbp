@@ -13,7 +13,7 @@ const MenuApi = {
 const onAddRootMenu = () => {
   AppIns.setMenuFromDailogTitle("新增菜单");
   AppIns.setAddMenuFormShow(true);
-  AppIns.setInitMenuValue({ menuParentTitle: "", menuParentCode: "0", appId: pageParams.appId });
+  AppIns.setInitMenuValue({ menuParentTitle: "", menuParentCode: "0", appId: PageVars.appId });
 }
 const onRefreshMenuTree = () => {
   AppIns.setCurrentMenuCode("");
@@ -108,7 +108,7 @@ const onGridPageChange = (page) => {
 }
 
 const onQueryTreeData = () => {
-  BmbpHttp.post(MenuApi.queryTreeUrl, { appId: pageParams.appId }).then((resp) => {
+  BmbpHttp.post(MenuApi.queryTreeUrl, { appId: PageVars.appId }).then((resp) => {
     if (resp.code == 0) {
       AppIns.setMenuTreeData(resp.data);
     } else {
@@ -121,7 +121,7 @@ const onQueryPageData = (queryParams) => {
   queryParams = queryParams || {}
   queryParams.pageNo = AppIns.pagination.current;
   queryParams.pageSize = AppIns.pagination.pageSize;
-  queryParams.appId = pageParams.appId;
+  queryParams.appId = PageVars.appId;
   let searchFormData = AppIns.searchFormRef.current.getFieldsValue();
   if (AppIns.currentMenuCode) {
     queryParams.menuParentCode = AppIns.currentMenuCode;
@@ -163,7 +163,7 @@ const saveMenuInfo = (formData, set_model) => {
 
 /// 查询排除节点的菜单结构数据
 const onQueryTreeDataWithOutRecordId = () => {
-  BmbpHttp.get(MenuApi.queryTreeWithOutMenuUrl + "/app/" + pageParams.appId + "/id/" + AppIns.initMenuValue.recordId, {}).then((resp) => {
+  BmbpHttp.get(MenuApi.queryTreeWithOutMenuUrl + "/app/" + PageVars.appId + "/id/" + AppIns.initMenuValue.recordId, {}).then((resp) => {
     if (resp.code == 0) {
       AppIns.setTreeParentData(resp.data);
     } else {

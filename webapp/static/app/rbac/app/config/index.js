@@ -11,21 +11,35 @@ function PageView() {
       返回
     </arco.Button>
   }>
-    <arco.Tabs.TabPane key='1' title='应用菜单'>
+    <arco.Tabs.TabPane key='1' title='菜单资源'>
       <AppMenuInfoView />
     </arco.Tabs.TabPane>
-    <arco.Tabs.TabPane key='2' title='应用集成' >
+    <arco.Tabs.TabPane key='2' title='接口资源'>
+      <AppUrlView />
+    </arco.Tabs.TabPane>
+    <arco.Tabs.TabPane key='3' title='数据资源'>
+      <AppDataScopeView />
+    </arco.Tabs.TabPane>
+    <arco.Tabs.TabPane key='4' title='应用集成' >
       <AppSSOView />
     </arco.Tabs.TabPane>
-    <arco.Tabs.TabPane key='3' title='基本信息'>
+    <arco.Tabs.TabPane key='5' title='基本信息'>
       <AppBaseInfoView />
     </arco.Tabs.TabPane>
   </arco.Tabs>
 }
 
 const AppMenuInfoView = () => {
-  const frameSrc = PageApi.appMenuValueUrl + "?appId=" + pageParams.recordId;
+  const frameSrc = PageApi.appMenuValueUrl + "?appId=" + PageVars.recordId;
   return <iframe className="bmbp-iframe-body" src={frameSrc}></iframe>
+}
+
+const AppUrlView = () => {
+  return <div>接口资源</div>
+}
+
+const AppDataScopeView = () => {
+  return <div>数据资源</div>
 }
 
 const AppSSOView = () => {
@@ -34,7 +48,7 @@ const AppSSOView = () => {
 
 const AppBaseInfoView = () => {
   React.useEffect(() => {
-    onQueryFormInfo(pageParams.recordId, (data) => {
+    onQueryFormInfo(PageVars.recordId, (data) => {
       PageContext.infoFormRef.current.setFieldsValue(data);
     });
   }, []);

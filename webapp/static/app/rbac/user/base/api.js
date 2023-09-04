@@ -82,9 +82,7 @@ const onInfoForm = (record) => {
   PageContext.setInfoFormShow(true);
 }
 const onConfigForm = (record) => {
-  PageContext.setInitFormValue({ recordId: record.recordId });
-  PageContext.setFormTitle("配置用户");
-  PageContext.setConfigFormShow(true);
+  window.parent.postMessage({ from: 'user', userId: record.recordId }, "*");
 }
 const onEnableEvent = (organ) => {
   BmbpHttp.post(PageApi.enableUserUrl + organ.recordId, {}).then((resp) => {

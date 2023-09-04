@@ -30,8 +30,8 @@
 {% endif %}
 
 <script type="text/babel">
-    {% if pageParams %}
-    const pageParams = {{pageParams}};
+    {% if PageVars %}
+    const PageVars = {{PageVars}};
     {% endif %}
     ReactDOM.render(
         < {{viewName}}/>,

@@ -11,7 +11,7 @@ const RoleApi = {
 }
 
 const onAddRootRole = () => {
-  AppIns.setRoleFromDailogTitle("新增组织");
+  AppIns.setRoleFromDailogTitle("新增角色");
   AppIns.setAddRoleFormShow(true);
   AppIns.setInitRoleValue({ roleParentTitle: "", roleParentCode: "0" });
 }
@@ -27,17 +27,20 @@ const onChangeRoleParent = (role) => {
   AppIns.setChangeParentRoleShow(true);
 }
 const onAddRoleChild = (role) => {
-  AppIns.setRoleFromDailogTitle("新增下级组织");
+  AppIns.setRoleFromDailogTitle("新增下级角色");
   AppIns.setAddRoleFormShow(true);
   AppIns.setInitRoleValue({ roleParentTitle: role.roleTitle, roleParentCode: role.roleCode });
 }
+const onConfigEvent = (record) => {
+  window.parent.postMessage({ from: 'role', roleId: record.recordId }, "*");
+}
 const onEditRole = (role) => {
-  AppIns.setRoleFromDailogTitle("编辑组织");
+  AppIns.setRoleFromDailogTitle("编辑角色");
   AppIns.setEditRoleFormShow(true);
   AppIns.setInitRoleValue({ recordId: role.recordId });
 }
 const onInfoRole = (role) => {
-  AppIns.setRoleFromDailogTitle("查看组织");
+  AppIns.setRoleFromDailogTitle("查看角色");
   AppIns.setInfoRoleFormShow(true);
   AppIns.setInitRoleValue({ recordId: role.recordId });
 }
@@ -78,11 +81,11 @@ const onDeleteRole = (role) => {
 
 
 const onEditRoleInfo = (role) => {
-  arco.Message.info("配置组织明细信息");
+  arco.Message.info("配置角色明细信息");
 }
 
 const onBatchDeleteRole = (roleIds) => {
-  arco.Message.info("批量删除组织节点:" + JSON.stringify(roleIds));
+  arco.Message.info("批量删除角色节点:" + JSON.stringify(roleIds));
 }
 const onToolBarImportBtnClick = () => {
   arco.Message.info("导入功能开发中...");
@@ -160,7 +163,7 @@ const saveRoleInfo = (formData, set_model) => {
   });
 }
 
-/// 查询排除节点的组织结构数据
+/// 查询排除节点的角色结构数据
 const onQueryTreeDataWithOutRecordId = () => {
   BmbpHttp.get(RoleApi.queryTreeWithOutRoleUrl + AppIns.initRoleValue.recordId, {}).then((resp) => {
     if (resp.code == 0) {

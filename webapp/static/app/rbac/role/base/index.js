@@ -83,12 +83,6 @@ const PageView = () => {
   AppIns.roleInfoFormRef = roleInfoFormRef;
   AppIns.setRoleInfoFormRef = setRoleInfoFormRef;
 
-
-
-  // 角色配置表单
-  const roleConfigRef = React.useRef();
-  AppIns.roleConfigRef = roleConfigRef;
-
   // 角色详情表单
   const roleFromInfoRef = React.useRef();
   AppIns.roleFromInfoRef = roleFromInfoRef;
@@ -163,7 +157,7 @@ const buildTreeNodeActionBar = (node) => {
       content={
         <div className="bmbp-action-more">
           <arco.Button size={'mini'} onClick={() => onAddRoleChild(node.dataRef)}>新增</arco.Button>
-          <arco.Button size={'mini'} onClick={() => onEditRoleInfo(node.dataRef)}>配置</arco.Button>
+          <arco.Button size={'mini'} onClick={() => onConfigEvent(node.dataRef)}>配置</arco.Button>
           <arco.Button size={'mini'} onClick={() => onEditRole(node.dataRef)}>编辑</arco.Button>
           <arco.Button size={'mini'} onClick={() => onInfoRole(node.dataRef)}>查看</arco.Button>
           <arco.Button size={'mini'} onClick={() => onChangeRoleParent(node.dataRef)}>变更上级</arco.Button>
@@ -328,7 +322,7 @@ const GridTable = () => {
       render: (_, record) => {
         return <div className="bmbp-grid-row-action">
           <arco.Button type='text' size={'mini'} onClick={() => onAddRoleChild(record)}>新增</arco.Button>
-          <arco.Button type='text' size={'mini'} onClick={() => onEditRoleInfo(record)}>配置</arco.Button>
+          <arco.Button type='text' size={'mini'} onClick={() => onConfigEvent(record)}>配置</arco.Button>
           <arco.Popover
             trigger='hover' position='left'
             content={
