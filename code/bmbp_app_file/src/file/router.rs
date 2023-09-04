@@ -1,9 +1,15 @@
 use super::web::*;
+use salvo::size_limiter::max_size;
 use salvo::Router;
 
 pub fn file_router() -> Router {
     Router::new()
-        .push(Router::with_path("/upload").post(upload_file))
+        .push(
+            Router::new()
+                .hoop(max_size(1024 * 1024 * 256))
+                .path("/upload")
+                .post(upload_file),
+        )
         .push(Router::with_path("/upload/img").post(upload_img))
         .push(
             Router::with_path("/download")
