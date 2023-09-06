@@ -13,4 +13,4 @@ tracing = "0.1"
 
 salvo = { version = "*",features=["default","serve-static","cors"] }
 tokio = { version = "1.32.0", features = ["full"] }
-async-trait = "0.1"
+async-trait = "0.1.73"
