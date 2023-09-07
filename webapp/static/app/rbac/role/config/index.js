@@ -23,7 +23,10 @@ function PageView() {
     <arco.Tabs.TabPane key='4' title='分配用户' >
       <div>分配用户</div>
     </arco.Tabs.TabPane>
-    <arco.Tabs.TabPane key='5' title='角色基本信息'>
+    <arco.Tabs.TabPane key='5' title='互斥角色' >
+      <div>互斥角色</div>
+    </arco.Tabs.TabPane>
+    <arco.Tabs.TabPane key='6' title='角色基本信息'>
       <div>角色基本信息</div>
     </arco.Tabs.TabPane>
   </arco.Tabs>
