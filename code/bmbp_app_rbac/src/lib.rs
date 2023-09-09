@@ -7,6 +7,7 @@ mod app_url;
 mod organ;
 mod proxy;
 mod role;
+mod role_app;
 mod role_app_data_scope;
 mod role_app_menu;
 mod role_app_url;

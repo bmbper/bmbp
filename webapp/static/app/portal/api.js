@@ -20,12 +20,6 @@ const queryMenuData = () => {
         menuTitlePath: '/权限管理/应用管理/'
       },
       {
-        recordId: '1.2',
-        menuTitle: "菜单管理",
-        menuUrl: '/rbac/v1/res/menu/index.view',
-        menuType: 'func',
-        menuTitlePath: '/权限管理/菜单管理/'
-      }, {
         recordId: '1.3',
         menuTitle: "组织管理",
         menuUrl: '/rbac/v1/organ/index.view',

@@ -5,3 +5,4 @@ mod service;
 mod util;
 mod vars;
 mod web;
+pub use router::*;
