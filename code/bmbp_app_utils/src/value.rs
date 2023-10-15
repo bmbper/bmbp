@@ -94,6 +94,12 @@ pub fn add_insert_default_value(params: &mut BmbpHashMap) {
     if is_empty_prop(params, "recordSign") {
         params.insert("recordSign".to_string(), BmbpValue::from("_"));
     }
+    if is_empty_prop(params, "recordNum") {
+        params.insert("recordNum".to_string(), BmbpValue::from(0));
+    }
+    if is_empty_prop(params, "recordRemark") {
+        params.insert("recordRemark".to_string(), BmbpValue::from(""));
+    }
 }
 
 pub fn add_update_default_value(params: &mut BmbpHashMap) {

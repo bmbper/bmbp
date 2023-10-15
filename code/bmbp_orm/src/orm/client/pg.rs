@@ -211,7 +211,6 @@ impl BmbpConn for BmbpPgConnect {
         tracing::info!("执行删除SQL:{},params:{:#?}", &sql, params);
         self.execute(sql, params).await
     }
-    #[allow(unused)]
     async fn execute(&mut self, sql: String, params: &[Value]) -> BmbpResp<usize> {
         let pg_params = to_pg_prams(params);
         let pg_params_ref = pg_params
@@ -219,7 +218,7 @@ impl BmbpConn for BmbpPgConnect {
             .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
             .collect::<Vec<&(dyn ToSql + Sync)>>();
         debug!("pg_sql:{}", sql);
-        debug!("pa_params:{:#?}", pg_params_ref);
+        debug!("pg_params:{:#?}", pg_params_ref);
         let execute_rs = self
             .client
             .lock()
@@ -272,8 +271,8 @@ impl BmbpConn for BmbpPgConnect {
             .iter()
             .map(|x| -> &(dyn ToSql + Sync) { x.as_ref() })
             .collect::<Vec<&(dyn ToSql + Sync)>>();
-        tracing::debug!("pg_sql:{}", sql);
-        tracing::debug!("pa_params:{:#?}", pg_params_ref);
+        tracing::info!("pg_sql:{}", sql);
+        tracing::info!("pg_params:{:#?}", pg_params_ref);
         let execute_rs = self
             .client
             .lock()
@@ -283,7 +282,7 @@ impl BmbpConn for BmbpPgConnect {
         match execute_rs {
             Ok(row_count) => Ok(row_count as usize),
             Err(err) => {
-                tracing::error!("error:{:#?}", err);
+                tracing::error!("sql error:{:#?}", err);
                 Err(BmbpError::orm(err.to_string().as_str()))
             }
         }

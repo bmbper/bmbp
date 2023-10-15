@@ -1,1 +1,1 @@
-pub trait CurdServiceTrait {}
+pub trait CurdService {}

@@ -267,6 +267,11 @@ impl BmbpScriptSql {
         self.from_tables.push(table.to_string());
         self
     }
+    pub fn from_alias(&mut self, table: &str, alias: &str) -> &mut Self {
+        self.script_type = BmbpScriptType::QUERY;
+        self.from_tables.push(format!("{} as {}", table, alias));
+        self
+    }
     pub fn from_slice(&mut self, tables: &[&str]) -> &mut Self {
         self.script_type = BmbpScriptType::QUERY;
         for table in tables {

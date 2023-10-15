@@ -20,8 +20,8 @@ impl UserScript {
     }
     pub(crate) fn query_script_by_organ() -> BmbpScriptSql {
         let mut query_script = BmbpScriptSql::new();
-        query_script.from(format!("{} as u", Self::get_organ_table_name()).as_str());
-        let columns = Self::get_organ_table_columns();
+        query_script.from(format!("{} as u", Self::get_orm_table_name()).as_str());
+        let columns = Self::get_orm_table_columns();
         for column in columns.as_slice() {
             if column.eq("user_password") {
                 continue;
@@ -36,10 +36,10 @@ impl UserScript {
 }
 
 impl CurdScript for UserScript {
-    fn get_organ_table_name() -> String {
+    fn get_orm_table_name() -> String {
         BmbpRbacUser::orm_table_name()
     }
-    fn get_organ_table_columns() -> Vec<String> {
+    fn get_orm_table_columns() -> Vec<String> {
         BmbpRbacUser::orm_table_column_name()
     }
 }

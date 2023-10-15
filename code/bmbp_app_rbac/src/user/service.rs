@@ -2,7 +2,7 @@ use bmbp_app_common::{
     BmbpError, BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, PageParams, PageVo, ValidRule,
     ValidType, DEFAULT_PASSWORD,
 };
-use bmbp_app_curd::{CurdDaoTrait, CurdScript};
+use bmbp_app_curd::{CurdDao, CurdScript};
 use bmbp_app_utils::{
     add_insert_default_value, add_update_default_value, is_empty_prop, sha2_256_encode_upper,
     valid_field_rule, valid_field_rule_slice,
@@ -131,7 +131,7 @@ impl UserService {
     ) -> Option<bmbp_app_common::BmbpError> {
         let valid_rule = vec![
             FieldValidRule(
-                "organCode".to_string(),
+                "organId".to_string(),
                 ValidRule(ValidType::NotEmpty, "用户所属组织不能为空".to_string()),
             ),
             FieldValidRule(

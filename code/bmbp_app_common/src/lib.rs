@@ -35,29 +35,30 @@ fn build_production_template() -> Tera {
 }
 /// 开发模式下的模板
 fn build_development_template() -> Tera {
-    let mut tp = Tera::new("webapp/template/**/*").unwrap();
+    let mut tp = Tera::new("bmbp_web/pages/**/*").unwrap();
     tp.autoescape_on(vec![]);
     tp.full_reload().unwrap();
     tp
 }
 /// 模板文件嵌入
 #[derive(RustEmbed)]
-#[folder = "../../webapp/template/"]
+#[folder = "../../bmbp_web/pages/"]
 pub struct EmbedTemplate;
 
 /// 静态文件嵌入
 #[derive(RustEmbed)]
-#[folder = "../../webapp/static/"]
+#[folder = "../../bmbp_web/assets/"]
 pub struct EmbedStatic;
 
 pub fn build_common_router() -> Router {
     let mut router = Router::new();
     if is_production() {
         router =
-            router.push(Router::with_path("/static/<**path>").get(static_embed::<EmbedStatic>()));
+            router.push(Router::with_path("/assets/<**path>").get(static_embed::<EmbedStatic>()));
     } else {
-        router = router
-            .push(Router::with_path("/static/<**path>").get(StaticDir::new(vec!["webapp/static"])));
+        router = router.push(
+            Router::with_path("/assets/<**path>").get(StaticDir::new(vec!["bmbp_web/assets"])),
+        );
     }
     router
 }

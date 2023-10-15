@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use bmbp_app_common::{BmbpHashMap, BmbpResp, PageVo};
 #[async_trait]
-pub trait CurdDaoTrait {
+pub trait CurdDao {
     async fn find_page(
         script_sql: &String,
         script_params: &BmbpHashMap,
