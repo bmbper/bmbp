@@ -7,6 +7,7 @@ edition = "2021"
 [dependencies]
 # 全局参数存放
 bmbp_app_common = { path = "../bmbp_app_common" }
+bmbp_app_base = { path = "../bmbp_app_base" }
 bmbp_app_auth = { path = "../bmbp_app_auth" }
 bmbp_app_rbac = { path = "../bmbp_app_rbac" }
 bmbp_app_portal = { path = "../bmbp_app_portal" }

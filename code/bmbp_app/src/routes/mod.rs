@@ -2,6 +2,7 @@ use bmbp_app_common::build_common_router;
 use bmbp_app_file::build_file_router;
 use bmbp_app_portal::build_home_router;
 use bmbp_app_rbac::build_rbac_router;
+use bmbp_app_base::build_app_base_router;
 use salvo::{
     cors::{Cors, CorsHandler},
     handler,
@@ -21,6 +22,10 @@ pub fn init_webapp_router() -> Router {
 
     let static_file_router = build_file_router();
     router = router.push(static_file_router);
+
+    //公共模块路由
+    let app_base_router = build_app_base_router();
+    router = router.push(app_base_router);
 
     // 引入主模块路由，用于处理登录，首页相关逻辑
     let api_home_router = build_home_router();
