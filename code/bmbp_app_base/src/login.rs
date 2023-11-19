@@ -7,7 +7,7 @@ use tera::Context;
 
 #[handler]
 pub async fn login_view(_req: &mut Request, res: &mut Response) {
-    let mut ctx = Context::new();
+    let ctx = Context::new();
     let te = BMBP_TEMPLATE.render("base/login/login.html", &ctx).unwrap();
     res.render(Text::Html(&te))
 }
