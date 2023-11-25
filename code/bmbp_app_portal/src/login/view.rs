@@ -13,6 +13,6 @@ pub async fn login_view(_req: &mut Request, res: &mut Response) {
     ctx.insert("viewScript", vec!["login/login.js"].as_slice());
     ctx.insert("viewCss", vec!["login.css"].as_slice());
     ctx.insert("viewName", "LoginView");
-    let te = BMBP_TEMPLATE.render("page.html", &ctx).unwrap();
+    let te = BMBP_TEMPLATE.render("base/login/login.html", &ctx).unwrap();
     res.render(Text::Html(&te))
 }
