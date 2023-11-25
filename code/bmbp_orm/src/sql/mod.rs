@@ -15,6 +15,7 @@ mod ddl;
 mod dml;
 mod dql;
 mod orm;
+mod page;
 mod param;
 mod raw;
 mod sql;

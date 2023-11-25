@@ -14,9 +14,9 @@ use crate::user::user_router;
 use salvo::Router;
 pub fn build_rbac_router() -> Router {
     Router::with_path("/rbac/v1")
+        .push(Router::with_path("/app").push(app_router()))
         .push(Router::with_path("/organ").push(organ_router()))
         .push(Router::with_path("/user").push(user_router()))
-        .push(Router::with_path("/app").push(app_router()))
         .push(Router::with_path("/menu").push(menu_router()))
         .push(Router::with_path("/app/url").push(app_url_router()))
         .push(Router::with_path("/app/data/scope").push(app_data_scope_router()))
