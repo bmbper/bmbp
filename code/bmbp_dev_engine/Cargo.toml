@@ -23,6 +23,6 @@ convert_case = "0.6"
 # 正则解析
 regex = "1"
 
-
+bmbp_dev_dsl = { path = "../bmbp_dev_dsl" }
 # 数据库封装
 bmbp_orm = { path = "../bmbp_orm" }

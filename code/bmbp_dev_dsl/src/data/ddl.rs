@@ -717,4 +717,14 @@ impl BmbpDbProcedure {
     }
 }
 
-
+#[derive(serde::Serialize, serde::Deserialize, Default, Clone)]
+pub struct BmbpDbEvent {
+    schema_code: String,
+    name: String,
+    sql: String,
+}
+impl BmbpDbEvent {
+    pub fn get_json(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+}

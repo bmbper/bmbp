@@ -7,3 +7,6 @@
 
 mod ddl;
 mod dmql;
+
+pub use ddl::*;
+pub use dmql::*;
