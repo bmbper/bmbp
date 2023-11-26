@@ -1,18 +1,53 @@
-<!doctype html>
-<html lang="en">
-
+<!DOCTYPE html>
+<html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="/assets/lib/base/bootstrap5/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
-    <link rel="icon" href="/assets/app/base/img/favicon.ico">
-    <title>Bmbp学习平台</title>
+	<title>星空背景图</title>
+	<style>
+		body {
+			background: url("星空.jpg") no-repeat center center fixed;
+			-webkit-background-size: cover;
+			-moz-background-size: cover;
+			-o-background-size: cover;
+			background-size: cover;
+		}
+
+		form {
+			width: 300px;
+			height: 400px;
+			background-color: rgba(255, 255, 255, 0.8);
+			border-radius: 10px;
+			padding: 20px;
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+
+		input[type="text"],
+		input[type="password"] {
+			width: 100%;
+			padding: 10px;
+			border-radius: 5px;
+			border: none;
+			margin-bottom: 20px;
+		}
+
+		input[type="submit"] {
+			width: 100%;
+			padding: 10px;
+			border-radius: 5px;
+			border: none;
+			background-color: #4CAF50;
+			color: white;
+			cursor: pointer;
+		}
+	</style>
 </head>
-
 <body>
-    <h1>Hello, world!-登录页面</h1>
-    <script src="/assets/lib/base/bootstrap5/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+	<form action="" method="post">
+		<input type="text" placeholder="用户名">
+		<input type="password" placeholder="密码">
+		<input type="submit" value="登录">
+	</form>
 </body>
-
-
 </html>

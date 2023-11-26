@@ -5,6 +5,7 @@ use salvo::prelude::*;
 
 mod env;
 mod routes;
+mod data;
 
 pub struct BmbpWebApp {}
 

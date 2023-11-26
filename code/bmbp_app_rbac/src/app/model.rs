@@ -7,7 +7,7 @@ pub struct BmbpRbacApp {
     app_code: Option<String>,
     app_title: Option<String>,
     app_key: Option<String>,
-    app_secrect_key: Option<String>,
+    app_secret_key: Option<String>,
     app_type: Option<BmbpRbacAppType>,
 }
 
@@ -22,7 +22,7 @@ impl BmbpRbacApp {
             "app_code".to_string(),
             "app_title".to_string(),
             "app_key".to_string(),
-            "app_secrect_key".to_string(),
+            "app_secret_key".to_string(),
             "app_type".to_string(),
         ];
         base_fields.extend_from_slice(rbac_app_field.as_slice());
