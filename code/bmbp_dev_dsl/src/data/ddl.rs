@@ -728,3 +728,35 @@ impl BmbpDbEvent {
         serde_json::to_string(self).unwrap()
     }
 }
+
+#[cfg(test)]
+mod tests{
+    #[test]
+    fn test_bmbp_db_schema(){
+    }
+
+    #[test]
+    fn test_bmbp_db_table(){
+    }
+    #[test]
+    fn test_bmbp_db_column(){
+    }
+    #[test]
+    fn test_bmbp_db_index(){
+    }
+    #[test]
+    fn test_bmbp_db_constraint(){
+    }
+    #[test]
+    fn test_bmbp_db_view(){
+    }
+    #[test]
+    fn test_bmbp_db_trigger(){
+    }
+    #[test]
+    fn test_bmbp_db_procedure(){
+    }
+    #[test]
+    fn test_bmbp_db_event(){
+    }
+}
