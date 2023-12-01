@@ -1,18 +1,5 @@
-/// 查询构建器
-/// 暂时支持PG，后续适配MYSQL\SQLite\SQLServer等
-
-///SQL构建的抽象
-pub trait SqlDynamicBuilder {
-    fn build(&self) -> String;
-}
-
-#[derive(Clone)]
-pub enum SelectBuilder {
-    String(String),
-    // 字段名 | 字段名 AS 别名 | 表名.字段名 | 表名.字段名 AS 别名 | SQL语句 | SQL语句 AS 别名 | 批量
-    Dynamic(DynamicSelectBuilder),// 动态字段
-}
-impl SqlDynamicBuilder for SelectBuilder {
+use crate::types::*;
+impl SqlBuilder for SelectBuilder {
     fn build(&self) -> String {
         match self {
             SelectBuilder::String(s) => s.clone(),
@@ -20,16 +7,7 @@ impl SqlDynamicBuilder for SelectBuilder {
         }
     }
 }
-
-#[derive(Clone)]
-pub struct DynamicSelectBuilder {
-    table_alias_: Option<String>,
-    // 表别名
-    field_: DynamicSelectBuilderType,
-    // 动态字段
-    alias_: Option<String>, // 字段别名
-}
-impl SqlDynamicBuilder for DynamicSelectBuilder {
+impl SqlBuilder for DynamicSelectBuilder {
     fn build(&self) -> String {
         let mut s = "".to_string();
         if let Some(ref table_alias) = self.table_alias_ {
@@ -42,16 +20,7 @@ impl SqlDynamicBuilder for DynamicSelectBuilder {
         s
     }
 }
-#[derive(Clone, Default)]
-pub enum DynamicSelectBuilderType {
-    // 字段名 | 字段名 AS 别名 | 表名.字段名 | 表名.字段名 AS 别名 | SQL语句 | SQL语句 AS 别名 | 批量
-    String(String),
-    // 动态字段
-    Dynamic(DynamicSelectBuilder),
-    // 临时表 QueryBuilder
-    TempTable(QueryBuilder),
-}
-impl SqlDynamicBuilder for DynamicSelectBuilderType {
+impl SqlBuilder for DynamicSelectBuilderType {
     fn build(&self) -> String {
         match self {
             DynamicSelectBuilderType::String(s) => s.clone(),
@@ -60,13 +29,7 @@ impl SqlDynamicBuilder for DynamicSelectBuilderType {
         }
     }
 }
-
-#[derive(Clone, Default)]
-pub enum TableBuilder {
-    String(String),
-    Dynamic(DynamicTableBuilder),
-}
-impl SqlDynamicBuilder for TableBuilder {
+impl SqlBuilder for TableBuilder {
     fn build(&self) -> String {
         match self {
             TableBuilder::String(s) => s.clone(),
@@ -74,17 +37,7 @@ impl SqlDynamicBuilder for TableBuilder {
         }
     }
 }
-
-#[derive(Clone, Default)]
-pub struct DynamicTableBuilder {
-    // 数据库实例
-    schema: Option<String>,
-    // 表名
-    table: DynamicTableBuilderType,
-    // 表别名
-    alias: Option<String>,
-}
-impl SqlDynamicBuilder for DynamicTableBuilder {
+impl SqlBuilder for DynamicTableBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
         if let Some(ref schema) = self.schema {
@@ -98,16 +51,8 @@ impl SqlDynamicBuilder for DynamicTableBuilder {
         sql
     }
 }
-#[derive(Clone, Default)]
-pub enum DynamicTableBuilderType {
-    // 表名  | 临时表
-    String(String),
-    // 动态表名
-    Dynamic(DynamicTableBuilder),
-    // 临时表 表构建器
-    TempTable(TableBuilder),
-}
-impl SqlDynamicBuilder for DynamicTableBuilderType {
+
+impl SqlBuilder for DynamicTableBuilderType {
     fn build(&self) -> String {
         match self {
             DynamicTableBuilderType::String(s) => s.clone(),
@@ -117,23 +62,12 @@ impl SqlDynamicBuilder for DynamicTableBuilderType {
     }
 }
 
-#[derive(Clone, Default)]
-pub struct QueryBuilder {
-    select_: Vec<SelectBuilder>,
-    from_: Vec<TableBuilder>,
-    join_: Vec<JoinQueryBuilder>,
-    filter_: Option<QueryFilterBuilder>,
-    group_: Option<Vec<QueryFilterItemBuilder>>,
-    order_: Option<Vec<OrderBuilder>>,
-    limit_: Option<u64>,
-    offset_: Option<u64>,
-}
-impl SqlDynamicBuilder for QueryBuilder {
+impl SqlBuilder for QueryBuilder {
     fn build(&self) -> String {
         let mut sql = "SELECT ".to_string();
         sql += &self.select_.iter().map(|s| s.build()).collect::<Vec<_>>().join(", ");
         sql += &self.from_.iter().map(|t| t.build()).collect::<Vec<_>>().join(", ");
-        if!self.join_.is_empty() {
+        if !self.join_.is_empty() {
             sql += &self.join_.iter().map(|j| j.build()).collect::<Vec<_>>().join(" ");
         }
         if let Some(ref filter) = self.filter_ {
@@ -148,13 +82,7 @@ impl SqlDynamicBuilder for QueryBuilder {
         sql
     }
 }
-#[derive(Clone, Default)]
-pub struct JoinQueryBuilder {
-    table: TableBuilder,
-    typ: JoinTableType,
-    filter: Option<QueryFilterBuilder>,
-}
-impl SqlDynamicBuilder for JoinQueryBuilder {
+impl SqlBuilder for JoinQueryBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
         sql += &format!("{} JOIN ", self.typ.to_string());
@@ -165,15 +93,7 @@ impl SqlDynamicBuilder for JoinQueryBuilder {
         sql
     }
 }
-
-#[derive(Clone, Default)]
-pub enum JoinTableType {
-    Inner,
-    Left,
-    Right,
-    Full,
-}
-impl SqlDynamicBuilder for JoinTableType {
+impl SqlBuilder for JoinTableType {
     fn build(&self) -> String {
         match self {
             JoinTableType::Inner => "INNER JOIN".to_string(),
@@ -183,14 +103,7 @@ impl SqlDynamicBuilder for JoinTableType {
         }
     }
 }
-
-#[derive(Clone, Default)]
-pub struct QueryFilterBuilder {
-    typ: QueryFilterType,
-    filters: Vec<QueryFilterItemBuilder>,
-}
-
-impl SqlDynamicBuilder for QueryFilterBuilder {
+impl SqlBuilder for QueryFilterBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
         sql += &format!("{} (", self.typ.to_string());
@@ -199,13 +112,8 @@ impl SqlDynamicBuilder for QueryFilterBuilder {
         sql
     }
 }
-#[derive(Clone, Default)]
-pub enum QueryFilterType {
-    And,
-    Or,
-}
 
-impl SqlDynamicBuilder for QueryFilterType {
+impl SqlBuilder for QueryFilterType {
     fn build(&self) -> String {
         match self {
             QueryFilterType::And => "AND".to_string(),
@@ -213,12 +121,8 @@ impl SqlDynamicBuilder for QueryFilterType {
         }
     }
 }
-#[derive(Clone, Default)]
-pub enum QueryFilterItemBuilder {
-    Simple(QuerySimpleFilterItemBuilder),
-    Nested(QueryFilterBuilder),
-}
-impl SqlDynamicBuilder for QueryFilterItemBuilder {
+
+impl SqlBuilder for QueryFilterItemBuilder {
     fn build(&self) -> String {
         match self {
             QueryFilterItemBuilder::Simple(s) => s.build(),
@@ -226,14 +130,7 @@ impl SqlDynamicBuilder for QueryFilterItemBuilder {
         }
     }
 }
-#[derive(Clone, Default)]
-pub struct QuerySimpleFilterItemBuilder {
-    filter_typ_: QueryFilterType,
-    field_: FilterFieldBuilder,
-    value_: String,
-    op_: FilterOperatorType,
-}
-impl SqlDynamicBuilder for QuerySimpleFilterItemBuilder {
+impl SqlBuilder for QuerySimpleFilterItemBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
         sql += &format!("{} ", self.filter_typ_.to_string());
@@ -243,12 +140,8 @@ impl SqlDynamicBuilder for QuerySimpleFilterItemBuilder {
         sql
     }
 }
-#[derive(Clone, Default)]
-pub enum FilterFieldBuilder {
-    String(String),
-    Dynamic(DynamicFilterFieldBuilder),
-}
-impl SqlDynamicBuilder for FilterFieldBuilder {
+
+impl SqlBuilder for FilterFieldBuilder {
     fn build(&self) -> String {
         match self {
             FilterFieldBuilder::String(s) => s.clone(),
@@ -256,14 +149,8 @@ impl SqlDynamicBuilder for FilterFieldBuilder {
         }
     }
 }
-#[derive(Clone, Default)]
-pub enum DynamicFilterFieldBuilder {
-    // 字段名  | 表名.字段名 | SQL语句 |
-    String(String),
-    // 动态字段
-    Dynamic(QueryBuilder),
-}
-impl SqlDynamicBuilder for DynamicFilterFieldBuilder {
+
+impl SqlBuilder for DynamicFilterFieldBuilder {
     fn build(&self) -> String {
         match self {
             DynamicFilterFieldBuilder::String(s) => s.clone(),
@@ -271,22 +158,8 @@ impl SqlDynamicBuilder for DynamicFilterFieldBuilder {
         }
     }
 }
-#[derive(Clone, Default)]
-pub enum FilterOperatorType {
-    Eq,
-    Ne,
-    Gt,
-    Lt,
-    Ge,
-    Le,
-    Like,
-    NotLike,
-    In,
-    NotIn,
-    IsNull,
-    IsNotNull,
-}
-impl SqlDynamicBuilder for FilterOperatorType {
+
+impl SqlBuilder for FilterOperatorType {
     fn build(&self) -> String {
         match self {
             FilterOperatorType::Eq => "=".to_string(),
@@ -304,12 +177,8 @@ impl SqlDynamicBuilder for FilterOperatorType {
         }
     }
 }
-#[derive(Clone, Default)]
-pub struct OrderBuilder {
-    field: String,
-    typ: OrderType,
-}
-impl SqlDynamicBuilder for OrderBuilder {
+
+impl SqlBuilder for OrderBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
         sql += &self.field;
@@ -317,12 +186,7 @@ impl SqlDynamicBuilder for OrderBuilder {
         sql
     }
 }
-#[derive(Clone, Default)]
-pub enum  OrderFieldBuilder {
-   String(String),
-   Dynamic(DynamicOrderFieldBuilder)
-}
-impl SqlDynamicBuilder for OrderFieldBuilder {
+impl SqlBuilder for OrderFieldBuilder {
     fn build(&self) -> String {
         match self {
             OrderFieldBuilder::String(s) => s.clone(),
@@ -330,14 +194,7 @@ impl SqlDynamicBuilder for OrderFieldBuilder {
         }
     }
 }
-#[derive(Clone, Default)]
-pub enum DynamicOrderFieldBuilder {
-    // 字段名  | 表名.字段名 | SQL语句 |
-    String(String),
-    // 动态字段
-    Dynamic(FilterFieldBuilder),
-}
-impl SqlDynamicBuilder for DynamicOrderFieldBuilder {
+impl SqlBuilder for DynamicOrderFieldBuilder {
     fn build(&self) -> String {
         match self {
             DynamicOrderFieldBuilder::String(s) => s.clone(),
@@ -345,12 +202,7 @@ impl SqlDynamicBuilder for DynamicOrderFieldBuilder {
         }
     }
 }
-#[derive(Clone, Default)]
-pub enum OrderType {
-    Asc,
-    Desc,
-}
-impl SqlDynamicBuilder for OrderType {
+impl SqlBuilder for OrderType {
     fn build(&self) -> String {
         match self {
             OrderType::Asc => "ASC".to_string(),
@@ -358,14 +210,8 @@ impl SqlDynamicBuilder for OrderType {
         }
     }
 }
-#[derive(Clone, Default)]
-pub struct UpdateBuilder {
-    set_: Vec<UpdateSetFieldBuilder>,
-    from_: Vec<TableBuilder>,
-    join_: Vec<JoinQueryBuilder>,
-    filter_: Option<QueryFilterBuilder>,
-}
-impl SqlDynamicBuilder for UpdateBuilder {
+
+impl SqlBuilder for UpdateBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
         sql += &"UPDATE ".to_string();
@@ -379,12 +225,7 @@ impl SqlDynamicBuilder for UpdateBuilder {
         sql
     }
 }
-#[derive(Clone, Default)]
-pub struct UpdateSetFieldBuilder {
-    field_: FilterFieldBuilder,
-    value_: String,
-}
-impl SqlDynamicBuilder for UpdateSetFieldBuilder {
+impl SqlBuilder for UpdateSetFieldBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
         sql += &self.field_.build();
@@ -393,12 +234,7 @@ impl SqlDynamicBuilder for UpdateSetFieldBuilder {
         sql
     }
 }
-#[derive(Clone, Default)]
-pub struct DeleteBuilder {
-    from_: Vec<TableBuilder>,
-    filter_: Option<QueryFilterBuilder>,
-}
-impl SqlDynamicBuilder for DeleteBuilder {
+impl SqlBuilder for DeleteBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
         sql += &"DELETE FROM ".to_string();
@@ -410,14 +246,8 @@ impl SqlDynamicBuilder for DeleteBuilder {
         sql
     }
 }
-#[derive(Clone, Default)]
-pub struct InsertBuilder {
-    into_: TableBuilder,
-    fields_: Option<Vec<String>>,
-    values_: Option<Vec<String>>,
-    query_: Option<QueryBuilder>,
-}
-impl SqlDynamicBuilder for InsertBuilder {
+
+impl SqlBuilder for InsertBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
         sql += &"INSERT INTO ".to_string();
@@ -438,5 +268,3 @@ impl SqlDynamicBuilder for InsertBuilder {
         sql
     }
 }
-#[cfg(test)]
-mod tests {}
