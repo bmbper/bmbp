@@ -1,4 +1,5 @@
 use crate::types::*;
+
 impl SqlBuilder for SelectBuilder {
     fn build(&self) -> String {
         match self {
@@ -7,6 +8,7 @@ impl SqlBuilder for SelectBuilder {
         }
     }
 }
+
 impl SqlBuilder for DynamicSelectBuilder {
     fn build(&self) -> String {
         let mut s = "".to_string();
@@ -20,6 +22,7 @@ impl SqlBuilder for DynamicSelectBuilder {
         s
     }
 }
+
 impl SqlBuilder for DynamicSelectBuilderType {
     fn build(&self) -> String {
         match self {
@@ -29,6 +32,7 @@ impl SqlBuilder for DynamicSelectBuilderType {
         }
     }
 }
+
 impl SqlBuilder for TableBuilder {
     fn build(&self) -> String {
         match self {
@@ -37,6 +41,7 @@ impl SqlBuilder for TableBuilder {
         }
     }
 }
+
 impl SqlBuilder for DynamicTableBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
@@ -64,28 +69,61 @@ impl SqlBuilder for DynamicTableBuilderType {
 
 impl SqlBuilder for QueryBuilder {
     fn build(&self) -> String {
-        let mut sql = "SELECT ".to_string();
-        sql += &self.select_.iter().map(|s| s.build()).collect::<Vec<_>>().join(", ");
-        sql += &self.from_.iter().map(|t| t.build()).collect::<Vec<_>>().join(", ");
+        let mut sql = "".to_string();
+        // 拼接select
+        if (!self.select_.is_empty()) {
+            sql += &"SELECT ";
+            sql += &self.select_.iter().map(|s| s.build()).collect::<Vec<_>>().join(",");
+            sql += &"\n";
+        }
+        // 拼接 FROm
+        if (!self.from_.is_empty()) {
+            sql += &" FROM ";
+            sql += &self.from_.iter().map(|t| t.build()).collect::<Vec<_>>().join(",");
+            sql += &"\n";
+        }
+        // 拼接JOIN
         if !self.join_.is_empty() {
-            sql += &self.join_.iter().map(|j| j.build()).collect::<Vec<_>>().join(" ");
+            sql += &self.join_.iter().map(|j| j.build()).collect::<Vec<_>>().join(" \n ");
         }
+        // 拼接WHERE条件
         if let Some(ref filter) = self.filter_ {
+            sql += &" WHERE ";
             sql += &filter.build();
+            sql += &"\n";
         }
+        // 拼接 Group by
         if let Some(ref group) = self.group_ {
-            sql += &group.iter().map(|g| g.build()).collect::<Vec<_>>().join(", ");
+            sql += &" GROUP BY ";
+            sql += &group.iter().map(|g| g.build()).collect::<Vec<_>>().join(",");
+            sql += &"\n";
         }
+        // 拼接 Order by
         if let Some(ref order) = self.order_ {
-            sql += &order.iter().map(|o| o.build()).collect::<Vec<_>>().join("");
+            sql += &" ORDER BY ";
+            sql += &order.iter().map(|o| o.build()).collect::<Vec<_>>().join(",");
+            sql += &"\n";
+        }
+        // 拼接 offset
+        if let Some(ref offset) = self.offset_ {
+            sql += &" OFFSET ";
+            sql += &offset.to_string();
+            sql += &"\n";
+        }
+        // 拼接 Limit
+        if let Some(ref limit) = self.limit_ {
+            sql += &" LIMIT ";
+            sql += &limit.to_string();
+            sql += &"\n";
         }
         sql
     }
 }
+
 impl SqlBuilder for JoinQueryBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
-        sql += &format!("{} JOIN ", self.typ.to_string());
+        sql += &format!("{} JOIN ", self.typ.build());
         sql += &self.table.build();
         if let Some(ref filter) = self.filter {
             sql += &filter.build();
@@ -93,6 +131,7 @@ impl SqlBuilder for JoinQueryBuilder {
         sql
     }
 }
+
 impl SqlBuilder for JoinTableType {
     fn build(&self) -> String {
         match self {
@@ -103,13 +142,22 @@ impl SqlBuilder for JoinTableType {
         }
     }
 }
+
 impl SqlBuilder for QueryFilterBuilder {
     fn build(&self) -> String {
-        let mut sql = "".to_string();
-        sql += &format!("{} (", self.typ.to_string());
-        sql += &self.filters.iter().map(|f| f.build()).collect::<Vec<_>>().join(", ");
-        sql += &")";
-        sql
+        let mut filter_vec = vec![];
+        if (!self.filters.is_empty()) {
+            filter_vec = self.filters.iter().map(|f| f.build()).collect::<Vec<_>>();
+        }
+        let filter_sql = match self.typ {
+            QueryFilterType::And => filter_vec.join(" AND "),
+            QueryFilterType::Or => filter_vec.join(" OR "),
+        };
+        if filter_sql.is_empty() {
+            "".to_string()
+        } else {
+            format!("({})", filter_sql)
+        }
     }
 }
 
@@ -125,18 +173,16 @@ impl SqlBuilder for QueryFilterType {
 impl SqlBuilder for QueryFilterItemBuilder {
     fn build(&self) -> String {
         match self {
+            QueryFilterItemBuilder::String(d) => d.to_string(),
             QueryFilterItemBuilder::Simple(s) => s.build(),
             QueryFilterItemBuilder::Nested(n) => n.build(),
         }
     }
 }
+
 impl SqlBuilder for QuerySimpleFilterItemBuilder {
     fn build(&self) -> String {
-        let mut sql = "".to_string();
-        sql += &format!("{} ", self.filter_typ_.to_string());
-        sql += &self.field_.build();
-        sql += &format!(" {} ", self.op_.to_string());
-        sql += &self.value_;
+        let sql = format!("{} {} {}", self.field_.build(), self.op_.build(), self.value_);
         sql
     }
 }
@@ -182,10 +228,11 @@ impl SqlBuilder for OrderBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
         sql += &self.field;
-        sql += &format!(" {}", self.typ.to_string());
+        sql += &format!(" {}", self.typ.build());
         sql
     }
 }
+
 impl SqlBuilder for OrderFieldBuilder {
     fn build(&self) -> String {
         match self {
@@ -194,6 +241,7 @@ impl SqlBuilder for OrderFieldBuilder {
         }
     }
 }
+
 impl SqlBuilder for DynamicOrderFieldBuilder {
     fn build(&self) -> String {
         match self {
@@ -202,6 +250,7 @@ impl SqlBuilder for DynamicOrderFieldBuilder {
         }
     }
 }
+
 impl SqlBuilder for OrderType {
     fn build(&self) -> String {
         match self {
@@ -225,6 +274,7 @@ impl SqlBuilder for UpdateBuilder {
         sql
     }
 }
+
 impl SqlBuilder for UpdateSetFieldBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
@@ -234,6 +284,7 @@ impl SqlBuilder for UpdateSetFieldBuilder {
         sql
     }
 }
+
 impl SqlBuilder for DeleteBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
@@ -251,7 +302,9 @@ impl SqlBuilder for InsertBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
         sql += &"INSERT INTO ".to_string();
-        sql += &self.into_.build();
+        if let Some(f) = &self.into_ {
+            sql += &*f.build();
+        }
         if let Some(f) = &self.fields_ {
             sql += &" (".to_string();
             sql += &f.join(", ");
@@ -268,3 +321,6 @@ impl SqlBuilder for InsertBuilder {
         sql
     }
 }
+
+
+
