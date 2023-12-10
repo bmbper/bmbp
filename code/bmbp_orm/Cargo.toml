@@ -26,8 +26,7 @@ sqlparser = "0.27"
 
 tokio-postgres = { version = "0.7", features = ["with-serde_json-1"] }
 
-tokio = { version = "1.32.0", features = ["full"] }
-
+tokio = { version = "1", features = ["full"] }
 async-trait = "0.1.73"
 # 应用工具类
 bmbp_app_common = { path = "../bmbp_app_common" }

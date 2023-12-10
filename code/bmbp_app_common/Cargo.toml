@@ -19,6 +19,5 @@ tera = "1.19.0"
 rust-embed="8.0.0"
 salvo = { version = "*",features=["default","serve-static","cors"]}
 uuid = {version = "1.4.0",features=["serde","v4"]}
-tokio = { version = "1.32.0", features = ["full"] }
-tracing = "0.1"
+tokio = { version = "1", features = ["full"] }tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

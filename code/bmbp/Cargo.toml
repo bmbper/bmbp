@@ -7,4 +7,4 @@ edition = "2021"
 [dependencies]
 # 全局参数存放
 bmbp_app = { path = "../bmbp_app" }
-tokio = { version = "1.32.0", features = ["full"] }
+tokio = { version = "1", features = ["full"] }
