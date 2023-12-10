@@ -14,7 +14,8 @@ bmbp_app_common = { path = "../bmbp_app_common" }
 bmbp_app_utils = { path = "../bmbp_app_utils" }
 
 salvo = { version = "*" ,features=["default","serve-static","cors"]}
-tokio = { version = "1", features = ["full"] }tera = "1"
+tokio = { version = "1", features = ["full"] }
+tera = "1"
 # 序列
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

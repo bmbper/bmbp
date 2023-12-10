@@ -17,6 +17,7 @@ bmbp_app_curd = {path="../bmbp_app_curd"}
 salvo = { version = "*" ,features=["default","serve-static","cors"]}
 tokio = { version = "1", features = ["full"] }
 
+
 tera = "1"
 reqwest = "0.11"
 
