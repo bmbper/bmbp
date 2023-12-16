@@ -1,3 +1,4 @@
+use std::ffi::CString;
 use async_trait::async_trait;
 use salvo::{writing::Json, Depot, Request, Response, Writer};
 use serde::{Deserialize, Serialize};
@@ -9,8 +10,8 @@ use crate::BmbpError;
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
 pub struct PageVo<T>
-where
-    T: Clone + Default + Serialize + Send + Sync,
+    where
+        T: Clone + Default + Serialize + Send + Sync,
 {
     page_no: Option<usize>,
     page_size: Option<usize>,
@@ -19,8 +20,8 @@ where
 }
 
 impl<T> PageVo<T>
-where
-    T: Clone + Default + Serialize + Send + Sync,
+    where
+        T: Clone + Default + Serialize + Send + Sync,
 {
     pub fn new() -> Self {
         PageVo::default()
@@ -59,12 +60,14 @@ where
         self.data.as_ref()
     }
 }
+
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
 #[repr(i8)]
 pub enum RespCode {
     SUCCESS = 0i8,
     ERROR = -1i8,
 }
+
 impl Default for RespCode {
     fn default() -> Self {
         Self::SUCCESS
@@ -75,8 +78,8 @@ impl Default for RespCode {
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
 pub struct RespVo<T>
-where
-    T: Clone + Default + Serialize + Send + Sync,
+    where
+        T: Clone + Default + Serialize + Send + Sync,
 {
     code: Option<RespCode>,
     msg: Option<String>,
@@ -84,8 +87,8 @@ where
 }
 
 impl<T> RespVo<T>
-where
-    T: Clone + Default + Serialize + Send + Sync,
+    where
+        T: Clone + Default + Serialize + Send + Sync,
 {
     pub fn get_code(&self) -> Option<&RespCode> {
         self.code.as_ref()
@@ -111,8 +114,8 @@ where
 }
 
 impl<T> RespVo<T>
-where
-    T: Clone + Default + Serialize + Send + Sync,
+    where
+        T: Clone + Default + Serialize + Send + Sync,
 {
     pub fn ok() -> Self {
         RespVo {
@@ -208,8 +211,8 @@ pub type BmbpResp<T> = Result<T, BmbpError>;
 
 #[async_trait]
 impl<T> Writer for RespVo<T>
-where
-    T: Clone + Default + Serialize + Send + Sync,
+    where
+        T: Clone + Default + Serialize + Send + Sync,
 {
     async fn write(self, _req: &mut Request, _depot: &mut Depot, res: &mut Response) {
         res.render(Json(self))
@@ -218,8 +221,8 @@ where
 
 #[async_trait]
 impl<T> Writer for PageVo<T>
-where
-    T: Clone + Default + Serialize + Send + Sync,
+    where
+        T: Clone + Default + Serialize + Send + Sync,
 {
     async fn write(self, _req: &mut Request, _depot: &mut Depot, res: &mut Response) {
         res.render(Json(self))
