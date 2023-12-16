@@ -1,17 +1,14 @@
 use tracing;
 
-mod routes;
+mod router;
+mod dict;
+mod region;
+mod vars;
+
+pub use router::build_setting_router;
 
 /// 设置路由
 pub fn set_route_scope() {
     tracing::info!("初始化设置模块路由")
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
-    }
-}

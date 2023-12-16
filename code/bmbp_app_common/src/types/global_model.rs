@@ -1,10 +1,13 @@
 use std::collections::HashMap;
+use std::fmt::Debug;
+use std::sync::{Arc, RwLock};
 
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::BmbpHashMap;
+use crate::{BmbpHashMap, ROOT_TREE_NODE};
 use crate::BmbpValue;
+
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
@@ -231,5 +234,232 @@ impl From<&BmbpBaseModel> for HashMap<String, BmbpValue> {
             BmbpValue::from(model.get_record_sign()),
         );
         bmbp_map
+    }
+}
+
+/// BmbpTreeModel 树节点基础属性
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
+pub struct BmbpTreeModel<T> where T: Default + Clone + Serialize {
+    // 节点编码
+    code: String,
+    // 节点路径编码
+    code_path: String,
+    // 父节点编码
+    parent_code: String,
+    // 节点名称
+    name: String,
+    // 节点路径名称
+    name_path: String,
+    // 子节点
+    children: Vec<BmbpTreeModel<T>>,
+    // 节点类型    
+    node_type: Option<String>,
+    // 节点排序
+    node_sort: Option<usize>,
+    // 节点层级
+    node_level: Option<usize>,
+    // 是否叶子节点
+    node_leaf: Option<bool>,
+    // 扩展属性
+    #[serde(flatten)]
+    node_props: Option<T>,
+}
+
+impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize {
+    pub fn new() -> Self {
+        BmbpTreeModel {
+            code: "".to_string(),
+            code_path: "".to_string(),
+            parent_code: "".to_string(),
+            name: "".to_string(),
+            name_path: "".to_string(),
+            children: vec![],
+            node_type: None,
+            node_sort: None,
+            node_level: None,
+            node_leaf: None,
+            node_props: None,
+        }
+    }
+    pub fn set_code(&mut self, code: String) -> &mut Self {
+        self.code = code;
+        self
+    }
+    pub fn set_code_path(&mut self, code_path: String) -> &mut Self {
+        self.code_path = code_path;
+        self
+    }
+    pub fn set_parent_code(&mut self, parent_code: String) -> &mut Self {
+        self.parent_code = parent_code;
+        self
+    }
+    pub fn set_name(&mut self, name: String) -> &mut Self {
+        self.name = name;
+        self
+    }
+    pub fn set_name_path(&mut self, name_path: String) -> &mut Self {
+        self.name_path = name_path;
+        self
+    }
+    pub fn set_children(&mut self, children: Vec<BmbpTreeModel<T>>) -> &mut Self {
+        self.children = children;
+        self
+    }
+    pub fn set_node_type(&mut self, node_type: String) -> &mut Self {
+        self.node_type = Some(node_type);
+        self
+    }
+    pub fn set_node_sort(&mut self, node_sort: usize) -> &mut Self {
+        self.node_sort = Some(node_sort);
+        self
+    }
+    pub fn set_node_level(&mut self, node_level: usize) -> &mut Self {
+        self.node_level = Some(node_level);
+        self
+    }
+    pub fn set_node_leaf(&mut self, node_leaf: bool) -> &mut Self {
+        self.node_leaf = Some(node_leaf);
+        self
+    }
+    pub fn set_node_props_opt(&mut self, ext_props: Option<T>) -> &mut Self {
+        self.node_props = ext_props;
+        self
+    }
+    pub fn set_node_props(&mut self, ext_props: T) -> &mut Self {
+        self.node_props = Some(ext_props);
+        self
+    }
+    pub fn get_code(&self) -> &String {
+        &self.code
+    }
+    pub fn get_code_path(&self) -> &String {
+        &self.code_path
+    }
+    pub fn get_parent_code(&self) -> &String {
+        &self.parent_code
+    }
+    pub fn get_name(&self) -> &String {
+        &self.name
+    }
+    pub fn get_name_path(&self) -> &String {
+        &self.name_path
+    }
+
+    pub fn get_children(&mut self) -> &Vec<BmbpTreeModel<T>> {
+        self.children.as_ref()
+    }
+    pub fn get_children_mut(&mut self) -> &mut Vec<BmbpTreeModel<T>> {
+        self.children.as_mut()
+    }
+    pub fn get_children_slice(&self) -> &[BmbpTreeModel<T>] {
+        self.children.as_slice()
+    }
+    pub fn get_children_mut_slice(&mut self) -> &mut [BmbpTreeModel<T>] {
+        self.children.as_mut_slice()
+    }
+
+    pub fn get_node_type(&self) -> Option<&String> {
+        self.node_type.as_ref()
+    }
+    pub fn get_node_sort(&self) -> Option<&usize> {
+        self.node_sort.as_ref()
+    }
+    pub fn get_node_level(&self) -> Option<&usize> {
+        self.node_level.as_ref()
+    }
+    pub fn get_node_leaf(&self) -> Option<&bool> {
+        self.node_leaf.as_ref()
+    }
+    pub fn get_node_props(&self) -> Option<&T> {
+        self.node_props.as_ref()
+    }
+    pub fn get_node_props_mut(&mut self) -> Option<&mut T> {
+        self.node_props.as_mut()
+    }
+}
+
+/// 树型结构节点引用
+struct BmbpTreeModelRef<'a, T> where T: Default + Clone + Serialize + 'a {
+    code: &'a String,
+    parent_code: &'a String,
+    node: &'a BmbpTreeModel<T>,
+    children: RwLock<Vec<Arc<BmbpTreeModelRef<'a, T>>>>,
+}
+
+impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize {
+    fn build_tree_ref<'a>(node_list: &'a [BmbpTreeModel<T>]) -> HashMap<&'a String, Arc<BmbpTreeModelRef<T>>> {
+        // 递归终结条件， 当传入的节点列表为空时，返回空的引用映射
+        let mut ref_map = HashMap::new();
+        if node_list.is_empty() {
+            return ref_map;
+        }
+        for node_ref in node_list{
+            let children = node_ref.get_children_slice();
+            let child_ref_map = Self::build_tree_ref(children);
+            ref_map.extend(child_ref_map);
+            let node_ref = BmbpTreeModelRef {
+                code: node_ref.get_code(),
+                parent_code: node_ref.get_parent_code(),
+                node: node_ref,
+                children: RwLock::new(vec![]),
+            };
+            let arc_node = Arc::new(node_ref);
+            ref_map.insert(&arc_node.code, arc_node.clone());
+        }
+        return ref_map;
+    }
+
+    fn build_tree_data(node_ref_list: &[Arc<BmbpTreeModelRef<T>>]) -> Vec<BmbpTreeModel<T>> {
+        let mut data_list = vec![];
+        if (node_ref_list.is_empty()) {
+            return data_list;
+        }
+        node_ref_list.into_iter().for_each(|node_ref| {
+            let children_node_ref = node_ref.children.read().unwrap();
+            let children_data = Self::build_tree_data(children_node_ref.as_slice());
+            let mut current_data = node_ref.node.clone();
+            current_data.set_children(children_data);
+            data_list.push(current_data);
+        });
+        data_list
+    }
+    /// build_tree
+    /// has_spurious: 是否包含孤立节点
+    pub fn build_tree(node_list: Vec<BmbpTreeModel<T>>, has_spurious: bool) -> Vec<BmbpTreeModel<T>> {
+        // 集合
+        let mut node_ref_map: HashMap<&String, Arc<BmbpTreeModelRef<T>>> = Self::build_tree_ref(node_list.as_slice());
+
+        // 拼接树型关系
+        for node_ref_key in node_ref_map.keys() {
+            let node = node_ref_map.get(node_ref_key).unwrap();
+            let arc_node = (*node).clone();
+            let parent_code = arc_node.parent_code;
+            if (node_ref_map.contains_key(parent_code)) {
+                let parent_node_ref = node_ref_map.get(parent_code).unwrap();
+                parent_node_ref.children.write().unwrap().push(arc_node.clone());
+            }
+        }
+
+        // 提取根节点
+        let mut root_node_ref = vec![];
+        node_ref_map.values().for_each(|node_ref| {
+            let parent_code = node_ref.parent_code;
+            if parent_code == ROOT_TREE_NODE || parent_code.is_empty() {
+                let arc_node_ref = node_ref.clone();
+                root_node_ref.push(arc_node_ref.clone());
+            }
+        });
+        // 根据根节点关联，获取实际数据
+        return Self::build_tree_data(root_node_ref.as_slice());
+    }
+    /// build_tree_with_spurious 包含孤立节点
+    pub fn build_tree_with_spurious(node_list: Vec<BmbpTreeModel<T>>) -> Vec<BmbpTreeModel<T>> {
+        Self::build_tree(node_list, true)
+    }
+    /// build_tree_without_spurious 不包含孤立节点
+    pub fn build_tree_without_spurious(node_list: Vec<BmbpTreeModel<T>>) -> Vec<BmbpTreeModel<T>> {
+        Self::build_tree(node_list, false)
     }
 }

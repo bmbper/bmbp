@@ -1,3 +1,5 @@
+extern crate core;
+
 mod types;
 use once_cell::sync::Lazy;
 pub use types::*;
