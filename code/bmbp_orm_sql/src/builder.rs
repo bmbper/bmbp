@@ -1,4 +1,4 @@
-use crate::{DeleteBuilder, QueryBuilder, UpdateBuilder, InsertBuilder, TableBuilder, SelectBuilder, DynamicSelectBuilderType, DynamicSelectBuilder, FilterOperatorType, QueryFilterBuilder, QueryFilterType, QueryFilterItemBuilder, FilterFieldBuilder, QuerySimpleFilterItemBuilder, OrderBuilder, OrderType, SqlBuilder};
+use crate::{DeleteBuilder, QueryBuilder, UpdateBuilder, InsertBuilder, TableBuilder, SelectBuilder, DynamicSelectBuilderType, DynamicSelectBuilder, FilterOperatorType, QueryFilterBuilder, QueryFilterType, QueryFilterItemBuilder, FilterFieldBuilder, QuerySimpleFilterItemBuilder, OrderBuilder, OrderType, SqlBuilder, UpdateSetFieldBuilder};
 
 impl QueryBuilder {
     pub fn new() -> QueryBuilder {
@@ -101,7 +101,11 @@ impl QueryBuilder {
         self.filter_mut().eq(field, value);
         self
     }
-
+    pub fn ne(&mut self, field: &str, value: &str) -> &mut Self {
+        self.init_filter();
+        self.filter_mut().ne(field, value);
+        self
+    }
     pub fn group(&mut self, field: &str) -> &mut Self {
         self.group_mut().push(SelectBuilder::new(field));
         self
@@ -178,12 +182,15 @@ impl QueryFilterBuilder {
         self
     }
 
+    pub fn ne(&mut self, field: &str, value: &str) -> &mut Self {
+        self.filters.push(QueryFilterItemBuilder::new(field, value, FilterOperatorType::Ne));
+        self
+    }
     pub fn add_filter(&mut self, filter: QueryFilterBuilder) -> &mut Self {
         self.filters.push(QueryFilterItemBuilder::Nested(filter));
         self
     }
 }
-
 
 impl QueryFilterItemBuilder {
     pub fn new(field: &str, value: &str, op: FilterOperatorType) -> QueryFilterItemBuilder {
@@ -232,13 +239,37 @@ impl UpdateBuilder {
             filter_: None,
         }
     }
+    fn init_filter(&mut self) {
+        if self.filter_.is_none() {
+            self.filter_ = Some(QueryFilterBuilder::and());
+        }
+    }
+    fn filter_mut(&mut self) -> &mut QueryFilterBuilder {
+        self.init_filter();
+        self.filter_.as_mut().unwrap()
+    }
+    pub fn from(&mut self, table: &str) -> &mut Self {
+        self.from_.push(TableBuilder::new(table));
+        self
+    }
+
+    pub fn set(&mut self, field: &str, value: &str) -> &mut Self {
+        self.set_.push(UpdateSetFieldBuilder::new(field, value));
+        self
+    }
+
+    pub fn eq(&mut self, field: &str, value: &str) -> &mut Self {
+        self.init_filter();
+        self.filter_mut().eq(field, value);
+        self
+    }
 }
 
-impl DeleteBuilder {
-    pub fn new() -> DeleteBuilder {
-        DeleteBuilder {
-            from_: vec![],
-            filter_: None,
+impl UpdateSetFieldBuilder {
+    pub fn new(field: &str, value: &str) -> UpdateSetFieldBuilder {
+        UpdateSetFieldBuilder {
+            field_: FilterFieldBuilder::String(field.to_string()),
+            value_: value.to_string(),
         }
     }
 }
@@ -251,5 +282,67 @@ impl InsertBuilder {
             values_: None,
             query_: None,
         }
+    }
+
+    fn fields_mut(&mut self) -> &mut Vec<String> {
+        if self.fields_.is_none() {
+            self.fields_ = Some(vec![]);
+        }
+        self.fields_.as_mut().unwrap()
+    }
+    fn values_mut(&mut self) -> &mut Vec<String> {
+        if self.values_.is_none() {
+            self.values_ = Some(vec![]);
+        }
+        self.values_.as_mut().unwrap()
+    }
+    pub fn into_table(&mut self, table: &str) -> &mut Self {
+        self.into_ = Some(TableBuilder::new(table));
+        self
+    }
+    pub fn field_value(&mut self, field: &str, value: &str) -> &mut Self {
+        self.fields_mut().push(field.to_string());
+        self.values_mut().push(value.to_string());
+        self
+    }
+    pub fn fields(&mut self, fields: &[&str]) -> &mut Self {
+        self.fields_ = Some(fields.iter().map(|f| f.to_string()).collect());
+        self
+    }
+    pub fn values(&mut self, values: &[&str]) -> &mut Self {
+        self.values_ = Some(values.iter().map(|f| f.to_string()).collect());
+        self
+    }
+    pub fn query(&mut self, query: QueryBuilder) -> &mut Self {
+        self.query_ = Some(query);
+        self
+    }
+}
+
+impl DeleteBuilder {
+    pub fn new() -> DeleteBuilder {
+        DeleteBuilder {
+            from_: vec![],
+            filter_: None,
+        }
+    }
+    fn init_filter(&mut self) {
+        if self.filter_.is_none() {
+            self.filter_ = Some(QueryFilterBuilder::and());
+        }
+    }
+    fn filter_mut(&mut self) -> &mut QueryFilterBuilder {
+        self.init_filter();
+        self.filter_.as_mut().unwrap()
+    }
+    pub fn from(&mut self, table: &str) -> &mut Self {
+        self.from_.push(TableBuilder::new(table));
+        self
+    }
+
+    pub fn eq(&mut self, field: &str, value: &str) -> &mut Self {
+        self.init_filter();
+        self.filter_mut().eq(field, value);
+        self
     }
 }

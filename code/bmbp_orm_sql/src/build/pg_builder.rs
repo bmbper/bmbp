@@ -71,13 +71,13 @@ impl SqlBuilder for QueryBuilder {
     fn build(&self) -> String {
         let mut sql = "".to_string();
         // 拼接select
-        if (!self.select_.is_empty()) {
+        if !self.select_.is_empty() {
             sql += &"SELECT ";
             sql += &self.select_.iter().map(|s| s.build()).collect::<Vec<_>>().join(",");
             sql += &"\n";
         }
         // 拼接 FROm
-        if (!self.from_.is_empty()) {
+        if !self.from_.is_empty() {
             sql += &" FROM ";
             sql += &self.from_.iter().map(|t| t.build()).collect::<Vec<_>>().join(",");
             sql += &"\n";
@@ -146,7 +146,7 @@ impl SqlBuilder for JoinTableType {
 impl SqlBuilder for QueryFilterBuilder {
     fn build(&self) -> String {
         let mut filter_vec = vec![];
-        if (!self.filters.is_empty()) {
+        if !self.filters.is_empty() {
             filter_vec = self.filters.iter().map(|f| f.build()).collect::<Vec<_>>();
         }
         let filter_sql = match self.typ {

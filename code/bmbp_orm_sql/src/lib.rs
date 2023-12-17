@@ -120,4 +120,20 @@ mod test {
         let query_sql = query.build().replace("\n", "");
         assert_eq!(target_sql, query_sql.as_str())
     }
+
+    #[test]
+    pub fn test_update() {
+        let target_sql = "UPDATE RBAC_USER SET NAME = 1 WHERE (ID = '3')";
+        let mut update = SQL::update();
+        update.from("RBAC_USER").set("NAME", "1").eq("ID", "'3'");
+        assert_eq!(update.build().replace("\n", ""), target_sql)
+    }
+
+    #[test]
+    pub fn test_delete() {
+        let target_sql = "DELETE FROM RBAC_USER WHERE (ID = '3')";
+        let mut delete = SQL::delete();
+        delete.from("RBAC_USER").eq("ID", "'3'");
+        assert_eq!(delete.build().replace("\n", ""), target_sql)
+    }
 }
