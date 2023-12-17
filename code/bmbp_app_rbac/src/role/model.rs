@@ -37,7 +37,7 @@ impl BmbpRbacRole {
     }
 
     pub fn orm_table_column_name() -> Vec<String> {
-        let mut base_fields = BmbpBaseModel::get_fields();
+        let mut base_fields = BmbpBaseModel::get_table_columns();
         let rbac_app_field = vec![
             "role_code".to_string(),
             "role_parent_code".to_string(),

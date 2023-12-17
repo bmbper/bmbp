@@ -37,7 +37,7 @@ impl BmbpRbacOrgan {
     }
 
     pub fn orm_table_column_name() -> Vec<String> {
-        let mut base_fields = BmbpBaseModel::get_fields();
+        let mut base_fields = BmbpBaseModel::get_table_columns();
         let rbac_app_field = vec![
             "organ_code".to_string(),
             "organ_parent_code".to_string(),

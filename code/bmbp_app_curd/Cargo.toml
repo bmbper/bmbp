@@ -10,10 +10,11 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 bmbp_orm_macro = { path = "../bmbp_orm_macro" }
 bmbp_orm_ins = { path = "../bmbp_orm_ins" }
+bmbp_orm_sql = { path = "../bmbp_orm_sql" }
 bmbp_app_common = { path = "../bmbp_app_common" }
 bmbp_app_utils = { path = "../bmbp_app_utils" }
 
-salvo = { version = "*" ,features=["default","serve-static","cors"]}
+salvo = { version = "*", features = ["default", "serve-static", "cors"] }
 tokio = { version = "1", features = ["full"] }
 tera = "1"
 # 序列

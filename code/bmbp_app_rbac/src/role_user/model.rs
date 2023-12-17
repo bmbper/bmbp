@@ -27,7 +27,7 @@ impl BmbpRbacRoleUser {
     }
 
     pub fn orm_table_column_name() -> Vec<String> {
-        let mut base_fields = BmbpBaseModel::get_fields();
+        let mut base_fields = BmbpBaseModel::get_table_columns();
         let rbac_app_field = vec!["role_id".to_string(), "user_id".to_string()];
         base_fields.extend_from_slice(rbac_app_field.as_slice());
         base_fields

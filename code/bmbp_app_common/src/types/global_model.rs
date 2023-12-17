@@ -8,6 +8,7 @@ use serde::Serialize;
 use crate::{BmbpHashMap, ROOT_TREE_NODE};
 use crate::BmbpValue;
 
+/// BmbpBaseModel 基础模型 用于存放公共字段
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
@@ -46,7 +47,7 @@ impl BmbpBaseModel {
         BmbpBaseModel::default()
     }
 
-    pub fn get_fields() -> Vec<String> {
+    pub fn get_table_columns() -> Vec<String> {
         vec![
             "record_id".to_string(),
             "record_level".to_string(),
@@ -237,11 +238,219 @@ impl From<&BmbpBaseModel> for HashMap<String, BmbpValue> {
     }
 }
 
-/// BmbpTreeModel 树节点基础属性
+
+/// BmbpCurdModel
+/// 用于标注表结构对应的抽象
+pub trait BmbpCurdModel {
+    fn get_table_name() -> String;
+    fn get_table_columns() -> Vec<String>;
+    fn get_table_alias() -> String {
+        "t1".to_string()
+    }
+    fn get_table_primary_key() -> String {
+        "record_id".to_string()
+    }
+}
+
+/// BmbpOrmModel
+/// 用于数据表结构对应的数据模型
+/// 并声明公共字段
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
-pub struct BmbpTreeModel<T> where T: Default + Clone + Serialize {
+pub struct BmbpOrmModel<T> where T: Default + Debug + Clone + Serialize + BmbpCurdModel {
+    /// 记录主键
+    record_id: Option<String>,
+    #[serde(flatten)]
+    ext_props: T,
+    /// 记录密级
+    record_level: Option<String>,
+    /// 记录状态
+    record_status: Option<String>,
+    /// 记录标识
+    record_flag: Option<String>,
+    /// 记录显示顺序
+    record_num: Option<usize>,
+    /// 记录备注
+    record_remark: Option<String>,
+    /// 记录创建时间
+    record_create_time: Option<String>,
+    /// 记录创建人
+    record_create_user: Option<String>,
+    /// 记录更新时间
+    record_update_time: Option<String>,
+    /// 记录更新用户
+    record_update_user: Option<String>,
+    /// 记录所属用户
+    record_owner_user: Option<String>,
+    /// 记录所属组织
+    record_owner_org: Option<String>,
+    /// 记录防串改标识
+    record_sign: Option<String>,
+}
+
+impl<T> BmbpOrmModel<T> where T: Default + Debug + Clone + Serialize + for<'a> Deserialize<'a> + BmbpCurdModel {
+    pub fn new() -> BmbpOrmModel<T> {
+        BmbpOrmModel::default()
+    }
+    pub fn set_record_id(&mut self, record_id: String) -> &mut Self {
+        self.record_id = Some(record_id);
+        self
+    }
+    pub fn set_record_level(&mut self, record_level: String) -> &mut Self {
+        self.record_level = Some(record_level);
+        self
+    }
+    pub fn set_record_status(&mut self, record_status: String) -> &mut Self {
+        self.record_status = Some(record_status);
+        self
+    }
+
+    pub fn set_record_flag(&mut self, record_flag: String) -> &mut Self {
+        self.record_flag = Some(record_flag);
+        self
+    }
+
+    pub fn set_record_num(&mut self, record_num: usize) -> &mut Self {
+        self.record_num = Some(record_num);
+        self
+    }
+    pub fn set_record_remark(&mut self, record_remark: String) -> &mut Self {
+        self.record_remark = Some(record_remark);
+        self
+    }
+
+    pub fn set_record_create_time(&mut self, record_create_time: String) -> &mut Self {
+        self.record_create_time = Some(record_create_time);
+        self
+    }
+    pub fn set_record_create_user(&mut self, record_create_user: String) -> &mut Self {
+        self.record_create_user = Some(record_create_user);
+        self
+    }
+
+    pub fn set_record_update_user(&mut self, record_update_user: String) -> &mut Self {
+        self.record_update_user = Some(record_update_user);
+        self
+    }
+
+    pub fn set_record_update_time(&mut self, record_update_time: String) -> &mut Self {
+        self.record_update_time = Some(record_update_time);
+        self
+    }
+
+    pub fn set_record_owner_user(&mut self, record_owner_user: String) -> &mut Self {
+        self.record_owner_user = Some(record_owner_user);
+        self
+    }
+    pub fn set_record_owner_org(&mut self, record_owner_org: String) -> &mut Self {
+        self.record_owner_org = Some(record_owner_org);
+        self
+    }
+    pub fn set_record_sign(&mut self, record_sign: String) -> &mut Self {
+        self.record_sign = Some(record_sign);
+        self
+    }
+
+    pub fn get_record_id(&self) -> Option<&String> {
+        self.record_id.as_ref()
+    }
+    pub fn get_record_level(&self) -> Option<&String> {
+        self.record_level.as_ref()
+    }
+    pub fn get_record_status(&self) -> Option<&String> {
+        self.record_status.as_ref()
+    }
+
+    pub fn get_record_flag(&self) -> Option<&String> {
+        self.record_flag.as_ref()
+    }
+
+    pub fn get_record_num(&self) -> Option<&usize> {
+        self.record_num.as_ref()
+    }
+    pub fn get_record_remark(&self) -> Option<&String> {
+        self.record_remark.as_ref()
+    }
+
+    pub fn get_record_create_time(&self) -> Option<&String> {
+        self.record_create_time.as_ref()
+    }
+    pub fn get_record_create_user(&self) -> Option<&String> {
+        self.record_create_user.as_ref()
+    }
+
+    pub fn get_record_update_user(&self) -> Option<&String> {
+        self.record_update_user.as_ref()
+    }
+
+    pub fn get_record_update_time(&self) -> Option<&String> {
+        self.record_update_time.as_ref()
+    }
+
+    pub fn get_record_owner_user(&self) -> Option<&String> {
+        self.record_owner_user.as_ref()
+    }
+    pub fn get_record_owner_org(&self) -> Option<&String> {
+        self.record_owner_org.as_ref()
+    }
+    pub fn get_record_sign(&self) -> Option<&String> {
+        self.record_sign.as_ref()
+    }
+
+    pub fn get_ext_props(&self) -> &T {
+        &self.ext_props
+    }
+    pub fn get_ext_props_mut(&mut self) -> &mut T {
+        &mut self.ext_props
+    }
+    pub fn set_ext_props(&mut self, ext_props: T) -> &mut Self {
+        self.ext_props = ext_props;
+        self
+    }
+}
+
+impl<T> BmbpCurdModel for BmbpOrmModel<T> where T: Default + Debug + Clone + Serialize + for<'a> Deserialize<'a> + BmbpCurdModel {
+    fn get_table_name() -> String {
+        T::get_table_name()
+    }
+
+    fn get_table_columns() -> Vec<String> {
+        let mut ext_columns = T::get_table_columns();
+        let base_columns = vec![
+            "record_id".to_string(),
+            "record_level".to_string(),
+            "record_status".to_string(),
+            "record_flag".to_string(),
+            "record_num".to_string(),
+            "record_remark".to_string(),
+            "record_create_time".to_string(),
+            "record_create_user".to_string(),
+            "record_update_time".to_string(),
+            "record_update_user".to_string(),
+            "record_owner_org".to_string(),
+            "record_owner_user".to_string(),
+            "record_sign".to_string(),
+        ];
+        ext_columns.extend_from_slice(base_columns.as_slice());
+        ext_columns
+    }
+
+    fn get_table_alias() -> String {
+        T::get_table_alias()
+    }
+    fn get_table_primary_key() -> String {
+        T::get_table_primary_key()
+    }
+}
+
+
+/// BmbpTreeModel
+/// 用于标注树结构结点模型
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
+pub struct BmbpTreeModel<T> where T: Default + Clone + Serialize + BmbpCurdModel {
     // 节点编码
     code: String,
     // 节点路径编码
@@ -267,7 +476,37 @@ pub struct BmbpTreeModel<T> where T: Default + Clone + Serialize {
     node_props: Option<T>,
 }
 
-impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize {
+impl<T> BmbpCurdModel for BmbpTreeModel<T> where T: Default + Clone + Serialize + Deserialize<'static> + BmbpCurdModel {
+    fn get_table_name() -> String {
+        T::get_table_name()
+    }
+
+    fn get_table_columns() -> Vec<String> {
+        let mut ext_columns = T::get_table_columns();
+        let tree_columns = vec![
+            "code".to_string(),
+            "code_path".to_string(),
+            "parent_code".to_string(),
+            "name".to_string(),
+            "name_path".to_string(),
+            "node_type".to_string(),
+            "node_sort".to_string(),
+            "node_level".to_string(),
+            "node_leaf".to_string(),
+        ];
+        ext_columns.extend_from_slice(tree_columns.as_slice());
+        ext_columns
+    }
+
+    fn get_table_alias() -> String {
+        T::get_table_alias()
+    }
+    fn get_table_primary_key() -> String {
+        T::get_table_primary_key()
+    }
+}
+
+impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize + BmbpCurdModel {
     pub fn new() -> Self {
         BmbpTreeModel {
             code: "".to_string(),
@@ -381,21 +620,21 @@ impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize {
 }
 
 /// 树型结构节点引用
-struct BmbpTreeModelRef<'a, T> where T: Default + Clone + Serialize + 'a {
+struct BmbpTreeModelRef<'a, T> where T: Default + Clone + Serialize + BmbpCurdModel + 'a {
     code: &'a String,
     parent_code: &'a String,
     node: &'a BmbpTreeModel<T>,
     children: RwLock<Vec<Arc<BmbpTreeModelRef<'a, T>>>>,
 }
 
-impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize {
+impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize + BmbpCurdModel  {
     fn build_tree_ref<'a>(node_list: &'a [BmbpTreeModel<T>]) -> HashMap<&'a String, Arc<BmbpTreeModelRef<T>>> {
         // 递归终结条件， 当传入的节点列表为空时，返回空的引用映射
         let mut ref_map = HashMap::new();
         if node_list.is_empty() {
             return ref_map;
         }
-        for node_ref in node_list{
+        for node_ref in node_list {
             let children = node_ref.get_children_slice();
             let child_ref_map = Self::build_tree_ref(children);
             ref_map.extend(child_ref_map);
@@ -463,3 +702,4 @@ impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize {
         Self::build_tree(node_list, false)
     }
 }
+

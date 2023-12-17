@@ -26,7 +26,7 @@ impl BmbpRbacUser {
     }
 
     pub fn orm_table_column_name() -> Vec<String> {
-        let mut base_fields = BmbpBaseModel::get_fields();
+        let mut base_fields = BmbpBaseModel::get_table_columns();
         let rbac_app_field = vec![
             "organ_id".to_string(),
             "user_name".to_string(),

@@ -27,6 +27,14 @@ impl<T> PageVo<T>
         PageVo::default()
     }
 
+    pub fn ok_data(data: Vec<T>) -> Self {
+        PageVo {
+            page_no: Some(0),
+            page_size: Some(0),
+            row_total: Some(data.len()),
+            data: Some(data),
+        }
+    }
     pub fn set_page_no(&mut self, page_no: usize) -> &mut Self {
         self.page_no = Some(page_no);
         self
