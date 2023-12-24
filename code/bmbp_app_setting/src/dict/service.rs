@@ -10,8 +10,11 @@ impl BmbpSettingDictService {
     pub async fn find_dict_tree(params: &DictQueryParams) -> BmbpResp<Vec<BmbpSettingDictOrmTreeModel>> {
         let query_sql = BmbpCurdScript::query::<BmbpSettingDictOrmTreeModel>();
         tracing::info!("query_sql: {}", query_sql.build());
-        let dict_vec = BmbpSettingDictDao::query(&query_sql.build(),&params).await?;
-        let tree_node: Vec<BmbpSettingDictOrmTreeModel> = BmbpTreeModel::build_tree_without_spurious(dict_vec);
+        let dict_vec = BmbpSettingDictDao::query(&query_sql.build(), &params).await?;
+        if dict_vec.is_none() {
+            return Ok(vec![]);
+        }
+        let tree_node: Vec<BmbpSettingDictOrmTreeModel> = BmbpTreeModel::build_tree_without_spurious(dict_vec.unwrap());
         return Ok(tree_node);
     }
 }
