@@ -17,4 +17,5 @@ impl BmbpSettingDictService {
         let tree_node: Vec<BmbpSettingDictOrmTreeModel> = BmbpTreeModel::build_tree_without_spurious(dict_vec.unwrap());
         return Ok(tree_node);
     }
+
 }

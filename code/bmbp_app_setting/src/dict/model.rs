@@ -4,7 +4,7 @@ use bmbp_app_common::{BmbpCurdModel, BmbpOrmModel, BmbpTreeModel, PageParams};
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DictQueryParams {
-    pub(crate) record_id: Option<String>,
+    pub(crate) data_id: Option<String>,
     pub(crate) parent_code: Option<String>,
     pub(crate) show_level: Option<String>,
 }
@@ -19,19 +19,21 @@ pub struct BmbpSettingDict {
     dict_alise: String,
     // 字典值
     dict_value: String,
+    // 字典类型
+    dict_type: BmbpDictType,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 #[repr(u8)]
 pub enum BmbpDictType {
-    Group = 0,
-    Item = 1,
+    Inner = 0,
+    Custom = 1,
 }
 
 impl Default for BmbpDictType {
     fn default() -> Self {
-        BmbpDictType::Group
+        BmbpDictType::Custom
     }
 }
 
@@ -40,7 +42,7 @@ impl BmbpCurdModel for BmbpSettingDict {
         "BMBP_SETTING_DICT".to_string()
     }
     fn get_table_columns() -> Vec<String> {
-        vec!["dict_alias".to_string(), "dict_value".to_string()]
+        vec!["dict_alias".to_string(), "dict_value".to_string(),"dict_type".to_string()]
     }
 }
 

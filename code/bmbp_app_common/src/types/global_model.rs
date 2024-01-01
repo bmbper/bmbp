@@ -260,142 +260,133 @@ pub trait BmbpCurdModel {
 #[serde(default)]
 pub struct BmbpOrmModel<T> where T: Default + Debug + Clone + Serialize + BmbpCurdModel {
     /// 记录主键
-    record_id: Option<String>,
+    data_id: Option<String>,
     #[serde(flatten)]
     ext_props: T,
     /// 记录密级
-    record_level: Option<String>,
+    data_level: Option<String>,
     /// 记录状态
-    record_status: Option<String>,
+    data_status: Option<String>,
     /// 记录标识
-    record_flag: Option<String>,
+    data_flag: Option<String>,
     /// 记录显示顺序
-    record_num: Option<usize>,
+    data_sort: Option<usize>,
     /// 记录备注
-    record_remark: Option<String>,
+    data_remark: Option<String>,
     /// 记录创建时间
-    record_create_time: Option<String>,
+    data_create_time: Option<String>,
     /// 记录创建人
-    record_create_user: Option<String>,
+    data_create_user: Option<String>,
     /// 记录更新时间
-    record_update_time: Option<String>,
+    data_update_time: Option<String>,
     /// 记录更新用户
-    record_update_user: Option<String>,
-    /// 记录所属用户
-    record_owner_user: Option<String>,
+    data_update_user: Option<String>,
     /// 记录所属组织
-    record_owner_org: Option<String>,
+    data_owner_org: Option<String>,
     /// 记录防串改标识
-    record_sign: Option<String>,
+    data_sign: Option<String>,
 }
 
 impl<T> BmbpOrmModel<T> where T: Default + Debug + Clone + Serialize + for<'a> Deserialize<'a> + BmbpCurdModel {
     pub fn new() -> BmbpOrmModel<T> {
         BmbpOrmModel::default()
     }
-    pub fn set_record_id(&mut self, record_id: String) -> &mut Self {
-        self.record_id = Some(record_id);
+    pub fn set_data_id(&mut self, data_id: String) -> &mut Self {
+        self.data_id = Some(data_id);
         self
     }
-    pub fn set_record_level(&mut self, record_level: String) -> &mut Self {
-        self.record_level = Some(record_level);
+    pub fn set_data_level(&mut self, data_level: String) -> &mut Self {
+        self.data_level = Some(data_level);
         self
     }
-    pub fn set_record_status(&mut self, record_status: String) -> &mut Self {
-        self.record_status = Some(record_status);
-        self
-    }
-
-    pub fn set_record_flag(&mut self, record_flag: String) -> &mut Self {
-        self.record_flag = Some(record_flag);
+    pub fn set_data_status(&mut self, data_status: String) -> &mut Self {
+        self.data_status = Some(data_status);
         self
     }
 
-    pub fn set_record_num(&mut self, record_num: usize) -> &mut Self {
-        self.record_num = Some(record_num);
-        self
-    }
-    pub fn set_record_remark(&mut self, record_remark: String) -> &mut Self {
-        self.record_remark = Some(record_remark);
+    pub fn set_data_flag(&mut self, data_flag: String) -> &mut Self {
+        self.data_flag = Some(data_flag);
         self
     }
 
-    pub fn set_record_create_time(&mut self, record_create_time: String) -> &mut Self {
-        self.record_create_time = Some(record_create_time);
+    pub fn set_data_sort(&mut self, data_sort: usize) -> &mut Self {
+        self.data_sort = Some(data_sort);
         self
     }
-    pub fn set_record_create_user(&mut self, record_create_user: String) -> &mut Self {
-        self.record_create_user = Some(record_create_user);
-        self
-    }
-
-    pub fn set_record_update_user(&mut self, record_update_user: String) -> &mut Self {
-        self.record_update_user = Some(record_update_user);
+    pub fn set_data_remark(&mut self, data_remark: String) -> &mut Self {
+        self.data_remark = Some(data_remark);
         self
     }
 
-    pub fn set_record_update_time(&mut self, record_update_time: String) -> &mut Self {
-        self.record_update_time = Some(record_update_time);
+    pub fn set_data_create_time(&mut self, data_create_time: String) -> &mut Self {
+        self.data_create_time = Some(data_create_time);
+        self
+    }
+    pub fn set_data_create_user(&mut self, data_create_user: String) -> &mut Self {
+        self.data_create_user = Some(data_create_user);
         self
     }
 
-    pub fn set_record_owner_user(&mut self, record_owner_user: String) -> &mut Self {
-        self.record_owner_user = Some(record_owner_user);
-        self
-    }
-    pub fn set_record_owner_org(&mut self, record_owner_org: String) -> &mut Self {
-        self.record_owner_org = Some(record_owner_org);
-        self
-    }
-    pub fn set_record_sign(&mut self, record_sign: String) -> &mut Self {
-        self.record_sign = Some(record_sign);
+    pub fn set_data_update_user(&mut self, data_update_user: String) -> &mut Self {
+        self.data_update_user = Some(data_update_user);
         self
     }
 
-    pub fn get_record_id(&self) -> Option<&String> {
-        self.record_id.as_ref()
-    }
-    pub fn get_record_level(&self) -> Option<&String> {
-        self.record_level.as_ref()
-    }
-    pub fn get_record_status(&self) -> Option<&String> {
-        self.record_status.as_ref()
+    pub fn set_data_update_time(&mut self, data_update_time: String) -> &mut Self {
+        self.data_update_time = Some(data_update_time);
+        self
     }
 
-    pub fn get_record_flag(&self) -> Option<&String> {
-        self.record_flag.as_ref()
+    pub fn set_data_owner_org(&mut self, data_owner_org: String) -> &mut Self {
+        self.data_owner_org = Some(data_owner_org);
+        self
+    }
+    pub fn set_data_sign(&mut self, data_sign: String) -> &mut Self {
+        self.data_sign = Some(data_sign);
+        self
     }
 
-    pub fn get_record_num(&self) -> Option<&usize> {
-        self.record_num.as_ref()
+    pub fn get_data_id(&self) -> Option<&String> {
+        self.data_id.as_ref()
     }
-    pub fn get_record_remark(&self) -> Option<&String> {
-        self.record_remark.as_ref()
+    pub fn get_data_level(&self) -> Option<&String> {
+        self.data_level.as_ref()
     }
-
-    pub fn get_record_create_time(&self) -> Option<&String> {
-        self.record_create_time.as_ref()
-    }
-    pub fn get_record_create_user(&self) -> Option<&String> {
-        self.record_create_user.as_ref()
+    pub fn get_data_status(&self) -> Option<&String> {
+        self.data_status.as_ref()
     }
 
-    pub fn get_record_update_user(&self) -> Option<&String> {
-        self.record_update_user.as_ref()
+    pub fn get_data_flag(&self) -> Option<&String> {
+        self.data_flag.as_ref()
     }
 
-    pub fn get_record_update_time(&self) -> Option<&String> {
-        self.record_update_time.as_ref()
+    pub fn get_data_sort(&self) -> Option<&usize> {
+        self.data_sort.as_ref()
+    }
+    pub fn get_data_remark(&self) -> Option<&String> {
+        self.data_remark.as_ref()
     }
 
-    pub fn get_record_owner_user(&self) -> Option<&String> {
-        self.record_owner_user.as_ref()
+    pub fn get_data_create_time(&self) -> Option<&String> {
+        self.data_create_time.as_ref()
     }
-    pub fn get_record_owner_org(&self) -> Option<&String> {
-        self.record_owner_org.as_ref()
+    pub fn get_data_create_user(&self) -> Option<&String> {
+        self.data_create_user.as_ref()
     }
-    pub fn get_record_sign(&self) -> Option<&String> {
-        self.record_sign.as_ref()
+
+    pub fn get_data_update_user(&self) -> Option<&String> {
+        self.data_update_user.as_ref()
+    }
+
+    pub fn get_data_update_time(&self) -> Option<&String> {
+        self.data_update_time.as_ref()
+    }
+
+    pub fn get_data_owner_org(&self) -> Option<&String> {
+        self.data_owner_org.as_ref()
+    }
+    pub fn get_data_sign(&self) -> Option<&String> {
+        self.data_sign.as_ref()
     }
 
     pub fn get_ext_props(&self) -> &T {
@@ -418,19 +409,18 @@ impl<T> BmbpCurdModel for BmbpOrmModel<T> where T: Default + Debug + Clone + Ser
     fn get_table_columns() -> Vec<String> {
         let mut ext_columns = T::get_table_columns();
         let base_columns = vec![
-            "record_id".to_string(),
-            "record_level".to_string(),
-            "record_status".to_string(),
-            "record_flag".to_string(),
-            "record_num".to_string(),
-            "record_remark".to_string(),
-            "record_create_time".to_string(),
-            "record_create_user".to_string(),
-            "record_update_time".to_string(),
-            "record_update_user".to_string(),
-            "record_owner_org".to_string(),
-            "record_owner_user".to_string(),
-            "record_sign".to_string(),
+            "data_id".to_string(),
+            "data_level".to_string(),
+            "data_status".to_string(),
+            "data_flag".to_string(),
+            "data_sort".to_string(),
+            "data_remark".to_string(),
+            "data_create_time".to_string(),
+            "data_create_user".to_string(),
+            "data_update_time".to_string(),
+            "data_update_user".to_string(),
+            "data_owner_org".to_string(),
+            "data_sign".to_string(),
         ];
         ext_columns.extend_from_slice(base_columns.as_slice());
         ext_columns
@@ -465,8 +455,6 @@ pub struct BmbpTreeModel<T> where T: Default + Clone + Serialize + BmbpCurdModel
     children: Vec<BmbpTreeModel<T>>,
     // 节点类型    
     node_type: Option<String>,
-    // 节点排序
-    node_sort: Option<usize>,
     // 节点层级
     node_level: Option<usize>,
     // 是否叶子节点
@@ -516,7 +504,6 @@ impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize + BmbpCurdModel {
             name_path: "".to_string(),
             children: vec![],
             node_type: None,
-            node_sort: None,
             node_level: None,
             node_leaf: None,
             node_props: None,
@@ -548,10 +535,6 @@ impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize + BmbpCurdModel {
     }
     pub fn set_node_type(&mut self, node_type: String) -> &mut Self {
         self.node_type = Some(node_type);
-        self
-    }
-    pub fn set_node_sort(&mut self, node_sort: usize) -> &mut Self {
-        self.node_sort = Some(node_sort);
         self
     }
     pub fn set_node_level(&mut self, node_level: usize) -> &mut Self {
@@ -602,9 +585,7 @@ impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize + BmbpCurdModel {
     pub fn get_node_type(&self) -> Option<&String> {
         self.node_type.as_ref()
     }
-    pub fn get_node_sort(&self) -> Option<&usize> {
-        self.node_sort.as_ref()
-    }
+
     pub fn get_node_level(&self) -> Option<&usize> {
         self.node_level.as_ref()
     }
@@ -627,7 +608,7 @@ struct BmbpTreeModelRef<'a, T> where T: Default + Clone + Serialize + BmbpCurdMo
     children: RwLock<Vec<Arc<BmbpTreeModelRef<'a, T>>>>,
 }
 
-impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize + BmbpCurdModel  {
+impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize + BmbpCurdModel {
     fn build_tree_ref<'a>(node_list: &'a [BmbpTreeModel<T>]) -> HashMap<&'a String, Arc<BmbpTreeModelRef<T>>> {
         // 递归终结条件， 当传入的节点列表为空时，返回空的引用映射
         let mut ref_map = HashMap::new();
@@ -652,7 +633,7 @@ impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize + BmbpCurdModel  {
 
     fn build_tree_data(node_ref_list: &[Arc<BmbpTreeModelRef<T>>]) -> Vec<BmbpTreeModel<T>> {
         let mut data_list = vec![];
-        if (node_ref_list.is_empty()) {
+        if node_ref_list.is_empty() {
             return data_list;
         }
         node_ref_list.into_iter().for_each(|node_ref| {

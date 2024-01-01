@@ -23,12 +23,17 @@ impl BmbpWebApp {
 
     fn init_router(&mut self) -> Router {
         tracing::info!("初始化WebApp接口服务路由......");
-        init_webapp_router()
+        let context = self.app_context();
+        let mut root_router = Router::with_path(context);
+        let app_router = init_webapp_router();
+        root_router = root_router.push(app_router);
+        root_router
     }
 
     pub async fn start(&mut self) {
         let host = self.host().clone();
-        tracing::info!("启动WebApp应用服务,监听地址:{}......", host.clone());
+        let context = self.app_context();
+        tracing::info!("启动WebApp应用服务,监听地址:{}{}......", host.clone(),context.clone());
         let acceptor = TcpListener::new(host.as_str()).bind().await;
         let router = self.init_router();
         Server::new(acceptor).serve(router).await;
@@ -45,5 +50,12 @@ impl BmbpWebApp {
             port = 3000;
         }
         format!("{}:{}", host, port)
+    }
+    fn app_context(&self) -> String {
+        let mut context = global_hash_map_vars("bmbp_server".to_string(), "server_context".to_string());
+        if context.is_empty() {
+            context = "".to_string();
+        }
+        context
     }
 }
