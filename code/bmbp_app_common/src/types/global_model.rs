@@ -656,7 +656,7 @@ impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize + BmbpCurdModel {
             let node = node_ref_map.get(node_ref_key).unwrap();
             let arc_node = (*node).clone();
             let parent_code = arc_node.parent_code;
-            if (node_ref_map.contains_key(parent_code)) {
+            if node_ref_map.contains_key(parent_code) {
                 let parent_node_ref = node_ref_map.get(parent_code).unwrap();
                 parent_node_ref.children.write().unwrap().push(arc_node.clone());
             }
