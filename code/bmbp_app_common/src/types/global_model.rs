@@ -478,7 +478,6 @@ impl<T> BmbpCurdModel for BmbpTreeModel<T> where T: Default + Clone + Serialize 
             "name".to_string(),
             "name_path".to_string(),
             "node_type".to_string(),
-            "node_sort".to_string(),
             "node_level".to_string(),
             "node_leaf".to_string(),
         ];

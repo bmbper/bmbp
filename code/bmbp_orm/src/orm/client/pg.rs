@@ -548,7 +548,7 @@ fn to_bmbp_map(row: &Row) -> BmbpHashMap {
         let col_type = column.type_().name();
         let mut props_value = BmbpValue::NULL;
         match col_type {
-            "varchar" => {
+            "varchar" | "text" => {
                 let v_rs = row.try_get(col_name);
                 match v_rs {
                     Ok(v) => {
@@ -559,7 +559,7 @@ fn to_bmbp_map(row: &Row) -> BmbpHashMap {
                     }
                 }
             }
-            "int2" | "int4" | "init8" | "int16" => {
+            "int2" | "int4" | "int8" | "int16" => {
                 let v_rs = row.try_get(col_name);
                 match v_rs {
                     Ok(v) => {
