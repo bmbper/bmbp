@@ -67,6 +67,7 @@ pub struct QueryBuilder {
     pub(crate) filter_: Option<QueryFilterBuilder>,
     pub(crate) group_: Option<Vec<SelectBuilder>>,
     pub(crate) order_: Option<Vec<OrderBuilder>>,
+    pub(crate) having_: Option<QueryFilterBuilder>,
     pub(crate) limit_: Option<u64>,
     pub(crate) offset_: Option<u64>,
 }
