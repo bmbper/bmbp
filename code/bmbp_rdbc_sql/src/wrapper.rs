@@ -1,5 +1,3 @@
-use std::iter::Filter;
-
 pub enum SQLJoinType {
     INNER,
     LEFT,
@@ -9,11 +7,10 @@ pub enum SQLJoinType {
 
 pub enum SQLCompareType {}
 
-pub enum SQLValueType {}
+pub enum SQLValueType {
+}
 
 /// SQL 语句接口，实现此方法用于生成SQL语句
-///
-///
 pub trait SQL {
     fn to_sql(&self) -> String;
 }
@@ -273,7 +270,6 @@ impl RdbcSQLTable for QueryWrapper {
 }
 
 pub struct DeleteWrapper {}
-
 
 pub struct QueryFilter {}
 
