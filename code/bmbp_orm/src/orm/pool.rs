@@ -19,7 +19,7 @@ use super::{client::build_conn, conn::BmbpConn};
 pub struct BmbpConnectionPool {
     data_source: Arc<BmbpDataSource>,
     conn_map: RwLock<HashMap<String, Arc<RwLock<Box<dyn BmbpConn + Send + Sync + 'static>>>>>,
-    idel_conn_id: Mutex<Vec<String>>,
+    idle_conn_id: Mutex<Vec<String>>,
     active_conn_id: Mutex<Vec<String>>,
 }
 
@@ -27,9 +27,9 @@ impl BmbpConnectionPool {
     pub async fn new(data_source: Arc<BmbpDataSource>) -> BmbpResp<Arc<BmbpConnectionPool>> {
         let conn_map = RwLock::new(HashMap::new());
         let pool = BmbpConnectionPool {
-            data_source: data_source,
+            data_source,
             conn_map,
-            idel_conn_id: Mutex::new(vec![]),
+            idle_conn_id: Mutex::new(vec![]),
             active_conn_id: Mutex::new(vec![]),
         };
         let arc_pool = Arc::new(pool);
@@ -46,7 +46,7 @@ impl BmbpConnectionPool {
             let arc_conn = Arc::new(conn);
             arc_conn.write().await.set_pool(arc_pool.clone());
             mp.insert(arc_conn.read().await.id().clone(), arc_conn.clone());
-            self.idel_conn_id
+            self.idle_conn_id
                 .lock()
                 .await
                 .push(arc_conn.clone().read().await.id().clone());
@@ -58,10 +58,10 @@ impl BmbpConnectionPool {
 
 impl BmbpConnectionPool {
     pub async fn get_conn(&self) -> BmbpResp<ConnInner> {
-        let mut conn_id_op = self.idel_conn_id.lock().await.pop();
+        let mut conn_id_op = self.idle_conn_id.lock().await.pop();
         let cur_now = OffsetDateTime::now_utc().second();
         while conn_id_op.is_none() {
-            conn_id_op = self.idel_conn_id.lock().await.pop();
+            conn_id_op = self.idle_conn_id.lock().await.pop();
             let end_now = OffsetDateTime::now_utc().second();
             if end_now - cur_now >= 5 {
                 return Err(BmbpError::orm("获取数据库连接池超时:5秒"));
@@ -81,7 +81,7 @@ impl BmbpConnectionPool {
     }
 
     pub async fn release_conn(&self, conn_id: String) {
-        self.idel_conn_id.lock().await.push(conn_id.clone());
+        self.idle_conn_id.lock().await.push(conn_id.clone());
         self.active_conn_id
             .lock()
             .await
