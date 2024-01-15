@@ -9,6 +9,7 @@ impl QueryBuilder {
             filter_: None,
             group_: None,
             order_: None,
+            having_: None,
             limit_: None,
             offset_: None,
         }
