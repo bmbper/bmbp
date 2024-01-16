@@ -1,4 +1,4 @@
-use bmbp_app_common::{BmbpResp, BmbpTreeModel};
+use bmbp_app_common::{BmbpResp, BmbpTreeModel, PageParams, PageVo};
 use bmbp_app_curd::BmbpCurdScript;
 use bmbp_orm_sql::SqlBuilder;
 use crate::dict::dao::BmbpSettingDictDao;
@@ -17,5 +17,9 @@ impl BmbpSettingDictService {
         let tree_node: Vec<BmbpSettingDictOrmTreeModel> = BmbpTreeModel::build_tree_without_spurious(dict_vec.unwrap());
         return Ok(tree_node);
     }
-
+    pub async fn find_dict_page(params: &PageParams<DictQueryParams>) -> BmbpResp<PageVo<BmbpSettingDictOrmTreeModel>> {
+        let query_sql = BmbpCurdScript::query::<BmbpSettingDictOrmTreeModel>();
+        tracing::info!("query_sql: {}", query_sql.build());
+        return Ok(PageVo::new());
+    }
 }
