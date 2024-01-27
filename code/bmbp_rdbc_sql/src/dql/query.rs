@@ -1,188 +1,489 @@
-use crate::{BmbpRdbcSQLJoinType, RdbcSQLFunc, RdbcSQLTable, RdbcSQLValue, RdbcValue};
+use std::sync::Arc;
+use crate::{RdbcFilter, RdbcOrder, RdbcSQL, RdbcColumn, RdbcTable, RdbcValue, RdbcFunc, RdbcCompareType};
 
-/// SQL 语句接口，实现此方法用于生成SQL语句
-pub enum SQLCompareType {
-    Eq,
-    Ne,
-    Gt,
-    Lt,
-    Ge,
-    Le,
-    Like,
-    NotLike,
-    In,
-    NotIn,
-    IsNull,
-    IsNotNull,
+pub struct Query {
+    select_: Vec<RdbcColumn>,
+    table_: Vec<RdbcTable>,
+    join_: Option<Vec<RdbcTable>>,
+    filter_: Option<RdbcFilter>,
+    group_by_: Option<Vec<RdbcColumn>>,
+    having_: Option<RdbcFilter>,
+    order_: Option<Vec<RdbcOrder>>,
+    limit_: Option<u64>,
+    offset_: Option<u64>,
 }
 
-
-pub struct RdbcColumn {
-    schema_: Option<String>,
-    table_: Option<String>,
-    alias_: Option<String>,
-}
-
-pub struct RdbcCompareColumn {
-    column: RdbcColumn,
-    compare_: SQLCompareType,
-    value_: RdbcValue,
-}
-
-pub enum RdbcFunc {}
-
-pub enum SQLWrapper {
-    Insert(InsertWrapper),
-    Query(QueryWrapper),
-    UPDATE(UpdateWrapper),
-    DELETE(DeleteWrapper),
-}
-
-pub struct InsertWrapper {}
-
-pub struct UpdateWrapper {}
-
-pub struct QueryWrapper {}
-
-impl QueryWrapper {
-    pub fn new() -> Self {
-        QueryWrapper {}
-    }
-
-    pub fn select(&mut self, field: &str) -> &mut Self {
-        self
-    }
-    pub fn select_with_table(&mut self, table: &str, field: &str) -> &mut Self {
-        self
-    }
-    pub fn select_with_schema_table(&mut self, schema: &str, table: &str, field: &str) -> &mut Self {
-        self
-    }
-    pub fn select_with_alias(&mut self, field: &str) -> &mut Self {
-        self
-    }
-    pub fn select_with_table_alias(&mut self, table: &str, field: &str, alias: &str) -> &mut Self {
-        self
-    }
-    pub fn select_with_schema_table_alias(&mut self, schema: &str, table: &str, field: &str, alias: &str) -> &mut Self {
-        self
-    }
-
-    pub fn select_with_query_alias(&mut self, query: QueryWrapper, alias: &str) -> &mut Self {
-        self
-    }
-
-    pub fn select_with_sql_value(&mut self, value: Box<dyn RdbcSQLValue>) -> &mut Self {
-        self
-    }
-    pub fn select_with_sql_value_alias(&mut self, value: Box<dyn RdbcSQLValue>, alias: &str) -> &mut Self {
-        self
-    }
-    pub fn select_with_value(&mut self, value: RdbcValue) -> &mut Self {
-        self
-    }
-    pub fn select_with_value_alias(&mut self, value: RdbcValue) -> &mut Self {
-        self
-    }
-    pub fn select_with_column(&mut self, column: RdbcColumn) -> &mut Self {
-        self
-    }
-    pub fn select_with_sql_func(&mut self, func: Box<dyn RdbcSQLFunc>) {}
-    pub fn select_with_sql_func_alias(&mut self, func: Box<dyn RdbcSQLFunc>, alias: &str) -> &mut Self {
-        self
-    }
-    pub fn select_with_func(&mut self, func: RdbcFunc) {}
-    pub fn select_with_func_alias(&mut self, func: RdbcFunc, alias: &str) -> &mut Self {
-        self
-    }
-    pub fn table(&mut self, table: &str) -> &mut Self {
-        self
-    }
-    pub fn table_with_schema(&mut self, table: &str, alias: &str) -> &mut Self {
-        self
-    }
-    pub fn table_with_alise(&mut self, table: &str, alias: &str) -> &mut Self {
-        self
-    }
-    pub fn table_with_query(&mut self, table: &str, query: QueryWrapper) -> &mut Self {
-        self
-    }
-    pub fn table_with_query_alias(&mut self, table: &str, alias: &str, query: QueryWrapper) -> &mut Self {
-        self
-    }
-    pub fn join_table(&mut self, table: &str, join: BmbpRdbcSQLJoinType) -> &mut Self {
-        self
-    }
-    pub fn join_table_with_alias(&mut self, table: &str, join: BmbpRdbcSQLJoinType) -> &mut Self {
-        self
-    }
-    pub fn join_table_with_schema(&mut self, table: &str, schema: &str, join: BmbpRdbcSQLJoinType) -> &mut Self {
-        self
-    }
-    pub fn join_table_with_schema_alias(&mut self, table: &str, schema: &str, alias: &str, join: BmbpRdbcSQLJoinType) -> &mut Self {
-        self
-    }
-
-    pub fn join_table_with_query(&mut self, table: QueryWrapper, join: BmbpRdbcSQLJoinType) -> &mut Self {
-        self
-    }
-    pub fn join_table_alias_with_query(&mut self, table: QueryWrapper, alias: &str, join: BmbpRdbcSQLJoinType) -> &mut Self {
-        self
-    }
-
-    pub fn filter(&mut self, filter: QueryFilter) -> &mut Self {
-        self
-    }
-
-    pub fn order_asc(&mut self, field: &str) -> &mut Self {
-        self
-    }
-    pub fn order_asc_with_table(&mut self, table: &str, field: &str) -> &mut Self {
-        self
-    }
-    pub fn order_asc_with_schema_table(&mut self, schema: &str, table: &str, field: &str) -> &mut Self {
-        self
-    }
-    pub fn order_desc(&mut self, field: &str) -> &mut Self {
-        self
-    }
-    pub fn order_desc_with_table(&mut self, table: &str, field: &str) -> &mut Self {
-        self
-    }
-    pub fn order_desc_with_schema_table(&mut self, schema: &str, table: &str, field: &str) -> &mut Self {
-        self
-    }
-    pub fn group_by(&mut self, field: &str) -> &mut Self { self }
-    pub fn group_by_with_table(&mut self, table: &str, field: &str) -> &mut Self { self }
-    pub fn group_by_with_schema_table(&mut self, schema: &str, table: &str, field: &str) -> &mut Self { self }
-    pub fn having(&mut self, field: RdbcCompareColumn) -> &mut Self {
-        self
-    }
-    pub fn limit(&mut self, limit: i32) -> &mut Self {
-        self
-    }
-    pub fn limit_offset(&mut self, limit: i32) -> &mut Self {
-        self
+impl RdbcSQL for Query {
+    fn to_sql(&self) -> String {
+        let mut sql = vec![];
+        if !self.select_.is_empty() {
+            let select = self.select_.iter().map(|c| c.to_sql()).collect::<Vec<_>>().join(",");
+            sql.push(format!("SELECT {}", select));
+        }
+        sql.join(" \n")
     }
 }
 
-impl RdbcSQLTable for QueryWrapper {
-    fn to_table(&self) -> String {
-        "".to_string()
+impl Query {
+    pub fn new() -> Query {
+        Query {
+            select_: vec![],
+            table_: vec![],
+            join_: None,
+            filter_: None,
+            group_by_: None,
+            having_: None,
+            order_: None,
+            limit_: None,
+            offset_: None,
+        }
     }
 }
 
-pub struct DeleteWrapper {}
+impl Query {
+    pub fn select<T>(&mut self, column: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn select_slice<T>(&mut self, columns: &[T]) -> &mut Self where T: ToString {
+        for column in columns {
+            self.select(column.to_string());
+        }
+        self
+    }
+    pub fn select_as_alias<T, A>(&mut self, column: T, alias: A) -> &mut Self where T: ToString, A: ToString {
+        self
+    }
+    pub fn select_slice_as_alias<T>(&mut self, columns: &[(T, T)]) -> &mut Self where T: ToString {
+        self
+    }
 
-pub struct QueryFilter {}
+    pub fn select_table_column<T>(&mut self, table: T, column: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn select_schema_table_column<T>(&mut self, schema: T, table: T, column: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn select_table_column_as_alias<T>(&mut self, table: T, column: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn select_schema_table_column_as_alias<T>(&mut self, schema: T, table: T, column: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
 
+    pub fn select_rdbc_value(&mut self, column: RdbcValue) -> &mut Self {
+        self
+    }
+    pub fn select_rdbc_value_as_alias<T>(&mut self, column: RdbcValue, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn select_raw_value<T>(&mut self, column: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn select_raw_value_as_alias<T>(&mut self, column: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn select_string_value<T>(&mut self, column: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn select_string_value_as_alias<T>(&mut self, column: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn select_query<T>(&mut self, column: Query) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn select_query_as_alias<T>(&mut self, column: Query, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn select_rdbc_func(&mut self, column: RdbcFunc) -> &mut Self {
+        self
+    }
+    pub fn select_rdbc_func_as_alias<T>(&mut self, column: RdbcFunc, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn select_column<T>(&mut self, column: RdbcColumn) -> &mut Self {
+        self
+    }
+
+    pub fn query_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn query_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn query_table_alias<T>(&mut self, table: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn query_schema_table_alias<T>(&mut self, schema: T, table: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn query_temp_table(&mut self, table: Query) -> &mut Self {
+        self
+    }
+    pub fn query_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn query_rdbc_table(&mut self, table: RdbcTable) -> &mut Self {
+        self
+    }
+
+    pub fn join_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn join_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn join_table_alias<T>(&mut self, table: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn join_schema_table_alias<T>(&mut self, schema: T, table: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn join_temp_table(&mut self, table: Query) -> &mut Self {
+        self
+    }
+    pub fn join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn join_rdbc_table(&mut self, table: RdbcTable) -> &mut Self {
+        self
+    }
+    pub fn left_join_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn left_join_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn left_join_table_alias<T>(&mut self, table: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn left_join_schema_table_alias<T>(&mut self, schema: T, table: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn left_join_temp_table(&mut self, table: Query) -> &mut Self {
+        self
+    }
+    pub fn left_join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn left_join_rdbc_table(&mut self, table: RdbcTable) -> &mut Self {
+        self
+    }
+    pub fn right_join_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn right_join_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn right_join_table_alias<T>(&mut self, table: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn right_join_schema_table_alias<T>(&mut self, schema: T, table: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn right_join_temp_table(&mut self, table: Query) -> &mut Self {
+        self
+    }
+    pub fn right_join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn right_join_rdbc_table(&mut self, table: RdbcTable) -> &mut Self {
+        self
+    }
+
+    pub fn full_join_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn full_join_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn full_join_table_alias<T>(&mut self, table: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn full_join_schema_table_alias<T>(&mut self, schema: T, table: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn full_join_temp_table(&mut self, table: Query) -> &mut Self {
+        self
+    }
+    pub fn full_join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn full_join_rdbc_table(&mut self, table: RdbcTable) -> &mut Self {
+        self
+    }
+    pub fn inner_join_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn inner_join_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn inner_join_table_alias<T>(&mut self, table: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn inner_join_schema_table_alias<T>(&mut self, schema: T, table: T, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn inner_join_temp_table(&mut self, table: Query) -> &mut Self {
+        self
+    }
+    pub fn inner_join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn inner_join_rdbc_table(&mut self, table: RdbcTable) -> &mut Self {
+        self
+    }
+
+    pub fn order_by<T>(&mut self, column: T, is_asc: bool) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn order_asc<T>(&mut self, column: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn order_desc<T>(&mut self, column: T) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn order_slice<T>(&mut self, column: &[T], is_asc: bool) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn order_slice_asc<T>(&mut self, column: &[T]) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn order_slice_desc<T>(&mut self, column: &[T]) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn order_column<T>(&mut self, column: RdbcColumn, is_asc: bool) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn order_column_vec<T>(&mut self, column: Vec<RdbcColumn>, is_asc: bool) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn order_column_slice<T>(&mut self, column: &[RdbcColumn], is_asc: bool) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn order_column_asc<T>(&mut self, column: RdbcColumn) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn order_column_vec_asc<T>(&mut self, column: Vec<RdbcColumn>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn order_column_slice_asc<T>(&mut self, column: &[RdbcColumn]) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn order_column_desc<T>(&mut self, column: RdbcColumn) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn order_column_vec_desc<T>(&mut self, column: Vec<RdbcColumn>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn order_column_slice_desc<T>(&mut self, column: &[RdbcColumn]) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn where_column_raw<T>(&mut self, column: RdbcColumn, compare: RdbcCompareType, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn where_column_string<T>(&mut self, column: RdbcColumn, compare: RdbcCompareType, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn where_column_rdbc_value<T>(&mut self, column: RdbcColumn, compare: RdbcCompareType, value: Option<RdbcValue>) -> &mut Self {
+        self
+    }
+}
+
+impl Query {
+    pub fn and<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn or<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn eq<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn eq_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn eq_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn ne<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn ne_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn ne_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn gt<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn gt_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn gt_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn gte<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn gte_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn gte_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn lt<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn lt_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn lt_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn lte<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn lte_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn lte_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn is_null(&mut self, column: RdbcColumn) -> &mut Self {
+        self
+    }
+    pub fn lte_not_null(&mut self, column: RdbcColumn) -> &mut Self {
+        self
+    }
+
+    pub fn like<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn like_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn like_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn like_left<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn like_left_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn like_left_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn like_right<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn like_right_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn like_right_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn not_like<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_like_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_like_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn not_like_left<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_like_left_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_like_left_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn not_like_right<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_like_right_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_like_right_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn in_<T>(&mut self, column: RdbcColumn, value: Option<Vec<T>>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn in_raw<T>(&mut self, column: RdbcColumn, value: Option<Vec<T>>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn in_string<T>(&mut self, column: RdbcColumn, value: Option<Vec<T>>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn in_query<T>(&mut self, column: RdbcColumn, value: Query) -> &mut Self {
+        self
+    }
+    pub fn not_in<T>(&mut self, column: RdbcColumn, value: Option<Vec<T>>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_in_raw<T>(&mut self, column: RdbcColumn, value: Option<Vec<T>>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_in_string<T>(&mut self, column: RdbcColumn, value: Option<Vec<T>>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_in_query<T>(&mut self, column: RdbcColumn, value: Query) -> &mut Self {
+        self
+    }
+
+    pub fn exists_query<T>(&mut self, column: RdbcColumn, value: Query) -> &mut Self {
+        self
+    }
+    pub fn not_exists_query<T>(&mut self, column: RdbcColumn, value: Query) -> &mut Self {
+        self
+    }
+}
 
 #[cfg(test)]
-pub mod tests {
-    use crate::dql::query::QueryWrapper;
+mod tests {
+    use crate::{Query, RdbcColumn, RdbcSQL};
 
     #[test]
-    fn test_table_model() {
-        let mut query = QueryWrapper::new();
+    fn test_select() {
+        let mut query = Query::new();
+        query.select("id").select("name".to_string())
+            .select_as_alias("张山", "manager")
+            .select_as_alias("李四".to_string(), "secondManager")
+            .select_as_alias(-1i8, "payLevel")
+            .select_as_alias(-2i16, "payInitStore")
+            .select_as_alias(-3i32, "payPrice")
+            .select_as_alias(-4i64, "payStock")
+            .select_as_alias(-5i128, "paySort")
+            .select_as_alias(-6isize, "paySum")
+            .select_as_alias(1u8, "initLevel")
+            .select_as_alias(2u16, "initStore")
+            .select_as_alias(3u32, "initPrice")
+            .select_as_alias(4u64, "initStock")
+            .select_as_alias(5u128, "initSort")
+            .select_as_alias(6usize, "initSum");
+        let mut sub_query_column = Query::new();
+        sub_query_column.select("sum_name").select("go_name".to_string());
+
+        query.select_query_as_alias(sub_query_column, "subQuery");
+        query.query_table("bmbp_setting_dict");
+        println!("{}", query.to_sql())
     }
 }
