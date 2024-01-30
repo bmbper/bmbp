@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use crate::{RdbcFilter, RdbcOrder, RdbcSQL, RdbcColumn, RdbcTable, RdbcValue, RdbcFunc, RdbcCompareType};
+use crate::{RdbcFilter, RdbcOrder, RdbcSQL, RdbcColumn, RdbcTable, RdbcValue, RdbcFunc, RdbcCompareType, RdbcTableColumn};
 
 pub struct Query {
     select_: Vec<RdbcColumn>,
@@ -42,6 +42,7 @@ impl Query {
 
 impl Query {
     pub fn select<T>(&mut self, column: T) -> &mut Self where T: ToString {
+        self.select_.push(RdbcColumn::column(column));
         self
     }
     pub fn select_slice<T>(&mut self, columns: &[T]) -> &mut Self where T: ToString {
@@ -50,49 +51,65 @@ impl Query {
         }
         self
     }
-    pub fn select_as_alias<T, A>(&mut self, column: T, alias: A) -> &mut Self where T: ToString, A: ToString {
+    pub fn select_as_alias<T, E>(&mut self, column: T, alias: E) -> &mut Self where T: ToString, E: ToString {
+        self.select_.push(RdbcColumn::column_as_alias(column, alias));
         self
     }
-    pub fn select_slice_as_alias<T>(&mut self, columns: &[(T, T)]) -> &mut Self where T: ToString {
+    pub fn select_slice_as_alias<T, E>(&mut self, columns: &[(T, E)]) -> &mut Self where T: ToString, E: ToString {
+        for (column, alias) in columns {
+            self.select_.push(RdbcColumn::column_as_alias(column.to_string(), alias.to_string()));
+        }
         self
     }
 
-    pub fn select_table_column<T>(&mut self, table: T, column: T) -> &mut Self where T: ToString {
+    pub fn select_table_column<T, C>(&mut self, table: T, column: C) -> &mut Self where T: ToString, C: ToString {
+        self.select_.push(RdbcColumn::table_column(table, column));
         self
     }
-    pub fn select_schema_table_column<T>(&mut self, schema: T, table: T, column: T) -> &mut Self where T: ToString {
+    pub fn select_schema_table_column<S, T, C>(&mut self, schema: S, table: T, column: C) -> &mut Self where S: ToString, T: ToString, C: ToString {
+        self.select_.push(RdbcColumn::schema_table_column(schema, table, column));
         self
     }
     pub fn select_table_column_as_alias<T>(&mut self, table: T, column: T, alias: T) -> &mut Self where T: ToString {
+        self.select_.push(RdbcColumn::table_column_as_alias(table, column, alias));
         self
     }
     pub fn select_schema_table_column_as_alias<T>(&mut self, schema: T, table: T, column: T, alias: T) -> &mut Self where T: ToString {
+        self.select_.push(RdbcColumn::schema_table_column_as_alias(schema, table, column, alias));
         self
     }
 
     pub fn select_rdbc_value(&mut self, column: RdbcValue) -> &mut Self {
+        self.select_.push(RdbcColumn::rdbc_value(column));
         self
     }
     pub fn select_rdbc_value_as_alias<T>(&mut self, column: RdbcValue, alias: T) -> &mut Self where T: ToString {
+        self.select_.push(RdbcColumn::rdbc_value_alias(column, alias));
         self
     }
     pub fn select_raw_value<T>(&mut self, column: T) -> &mut Self where T: ToString {
+        self.select_.push(RdbcColumn::raw_value(column));
         self
     }
     pub fn select_raw_value_as_alias<T>(&mut self, column: T, alias: T) -> &mut Self where T: ToString {
+        self.select_.push(RdbcColumn::raw_value_alias(column, alias));
         self
     }
     pub fn select_string_value<T>(&mut self, column: T) -> &mut Self where T: ToString {
+        self.select_.push(RdbcColumn::string_value(column));
         self
     }
     pub fn select_string_value_as_alias<T>(&mut self, column: T, alias: T) -> &mut Self where T: ToString {
+        self.select_.push(RdbcColumn::string_value_alias(column, alias));
         self
     }
 
     pub fn select_query<T>(&mut self, column: Query) -> &mut Self where T: ToString {
+        self.select_.push(RdbcColumn::query(column));
         self
     }
     pub fn select_query_as_alias<T>(&mut self, column: Query, alias: T) -> &mut Self where T: ToString {
+        self.select_.push(RdbcColumn::query_alias(column, alias));
         self
     }
     pub fn select_rdbc_func(&mut self, column: RdbcFunc) -> &mut Self {
@@ -102,28 +119,36 @@ impl Query {
         self
     }
     pub fn select_column<T>(&mut self, column: RdbcColumn) -> &mut Self {
+        self.select_.push(column);
         self
     }
 
     pub fn query_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
+        self.table_.push(RdbcTable::table(table));
         self
     }
     pub fn query_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
+        self.table_.push(RdbcTable::schema_table(schema, table));
         self
     }
     pub fn query_table_alias<T>(&mut self, table: T, alias: T) -> &mut Self where T: ToString {
+        self.table_.push(RdbcTable::table_alias(table, alias));
         self
     }
     pub fn query_schema_table_alias<T>(&mut self, schema: T, table: T, alias: T) -> &mut Self where T: ToString {
+        self.table_.push(RdbcTable::schema_table_alias(schema, table, alias));
         self
     }
     pub fn query_temp_table(&mut self, table: Query) -> &mut Self {
+        self.table_.push(RdbcTable::temp_table(table));
         self
     }
     pub fn query_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
+        self.table_.push(RdbcTable::temp_table_alias(table, alias));
         self
     }
     pub fn query_rdbc_table(&mut self, table: RdbcTable) -> &mut Self {
+        self.table_.push(table);
         self
     }
 
