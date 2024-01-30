@@ -1,5 +1,4 @@
-use std::sync::Arc;
-use crate::{RdbcFilter, RdbcOrder, RdbcSQL, RdbcColumn, RdbcTable, RdbcValue, RdbcFunc, RdbcCompareType, RdbcTableColumn};
+use crate::{RdbcFilter, RdbcOrder, RdbcSQL, RdbcColumn, RdbcTable, RdbcValue, RdbcFunc, RdbcCompareType, RdbcConcatType, RdbcTableFilterColumn, RdbcFilterColumn};
 
 pub struct Query {
     select_: Vec<RdbcColumn>,
@@ -30,13 +29,22 @@ impl Query {
             select_: vec![],
             table_: vec![],
             join_: None,
-            filter_: None,
+            filter_: Some(RdbcFilter::new()),
             group_by_: None,
             having_: None,
             order_: None,
             limit_: None,
             offset_: None,
         }
+    }
+}
+
+impl Query {
+    fn create_filter(&mut self, concat: RdbcConcatType) -> &mut Self {
+        let filter = self.filter_.take().unwrap();
+        let new_filter = RdbcFilter::concat_with_filter(concat, filter);
+        self.filter_ = Some(new_filter);
+        self
     }
 }
 
@@ -317,13 +325,17 @@ impl Query {
 }
 
 impl Query {
-    pub fn and<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+    pub fn and(&mut self) -> &mut Self {
+        self.create_filter(RdbcConcatType::And);
         self
     }
-    pub fn or<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+    pub fn or(&mut self) -> &mut Self {
+        self.create_filter(RdbcConcatType::And);
         self
     }
-    pub fn eq<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+
+    pub fn eq<T, V>(&mut self, column: T, value: V) -> &mut Self where T: ToString, V: ToString {
+        self.filter_.as_mut().unwrap().eq(column, value);
         self
     }
     pub fn eq_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
@@ -484,7 +496,7 @@ impl Query {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Query, RdbcColumn, RdbcSQL};
+    use crate::{Query, RdbcSQL, RdbcValue};
 
     #[test]
     fn test_select() {
@@ -509,6 +521,8 @@ mod tests {
 
         query.select_query_as_alias(sub_query_column, "subQuery");
         query.query_table("bmbp_setting_dict");
+        query.eq("abc", "1");
+        query.or().eq("def", "2").eq("c", "3").and().eq("c", "4");
         println!("{}", query.to_sql())
     }
 }

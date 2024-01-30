@@ -317,11 +317,50 @@ pub struct RdbcFilter {
     compare: Vec<RdbcFilterColumn>,
 }
 
+impl RdbcFilter {
+    pub(crate) fn concat_with_filter(concat: RdbcConcatType, filter: RdbcFilter) -> RdbcFilter {
+        RdbcFilter {
+            concat_: concat,
+            compare: vec![RdbcFilterColumn::filter(filter)],
+        }
+    }
+
+    pub fn eq<T, V>(&mut self, column: T, value: V) -> &mut Self where T: ToString, V: ToString {
+        self.compare.push(RdbcFilterColumn::eq(column, value));
+        self
+    }
+}
+
+impl RdbcFilter {
+    pub fn new() -> RdbcFilter {
+        RdbcFilter {
+            concat_: RdbcConcatType::And,
+            compare: vec![],
+        }
+    }
+}
+
 pub enum RdbcFilterColumn {
     Table(RdbcTableFilterColumn),
     Func(RdbcFuncFilterColumn),
     Query(RdbcQueryFilterColumn),
     Filter(RdbcFilter),
+}
+
+impl RdbcFilterColumn {
+    fn filter(filter: RdbcFilter) -> RdbcFilterColumn {
+        RdbcFilterColumn::Filter(filter)
+    }
+}
+
+impl RdbcFilterColumn {
+    pub fn eq<T, V>(column: T, value: V) -> RdbcFilterColumn where T: ToString, V: ToString {
+        RdbcFilterColumn::Table(RdbcTableFilterColumn {
+            column_: RdbcColumn::column(column),
+            compare_: RdbcCompareType::Eq,
+            value: Some(RdbcValue::String(value.to_string())),
+        })
+    }
 }
 
 pub struct RdbcTableFilterColumn {

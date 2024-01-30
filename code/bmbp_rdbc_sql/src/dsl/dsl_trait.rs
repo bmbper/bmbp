@@ -1,4 +1,3 @@
-use std::fmt::Display;
 
 pub trait RdbcSQL {
     fn to_sql(&self) -> String;
