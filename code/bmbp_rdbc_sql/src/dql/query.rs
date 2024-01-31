@@ -213,7 +213,8 @@ impl Query {
     pub fn left_join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
         self
     }
-    pub fn left_join_rdbc_table(&mut self, table: RdbcTable) -> &mut Self {
+    pub fn left_join_rdbc_table(&mut self, mut table: RdbcTable) -> &mut Self {
+        table.join(RdbcTableJoinType::Left);
         self.join_.as_mut().unwrap().push(table);
         self
     }
@@ -235,7 +236,9 @@ impl Query {
     pub fn right_join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
         self
     }
-    pub fn right_join_rdbc_table(&mut self, table: RdbcTable) -> &mut Self {
+    pub fn right_join_rdbc_table(&mut self, mut table: RdbcTable) -> &mut Self {
+        table.join(RdbcTableJoinType::Right);
+        self.join_.as_mut().unwrap().push(table);
         self
     }
 
@@ -257,7 +260,9 @@ impl Query {
     pub fn full_join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
         self
     }
-    pub fn full_join_rdbc_table(&mut self, table: RdbcTable) -> &mut Self {
+    pub fn full_join_rdbc_table(&mut self, mut table: RdbcTable) -> &mut Self {
+        table.join(RdbcTableJoinType::Full);
+        self.join_.as_mut().unwrap().push(table);
         self
     }
     pub fn inner_join_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
@@ -278,7 +283,9 @@ impl Query {
     pub fn inner_join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
         self
     }
-    pub fn inner_join_rdbc_table(&mut self, table: RdbcTable) -> &mut Self {
+    pub fn inner_join_rdbc_table(&mut self, mut table: RdbcTable) -> &mut Self {
+        table.join(RdbcTableJoinType::Inner);
+        self.join_.as_mut().unwrap().push(table);
         self
     }
 

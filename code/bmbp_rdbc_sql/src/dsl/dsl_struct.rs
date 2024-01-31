@@ -247,6 +247,15 @@ impl RdbcTable {
 }
 
 impl RdbcTable {
+    pub fn join(&mut self, join_: RdbcTableJoinType) -> &mut Self {
+        match self {
+            RdbcTable::Table(ref mut table) => {
+                table.left_join();
+            }
+            RdbcTable::Query(ref mut table) => {}
+        }
+        self
+    }
     pub fn left_join(&mut self) -> &mut Self {
         match self {
             RdbcTable::Table(ref mut table) => {
