@@ -1,4 +1,4 @@
-use crate::{RdbcFilter, RdbcOrder, RdbcSQL, RdbcColumn, RdbcTable, RdbcValue, RdbcFunc, RdbcCompareType, RdbcConcatType, RdbcTableFilterColumn, RdbcFilterColumn};
+use crate::{RdbcFilter, RdbcOrder, RdbcSQL, RdbcColumn, RdbcTable, RdbcValue, RdbcFunc, RdbcCompareType, RdbcConcatType, RdbcTableFilterColumn, RdbcFilterColumn, RdbcTableJoinType, table};
 
 pub struct Query {
     select_: Vec<RdbcColumn>,
@@ -10,6 +10,7 @@ pub struct Query {
     order_: Option<Vec<RdbcOrder>>,
     limit_: Option<u64>,
     offset_: Option<u64>,
+    params_: Option<Vec<RdbcValue>>,
 }
 
 impl RdbcSQL for Query {
@@ -28,16 +29,18 @@ impl Query {
         Query {
             select_: vec![],
             table_: vec![],
-            join_: None,
+            join_: Some(vec![]),
             filter_: Some(RdbcFilter::new()),
             group_by_: None,
             having_: None,
             order_: None,
             limit_: None,
             offset_: None,
+            params_: None,
         }
     }
 }
+
 
 impl Query {
     fn create_filter(&mut self, concat: RdbcConcatType) -> &mut Self {
@@ -46,9 +49,6 @@ impl Query {
         self.filter_ = Some(new_filter);
         self
     }
-}
-
-impl Query {
     pub fn select<T>(&mut self, column: T) -> &mut Self where T: ToString {
         self.select_.push(RdbcColumn::column(column));
         self
@@ -161,27 +161,41 @@ impl Query {
     }
 
     pub fn join_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
+        self.join_.as_mut().unwrap().push(RdbcTable::table(table));
         self
     }
+    pub fn on(&mut self) -> Option<&mut RdbcTable> {
+        self.join_.as_mut().unwrap().get_mut(0)
+    }
+    pub fn on_index(&mut self, index: usize) -> Option<&mut RdbcTable> {
+        self.join_.as_mut().unwrap().get_mut(index)
+    }
     pub fn join_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
+        self.join_.as_mut().unwrap().push(RdbcTable::schema_table(schema, table));
         self
     }
     pub fn join_table_alias<T>(&mut self, table: T, alias: T) -> &mut Self where T: ToString {
+        self.join_.as_mut().unwrap().push(RdbcTable::table_alias(table, alias));
         self
     }
     pub fn join_schema_table_alias<T>(&mut self, schema: T, table: T, alias: T) -> &mut Self where T: ToString {
+        self.join_.as_mut().unwrap().push(RdbcTable::schema_table_alias(schema, table, alias));
         self
     }
     pub fn join_temp_table(&mut self, table: Query) -> &mut Self {
+        self.join_.as_mut().unwrap().push(RdbcTable::temp_table(table));
         self
     }
     pub fn join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
+        self.join_.as_mut().unwrap().push(RdbcTable::temp_table_alias(table, alias));
         self
     }
     pub fn join_rdbc_table(&mut self, table: RdbcTable) -> &mut Self {
+        self.join_.as_mut().unwrap().push(table);
         self
     }
     pub fn left_join_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
+        self.join_.as_mut().unwrap().push(RdbcTable::left_join_table(table));
         self
     }
     pub fn left_join_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
@@ -200,6 +214,7 @@ impl Query {
         self
     }
     pub fn left_join_rdbc_table(&mut self, table: RdbcTable) -> &mut Self {
+        self.join_.as_mut().unwrap().push(table);
         self
     }
     pub fn right_join_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
@@ -496,7 +511,8 @@ impl Query {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Query, RdbcSQL, RdbcValue};
+    use std::ptr::eq;
+    use crate::{left_table, Query, RdbcSQL, RdbcTable, RdbcValue, table};
 
     #[test]
     fn test_select() {
@@ -518,11 +534,11 @@ mod tests {
             .select_as_alias(6usize, "initSum");
         let mut sub_query_column = Query::new();
         sub_query_column.select("sum_name").select("go_name".to_string());
-
         query.select_query_as_alias(sub_query_column, "subQuery");
         query.query_table("bmbp_setting_dict");
         query.eq("abc", "1");
         query.or().eq("def", "2").eq("c", "3").and().eq("c", "4");
+        query.join_table("a").on().unwrap().eq("a", "b").eq("c", "d").or().eq("e", "f").eq("g", "h");
         println!("{}", query.to_sql())
     }
 }

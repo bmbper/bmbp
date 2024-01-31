@@ -11,7 +11,7 @@ pub enum RdbcColumn {
 impl RdbcSQL for RdbcColumn {
     fn to_sql(&self) -> String {
         match self {
-            RdbcColumn::Table(_) => "".to_string(),
+            RdbcColumn::Table(t) => t.to_sql(),
             RdbcColumn::Query(_) => "".to_string(),
             RdbcColumn::Func(_) => "".to_string(),
             RdbcColumn::Value(_) => "".to_string(),
@@ -74,6 +74,22 @@ pub struct RdbcTableColumn {
     table_: Option<String>,
     name_: String,
     alias_: Option<String>,
+}
+
+impl RdbcSQL for RdbcTableColumn {
+    fn to_sql(&self) -> String {
+        let mut column = self.name_.clone();
+        if let Some(ref alias) = self.alias_ {
+            column = format!("{} AS {}", column, alias);
+        }
+        if let Some(ref table) = self.table_ {
+            column = format!("{}.{}", table, column);
+        }
+        if let Some(ref schema) = self.schema_ {
+            column = format!("{}.{}", schema, column);
+        }
+        column
+    }
 }
 
 impl RdbcTableColumn {
@@ -216,6 +232,9 @@ impl RdbcTable {
     pub fn schema_table_alias<T>(schema: T, table: T, alias: T) -> RdbcTable where T: ToString {
         RdbcTable::Table(RdbcSchemaTable::schema_table_alias(schema, table, alias))
     }
+    pub(crate) fn left_join_table<T>(table: T) -> Self where T: ToString {
+        RdbcTable::Table(RdbcSchemaTable::left_join_table(table))
+    }
     pub fn temp_table(table: Query) -> RdbcTable {
         RdbcTable::Query(RdbcQueryTable::query(table))
     }
@@ -224,6 +243,36 @@ impl RdbcTable {
     }
     fn query(table: Query) -> RdbcTable {
         RdbcTable::Query(RdbcQueryTable::query(table))
+    }
+}
+
+impl RdbcTable {
+    pub fn left_join(&mut self) -> &mut Self {
+        match self {
+            RdbcTable::Table(ref mut table) => {
+                table.left_join();
+            }
+            RdbcTable::Query(ref mut table) => {}
+        }
+        self
+    }
+    pub fn eq<C, V>(&mut self, column: C, value: V) -> &mut Self where V: ToString, C: ToString {
+        match self {
+            RdbcTable::Table(ref mut table) => {
+                table.eq(column, value);
+            }
+            RdbcTable::Query(ref mut table) => {}
+        }
+        self
+    }
+    pub fn or(&mut self) -> &mut Self {
+        match self {
+            RdbcTable::Table(ref mut table) => {
+                table.or();
+            }
+            RdbcTable::Query(ref mut table) => {}
+        }
+        self
     }
 }
 
@@ -249,7 +298,7 @@ impl RdbcSchemaTable {
             name_: table.to_string(),
             alias_: None,
             join_: None,
-            filter_: None,
+            filter_: Some(RdbcFilter::new()),
         }
     }
     fn table_alias<T>(table: T, alias: T) -> RdbcSchemaTable where T: ToString {
@@ -258,7 +307,7 @@ impl RdbcSchemaTable {
             name_: table.to_string(),
             alias_: Some(alias.to_string()),
             join_: None,
-            filter_: None,
+            filter_: Some(RdbcFilter::new()),
         }
     }
     fn schema_table<T>(schema: T, table: T) -> RdbcSchemaTable where T: ToString {
@@ -267,7 +316,7 @@ impl RdbcSchemaTable {
             name_: table.to_string(),
             alias_: None,
             join_: None,
-            filter_: None,
+            filter_: Some(RdbcFilter::new()),
         }
     }
     fn schema_table_alias<T>(schema: T, table: T, alias: T) -> RdbcSchemaTable where T: ToString {
@@ -276,10 +325,55 @@ impl RdbcSchemaTable {
             name_: table.to_string(),
             alias_: Some(alias.to_string()),
             join_: None,
-            filter_: None,
+            filter_: Some(RdbcFilter::new()),
+        }
+    }
+    fn left_join_table<T>(table: T) -> RdbcSchemaTable where T: ToString {
+        RdbcSchemaTable {
+            schema_: None,
+            name_: table.to_string(),
+            alias_: None,
+            join_: Some(RdbcTableJoinType::Left),
+            filter_: Some(RdbcFilter::new()),
+        }
+    }
+    fn left_join_table_alias<T, A>(table: T, alias: A) -> RdbcSchemaTable where T: ToString, A: ToString {
+        RdbcSchemaTable {
+            schema_: None,
+            name_: table.to_string(),
+            alias_: Some(alias.to_string()),
+            join_: Some(RdbcTableJoinType::Left),
+            filter_: Some(RdbcFilter::new()),
         }
     }
 }
+
+impl RdbcSchemaTable {
+    fn create_filter(&mut self, concat: RdbcConcatType) -> &mut Self {
+        let filter = self.filter_.take().unwrap();
+        let new_filter = RdbcFilter::concat_with_filter(concat, filter);
+        self.filter_ = Some(new_filter);
+        self
+    }
+    pub fn left_join(&mut self) -> &mut Self {
+        self.join_ = Some(RdbcTableJoinType::Left);
+        self
+    }
+    pub fn eq<C, V>(&mut self, column: C, value: V) -> &mut Self where V: ToString, C: ToString {
+        self.filter_.as_mut().unwrap().eq(column, value);
+        self
+    }
+
+    pub fn or(&mut self) -> &mut Self {
+        self.create_filter(RdbcConcatType::Or);
+        self
+    }
+    pub fn and(&mut self) -> &mut Self {
+        self.create_filter(RdbcConcatType::And);
+        self
+    }
+}
+
 
 pub struct RdbcQueryTable {
     name_: Query,
@@ -324,7 +418,6 @@ impl RdbcFilter {
             compare: vec![RdbcFilterColumn::filter(filter)],
         }
     }
-
     pub fn eq<T, V>(&mut self, column: T, value: V) -> &mut Self where T: ToString, V: ToString {
         self.compare.push(RdbcFilterColumn::eq(column, value));
         self
@@ -410,4 +503,24 @@ pub struct RdbcColumnOrder {
 pub enum RdbcOrderType {
     Asc,
     Desc,
+}
+
+pub fn table<T>(table: T) -> RdbcTable where T: ToString {
+    RdbcTable::table(table)
+}
+
+pub fn left_table<T>(table: T) -> RdbcTable where T: ToString {
+    RdbcTable::left_join_table(table)
+}
+
+pub fn inner_table<T>(table: T) -> RdbcTable where T: ToString {
+    RdbcTable::table(table)
+}
+
+pub fn right_table<T>(table: T) -> RdbcTable where T: ToString {
+    RdbcTable::table(table)
+}
+
+pub fn full_table<T>(table: T) -> RdbcTable where T: ToString {
+    RdbcTable::table(table)
 }
