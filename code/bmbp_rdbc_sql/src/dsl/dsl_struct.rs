@@ -461,6 +461,7 @@ impl RdbcFilterColumn {
             column_: RdbcColumn::column(column),
             compare_: RdbcCompareType::Eq,
             value: Some(RdbcValue::String(value.to_string())),
+            ignore_null: false,
         })
     }
 }
@@ -469,6 +470,7 @@ pub struct RdbcTableFilterColumn {
     column_: RdbcColumn,
     compare_: RdbcCompareType,
     value: Option<RdbcValue>,
+    ignore_null: bool,
 }
 
 pub struct RdbcFuncFilterColumn {
