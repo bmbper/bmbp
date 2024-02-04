@@ -1,3 +1,4 @@
+use std::mem::take;
 use std::sync::{Arc, RwLock, Weak};
 use crate::datasource::RdbcDataSource;
 use crate::pool::RdbcConnPool;
@@ -14,7 +15,7 @@ impl RdbcConn {
     pub fn new(pool: Arc<RdbcConnPool>, ds: Arc<RdbcDataSource>, conn: Option<Box<dyn RdbcDbConn + Send + Sync>>) -> RdbcConn {
         RdbcConn {
             data_source: ds,
-            pool: pool.downgrade(),
+            pool: Arc::downgrade(&pool),
             inner: conn,
         }
     }
@@ -22,6 +23,6 @@ impl RdbcConn {
 
 impl Drop for RdbcConn {
     fn drop(&mut self) {
-        self.pool.upgrade().unwrap().push_conn(self.inner.take());
+        self.pool.upgrade().unwrap().push_conn(self.inner.take().unwrap());
     }
 }
