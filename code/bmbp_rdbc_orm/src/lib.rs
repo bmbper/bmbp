@@ -2,6 +2,7 @@ mod conn;
 mod datasource;
 mod orm;
 mod pool;
+mod client;
 
 pub use datasource::*;
 pub use orm::*;
