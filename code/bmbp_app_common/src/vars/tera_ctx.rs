@@ -1,7 +1,6 @@
 use tera::Context;
 
 use crate::APP_TITLE;
-
 pub fn page_context(func: &str) -> Context {
     let mut ctx = Context::new();
     ctx.insert("appTitle", APP_TITLE);
