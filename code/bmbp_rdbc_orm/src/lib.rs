@@ -3,13 +3,14 @@ mod datasource;
 mod orm;
 mod pool;
 mod client;
+mod err;
 
 pub use datasource::*;
 pub use orm::*;
 
 #[cfg(test)]
 pub mod tests {
-    use crate::{RdbcDataBaseDriver, RdbcDataSource, RdbcOrm, RdbcDataBaseDriver};
+    use crate::{RdbcDataBaseDriver, RdbcDataSource, RdbcOrm};
 
     fn build_datasource() -> RdbcDataSource {
         let mut ds = RdbcDataSource::new(RdbcDataBaseDriver::Postgres);
