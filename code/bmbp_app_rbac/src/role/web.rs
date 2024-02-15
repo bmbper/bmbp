@@ -1,7 +1,7 @@
 use bmbp_app_common::BmbpError;
 use bmbp_app_common::BmbpHashMap;
 use bmbp_app_common::BmbpResp;
-use bmbp_app_common::PageParams;
+use bmbp_app_common::BmbpPageParam;
 use bmbp_app_common::PageVo;
 use bmbp_app_common::RespVo;
 use salvo::handler;
@@ -68,7 +68,7 @@ pub async fn find_role_page(
     req: &mut Request,
     _res: &mut Response,
 ) -> BmbpResp<RespVo<PageVo<BmbpHashMap>>> {
-    let params = req.parse_json::<PageParams<BmbpHashMap>>().await?;
+    let params = req.parse_json::<BmbpPageParam<BmbpHashMap>>().await?;
     let rs = RoleService::find_role_page(&params).await?;
     Ok(RespVo::ok_data(rs))
 }

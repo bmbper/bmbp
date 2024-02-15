@@ -1,5 +1,10 @@
+pub enum RdbcDataBaseDriver {
+    Postgres,
+    Mysql,
+}
 
-pub struct RdbcDataSource{
+pub struct RdbcDataSource {
+    driver: RdbcDataBaseDriver,
     host: String,
     port: u16,
     user: String,
@@ -15,9 +20,11 @@ pub struct RdbcDataSource{
     max_wait_time: Option<usize>,
     max_idle_time: Option<usize>,
 }
+
 impl RdbcDataSource {
-    pub fn new() -> Self {
+    pub fn new(driver: RdbcDataBaseDriver) -> Self {
         RdbcDataSource {
+            driver,
             host: "".to_string(),
             port: 0,
             user: "".to_string(),
@@ -33,6 +40,13 @@ impl RdbcDataSource {
             max_wait_time: None,
             max_idle_time: None,
         }
+    }
+    pub fn driver(&self) -> &RdbcDataBaseDriver {
+        &self.driver
+    }
+    pub fn set_driver(&mut self, driver: RdbcDataBaseDriver) -> &mut Self {
+        self.driver = driver;
+        self
     }
     pub fn host(&self) -> &String {
         &self.host

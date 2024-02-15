@@ -1,6 +1,6 @@
 use crate::app::dao::RbacAppDao;
 use bmbp_app_common::{
-    BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, PageParams, PageVo, ValidRule, ValidType,
+    BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, BmbpPageParam, PageVo, ValidRule, ValidType,
 };
 use bmbp_app_utils::{
     add_insert_default_value, add_update_default_value, is_empty_prop, valid_field_rule,
@@ -12,7 +12,7 @@ use super::script::RbacAppScript;
 pub struct RbacAppService;
 impl RbacAppService {
     pub(crate) async fn find_page(
-        params: &PageParams<BmbpHashMap>,
+        params: &BmbpPageParam<BmbpHashMap>,
     ) -> BmbpResp<PageVo<BmbpHashMap>> {
         let query_script = RbacAppScript::query_script();
         let query_params = BmbpHashMap::new();

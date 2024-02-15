@@ -1,6 +1,6 @@
 use super::{dao::MenuDao, script::MenuScript};
 use bmbp_app_common::{
-    BmbpError, BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, PageParams, PageVo, ValidRule,
+    BmbpError, BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, BmbpPageParam, PageVo, ValidRule,
     ValidType, ROOT_TREE_NODE,
 };
 use bmbp_app_utils::{
@@ -103,7 +103,7 @@ impl MenuService {
     }
 
     /// 分页查询菜单列表
-    pub async fn find_menu_page(params: &PageParams<BmbpHashMap>) -> BmbpResp<PageVo<BmbpHashMap>> {
+    pub async fn find_menu_page(params: &BmbpPageParam<BmbpHashMap>) -> BmbpResp<PageVo<BmbpHashMap>> {
         let mut query_script = MenuScript::query_script();
         query_script.order_by("menu_parent_code asc");
         query_script.order_by("record_num asc");

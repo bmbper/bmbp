@@ -13,6 +13,7 @@ bmbp_app_common = { path = "../bmbp_app_common" }
 bmbp_app_utils = { path = "../bmbp_app_utils" }
 bmbp_app_curd = { path = "../bmbp_app_curd" }
 bmbp_orm_sql = { path = "../bmbp_orm_sql" }
+bmbp_rdbc = { path = "../bmbp_rdbc" }
 
 salvo = { version = "*", features = ["default", "serve-static", "cors"] }
 tokio = { version = "1", features = ["full"] }

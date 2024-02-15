@@ -1,15 +1,24 @@
 use serde::{Deserialize, Serialize};
-use bmbp_app_common::{BmbpCurdModel, BmbpOrmModel, BmbpTreeModel, PageParams};
+use bmbp_app_common::{BmbpPageParam};
+use bmbp_rdbc::{RdbcTableModel, RdbcTreeTableRow};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DictQueryParams {
-    pub(crate) data_id: Option<String>,
-    pub(crate) parent_code: Option<String>,
-    pub(crate) show_level: Option<String>,
+    data_id: Option<String>,
+    parent_code: Option<String>,
+    show_level: Option<String>,
 }
-
-type DictPageQueryParams = PageParams<DictQueryParams>;
+impl DictQueryParams{
+    pub fn new() -> Self {
+        DictQueryParams {
+            data_id: None,
+            parent_code: None,
+            show_level: None,
+        }
+    }
+}
+type DictPageQueryParams = BmbpPageParam<DictQueryParams>;
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -37,14 +46,13 @@ impl Default for BmbpDictType {
     }
 }
 
-impl BmbpCurdModel for BmbpSettingDict {
+impl RdbcTableModel for BmbpSettingDict {
     fn get_table_name() -> String {
         "BMBP_SETTING_DICT".to_string()
     }
-    fn get_table_columns() -> Vec<String> {
-        vec!["dict_alias".to_string(), "dict_value".to_string(),"dict_type".to_string()]
+    fn get_table_fields() -> Vec<String> {
+        vec!["dict_alias".to_string(), "dict_value".to_string(), "dict_type".to_string()]
     }
 }
 
-pub type BmbpSettingDictOrmModel = BmbpOrmModel<BmbpSettingDict>;
-pub type BmbpSettingDictOrmTreeModel = BmbpTreeModel<BmbpSettingDictOrmModel>;
+pub type BmbpSettingDictOrmModel = RdbcTreeTableRow<BmbpSettingDict>;

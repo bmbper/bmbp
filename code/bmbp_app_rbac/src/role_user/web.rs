@@ -1,4 +1,4 @@
-use bmbp_app_common::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, PageParams, PageVo, RespVo};
+use bmbp_app_common::{BmbpError, BmbpHashMap, BmbpResp, BmbpValue, BmbpPageParam, PageVo, RespVo};
 use salvo::{handler, Request, Response};
 
 use super::service::RbacRoleUserService;
@@ -8,7 +8,7 @@ pub async fn find_role_page(
     req: &mut Request,
     _res: &mut Response,
 ) -> BmbpResp<RespVo<PageVo<BmbpHashMap>>> {
-    let params = req.parse_json::<PageParams<BmbpHashMap>>().await?;
+    let params = req.parse_json::<BmbpPageParam<BmbpHashMap>>().await?;
     let rs = RbacRoleUserService::find_role_page(&params).await?;
     Ok(RespVo::ok_data(rs))
 }

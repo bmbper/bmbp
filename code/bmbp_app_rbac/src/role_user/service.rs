@@ -2,7 +2,7 @@ use bmbp_app_common::BmbpError;
 use bmbp_app_common::BmbpHashMap;
 use bmbp_app_common::BmbpResp;
 use bmbp_app_common::BmbpValue;
-use bmbp_app_common::PageParams;
+use bmbp_app_common::BmbpPageParam;
 use bmbp_app_common::PageVo;
 use bmbp_app_curd::CurdDao;
 use bmbp_app_curd::CurdScript;
@@ -30,7 +30,7 @@ impl RbacRoleUserService {
     }
 
     pub(crate) async fn find_role_page(
-        page_params: &PageParams<BmbpHashMap>,
+        page_params: &BmbpPageParam<BmbpHashMap>,
     ) -> BmbpResp<PageVo<BmbpHashMap>> {
         let mut script_params = BmbpHashMap::new();
         if let Some(params) = page_params.get_params() {

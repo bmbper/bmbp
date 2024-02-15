@@ -1,6 +1,6 @@
 use super::{dao::OrganDao, script::OrganScript};
 use bmbp_app_common::{
-    BmbpError, BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, PageParams, PageVo, ValidRule,
+    BmbpError, BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, BmbpPageParam, PageVo, ValidRule,
     ValidType, ROOT_TREE_NODE,
 };
 use bmbp_app_utils::{
@@ -96,7 +96,7 @@ impl OrganService {
 
     /// 分页查询组织列表
     pub async fn find_organ_page(
-        params: &PageParams<BmbpHashMap>,
+        params: &BmbpPageParam<BmbpHashMap>,
     ) -> BmbpResp<PageVo<BmbpHashMap>> {
         let mut query_script = OrganScript::query_script();
         query_script.order_by("organ_parent_code asc");

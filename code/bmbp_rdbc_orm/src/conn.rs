@@ -1,28 +1,7 @@
-use std::mem::take;
-use std::sync::{Arc, RwLock, Weak};
+use std::sync::{Arc};
 use crate::datasource::RdbcDataSource;
-use crate::pool::RdbcConnPool;
 
-pub trait RdbcDbConn {}
-
-pub struct RdbcConn {
-    data_source: Arc<RdbcDataSource>,
-    pool: Weak<RdbcConnPool>,
-    inner: Option<Box<dyn RdbcDbConn + Send + Sync + 'static>>,
-}
-
-impl RdbcConn {
-    pub fn new(pool: Arc<RdbcConnPool>, ds: Arc<RdbcDataSource>, conn: Option<Box<dyn RdbcDbConn + Send + Sync>>) -> RdbcConn {
-        RdbcConn {
-            data_source: ds,
-            pool: Arc::downgrade(&pool),
-            inner: conn,
-        }
-    }
-}
-
-impl Drop for RdbcConn {
-    fn drop(&mut self) {
-        self.pool.upgrade().unwrap().push_conn(self.inner.take().unwrap());
-    }
+pub trait RdbcDbConn {
+    async fn new(data_source:Arc<RdbcDataSource>)->Self;
+    async fn is_valid(&self) -> bool;
 }

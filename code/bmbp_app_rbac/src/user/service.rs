@@ -1,5 +1,5 @@
 use bmbp_app_common::{
-    BmbpError, BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, PageParams, PageVo, ValidRule,
+    BmbpError, BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, BmbpPageParam, PageVo, ValidRule,
     ValidType, DEFAULT_PASSWORD,
 };
 use bmbp_app_curd::{CurdDao, CurdScript};
@@ -17,7 +17,7 @@ pub struct UserService;
 impl UserService {
     /// 分页查询组织列表
     pub async fn find_user_page(
-        page_params: &PageParams<BmbpHashMap>,
+        page_params: &BmbpPageParam<BmbpHashMap>,
     ) -> BmbpResp<PageVo<BmbpHashMap>> {
         let mut query_script = UserScript::query_script_by_organ();
         let mut query_params = BmbpHashMap::new();

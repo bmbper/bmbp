@@ -11,7 +11,7 @@ pub fn build_dict_router() -> Router {
         .push(Router::with_path("/save").post(save_dict))
         .push(Router::with_path("/insert").post(insert_dict))
         .push(Router::with_path("/update").post(update_dict))
-        .push(Router::with_path("/info/<record_id>").post(find_dict_info).get(find_dict_page))
+        .push(Router::with_path("/info/<record_id>").post(find_dict_info).get(find_dict_info))
         .push(Router::with_path("/enable/<record_id>").post(enable_dict))
         .push(Router::with_path("/disable/<record_id>").post(disable_dict))
         .push(Router::with_path("/delete/<record_id>").post(delete_dict))

@@ -1,6 +1,6 @@
 use super::{dao::RoleDao, script::RoleScript};
 use bmbp_app_common::{
-    BmbpError, BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, PageParams, PageVo, ValidRule,
+    BmbpError, BmbpHashMap, BmbpResp, BmbpValue, FieldValidRule, BmbpPageParam, PageVo, ValidRule,
     ValidType, ROOT_TREE_NODE,
 };
 use bmbp_app_utils::{
@@ -92,7 +92,7 @@ impl RoleService {
     }
 
     /// 分页查询角色列表
-    pub async fn find_role_page(params: &PageParams<BmbpHashMap>) -> BmbpResp<PageVo<BmbpHashMap>> {
+    pub async fn find_role_page(params: &BmbpPageParam<BmbpHashMap>) -> BmbpResp<PageVo<BmbpHashMap>> {
         let mut query_script = RoleScript::query_script();
         query_script.order_by("role_parent_code asc");
         query_script.order_by("record_num asc");
