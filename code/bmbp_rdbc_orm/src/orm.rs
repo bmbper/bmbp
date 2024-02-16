@@ -1,4 +1,3 @@
-use crate::conn::{RdbcDbConn};
 use crate::datasource::RdbcDataSource;
 use crate::pool::{RdbcConn, RdbcConnPool};
 use std::sync::Arc;
