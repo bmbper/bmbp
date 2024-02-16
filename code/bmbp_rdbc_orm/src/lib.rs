@@ -29,9 +29,9 @@ pub mod tests {
 
     #[tokio::test]
     async fn test_rom() {
-        let mut ds = build_datasource();
+        let ds = build_datasource();
         let orm = RdbcOrm::new(ds).await;
         let conn = orm.get_conn().await;
-        assert!(conn.is_valid())
+        assert!(conn.is_valid().await)
     }
 }

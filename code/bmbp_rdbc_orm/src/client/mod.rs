@@ -28,14 +28,14 @@ pub async fn build_conn(ds: Arc<RdbcDataSource>) -> Box<dyn RdbcDbConn + Send + 
 }
 
 async fn build_sqlite_conn(datasource: Arc<RdbcDataSource>) -> Box<dyn RdbcDbConn + Send + Sync + 'static> {
-    Box::new(SqliteDbClient::new(datasource.clone()))
+    Box::new(SqliteDbClient::new(datasource.clone()).await)
 }
 
 async fn build_postgres_conn(datasource: Arc<RdbcDataSource>) -> Box<dyn RdbcDbConn + Send + Sync + 'static> {
-    Box::new(PgDbClient::new(datasource.clone()))
+    Box::new(PgDbClient::new(datasource.clone()).await)
 }
 
 async fn build_mysql_conn(datasource: Arc<RdbcDataSource>) -> Box<dyn RdbcDbConn + Send + Sync + 'static> {
-    Box::new(MysqlDbClient::new(datasource.clone()))
+    Box::new(MysqlDbClient::new(datasource.clone()).await)
 }
 

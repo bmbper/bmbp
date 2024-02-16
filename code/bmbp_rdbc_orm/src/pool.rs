@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use crate::conn::{RdbcDbConn};
 use crate::datasource::RdbcDataSource;
 use std::sync::Arc;
@@ -8,7 +7,7 @@ use crate::client;
 pub struct RdbcConnPool {
     data_source: Arc<RdbcDataSource>,
     conn_size: RwLock<usize>,
-    conn_map: RwLock<HashMap<String, Box<dyn RdbcDbConn + Send + Sync + 'static>>>,
+    conn_map: RwLock<Vec<Box<dyn RdbcDbConn + Send + Sync + 'static>>>,
 }
 
 impl RdbcConnPool {
@@ -16,7 +15,7 @@ impl RdbcConnPool {
         let pool = RdbcConnPool {
             data_source,
             conn_size: RwLock::new(0),
-            conn_map: RwLock::new(HashMap::new()),
+            conn_map: RwLock::new(vec![]),
         };
         let arc_pool = Arc::new(pool);
         arc_pool
@@ -28,7 +27,7 @@ impl RdbcConnPool {
         *self.conn_size.write().unwrap() = init_conn_size.clone();
         for _ in 0..init_conn_size {
             let conn = client::build_conn(ds.clone()).await;
-            self.conn_map.write().unwrap().insert("a".to_string(),conn);
+            self.conn_map.write().unwrap().push(conn);
         }
     }
 
