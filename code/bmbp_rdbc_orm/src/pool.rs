@@ -1,6 +1,7 @@
+use std::cell::RefCell;
 use crate::conn::{RdbcDbConn};
 use crate::datasource::RdbcDataSource;
-use std::sync::Arc;
+use std::sync::{Arc, Weak};
 use std::sync::{RwLock};
 use crate::client;
 
@@ -8,6 +9,7 @@ pub struct RdbcConnPool {
     data_source: Arc<RdbcDataSource>,
     conn_size: RwLock<usize>,
     conn_map: RwLock<Vec<Box<dyn RdbcDbConn + Send + Sync + 'static>>>,
+    _re: RefCell<Weak<RdbcConnPool>>,
 }
 
 impl RdbcConnPool {
@@ -16,8 +18,10 @@ impl RdbcConnPool {
             data_source,
             conn_size: RwLock::new(0),
             conn_map: RwLock::new(vec![]),
+            _re: RefCell::new(Weak::new()),
         };
         let arc_pool = Arc::new(pool);
+        *arc_pool._re.borrow_mut() = Arc::downgrade(&arc_pool) ;
         arc_pool
     }
 
@@ -47,13 +51,39 @@ impl RdbcConnPool {
 }
 
 impl RdbcConnPool {
-    pub async fn get_conn(&self) -> Box<dyn RdbcDbConn + Send + Sync + 'static> {
+    pub async fn get_conn(&self) -> RdbcConn {
         if self.conn_map.read().unwrap().is_empty() {
             self.build_conn_grown().await;
         }
-        self.conn_map.write().unwrap().pop().unwrap()
+        let conn = self.conn_map.write().unwrap().pop().unwrap();
+        RdbcConn {
+            name: "x".to_string(),
+            datasource: self.data_source.clone(),
+            pool: self._re.borrow().clone(),
+            conn: Some(conn),
+        }
     }
     pub fn push_conn(&self, conn: Box<dyn RdbcDbConn + Send + Sync + 'static>) {
         self.conn_map.write().unwrap().push(conn);
+    }
+}
+
+pub struct RdbcConn {
+    pub(crate) name: String,
+    pub(crate) datasource: Arc<RdbcDataSource>,
+    pub(crate) pool: Weak<RdbcConnPool>,
+    pub(crate) conn: Option<Box<dyn RdbcDbConn + Send + Sync + 'static>>,
+}
+
+impl RdbcConn {
+    pub async fn is_valid(&mut self) -> bool {
+        self.conn.as_mut().unwrap().is_valid().await
+    }
+}
+
+impl Drop for RdbcConn {
+    fn drop(&mut self) {
+        let con = self.conn.take().unwrap();
+        self.pool.upgrade().unwrap().push_conn(con)
     }
 }

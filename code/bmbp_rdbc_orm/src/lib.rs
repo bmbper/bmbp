@@ -31,7 +31,7 @@ pub mod tests {
     async fn test_rom() {
         let ds = build_datasource();
         let orm = RdbcOrm::new(ds).await;
-        let conn = orm.get_conn().await;
+        let mut conn = orm.get_conn().await;
         assert!(conn.is_valid().await)
     }
 }
