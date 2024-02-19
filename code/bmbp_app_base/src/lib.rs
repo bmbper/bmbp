@@ -1,3 +1,3 @@
-mod login;
+mod index;
 mod router;
 pub use router::*;

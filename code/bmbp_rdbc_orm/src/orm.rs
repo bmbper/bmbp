@@ -25,9 +25,6 @@ impl RdbcOrmInner {
         self.pool.get_conn().await
     }
     pub async fn valid(self) -> bool {
-        match self.pool.valid().await {
-            Ok(b) => b,
-            _ => false
-        }
+        self.pool.valid().await
     }
 }

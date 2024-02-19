@@ -23,11 +23,7 @@ impl BmbpWebApp {
 
     fn init_router(&mut self) -> Router {
         tracing::info!("初始化WebApp接口服务路由......");
-        let context = self.app_context();
-        let mut root_router = Router::with_path(context);
-        let app_router = init_webapp_router();
-        root_router = root_router.push(app_router);
-        root_router
+        init_webapp_router()
     }
 
     pub async fn start(&mut self) {

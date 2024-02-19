@@ -1,6 +1,5 @@
 mod router;
 mod web;
-mod view;
 mod dao;
 mod scripts;
 mod model;

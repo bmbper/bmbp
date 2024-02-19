@@ -107,7 +107,7 @@ impl RdbcConnPool {
     pub async fn valid(&self)->bool{
         return match self.get_conn().await {
             Ok(conn) => {
-                conn.valid()
+                conn.valid().await
             },
             Err(_) => {
                 false

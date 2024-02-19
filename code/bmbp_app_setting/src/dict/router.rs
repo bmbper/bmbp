@@ -1,5 +1,4 @@
 use salvo::Router;
-use salvo::routing::post;
 use crate::dict::web::{delete_dict, disable_dict, enable_dict, find_dict_info, find_dict_list, find_dict_page, find_dict_tree, find_dict_tree_exclude_by_id, insert_dict, save_dict, save_dict_parent, update_dict};
 
 pub fn build_dict_router() -> Router {

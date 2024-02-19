@@ -16,8 +16,9 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["fmt"] }
 # 运行时
 tokio = { version = "1", features = ["full"] }
-async-trait = "0.1.77"
-async_static = "0.1"
+async-trait = "0"
+async_static = "0"
+once_cell = "1"
 # 数据库
 tokio-postgres = "0.7"
 

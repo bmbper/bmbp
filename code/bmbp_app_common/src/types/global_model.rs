@@ -648,7 +648,7 @@ impl<T> BmbpTreeModel<T> where T: Default + Clone + Serialize + BmbpCurdModel {
     /// has_spurious: 是否包含孤立节点
     pub fn build_tree(node_list: Vec<BmbpTreeModel<T>>, _has_spurious: bool) -> Vec<BmbpTreeModel<T>> {
         // 集合
-        let mut node_ref_map: HashMap<&String, Arc<BmbpTreeModelRef<T>>> = Self::build_tree_ref(node_list.as_slice());
+        let  node_ref_map: HashMap<&String, Arc<BmbpTreeModelRef<T>>> = Self::build_tree_ref(node_list.as_slice());
 
         // 拼接树型关系
         for node_ref_key in node_ref_map.keys() {

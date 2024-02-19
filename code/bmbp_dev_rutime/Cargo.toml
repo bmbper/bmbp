@@ -14,4 +14,4 @@ async-trait = "0.1.73"
 tokio = { version = "1", features = ["full"] }
 bmbp_app_common = { path = "../bmbp_app_common" }
 bmbp_app_utils = { path = "../bmbp_app_utils" }
-bmbp_orm = { path = "../bmbp_orm" }
+

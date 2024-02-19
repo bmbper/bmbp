@@ -1,4 +1,3 @@
-use std::ffi::CString;
 use async_trait::async_trait;
 use salvo::{writing::Json, Depot, Request, Response, Writer};
 use serde::{Deserialize, Serialize};

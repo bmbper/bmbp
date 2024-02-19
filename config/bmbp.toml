@@ -10,7 +10,6 @@ log_level = "debug"
 [bmbp.server]
 host = ""
 port = 8011
-context = "/bmbp-api"
 [bmbp.ds]
 driver = "postgres"
 host = "127.0.0.1"

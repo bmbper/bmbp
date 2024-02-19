@@ -8,12 +8,8 @@ edition = "2021"
 [dependencies]
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-
-bmbp_orm_macro = { path = "../bmbp_orm_macro" }
-bmbp_orm_ins = { path = "../bmbp_orm_ins" }
 bmbp_app_common = { path = "../bmbp_app_common" }
 bmbp_app_utils = { path = "../bmbp_app_utils" }
-bmbp_app_curd = {path="../bmbp_app_curd"}
 salvo = { version = "*" ,features=["default","serve-static","cors"]}
 tokio = { version = "1", features = ["full"] }
 

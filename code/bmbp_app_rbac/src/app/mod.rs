@@ -1,10 +1,8 @@
 mod dao;
 mod model;
 mod router;
-mod script;
 mod service;
 mod util;
 mod vars;
-mod view;
 mod web;
 pub use router::app_router;
