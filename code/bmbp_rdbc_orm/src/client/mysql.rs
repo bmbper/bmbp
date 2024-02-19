@@ -1,24 +1,24 @@
 use std::sync::Arc;
 use async_trait::async_trait;
-use crate::client::pg::PgDbClient;
-use crate::client::sqlite::SqliteDbClient;
-use crate::conn::RdbcDbConn;
+use crate::err::RdbcResult;
+use crate::pool::RdbcConnInner;
 use crate::RdbcDataSource;
 
-pub struct MysqlDbClient{
-    data_source: Arc<RdbcDataSource>
+pub struct MysqlDbClient {
+    data_source: Arc<RdbcDataSource>,
 }
+
 impl MysqlDbClient {
-    pub(crate) async fn new(data_source: Arc<RdbcDataSource>) -> Self {
-        MysqlDbClient {
+    pub(crate) async fn new(data_source: Arc<RdbcDataSource>) -> RdbcResult<Self> {
+        Ok(MysqlDbClient {
             data_source: data_source.clone()
-        }
+        })
     }
 }
+
 #[async_trait]
-impl RdbcDbConn for MysqlDbClient {
-    async fn is_valid(&self) -> bool {
+impl RdbcConnInner for MysqlDbClient {
+    async fn valid(&self) -> bool {
         return true;
     }
-
 }

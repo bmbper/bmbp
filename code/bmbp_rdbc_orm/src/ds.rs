@@ -1,6 +1,24 @@
+use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
+
 pub enum RdbcDataBaseDriver {
     Postgres,
     Mysql,
+}
+
+impl RdbcDataBaseDriver {
+    pub fn value(&self) -> &str {
+        match self {
+            RdbcDataBaseDriver::Postgres => "Postgres",
+            RdbcDataBaseDriver::Mysql => "Mysql",
+        }
+    }
+    pub fn value_of(driver: String) -> RdbcResult<Self> {
+        match driver.as_str() {
+            "Postgres" => Ok(RdbcDataBaseDriver::Postgres),
+            "Mysql" => Ok(RdbcDataBaseDriver::Mysql),
+            _ => Err(RdbcError::new(RdbcErrorType::NotSupportDatabase, "暂不支持的数据库类型")),
+        }
+    }
 }
 
 pub struct RdbcDataSource {
@@ -13,18 +31,19 @@ pub struct RdbcDataSource {
     schema: String,
     ignore_case: bool,
     use_ssl: bool,
-
     init_conn_size: Option<usize>,
+    grow_conn_size: Option<usize>,
     max_conn_size: Option<usize>,
     max_idle_conn: Option<usize>,
     max_wait_time: Option<usize>,
     max_idle_time: Option<usize>,
+
 }
 
 impl RdbcDataSource {
-    pub fn new(driver: RdbcDataBaseDriver) -> Self {
+    pub fn new() -> Self {
         RdbcDataSource {
-            driver,
+            driver: RdbcDataBaseDriver::Postgres,
             host: "".to_string(),
             port: 0,
             user: "".to_string(),
@@ -35,6 +54,7 @@ impl RdbcDataSource {
             use_ssl: false,
 
             init_conn_size: None,
+            grow_conn_size: None,
             max_conn_size: None,
             max_idle_conn: None,
             max_wait_time: None,
@@ -111,9 +131,17 @@ impl RdbcDataSource {
         self.init_conn_size = Some(init_conn_size);
         self
     }
+    pub fn grow_conn_size(&self) -> &Option<usize> {
+        &self.grow_conn_size
+    }
+    pub fn set_grow_conn_size(&mut self, grow_conn_size: usize) -> &mut Self {
+        self.grow_conn_size = Some(grow_conn_size);
+        self
+    }
     pub fn max_conn_size(&self) -> &Option<usize> {
         &self.max_conn_size
     }
+
     pub fn set_max_conn_size(&mut self, max_conn_size: usize) -> &mut Self {
         self.max_conn_size = Some(max_conn_size);
         self

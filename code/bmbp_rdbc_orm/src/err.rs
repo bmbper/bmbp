@@ -1,5 +1,23 @@
-pub struct RdbcError{
-
+#[derive(Debug)]
+pub enum RdbcErrorType {
+    TimeOut,
+    NotSupportDatabase,
+    ConnectError
 }
 
-pub type RdbcResp<T> = Result<T,String>;
+#[derive(Debug)]
+pub struct RdbcError {
+    typ: RdbcErrorType,
+    msg: String,
+}
+
+impl RdbcError {
+    pub fn new(typ: RdbcErrorType, msg: &str) -> Self {
+        RdbcError {
+            typ,
+            msg: msg.to_string(),
+        }
+    }
+}
+
+pub type RdbcResult<T> = Result<T, RdbcError>;

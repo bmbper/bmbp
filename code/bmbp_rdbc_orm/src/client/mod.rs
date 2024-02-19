@@ -2,40 +2,45 @@ mod pg;
 mod mysql;
 mod sqlite;
 
+use std::clone;
 use std::sync::Arc;
 use crate::client::mysql::MysqlDbClient;
 use crate::client::pg::PgDbClient;
 use crate::client::sqlite::SqliteDbClient;
-use crate::conn::RdbcDbConn;
+use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
+use crate::pool::RdbcConnInner;
 use crate::RdbcDataBaseDriver::*;
 use crate::RdbcDataSource;
 
-pub async fn build_conn(ds: Arc<RdbcDataSource>) -> Box<dyn RdbcDbConn + Send + Sync + 'static> {
-    match ds.driver() {
+pub async fn build_conn(ds: Arc<RdbcDataSource>) -> RdbcResult<Box<dyn RdbcConnInner + Send + Sync + 'static>> {
+    return match ds.driver() {
         Mysql => {
-            return build_mysql_conn(ds.clone()).await;
+            build_mysql_conn(ds.clone()).await
         }
-       Postgresql => {
-            return build_postgres_conn(ds.clone()).await;
+        Postgresql => {
+            build_postgres_conn(ds.clone()).await
         }
         Sqlite => {
-            return build_sqlite_conn(ds.clone()).await;
+            build_sqlite_conn(ds.clone()).await
         }
         _ => {
-            panic!("not support driver")
+            Err(RdbcError::new(RdbcErrorType::NotSupportDatabase, "不支持的数据库类型"))
         }
     }
 }
 
-async fn build_sqlite_conn(datasource: Arc<RdbcDataSource>) -> Box<dyn RdbcDbConn + Send + Sync + 'static> {
-    Box::new(SqliteDbClient::new(datasource.clone()).await)
+async fn build_sqlite_conn(datasource: Arc<RdbcDataSource>) -> RdbcResult<Box<dyn RdbcConnInner + Send + Sync + 'static>> {
+    let conn = SqliteDbClient::new(datasource.clone()).await?;
+    Ok(Box::new(conn))
 }
 
-async fn build_postgres_conn(datasource: Arc<RdbcDataSource>) -> Box<dyn RdbcDbConn + Send + Sync + 'static> {
-    Box::new(PgDbClient::new(datasource.clone()).await)
+async fn build_postgres_conn(datasource: Arc<RdbcDataSource>) ->RdbcResult<Box<dyn RdbcConnInner + Send + Sync + 'static>> {
+    let conn = PgDbClient::new(datasource.clone()).await?;
+    Ok(Box::new(conn))
 }
 
-async fn build_mysql_conn(datasource: Arc<RdbcDataSource>) -> Box<dyn RdbcDbConn + Send + Sync + 'static> {
-    Box::new(MysqlDbClient::new(datasource.clone()).await)
+async fn build_mysql_conn(datasource: Arc<RdbcDataSource>) -> RdbcResult<Box<dyn RdbcConnInner + Send + Sync + 'static>> {
+    let conn = MysqlDbClient::new(datasource.clone()).await?;
+    Ok(Box::new(conn))
 }
 
