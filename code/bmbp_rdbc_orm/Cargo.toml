@@ -10,6 +10,7 @@ description.workspace = true
 [dependencies]
 # sql
 bmbp_rdbc_sql = { path = "../bmbp_rdbc_sql" }
+bmbp_rdbc_macro = { path = "../bmbp_rdbc_macro" }
 bmbp_app_common = { path = "../bmbp_app_common" }
 # 日志
 tracing = "0.1"
