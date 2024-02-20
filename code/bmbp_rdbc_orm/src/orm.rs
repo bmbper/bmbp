@@ -35,8 +35,19 @@ impl RdbcOrmInner {
     pub async fn select_page_by_query<T>(&self, page: &mut RdbcPage<T>, query: &Query) -> RdbcResult<RdbcPage<T>> where T: Default + Debug + Clone + Serialize + From<RdbcOrmRow> {
         Ok(RdbcPage::new())
     }
-    pub async fn select_list_by_query<T>(&self, query: &Query) -> RdbcResult<Option<Vec<T>>> where T: Default + Debug + Clone + Serialize + From<RdbcOrmRow>{
-        Ok(None)
+    pub async fn select_list_by_query<T>(&self, query: &Query) -> RdbcResult<Option<Vec<T>>> where T: Default + Debug + Clone + Serialize + From<RdbcOrmRow> {
+        let row_op = self.pool.get_conn().await?.select_list_by_query(query).await?;
+        match row_op {
+            Some(rows) => {
+                let mut list = Vec::new();
+                for row in rows {
+                    let t = T::from(row);
+                    list.push(t);
+                }
+                Ok(Some(list))
+            }
+            None => Ok(None)
+        }
     }
     pub async fn select_one_by_query<T>(&self, query: &Query) -> RdbcResult<Option<T>> where T: Default + Debug + Clone + Serialize + From<RdbcOrmRow> {
         Ok(None)

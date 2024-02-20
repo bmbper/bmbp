@@ -3,6 +3,7 @@ pub enum RdbcErrorType {
     TimeOut,
     NotSupportDatabase,
     ConnectError,
+    SQLError,
 }
 
 #[derive(Debug)]

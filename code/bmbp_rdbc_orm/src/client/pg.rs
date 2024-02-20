@@ -1,7 +1,11 @@
+use std::fmt::Debug;
 use std::sync::{Arc};
 use async_trait::async_trait;
+use serde::Serialize;
 use tokio::sync::RwLock;
 use tokio_postgres::{Client, connect, NoTls};
+use bmbp_rdbc_macro::RdbcOrmRow;
+use bmbp_rdbc_sql::{Query, RdbcSQL};
 use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 use crate::pool::RdbcConnInner;
 use crate::RdbcDataSource;
@@ -49,5 +53,23 @@ impl RdbcConnInner for PgDbClient {
     async fn valid(&self) -> bool {
         let test_url = "select 1";
         self.client.read().await.execute(test_url, &[]).await.is_ok()
+    }
+
+    async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
+        let sql = query.to_sql();
+        tracing::info!("查询语句:{}",sql);
+        match self.client.read().await.query(&sql, &[]).await {
+            Ok(rows) => {
+                let mut list = Vec::new();
+                for row in rows {
+                    let orm_row = RdbcOrmRow::from(row);
+                    list.push(orm_row);
+                }
+                Ok(Some(list))
+            }
+            Err(e) => {
+                Err(RdbcError::new(RdbcErrorType::SQLError, &e.to_string()))
+            }
+        }
     }
 }

@@ -1,15 +1,21 @@
+use std::fmt::Debug;
 use crate::ds::RdbcDataSource;
 use std::sync::{Arc};
 use std::sync::{RwLock};
 use std::time::{Duration, Instant};
 use crate::client;
 use async_trait::async_trait;
+use serde::Serialize;
+use tokio_postgres::types::IsNull::No;
+use bmbp_rdbc_macro::RdbcOrmRow;
+use bmbp_rdbc_sql::Query;
 use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 
 /// RdbcConnInner 定义数据库连接抽象
 #[async_trait]
 pub trait RdbcConnInner {
     async fn valid(&self) -> bool;
+    async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>>;
 }
 
 /// RdbcTransConnInner 定义数据库事务连接抽象
@@ -39,6 +45,13 @@ impl<'a> RdbcConn<'a> {
             return con.valid().await;
         } else {
             false
+        }
+    }
+    pub async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
+        if let Some(con) = &self.inner {
+            con.select_list_by_query(query).await
+        } else {
+            Err(RdbcError::new(RdbcErrorType::ConnectError, "获取到有效的数据库连接"))
         }
     }
 }
@@ -104,15 +117,15 @@ impl RdbcConnPool {
             inner: Some(conn),
         })
     }
-    pub async fn valid(&self)->bool{
+    pub async fn valid(&self) -> bool {
         return match self.get_conn().await {
             Ok(conn) => {
                 conn.valid().await
-            },
+            }
             Err(_) => {
                 false
             }
-        }
+        };
     }
 }
 

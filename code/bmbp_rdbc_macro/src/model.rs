@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
 use serde::{Deserialize, Serialize};
+use tokio_postgres::Row;
 use bmbp_rdbc_sql::RdbcValue;
+
 
 /// RdbcModel 定义数据库表标记
 pub trait RdbcModel {
@@ -572,11 +574,23 @@ pub struct RdbcOrmRow {
 }
 
 impl RdbcOrmRow {
+    pub fn new() -> Self {
+        RdbcOrmRow {
+            columns: vec![],
+            data: HashMap::new(),
+        }
+    }
     pub fn get_columns(&self) -> &Vec<String> {
         &self.columns
     }
+    pub fn get_columns_mut(&mut self) -> &mut Vec<String> {
+        &mut self.columns
+    }
     pub fn get_data(&self) -> &HashMap<String, RdbcValue> {
         &self.data
+    }
+    pub fn get_data_mut(&mut self) -> &mut HashMap<String, RdbcValue> {
+        &mut self.data
     }
 }
 
@@ -794,4 +808,16 @@ impl<T> From<RdbcOrmRow> for BmbpOrmRdbcTree<T> where T: From<RdbcOrmRow> + Defa
     }
 }
 
+
+impl From<Row> for RdbcOrmRow {
+    fn from(row: Row) -> Self {
+        let mut orm_row = RdbcOrmRow::new();
+        let columns = row.columns();
+        for col in columns {
+            let col_name = col.name().to_string();
+            orm_row.get_columns_mut().push(col_name);
+        }
+        orm_row
+    }
+}
 
