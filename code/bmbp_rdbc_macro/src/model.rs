@@ -571,6 +571,15 @@ pub struct RdbcOrmRow {
     data: HashMap<String, RdbcValue>,
 }
 
+impl RdbcOrmRow {
+    pub fn get_columns(&self) -> &Vec<String> {
+        &self.columns
+    }
+    pub fn get_data(&self) -> &HashMap<String, RdbcValue> {
+        &self.data
+    }
+}
+
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]

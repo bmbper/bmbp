@@ -2,7 +2,7 @@
 pub enum RdbcErrorType {
     TimeOut,
     NotSupportDatabase,
-    ConnectError
+    ConnectError,
 }
 
 #[derive(Debug)]
@@ -17,6 +17,12 @@ impl RdbcError {
             typ,
             msg: msg.to_string(),
         }
+    }
+}
+
+impl RdbcError {
+    pub fn get_msg(&self) -> String {
+        self.msg.to_string()
     }
 }
 

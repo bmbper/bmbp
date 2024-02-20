@@ -13,9 +13,9 @@ impl RdbcDataBaseDriver {
         }
     }
     pub fn value_of(driver: String) -> RdbcResult<Self> {
-        match driver.as_str() {
-            "Postgres" => Ok(RdbcDataBaseDriver::Postgres),
-            "Mysql" => Ok(RdbcDataBaseDriver::Mysql),
+        match driver.to_lowercase().as_str() {
+            "postgres" => Ok(RdbcDataBaseDriver::Postgres),
+            "mysql" => Ok(RdbcDataBaseDriver::Mysql),
             _ => Err(RdbcError::new(RdbcErrorType::NotSupportDatabase, "暂不支持的数据库类型")),
         }
     }

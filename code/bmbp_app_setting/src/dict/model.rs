@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use bmbp_app_common::{BmbpPageParam};
-use bmbp_rdbc_orm::{RdbcModel, BmbpOrmRdbcTree};
+use bmbp_rdbc_orm::{RdbcModel, BmbpOrmRdbcTree, RdbcOrmRow};
+use crate::dict::model::BmbpDictType::{Custom, Inner};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -9,7 +10,8 @@ pub struct DictQueryParams {
     parent_code: Option<String>,
     show_level: Option<usize>,
 }
-impl DictQueryParams{
+
+impl DictQueryParams {
     pub fn new() -> Self {
         DictQueryParams {
             data_id: None,
@@ -39,8 +41,8 @@ impl DictQueryParams{
         self.show_level = Some(show_level);
         self
     }
-
 }
+
 type DictPageQueryParams = BmbpPageParam<DictQueryParams>;
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
@@ -55,7 +57,7 @@ pub struct BmbpSettingDict {
     dict_type: BmbpDictType,
 }
 
-impl BmbpSettingDict{
+impl BmbpSettingDict {
     pub fn new() -> Self {
         BmbpSettingDict {
             dict_alise: "".to_string(),
@@ -86,6 +88,24 @@ impl BmbpSettingDict{
     }
 }
 
+impl From<RdbcOrmRow> for BmbpSettingDict {
+    fn from(row: RdbcOrmRow) -> Self {
+        let mut dict = BmbpSettingDict::default();
+        if let Some(data) = row.get_data().get("dict_alias") {
+            dict.set_dict_alise(data.to_string());
+        }
+        if let Some(data) = row.get_data().get("dict_value") {
+            dict.set_dict_value(data.to_string());
+        }
+        if let Some(data) = row.get_data().get("dict_type") {
+            if let Some(dict_type) = BmbpDictType::value_of(data.get_string()) {
+                dict.set_dict_type(dict_type);
+            }
+        }
+        dict
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 #[repr(u8)]
@@ -94,11 +114,26 @@ pub enum BmbpDictType {
     Custom = 1,
 }
 
+impl BmbpDictType {
+    fn value_of(data: String) -> Option<Self> {
+        match data.as_str() {
+            "0" => {
+                Some(Inner)
+            }
+            "1" => {
+                Some(Custom)
+            }
+            _ => { None }
+        }
+    }
+}
+
 impl Default for BmbpDictType {
     fn default() -> Self {
         BmbpDictType::Custom
     }
 }
+
 impl RdbcModel for BmbpSettingDict {
     fn get_table_name() -> String {
         "BMBP_SETTING_DICT".to_string()

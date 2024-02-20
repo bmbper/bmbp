@@ -1,26 +1,23 @@
 use salvo::{handler, Request, Response};
+use tracing::info;
 use bmbp_app_common::{BmbpResp, HttpRespListVo, HttpRespPageVo, HttpRespVo, PageVo, RespVo};
 use crate::dict::model::{BmbpSettingDictOrmModel, DictQueryParams};
+use bmbp_rdbc_orm::{Query, RdbcModel, RdbcORM};
+use crate::dict::scripts::build_query_script;
 
-
-/// find_dict_tree 查询字典树
-/// 接收JSON参数：
-///  ```json
-///     {
-///         code: 节点编码
-///         showLevel: 显示层级
-///         status:  节点状态
-///     }
-///  ```
-///
 #[handler]
 pub async fn find_dict_tree(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespListVo<BmbpSettingDictOrmModel> {
     let params = req.parse_json::<DictQueryParams>().await?;
-    tracing::info!("find_dict_tree params: {:#?}", params);
-    Ok(RespVo::ok_data(vec![]))
+    info!("find_dict_tree params: {:#?}", params);
+    // 拼接查询条件
+    let query = build_query_script();
+    match RdbcORM.await.select_list_by_query::<BmbpSettingDictOrmModel>(&query).await {
+        Ok(dict_vec) => Ok(RespVo::ok_option(dict_vec)),
+        Err(e) => Ok(RespVo::fail_msg(e.get_msg().as_str()))
+    }
 }
 
 #[handler]
