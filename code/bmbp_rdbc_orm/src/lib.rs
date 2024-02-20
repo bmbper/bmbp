@@ -72,7 +72,8 @@ pub mod tests {
     use crate::{RdbcDataBaseDriver, RdbcDataSource, RdbcOrmInner};
 
     fn build_datasource() -> RdbcDataSource {
-        let mut ds = RdbcDataSource::new(RdbcDataBaseDriver::Postgres);
+        let mut ds = RdbcDataSource::new();
+        ds.set_driver(RdbcDataBaseDriver::Postgres);
         ds.set_host("127.0.0.1".to_string())
             .set_port(5432)
             .set_user("bmbp".to_string())
