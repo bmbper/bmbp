@@ -1,5 +1,5 @@
 use salvo::Router;
-use crate::dict::web::{delete_dict, disable_dict, enable_dict, find_dict_info, find_dict_list, find_dict_page, find_dict_tree, find_dict_tree_exclude_by_id, insert_dict, save_dict, save_dict_parent, update_dict};
+use crate::dict::web::*;
 
 pub fn build_dict_router() -> Router {
     let mut dict_router = Router::with_path("/dict");

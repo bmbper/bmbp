@@ -1,6 +1,5 @@
 use salvo::{handler, Request, Response};
-use tracing::{debug};
-use bmbp_app_common::{BmbpResp, PageVo, RespVo};
+use bmbp_app_common::{BmbpResp, HttpRespListVo, HttpRespPageVo, HttpRespVo, PageVo, RespVo};
 use crate::dict::model::{BmbpSettingDictOrmModel, DictQueryParams};
 
 
@@ -18,7 +17,9 @@ use crate::dict::model::{BmbpSettingDictOrmModel, DictQueryParams};
 pub async fn find_dict_tree(
     req: &mut Request,
     _res: &mut Response,
-) -> BmbpResp<RespVo<Vec<BmbpSettingDictOrmModel>>> {
+) -> HttpRespListVo<BmbpSettingDictOrmModel> {
+    let params = req.parse_json::<DictQueryParams>().await?;
+    tracing::info!("find_dict_tree params: {:#?}", params);
     Ok(RespVo::ok_data(vec![]))
 }
 
@@ -26,7 +27,7 @@ pub async fn find_dict_tree(
 pub async fn find_dict_page(
     req: &mut Request,
     _res: &mut Response,
-) -> BmbpResp<PageVo<BmbpSettingDictOrmModel>> {
+) -> HttpRespPageVo<BmbpSettingDictOrmModel> {
     Ok(PageVo::ok_data(vec![]))
 }
 
@@ -34,7 +35,7 @@ pub async fn find_dict_page(
 pub async fn find_dict_list(
     req: &mut Request,
     _res: &mut Response,
-) -> BmbpResp<RespVo<BmbpSettingDictOrmModel>> {
+) -> HttpRespListVo<BmbpSettingDictOrmModel> {
     let dict = BmbpSettingDictOrmModel::default();
     Ok(RespVo::ok_option(None))
 }
@@ -43,9 +44,8 @@ pub async fn find_dict_list(
 pub async fn find_dict_info(
     req: &mut Request,
     _res: &mut Response,
-) -> BmbpResp<RespVo<Option<Vec<BmbpSettingDictOrmModel>>>> {
+) -> HttpRespVo<BmbpSettingDictOrmModel> {
     let dict = BmbpSettingDictOrmModel::default();
-    let dict_list = vec![dict];
     Ok(RespVo::ok_option(None))
 }
 
@@ -53,7 +53,7 @@ pub async fn find_dict_info(
 pub async fn save_dict(
     req: &mut Request,
     _res: &mut Response,
-) -> BmbpResp<RespVo<Option<Vec<BmbpSettingDictOrmModel>>>> {
+) -> HttpRespVo<BmbpSettingDictOrmModel> {
     let dict = BmbpSettingDictOrmModel::default();
     let dict_list = vec![dict];
     Ok(RespVo::ok_option(None))
@@ -63,7 +63,7 @@ pub async fn save_dict(
 pub async fn insert_dict(
     req: &mut Request,
     _res: &mut Response,
-) -> BmbpResp<RespVo<Option<Vec<BmbpSettingDictOrmModel>>>> {
+) -> HttpRespVo<BmbpSettingDictOrmModel> {
     let dict = BmbpSettingDictOrmModel::default();
     let dict_list = vec![dict];
     Ok(RespVo::ok_option(None))
@@ -73,7 +73,7 @@ pub async fn insert_dict(
 pub async fn update_dict(
     req: &mut Request,
     _res: &mut Response,
-) -> BmbpResp<RespVo<Option<Vec<BmbpSettingDictOrmModel>>>> {
+) -> HttpRespVo<BmbpSettingDictOrmModel> {
     let dict = BmbpSettingDictOrmModel::default();
     let dict_list = vec![dict];
     Ok(RespVo::ok_option(None))
@@ -83,9 +83,7 @@ pub async fn update_dict(
 pub async fn disable_dict(
     req: &mut Request,
     _res: &mut Response,
-) -> BmbpResp<RespVo<Option<Vec<BmbpSettingDictOrmModel>>>> {
-    let dict = BmbpSettingDictOrmModel::default();
-    let dict_list = vec![dict];
+) -> HttpRespVo<usize> {
     Ok(RespVo::ok_option(None))
 }
 
@@ -93,9 +91,7 @@ pub async fn disable_dict(
 pub async fn enable_dict(
     req: &mut Request,
     _res: &mut Response,
-) -> BmbpResp<RespVo<Option<Vec<BmbpSettingDictOrmModel>>>> {
-    let dict = BmbpSettingDictOrmModel::default();
-    let dict_list = vec![dict];
+) -> HttpRespVo<usize> {
     Ok(RespVo::ok_option(None))
 }
 
@@ -103,28 +99,22 @@ pub async fn enable_dict(
 pub async fn delete_dict(
     req: &mut Request,
     _res: &mut Response,
-) -> BmbpResp<RespVo<Option<Vec<BmbpSettingDictOrmModel>>>> {
-    let dict = BmbpSettingDictOrmModel::default();
-    let dict_list = vec![dict];
-    Ok(RespVo::ok_data(Some(dict_list)))
+) -> HttpRespVo<usize> {
+    Ok(RespVo::ok_option(None))
 }
 
 #[handler]
 pub async fn find_dict_tree_exclude_by_id(
     req: &mut Request,
     _res: &mut Response,
-) -> BmbpResp<RespVo<Vec<BmbpSettingDictOrmModel>>> {
-    let dict = BmbpSettingDictOrmModel::default();
-    let dict_list = vec![dict];
-    Ok(RespVo::ok_data(dict_list))
+) -> HttpRespListVo<BmbpSettingDictOrmModel> {
+    Ok(RespVo::ok_data(vec![]))
 }
 
 #[handler]
 pub async fn save_dict_parent(
     req: &mut Request,
     _res: &mut Response,
-) -> BmbpResp<RespVo<Option<Vec<BmbpSettingDictOrmModel>>>> {
-    let dict = BmbpSettingDictOrmModel::default();
-    let dict_list = vec![dict];
-    Ok(RespVo::ok_data(Some(dict_list)))
+) -> HttpRespVo<usize> {
+    Ok(RespVo::ok_option(None))
 }

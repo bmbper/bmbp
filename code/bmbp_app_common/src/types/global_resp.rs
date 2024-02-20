@@ -235,3 +235,7 @@ impl<T> Writer for PageVo<T>
         res.render(Json(self))
     }
 }
+
+pub type HttpRespVo<T> = BmbpResp<RespVo<T>>;
+pub type HttpRespListVo<T> = BmbpResp<RespVo<Vec<T>>>;
+pub type HttpRespPageVo<T> = BmbpResp<PageVo<T>>;

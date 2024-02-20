@@ -1,9 +1,11 @@
+use std::fmt::Debug;
 use std::sync::Arc;
+use serde::Serialize;
+use bmbp_rdbc_macro::{RdbcModel, RdbcOrmRow, RdbcPage};
 use bmbp_rdbc_sql::{Delete, Insert, Query, Update};
 use crate::ds::RdbcDataSource;
 use crate::pool::{RdbcConn, RdbcConnPool};
 use crate::err::RdbcResult;
-use crate::val::{RdbcModel, RdbcPage, RdbcRow};
 
 
 pub struct RdbcOrmInner {
@@ -30,13 +32,13 @@ impl RdbcOrmInner {
     pub async fn valid(&self) -> bool {
         self.pool.valid().await
     }
-    pub async fn select_page_by_query<T>(&self, page: &mut RdbcPage<T>, query: &Query) -> RdbcResult<RdbcPage<T>> where T: From<RdbcRow> {
+    pub async fn select_page_by_query<T>(&self, page: &mut RdbcPage<T>, query: &Query) -> RdbcResult<RdbcPage<T>> where T: Default + Debug + Clone + Serialize + From<RdbcOrmRow> {
         Ok(RdbcPage::new())
     }
-    pub async fn select_list_by_query<T>(&self, query: &Query) -> RdbcResult<Option<Vec<T>>> where T: From<RdbcRow> {
+    pub async fn select_list_by_query<T>(&self, query: &Query) -> RdbcResult<Option<Vec<T>>> where T: Default + Debug + Clone + Serialize + From<RdbcOrmRow>{
         Ok(None)
     }
-    pub async fn select_one_by_query<T>(&self, query: &Query) -> RdbcResult<Option<T>> where T: From<RdbcRow> {
+    pub async fn select_one_by_query<T>(&self, query: &Query) -> RdbcResult<Option<T>> where T: Default + Debug + Clone + Serialize + From<RdbcOrmRow> {
         Ok(None)
     }
     pub async fn execute_insert(&self, insert: &Insert) -> RdbcResult<u64> {
@@ -48,5 +50,5 @@ impl RdbcOrmInner {
     pub async fn execute_delete(&self, insert: &Delete) -> RdbcResult<u64> {
         Ok(0)
     }
-    pub async fn delete_by_id<T>(&self,id:String) -> RdbcResult<u64> where T:RdbcModel { Ok(0) }
+    pub async fn delete_by_id<T>(&self, id: String) -> RdbcResult<u64> where T: RdbcModel { Ok(0) }
 }
