@@ -219,6 +219,15 @@ pub enum RdbcTable {
     Query(RdbcQueryTable),
 }
 
+impl RdbcSQL for RdbcTable {
+    fn to_sql(&self) -> String {
+        match self {
+            RdbcTable::Table(ref table) => table.to_sql(),
+            RdbcTable::Query(ref query) => query.to_sql(),
+        }
+    }
+}
+
 impl RdbcTable {
     pub(crate) fn table<T>(table: T) -> RdbcTable where T: ToString {
         RdbcTable::Table(RdbcSchemaTable::table(table))
@@ -298,6 +307,22 @@ pub struct RdbcSchemaTable {
     alias_: Option<String>,
     join_: Option<RdbcTableJoinType>,
     filter_: Option<RdbcFilter>,
+}
+
+impl RdbcSQL for RdbcSchemaTable {
+    fn to_sql(&self) -> String {
+        let mut sql = String::new();
+        if let Some(ref schema) = self.schema_ {
+            sql.push_str(&schema);
+            sql.push_str(".");
+        }
+        sql.push_str(&self.name_);
+        if let Some(ref alias) = self.alias_ {
+            sql.push_str(" AS ");
+            sql.push_str(&alias);
+        }
+        sql
+    }
 }
 
 impl RdbcSchemaTable {
@@ -391,6 +416,12 @@ pub struct RdbcQueryTable {
     filter_: Option<RdbcFilter>,
 }
 
+impl RdbcSQL for RdbcQueryTable {
+    fn to_sql(&self) -> String {
+        format!("({})", self.name_.to_sql())
+    }
+}
+
 impl RdbcQueryTable {
     fn query(table: Query) -> RdbcQueryTable {
         RdbcQueryTable {
@@ -418,6 +449,12 @@ pub enum RdbcConcatType {
 pub struct RdbcFilter {
     concat_: RdbcConcatType,
     compare: Vec<RdbcFilterColumn>,
+}
+
+impl RdbcSQL for RdbcFilter {
+    fn to_sql(&self) -> String {
+        "".to_string()
+    }
 }
 
 impl RdbcFilter {
@@ -504,6 +541,12 @@ pub enum RdbcCompareType {
 
 pub enum RdbcOrder {
     Column(RdbcColumnOrder)
+}
+
+impl RdbcSQL for RdbcOrder {
+    fn to_sql(&self) -> String {
+        "".to_string()
+    }
 }
 
 pub struct RdbcColumnOrder {
