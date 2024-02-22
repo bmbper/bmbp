@@ -8,7 +8,7 @@ use async_trait::async_trait;
 use serde::Serialize;
 use tokio_postgres::types::IsNull::No;
 use bmbp_rdbc_macro::RdbcOrmRow;
-use bmbp_rdbc_sql::Query;
+use bmbp_rdbc_sql::{Query, RdbcValue};
 use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 
 /// RdbcConnInner 定义数据库连接抽象
@@ -16,6 +16,7 @@ use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 pub trait RdbcConnInner {
     async fn valid(&self) -> bool;
     async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>>;
+    async fn select_list(&self, query: &str, params: &[RdbcValue]) -> RdbcResult<Option<Vec<RdbcOrmRow>>>;
 }
 
 /// RdbcTransConnInner 定义数据库事务连接抽象
@@ -186,7 +187,8 @@ pub mod tests {
     use crate::pool::RdbcConnPool;
 
     fn build_datasource() -> RdbcDataSource {
-        let mut ds = RdbcDataSource::new(RdbcDataBaseDriver::Postgres);
+        let mut ds = RdbcDataSource::new();
+        ds.set_driver(RdbcDataBaseDriver::Postgres);
         ds.set_host("127.0.0.1".to_string())
             .set_port(5432)
             .set_user("bmbp".to_string())
@@ -247,5 +249,19 @@ pub mod tests {
         tracing::info!("===========>:{}", con.valid().await);
         assert!(con.valid().await);
         assert!(true)
+    }
+
+    #[tokio::test]
+    async fn test_get_query() {
+        tracing_subscriber::fmt().init();
+        let pool = RdbcConnPool::new(Arc::new(build_datasource()));
+        let init_rs = pool.init().await;
+        tracing::info!("连接池准备就绪： ===> init {} used {} idle {}", pool.conn_size(), pool.conn_used_size(), pool.conn_idle_size());
+        let con_rs = pool.get_conn().await;
+        if con_rs.is_err() {
+            tracing::error!("数据库连接池获取链接失败:{:#?}",con_rs.err().unwrap());
+            assert!(false);
+            return;
+        }
     }
 }

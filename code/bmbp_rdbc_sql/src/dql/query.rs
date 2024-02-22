@@ -68,6 +68,16 @@ impl Query {
             params_: None,
         }
     }
+    pub fn to_params(&self) -> Vec<RdbcValue> {
+        if let Some(params) = self.params_.as_ref() {
+            params.clone()
+        } else {
+            vec![]
+        }
+    }
+    pub fn to_sql_params(&self) -> (String, Vec<RdbcValue>) {
+        (self.to_sql(), self.to_params())
+    }
 }
 
 
@@ -375,6 +385,7 @@ impl Query {
     }
 }
 
+
 impl Query {
     pub fn and(&mut self) -> &mut Self {
         self.create_filter(RdbcConcatType::And);
@@ -544,6 +555,7 @@ impl Query {
         self
     }
 }
+
 
 #[cfg(test)]
 mod tests {

@@ -821,24 +821,47 @@ impl From<Row> for RdbcOrmRow {
             let col_type = col.type_().name().to_string();
             match col_type.as_str() {
                 "text" | "varchar" | "char" | "json" | "xml" => {
-                    let value: String = row.get(col_name.as_str());
-                    orm_row.get_data_mut().insert(col_name, RdbcValue::String(value));
+                    let col_value: Option<String> = row.get(col_name.as_str());
+                    if let Some(value) = col_value {
+                        orm_row.get_data_mut().insert(col_name, RdbcValue::String(value));
+                    }
                 }
-                "int2" | "int4" | "int8" => {
-                    let value: i16 = row.get(col_name.as_str());
-                    orm_row.get_data_mut().insert(col_name, RdbcValue::Int(value));
+                "int2" => {
+                    let col_value: Option<i16> = row.get(col_name.as_str());
+                    if let Some(value) = col_value {
+                        orm_row.get_data_mut().insert(col_name, RdbcValue::Int(value));
+                    }
+                }
+                "int4" => {
+                    let col_value: Option<i32> = row.get(col_name.as_str());
+                    if let Some(value) = col_value {
+                        orm_row.get_data_mut().insert(col_name, RdbcValue::BigInt(value as i64));
+                    }
+                }
+                "int8" => {
+                    let col_value: Option<i64> = row.get(col_name.as_str());
+                    if let Some(value) = col_value {
+                        orm_row.get_data_mut().insert(col_name, RdbcValue::BigInt(value));
+                    }
+
                 }
                 "float4" | "float8" => {
-                    let value: f32 = row.get(col_name.as_str());
-                    orm_row.get_data_mut().insert(col_name, RdbcValue::Float(value));
+                    let col_value: Option<f32> = row.get(col_name.as_str());
+                    if let Some(value) = col_value {
+                        orm_row.get_data_mut().insert(col_name, RdbcValue::Float(value));
+                    }
                 }
                 "date" | "time" | "timestamp" => {
-                    let value: chrono::DateTime<chrono::Utc> = row.get(col_name.as_str());
-                    orm_row.get_data_mut().insert(col_name, RdbcValue::DateTime(value));
+                    let col_value: Option<chrono::DateTime<chrono::Utc>> = row.get(col_name.as_str());
+                    if let Some(value) = col_value {
+                        orm_row.get_data_mut().insert(col_name, RdbcValue::DateTime(value));
+                    }
                 }
                 "bool" => {
-                    let value: bool = row.get(col_name.as_str());
-                    orm_row.get_data_mut().insert(col_name, RdbcValue::Bool(value));
+                    let col_value: Option<bool> = row.get(col_name.as_str());
+                    if let Some(value) = col_value {
+                        orm_row.get_data_mut().insert(col_name, RdbcValue::Bool(value));
+                    }
                 }
                 _ => {
                     tracing::warn!("postgres数据库暂未支持的列类型: {:#?}", col_type);

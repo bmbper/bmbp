@@ -1,9 +1,9 @@
 use std::fmt::Display;
 use chrono::Utc;
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub enum RdbcValue {
     Int(i16),
-    BigInt(isize),
+    BigInt(i64),
     Float(f32),
     BigFloat(f64),
     String(String),
