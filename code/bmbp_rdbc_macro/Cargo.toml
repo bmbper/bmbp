@@ -10,5 +10,13 @@ description.workspace = true
 [dependencies]
 serde = { version = "1.0.195", features = ["derive"] }
 bmbp_rdbc_sql = { path = "../bmbp_rdbc_sql" }
+
+# 日志
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt"] }
+
 # 数据库
-tokio-postgres = "0.7"
+tokio-postgres = { version = "0.7" ,features=["with-chrono-0_4"] }
+# 时间库
+chrono = "0"
+log = "0.4.20"

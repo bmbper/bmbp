@@ -1,8 +1,10 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
 use serde::{Deserialize, Serialize};
 use tokio_postgres::Row;
+use tokio_postgres::types::Date;
 use bmbp_rdbc_sql::RdbcValue;
+use log::trace;
 
 
 /// RdbcModel 定义数据库表标记
@@ -814,17 +816,33 @@ impl From<Row> for RdbcOrmRow {
         let mut orm_row = RdbcOrmRow::new();
         let columns = row.columns();
         for col in columns {
-            println!("===>{:#?}", col);
             let col_name = col.name().to_string();
             orm_row.get_columns_mut().push(col_name.clone());
             let col_type = col.type_().name().to_string();
             match col_type.as_str() {
-                "text" => {
+                "text" | "varchar" | "char" | "json" | "xml" => {
                     let value: String = row.get(col_name.as_str());
                     orm_row.get_data_mut().insert(col_name, RdbcValue::String(value));
                 }
-                _=>{
-
+                "int2" | "int4" | "int8" => {
+                    let value: i16 = row.get(col_name.as_str());
+                    orm_row.get_data_mut().insert(col_name, RdbcValue::Int(value));
+                }
+                "float4" | "float8" => {
+                    let value: f32 = row.get(col_name.as_str());
+                    orm_row.get_data_mut().insert(col_name, RdbcValue::Float(value));
+                }
+                "date" | "time" | "timestamp" => {
+                    let value: chrono::DateTime<chrono::Utc> = row.get(col_name.as_str());
+                    orm_row.get_data_mut().insert(col_name, RdbcValue::DateTime(value));
+                }
+                "bool" => {
+                    let value: bool = row.get(col_name.as_str());
+                    orm_row.get_data_mut().insert(col_name, RdbcValue::Bool(value));
+                }
+                _ => {
+                    tracing::warn!("postgres数据库暂未支持的列类型: {:#?}", col_type);
+                    orm_row.get_data_mut().insert(col_name, RdbcValue::Null);
                 }
             }
         }
