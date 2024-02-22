@@ -10,3 +10,4 @@ description.workspace = true
 [dependencies]
 # 时间库
 chrono = "0"
+tokio-postgres = { version = "0.7" ,features=["with-chrono-0_4"] }

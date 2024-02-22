@@ -8,6 +8,33 @@ pub use dsl_func::*;
 pub use dsl_trait::*;
 pub use dsl_value::*;
 
+pub enum DatabaseType{
+    MySQL,
+    SQLite,
+    Postgres,
+    MSSQL,
+    Oracle,
+    DB2,
+    Firebird,
+    Informix,
+    Sybase,
+    Access,
+    Ingres,
+    Interbase,
+    SQLite3,
+    Virtuoso,
+    H2,
+    HSQLDB,
+    MemSQL,
+    MonetDB,
+    Crate,
+    Redshift,
+    ClickHouse,
+    BigQuery,
+    Snowflake,
+    Presto,
+}
+
 #[cfg(test)]
 mod test {
     #[test]

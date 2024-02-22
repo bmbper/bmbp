@@ -1,6 +1,5 @@
 use std::fmt::Display;
 use chrono::Utc;
-
 #[derive(Debug)]
 pub enum RdbcValue {
     Int(i16),
@@ -12,7 +11,6 @@ pub enum RdbcValue {
     Bool(bool),
     Null,
 }
-
 
 impl RdbcValue {
     pub fn get_string(&self) -> String {

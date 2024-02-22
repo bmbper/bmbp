@@ -1,6 +1,7 @@
-use crate::{RdbcFilter, RdbcOrder, RdbcSQL, RdbcColumn, RdbcTable, RdbcValue, RdbcFunc, RdbcCompareType, RdbcConcatType, RdbcTableFilterColumn, RdbcFilterColumn, RdbcTableJoinType, table};
+use crate::{RdbcFilter, RdbcOrder, RdbcSQL, RdbcColumn, RdbcTable, RdbcValue, RdbcFunc, RdbcCompareType, RdbcConcatType, RdbcTableFilterColumn, RdbcFilterColumn, RdbcTableJoinType, table, DatabaseType};
 
 pub struct Query {
+    driver_: Option<DatabaseType>,
     select_: Vec<RdbcColumn>,
     table_: Vec<RdbcTable>,
     join_: Option<Vec<RdbcTable>>,
@@ -54,6 +55,7 @@ impl RdbcSQL for Query {
 impl Query {
     pub fn new() -> Query {
         Query {
+            driver_: None,
             select_: vec![],
             table_: vec![],
             join_: Some(vec![]),
