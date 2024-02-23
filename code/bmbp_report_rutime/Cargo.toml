@@ -9,7 +9,7 @@ proc-macro = true
 bmbp_app_common = { path = "../bmbp_app_common" }
 bmbp_app_utils = { path = "../bmbp_app_utils" }
 # 宏语法解析器
-syn = "1"
+syn = "2.0.48"
 quote = "1"
 
 serde = { version = "1", features = ["derive"] }

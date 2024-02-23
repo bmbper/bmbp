@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use async_trait::async_trait;
 use salvo::{http::ParseError, writing::Json, Depot, Request, Response, Writer};
 
@@ -15,9 +16,9 @@ pub enum BmbpErrorKind {
     OTHER,
 }
 
-impl ToString for BmbpErrorKind {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for BmbpErrorKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             BmbpErrorKind::API => "API".to_string(),
             BmbpErrorKind::SERVICE => "SERVICE".to_string(),
             BmbpErrorKind::DAO => "DAO".to_string(),
@@ -26,7 +27,8 @@ impl ToString for BmbpErrorKind {
             BmbpErrorKind::UTIL => "UTIL".to_string(),
             BmbpErrorKind::OTHER => "OTHER".to_string(),
             BmbpErrorKind::VALID => "VALID".to_string(),
-        }
+        };
+        write!(f, "{}", str)
     }
 }
 
@@ -96,10 +98,10 @@ impl BmbpError {
     }
 }
 
-impl ToString for BmbpError {
-    fn to_string(&self) -> String {
+impl Display for BmbpError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let vo: RespVo<String> = RespVo::fail_msg(format!("{}:{}", self.name(), self.msg).as_str());
-        serde_json::to_string(&vo).unwrap()
+        write!(f, "{}", serde_json::to_string(&vo).unwrap())
     }
 }
 

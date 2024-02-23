@@ -4,8 +4,6 @@ use serde::{Deserialize, Serialize};
 use tokio_postgres::Row;
 use tokio_postgres::types::Date;
 use bmbp_rdbc_sql::RdbcValue;
-use log::trace;
-
 
 /// RdbcModel 定义数据库表标记
 pub trait RdbcModel {
