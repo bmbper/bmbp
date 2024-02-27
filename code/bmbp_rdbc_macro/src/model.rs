@@ -636,6 +636,9 @@ impl<T> RdbcPage<T> where T: Default + Debug + Clone + Serialize + From<RdbcOrmR
     pub fn data(&self) -> &Option<Vec<T>> {
         &self.data
     }
+    pub fn data_take(&mut self) -> Option<Vec<T>> {
+        self.data.take()
+    }
     pub fn set_page_num(&mut self, page_num: usize) -> &mut Self {
         self.page_num = page_num;
         self

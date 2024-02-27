@@ -26,6 +26,15 @@ impl<T> PageVo<T>
         PageVo::default()
     }
 
+    pub fn new_page(page_no: usize, page_size: usize, row_total: usize, data: Option<Vec<T>>) -> Self {
+        PageVo {
+            page_no: Some(page_no),
+            page_size: Some(page_size),
+            row_total: Some(row_total),
+            data,
+        }
+    }
+
     pub fn ok_data(data: Vec<T>) -> Self {
         PageVo {
             page_no: Some(0),
@@ -238,4 +247,4 @@ impl<T> Writer for PageVo<T>
 
 pub type HttpRespVo<T> = BmbpResp<RespVo<T>>;
 pub type HttpRespListVo<T> = BmbpResp<RespVo<Vec<T>>>;
-pub type HttpRespPageVo<T> = BmbpResp<PageVo<T>>;
+pub type HttpRespPageVo<T> = BmbpResp<RespVo<PageVo<T>>>;

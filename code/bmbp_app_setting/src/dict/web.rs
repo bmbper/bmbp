@@ -1,8 +1,8 @@
 use salvo::{handler, Request, Response};
 use tracing::info;
-use bmbp_app_common::{BmbpResp, HttpRespListVo, HttpRespPageVo, HttpRespVo, PageVo, RespVo};
+use bmbp_app_common::{BmbpPageParam, BmbpResp, HttpRespListVo, HttpRespPageVo, HttpRespVo, PageVo, RespVo};
 use crate::dict::model::{BmbpSettingDictOrmModel, DictQueryParams};
-use bmbp_rdbc_orm::{Query, RdbcModel, RdbcORM};
+use bmbp_rdbc_orm::{Query, RdbcModel, RdbcORM, RdbcPage};
 use crate::dict::scripts::build_query_script;
 
 #[handler]
@@ -25,7 +25,20 @@ pub async fn find_dict_page(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespPageVo<BmbpSettingDictOrmModel> {
-    Ok(PageVo::ok_data(vec![]))
+    let params = req.parse_json::<BmbpPageParam<DictQueryParams>>().await?;
+    info!("find_dict_tree params: {:#?}", params);
+    // 拼接查询条件
+    let query = build_query_script();
+    let mut page: RdbcPage<BmbpSettingDictOrmModel> = RdbcPage::new();
+    page.set_page_num(params.get_page_no().clone()).set_page_size(params.get_page_size().clone());
+    match RdbcORM.await.select_page_by_query::<BmbpSettingDictOrmModel>(&mut page, &query).await {
+        Ok(page_) => {
+            let rbac_page = PageVo::new_page(page_.page_num().clone(),
+                                             page_.page_size().clone(), page_.total().clone(), page.data_take());
+            Ok(RespVo::ok_data(rbac_page))
+        }
+        Err(e) => Ok(RespVo::fail_msg(e.get_msg().as_str()))
+    }
 }
 
 #[handler]

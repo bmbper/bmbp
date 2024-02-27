@@ -335,6 +335,7 @@ impl RdbcSchemaTable {
             alias_: None,
             join_: None,
             filter_: Some(RdbcFilter::new()),
+            params_: None,
         }
     }
     fn table_alias<T>(table: T, alias: T) -> RdbcSchemaTable where T: ToString {
@@ -344,6 +345,7 @@ impl RdbcSchemaTable {
             alias_: Some(alias.to_string()),
             join_: None,
             filter_: Some(RdbcFilter::new()),
+            params_: None,
         }
     }
     fn schema_table<T>(schema: T, table: T) -> RdbcSchemaTable where T: ToString {
@@ -353,6 +355,7 @@ impl RdbcSchemaTable {
             alias_: None,
             join_: None,
             filter_: Some(RdbcFilter::new()),
+            params_: None,
         }
     }
     fn schema_table_alias<T>(schema: T, table: T, alias: T) -> RdbcSchemaTable where T: ToString {
@@ -362,6 +365,7 @@ impl RdbcSchemaTable {
             alias_: Some(alias.to_string()),
             join_: None,
             filter_: Some(RdbcFilter::new()),
+            params_:None
         }
     }
     fn left_join_table<T>(table: T) -> RdbcSchemaTable where T: ToString {
@@ -371,6 +375,7 @@ impl RdbcSchemaTable {
             alias_: None,
             join_: Some(RdbcTableJoinType::Left),
             filter_: Some(RdbcFilter::new()),
+            params_:None
         }
     }
     fn left_join_table_alias<T, A>(table: T, alias: A) -> RdbcSchemaTable where T: ToString, A: ToString {
@@ -380,6 +385,7 @@ impl RdbcSchemaTable {
             alias_: Some(alias.to_string()),
             join_: Some(RdbcTableJoinType::Left),
             filter_: Some(RdbcFilter::new()),
+            params_:None
         }
     }
 }
@@ -465,6 +471,7 @@ impl RdbcFilter {
         RdbcFilter {
             concat_: concat,
             compare: vec![RdbcFilterColumn::filter(filter)],
+            params_: None,
         }
     }
     pub fn eq<T, V>(&mut self, column: T, value: V) -> &mut Self where T: ToString, V: ToString {
@@ -478,6 +485,7 @@ impl RdbcFilter {
         RdbcFilter {
             concat_: RdbcConcatType::And,
             compare: vec![],
+            params_: None,
         }
     }
 }

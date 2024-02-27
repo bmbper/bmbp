@@ -32,8 +32,8 @@ impl RdbcOrmInner {
     pub async fn valid(&self) -> bool {
         self.pool.valid().await
     }
-    pub async fn select_page_by_query<T>(&self, page: &mut RdbcPage<T>, query: &Query) -> RdbcResult<RdbcPage<T>> where T: Default + Debug + Clone + Serialize + From<RdbcOrmRow> {
-        Ok(RdbcPage::new())
+    pub async fn select_page_by_query<'a, T>(&self, page: &'a mut RdbcPage<T>, query: &Query) -> RdbcResult<&'a mut RdbcPage<T>> where T: Default + Debug + Clone + Serialize + From<RdbcOrmRow> {
+        Ok(page)
     }
     pub async fn select_list_by_query<T>(&self, query: &Query) -> RdbcResult<Option<Vec<T>>> where T: Default + Debug + Clone + Serialize + From<RdbcOrmRow> {
         let row_op = self.pool.get_conn().await?.select_list_by_query(query).await?;

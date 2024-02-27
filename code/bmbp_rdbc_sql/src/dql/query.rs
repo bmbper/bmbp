@@ -53,14 +53,14 @@ impl RdbcSQL for Query {
     }
     fn to_sql_with_params(&self) -> (String, Vec<RdbcValue>) {
         let mut sql = self.to_sql();
-        let mut params = vec![];
+        let mut sql_params = vec![];
         if let Some(ref params) = self.params_ {
             for (key, value) in params {
                 sql = sql.replace(key, format!("${}", params.len()).as_str());
-                params.push(value.clone());
+                sql_params.push(value.clone());
             }
         };
-        (sql, params)
+        (sql, sql_params)
     }
 }
 
