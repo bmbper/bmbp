@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::{Query, RdbcFunc, RdbcSQL, RdbcValue};
 
 /// RdbcColumn SELECT 返回列
@@ -307,6 +308,7 @@ pub struct RdbcSchemaTable {
     alias_: Option<String>,
     join_: Option<RdbcTableJoinType>,
     filter_: Option<RdbcFilter>,
+    params_: Option<HashMap<String, RdbcValue>>,
 }
 
 impl RdbcSQL for RdbcSchemaTable {
@@ -449,6 +451,7 @@ pub enum RdbcConcatType {
 pub struct RdbcFilter {
     concat_: RdbcConcatType,
     compare: Vec<RdbcFilterColumn>,
+    params_: Option<HashMap<String, RdbcValue>>,
 }
 
 impl RdbcSQL for RdbcFilter {

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::{RdbcFilter, RdbcOrder, RdbcSQL, RdbcColumn, RdbcTable, RdbcValue, RdbcFunc, RdbcCompareType, RdbcConcatType, RdbcTableFilterColumn, RdbcFilterColumn, RdbcTableJoinType, table, DatabaseType};
 
 pub struct Query {
@@ -11,7 +12,7 @@ pub struct Query {
     order_: Option<Vec<RdbcOrder>>,
     limit_: Option<u64>,
     offset_: Option<u64>,
-    params_: Option<Vec<RdbcValue>>,
+    params_: Option<HashMap<String, RdbcValue>>,
 }
 
 impl RdbcSQL for Query {
@@ -50,6 +51,17 @@ impl RdbcSQL for Query {
         }
         sql.join(" \n")
     }
+    fn to_sql_with_params(&self) -> (String, Vec<RdbcValue>) {
+        let mut sql = self.to_sql();
+        let mut params = vec![];
+        if let Some(ref params) = self.params_ {
+            for (key, value) in params {
+                sql = sql.replace(key, format!("${}", params.len()).as_str());
+                params.push(value.clone());
+            }
+        };
+        (sql, params)
+    }
 }
 
 impl Query {
@@ -70,7 +82,7 @@ impl Query {
     }
     pub fn to_params(&self) -> Vec<RdbcValue> {
         if let Some(params) = self.params_.as_ref() {
-            params.clone()
+            vec![]
         } else {
             vec![]
         }
