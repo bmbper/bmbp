@@ -361,7 +361,7 @@ impl BmbpDBColumn {
     }
 }
 // 数据库表字段类型定义
-#[derive(serde::Serialize, serde::Deserialize, Default, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub enum BmbpDBColumnType {
     Varchar,
     Text,
@@ -384,7 +384,7 @@ impl BmbpDBColumnType {
     }
 }
 // 数据库表字段默认值定义
-#[derive(serde::Serialize, serde::Deserialize, Default, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub enum BmbpDbColumnDefaultValue {
     Int(i32),
     BigDecimal(f64),
@@ -448,7 +448,7 @@ impl BmbpDbIndex {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Default, Clone)]
+#[derive(serde::Serialize, serde::Deserialize,Clone)]
 pub enum BmbpDbIndexType {
     Primary,
     Unique,
@@ -567,13 +567,13 @@ impl BmbpDbConstraint {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Default, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub enum BmbpDbConstraintType {
     Unique,
     Check,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Default, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct BmbpDbView {
     // 数据库模式编码
     schema_code: String,
@@ -635,7 +635,7 @@ pub struct BmbpDbTrigger {
     sql: String,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Default, Clone)]
+#[derive(serde::Serialize, serde::Deserialize,  Clone)]
 pub enum BmbpDbTriggerType {
     Before,
     After,
