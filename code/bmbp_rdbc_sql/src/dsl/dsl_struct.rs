@@ -570,6 +570,12 @@ pub enum RdbcOrderType {
     Desc,
 }
 
+
+pub enum RdbcDmlValue {
+    VALUE(RdbcValue),
+    FUNC(RdbcFunc),
+}
+
 pub fn table<T>(table: T) -> RdbcTable where T: ToString {
     RdbcTable::table(table)
 }
