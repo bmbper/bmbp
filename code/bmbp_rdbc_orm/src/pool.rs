@@ -16,6 +16,7 @@ use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 pub trait RdbcConnInner {
     async fn valid(&self) -> bool;
     async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>>;
+    async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>>;
     async fn select_list(&self, query: &str, params: &[RdbcValue]) -> RdbcResult<Option<Vec<RdbcOrmRow>>>;
 }
 
@@ -51,6 +52,13 @@ impl<'a> RdbcConn<'a> {
     pub async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
         if let Some(con) = &self.inner {
             con.select_list_by_query(query).await
+        } else {
+            Err(RdbcError::new(RdbcErrorType::ConnectError, "获取到有效的数据库连接"))
+        }
+    }
+    pub async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>> {
+        if let Some(con) = &self.inner {
+            con.select_list_by_one(query).await
         } else {
             Err(RdbcError::new(RdbcErrorType::ConnectError, "获取到有效的数据库连接"))
         }

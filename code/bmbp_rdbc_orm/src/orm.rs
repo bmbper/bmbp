@@ -50,7 +50,13 @@ impl RdbcOrmInner {
         }
     }
     pub async fn select_one_by_query<T>(&self, query: &Query) -> RdbcResult<Option<T>> where T: Default + Debug + Clone + Serialize + From<RdbcOrmRow> {
-        Ok(None)
+        let row_op = self.pool.get_conn().await?.select_one_by_query(query).await?;
+        match row_op {
+            Some(row) => {
+                Ok(Some(T::from(row)))
+            }
+            None => Ok(None)
+        }
     }
     pub async fn execute_insert(&self, insert: &Insert) -> RdbcResult<u64> {
         Ok(0)
