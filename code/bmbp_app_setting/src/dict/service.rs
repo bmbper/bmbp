@@ -1,6 +1,7 @@
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo, RespVo};
-use bmbp_rdbc_orm::{RdbcORM, RdbcPage};
-use crate::dict::model::{BmbpSettingDictOrmModel, DictQueryParams};
+use bmbp_app_utils::is_empty_string;
+use bmbp_rdbc_orm::{RdbcModel, RdbcORM, RdbcPage};
+use crate::dict::model::{BmbpSettingDict, BmbpSettingDictOrmModel, DictQueryParams};
 use crate::dict::scripts::build_query_script;
 
 pub async fn query_dict_tree(params: DictQueryParams) -> BmbpResp<Option<Vec<BmbpSettingDictOrmModel>>> {
@@ -36,7 +37,15 @@ pub async fn query_dict_page(params: BmbpPageParam<DictQueryParams>) -> BmbpResp
 
 
 pub async fn query_dict_by_id(id: Option<String>) -> BmbpResp<Option<BmbpSettingDictOrmModel>> {
-    Ok(None)
+    if is_empty_string(id.as_ref()) {
+        return Ok(None);
+    }
+    let mut query = build_query_script();
+    query.eq(BmbpSettingDict::get_table_primary_key(), id.unwrap());
+    match RdbcORM.await.select_one_by_query::<BmbpSettingDictOrmModel>(&query).await {
+        Ok(data) => Ok(data),
+        Err(err) => Err(BmbpError::service(err.get_msg().as_str()))
+    }
 }
 
 pub async fn insert_dict_info(dict: BmbpSettingDictOrmModel) -> BmbpResp<Option<BmbpSettingDictOrmModel>> {
@@ -45,4 +54,17 @@ pub async fn insert_dict_info(dict: BmbpSettingDictOrmModel) -> BmbpResp<Option<
 
 pub async fn update_dict_info(dict: BmbpSettingDictOrmModel) -> BmbpResp<Option<BmbpSettingDictOrmModel>> {
     Ok(None)
+}
+
+
+pub async fn disable_dict_status(dict_id: Option<String>) -> BmbpResp<usize> {
+    Ok(0)
+}
+
+pub async fn enable_dict_status(dict_id: Option<String>) -> BmbpResp<usize> {
+    Ok(0)
+}
+
+pub async fn delete_dict(dict_id: Option<String>) -> BmbpResp<usize> {
+    Ok(0)
 }
