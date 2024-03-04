@@ -4,6 +4,7 @@ pub enum RdbcErrorType {
     NotSupportDatabase,
     ConnectError,
     SQLError,
+    PrimaryRequired,
 }
 
 #[derive(Debug)]

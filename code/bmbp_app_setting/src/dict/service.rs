@@ -1,7 +1,6 @@
-use tracing::subscriber::set_default;
-use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo, RespVo};
+use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
 use bmbp_app_utils::is_empty_string;
-use bmbp_rdbc_orm::{Delete, RdbcModel, RdbcORM, RdbcPage};
+use bmbp_rdbc_orm::{Delete, Insert, RDBC_DATA_STATUS, RDBC_DISABLE, RDBC_ENABLE, RdbcModel, RdbcORM, RdbcPage, Update};
 use crate::dict::model::{BmbpSettingDict, BmbpSettingDictOrmModel, DictQueryParams};
 use crate::dict::scripts::build_query_script;
 
@@ -49,23 +48,49 @@ pub async fn query_dict_by_id(id: Option<String>) -> BmbpResp<Option<BmbpSetting
     }
 }
 
-pub async fn insert_dict_info(mut dict: BmbpSettingDictOrmModel) -> BmbpResp<Option<BmbpSettingDictOrmModel>> {
-    let dict_mut = &mut dict;
-
-    Ok(None)
+pub async fn insert_dict_info(mut dict: BmbpSettingDictOrmModel) -> BmbpResp<usize> {
+    let mut insert = Insert::new();
+    insert.insert_table(BmbpSettingDict::get_table_name());
+    match RdbcORM.await.execute_insert(&insert).await {
+        Ok(data) => {
+            Ok(data as usize)
+        }
+        Err(err) => Err(BmbpError::service(err.get_msg().as_str()))
+    }
 }
 
-pub async fn update_dict_info(dict: BmbpSettingDictOrmModel) -> BmbpResp<Option<BmbpSettingDictOrmModel>> {
-    Ok(None)
+pub async fn update_dict_info(dict: BmbpSettingDictOrmModel) -> BmbpResp<usize> {
+    let mut update = Update::new();
+    update.update_table(BmbpSettingDict::get_table_name()).set(RDBC_DATA_STATUS, RDBC_DISABLE).eq(BmbpSettingDict::get_table_primary_key(), dict.get_data_id().unwrap());
+    execute_update(&update).await
 }
 
 
 pub async fn disable_dict_status(dict_id: Option<String>) -> BmbpResp<usize> {
-    Ok(0)
+    if is_empty_string(dict_id.as_ref()) {
+        return Err(BmbpError::service("请指定待停用的字典!"));
+    }
+    let mut update = Update::new();
+    update.update_table(BmbpSettingDict::get_table_name()).set(RDBC_DATA_STATUS, RDBC_ENABLE).eq(BmbpSettingDict::get_table_primary_key(), dict_id.unwrap());
+    execute_update(&update).await
 }
 
 pub async fn enable_dict_status(dict_id: Option<String>) -> BmbpResp<usize> {
-    Ok(0)
+    if is_empty_string(dict_id.as_ref()) {
+        return Err(BmbpError::service("请指定待启用的字典!"));
+    }
+    let mut update = Update::new();
+    update.update_table(BmbpSettingDict::get_table_name()).set(RDBC_DATA_STATUS, RDBC_DISABLE).eq(BmbpSettingDict::get_table_primary_key(), dict_id.unwrap());
+    execute_update(&update).await
+}
+
+async fn execute_update(update:&Update)->BmbpResp<usize>{
+    match RdbcORM.await.execute_update(update).await {
+        Ok(data) => {
+            Ok(data as usize)
+        }
+        Err(err) => Err(BmbpError::service(err.get_msg().as_str()))
+    }
 }
 
 pub async fn delete_dict(dict_id: Option<String>) -> BmbpResp<usize> {

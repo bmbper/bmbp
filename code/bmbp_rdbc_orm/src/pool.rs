@@ -29,6 +29,11 @@ pub trait RdbcTransConnInner {
     async fn valid(&self) -> bool;
 }
 
+#[async_trait]
+pub trait RdbcPreapermentInner{}
+
+
+
 ///RdbcConn 定义数据库连接池链接
 pub struct RdbcConn<'a> {
     datasource: Arc<RdbcDataSource>,
@@ -66,6 +71,22 @@ impl<'a> RdbcConn<'a> {
             Err(RdbcError::new(RdbcErrorType::ConnectError, "获取到有效的数据库连接"))
         }
     }
+    pub async fn execute_insert(&self, insert: &Insert) -> RdbcResult<u64> {
+        if let Some(con) = &self.inner {
+            con.execute_insert(insert).await
+        } else {
+            Err(RdbcError::new(RdbcErrorType::ConnectError, "获取到有效的数据库连接"))
+        }
+    }
+
+    pub async fn execute_update(&self, update: &Update) -> RdbcResult<u64> {
+        if let Some(con) = &self.inner {
+            con.execute_update(update).await
+        } else {
+            Err(RdbcError::new(RdbcErrorType::ConnectError, "获取到有效的数据库连接"))
+        }
+    }
+
     pub async fn execute_delete(&self, delete: &Delete) -> RdbcResult<u64> {
         if let Some(con) = &self.inner {
             con.execute_delete(delete).await

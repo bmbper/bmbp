@@ -28,11 +28,11 @@ impl Insert {
         self.driver_ = Some(driver);
         self
     }
-    pub fn insert_into_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
+    pub fn insert_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
         self.table_.push(RdbcTable::table(table));
         self
     }
-    pub fn insert_into_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
+    pub fn insert_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
         self.table_.push(RdbcTable::schema_table(schema, table));
         self
     }

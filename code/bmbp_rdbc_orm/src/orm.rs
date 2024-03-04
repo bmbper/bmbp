@@ -5,7 +5,7 @@ use bmbp_rdbc_macro::{RdbcModel, RdbcOrmRow, RdbcPage};
 use bmbp_rdbc_sql::{Delete, Insert, Query, Update};
 use crate::ds::RdbcDataSource;
 use crate::pool::{RdbcConn, RdbcConnPool};
-use crate::err::RdbcResult;
+use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 
 
 pub struct RdbcOrmInner {
@@ -59,13 +59,20 @@ impl RdbcOrmInner {
         }
     }
     pub async fn execute_insert(&self, insert: &Insert) -> RdbcResult<u64> {
-        Ok(0)
+        self.pool.get_conn().await?.execute_insert(insert).await
     }
     pub async fn execute_update(&self, update: &Update) -> RdbcResult<u64> {
-        Ok(0)
+        self.pool.get_conn().await?.execute_update(update).await
     }
     pub async fn execute_delete(&self, delete: &Delete) -> RdbcResult<u64> {
         self.pool.get_conn().await?.execute_delete(delete).await
     }
-    pub async fn delete_by_id<T>(&self, id: String) -> RdbcResult<u64> where T: RdbcModel { Ok(0) }
+    pub async fn delete_by_id<T>(&self, id: String) -> RdbcResult<u64> where T: RdbcModel {
+        if (id.is_empty()) {
+            return Err(RdbcError::new(RdbcErrorType::PrimaryRequired, "请指定要删除的记录"));
+        }
+        let mut delete_sql = Delete::new();
+        delete_sql.delete_table(T::get_table_name()).eq(T::get_table_primary_key(), id);
+        self.pool.get_conn().await?.execute_delete(&delete_sql).await
+    }
 }
