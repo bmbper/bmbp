@@ -1,6 +1,7 @@
+use tracing::subscriber::set_default;
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo, RespVo};
 use bmbp_app_utils::is_empty_string;
-use bmbp_rdbc_orm::{RdbcModel, RdbcORM, RdbcPage};
+use bmbp_rdbc_orm::{Delete, RdbcModel, RdbcORM, RdbcPage};
 use crate::dict::model::{BmbpSettingDict, BmbpSettingDictOrmModel, DictQueryParams};
 use crate::dict::scripts::build_query_script;
 
@@ -48,7 +49,9 @@ pub async fn query_dict_by_id(id: Option<String>) -> BmbpResp<Option<BmbpSetting
     }
 }
 
-pub async fn insert_dict_info(dict: BmbpSettingDictOrmModel) -> BmbpResp<Option<BmbpSettingDictOrmModel>> {
+pub async fn insert_dict_info(mut dict: BmbpSettingDictOrmModel) -> BmbpResp<Option<BmbpSettingDictOrmModel>> {
+    let dict_mut = &mut dict;
+
     Ok(None)
 }
 
@@ -66,5 +69,13 @@ pub async fn enable_dict_status(dict_id: Option<String>) -> BmbpResp<usize> {
 }
 
 pub async fn delete_dict(dict_id: Option<String>) -> BmbpResp<usize> {
-    Ok(0)
+    if is_empty_string(dict_id.as_ref()) {
+        return Err(BmbpError::service("请指定待删除的字典!"));
+    }
+    let mut delete_dict = Delete::new();
+    delete_dict.delete_table(BmbpSettingDict::get_table_name()).eq(BmbpSettingDict::get_table_primary_key(), dict_id.unwrap());
+    match RdbcORM.await.execute_delete(&delete_dict).await {
+        Ok(data) => Ok((data as usize)),
+        Err(err) => Err(BmbpError::service(err.get_msg().as_str()))
+    }
 }

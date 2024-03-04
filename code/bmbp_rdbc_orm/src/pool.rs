@@ -8,7 +8,7 @@ use async_trait::async_trait;
 use serde::Serialize;
 use tokio_postgres::types::IsNull::No;
 use bmbp_rdbc_macro::RdbcOrmRow;
-use bmbp_rdbc_sql::{Query, RdbcValue};
+use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcValue, Update};
 use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 
 /// RdbcConnInner 定义数据库连接抽象
@@ -18,6 +18,9 @@ pub trait RdbcConnInner {
     async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>>;
     async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>>;
     async fn select_list_by_sql(&self, query: &str, params: &[RdbcValue]) -> RdbcResult<Option<Vec<RdbcOrmRow>>>;
+    async fn execute_insert(&self, delete: &Insert) -> RdbcResult<u64>;
+    async fn execute_update(&self, delete: &Update) -> RdbcResult<u64>;
+    async fn execute_delete(&self, delete: &Delete) -> RdbcResult<u64>;
 }
 
 /// RdbcTransConnInner 定义数据库事务连接抽象
@@ -59,6 +62,13 @@ impl<'a> RdbcConn<'a> {
     pub async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>> {
         if let Some(con) = &self.inner {
             con.select_one_by_query(query).await
+        } else {
+            Err(RdbcError::new(RdbcErrorType::ConnectError, "获取到有效的数据库连接"))
+        }
+    }
+    pub async fn execute_delete(&self, delete: &Delete) -> RdbcResult<u64> {
+        if let Some(con) = &self.inner {
+            con.execute_delete(delete).await
         } else {
             Err(RdbcError::new(RdbcErrorType::ConnectError, "获取到有效的数据库连接"))
         }

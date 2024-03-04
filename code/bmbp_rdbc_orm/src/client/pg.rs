@@ -6,7 +6,7 @@ use tokio::sync::RwLock;
 use tokio_postgres::{Client, connect, Error, NoTls, Row};
 use tokio_postgres::types::{ToSql};
 use bmbp_rdbc_macro::RdbcOrmRow;
-use bmbp_rdbc_sql::{Query, RdbcValue};
+use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcSQL, RdbcValue, Update};
 use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 use crate::pool::RdbcConnInner;
 use crate::RdbcDataSource;
@@ -64,6 +64,17 @@ impl PgDbClient {
             }
         }
     }
+    async fn execute(&self, sql: &str, params: &[RdbcValue]) -> RdbcResult<u64> {
+        let pg_prams = params.iter().filter_map(|v| Self::to_pg_sql(v)).collect::<Vec<_>>();
+        match self.client.read().await.execute(sql, pg_prams.as_slice()).await {
+            Ok(row_count) => {
+                Ok(row_count)
+            }
+            Err(e) => {
+                Err(RdbcError::new(RdbcErrorType::SQLError, &e.to_string()))
+            }
+        }
+    }
 }
 
 #[async_trait]
@@ -107,5 +118,20 @@ impl RdbcConnInner for PgDbClient {
                 Err(RdbcError::new(RdbcErrorType::SQLError, &e.to_string()))
             }
         }
+    }
+
+    async fn execute_insert(&self, insert: &Insert) -> RdbcResult<u64> {
+        let (sql, params) = insert.to_sql_with_params();
+        self.execute(sql.as_str(), params.as_slice()).await
+    }
+
+    async fn execute_update(&self, update: &Update) -> RdbcResult<u64> {
+        let (sql, params) = update.to_sql_with_params();
+        self.execute(sql.as_str(), params.as_slice()).await
+    }
+
+    async fn execute_delete(&self, delete: &Delete) -> RdbcResult<u64> {
+        let (sql, params) = delete.to_sql_with_params();
+        self.execute(sql.as_str(), params.as_slice()).await
     }
 }

@@ -15,6 +15,15 @@ pub struct Update {
     params_: Option<HashMap<String, RdbcValue>>,
 }
 
+impl RdbcSQL for Update {
+    fn to_sql(&self) -> String {
+        "".to_string()
+    }
+
+    fn to_sql_with_params(&self) -> (String, Vec<RdbcValue>) {
+        ("".to_string(), vec![])
+    }
+}
 
 impl Update {
     pub fn new() -> Update {

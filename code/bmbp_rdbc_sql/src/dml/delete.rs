@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::{DatabaseType, Query, RdbcColumn, RdbcFilter, RdbcOrder, RdbcTable, RdbcTableJoinType, RdbcValue};
+use crate::{DatabaseType, Query, RdbcColumn, RdbcConcatType, RdbcFilter, RdbcOrder, RdbcSQL, RdbcTable, RdbcTableJoinType, RdbcValue, Update};
 
 pub struct Delete {
     driver_: Option<DatabaseType>,
@@ -14,6 +14,15 @@ pub struct Delete {
     params_: Option<HashMap<String, RdbcValue>>,
 }
 
+impl RdbcSQL for Delete {
+    fn to_sql(&self) -> String {
+        "".to_string()
+    }
+
+    fn to_sql_with_params(&self) -> (String, Vec<RdbcValue>) {
+        ("".to_string(), vec![])
+    }
+}
 
 impl Delete {
     pub fn new() -> Delete {
@@ -47,6 +56,12 @@ impl Delete {
 }
 
 impl Delete {
+    fn create_filter(&mut self, concat: RdbcConcatType) -> &mut Self {
+        let filter = self.filter_.take().unwrap();
+        let new_filter = RdbcFilter::concat_with_filter(concat, filter);
+        self.filter_ = Some(new_filter);
+        self
+    }
     pub fn delete_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
         self.table_.push(RdbcTable::table(table));
         self
@@ -204,4 +219,175 @@ impl Delete {
         self.join_.as_mut().unwrap().push(table);
         self
     }
+}
+
+impl Delete{
+    pub fn and(&mut self) -> &mut Self {
+        self.create_filter(RdbcConcatType::And);
+        self
+    }
+    pub fn or(&mut self) -> &mut Self {
+        self.create_filter(RdbcConcatType::And);
+        self
+    }
+
+    pub fn eq<T, V>(&mut self, column: T, value: V) -> &mut Self where T: ToString, V: ToString {
+        self.filter_.as_mut().unwrap().eq(column, value);
+        self
+    }
+    pub fn eq_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn eq_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn ne<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn ne_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn ne_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn gt<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn gt_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn gt_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn gte<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn gte_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn gte_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn lt<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn lt_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn lt_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn lte<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn lte_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn lte_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn is_null(&mut self, column: RdbcColumn) -> &mut Self {
+        self
+    }
+    pub fn lte_not_null(&mut self, column: RdbcColumn) -> &mut Self {
+        self
+    }
+
+    pub fn like<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn like_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn like_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn like_left<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn like_left_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn like_left_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn like_right<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn like_right_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn like_right_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn not_like<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_like_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_like_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn not_like_left<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_like_left_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_like_left_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn not_like_right<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_like_right_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_like_right_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn in_<T>(&mut self, column: RdbcColumn, value: Option<Vec<T>>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn in_raw<T>(&mut self, column: RdbcColumn, value: Option<Vec<T>>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn in_string<T>(&mut self, column: RdbcColumn, value: Option<Vec<T>>) -> &mut Self where T: ToString {
+        self
+    }
+
+    pub fn in_query<T>(&mut self, column: RdbcColumn, value: Query) -> &mut Self {
+        self
+    }
+    pub fn not_in<T>(&mut self, column: RdbcColumn, value: Option<Vec<T>>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_in_raw<T>(&mut self, column: RdbcColumn, value: Option<Vec<T>>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_in_string<T>(&mut self, column: RdbcColumn, value: Option<Vec<T>>) -> &mut Self where T: ToString {
+        self
+    }
+    pub fn not_in_query<T>(&mut self, column: RdbcColumn, value: Query) -> &mut Self {
+        self
+    }
+
+    pub fn exists_query<T>(&mut self, column: RdbcColumn, value: Query) -> &mut Self {
+        self
+    }
+    pub fn not_exists_query<T>(&mut self, column: RdbcColumn, value: Query) -> &mut Self {
+        self
+    }
+
 }

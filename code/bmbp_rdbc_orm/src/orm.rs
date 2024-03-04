@@ -61,11 +61,11 @@ impl RdbcOrmInner {
     pub async fn execute_insert(&self, insert: &Insert) -> RdbcResult<u64> {
         Ok(0)
     }
-    pub async fn execute_update(&self, insert: &Update) -> RdbcResult<u64> {
+    pub async fn execute_update(&self, update: &Update) -> RdbcResult<u64> {
         Ok(0)
     }
-    pub async fn execute_delete(&self, insert: &Delete) -> RdbcResult<u64> {
-        Ok(0)
+    pub async fn execute_delete(&self, delete: &Delete) -> RdbcResult<u64> {
+        self.pool.get_conn().await?.execute_delete(delete).await
     }
     pub async fn delete_by_id<T>(&self, id: String) -> RdbcResult<u64> where T: RdbcModel { Ok(0) }
 }
