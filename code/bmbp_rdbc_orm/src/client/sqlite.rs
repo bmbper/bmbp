@@ -30,7 +30,7 @@ impl RdbcConnInner for SqliteDbClient {
     async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>> {
         Ok(None)
     }
-    async fn select_list(&self, query: &str, params: &[RdbcValue]) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
+    async fn select_list_by_sql(&self, query: &str, params: &[RdbcValue]) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
         Ok(None)
     }
 }

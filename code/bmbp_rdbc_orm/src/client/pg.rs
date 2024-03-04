@@ -1,8 +1,9 @@
 use std::fmt::Debug;
+use std::future::Future;
 use std::sync::{Arc};
 use async_trait::async_trait;
 use tokio::sync::RwLock;
-use tokio_postgres::{Client, connect, NoTls};
+use tokio_postgres::{Client, connect, Error, NoTls, Row};
 use tokio_postgres::types::{ToSql};
 use bmbp_rdbc_macro::RdbcOrmRow;
 use bmbp_rdbc_sql::{Query, RdbcValue};
@@ -73,12 +74,25 @@ impl RdbcConnInner for PgDbClient {
     }
     async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
         let (sql, params) = query.to_sql_params();
-        self.select_list(sql.as_str(), params.as_slice()).await
+        self.select_list_by_sql(sql.as_str(), params.as_slice()).await
     }
     async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>> {
-        Ok(None)
+        let (sql, params) = query.to_sql_params();
+        let pg_prams = params.iter().filter_map(|v| Self::to_pg_sql(v)).collect::<Vec<_>>();
+        match self.client.read().await.query_opt(sql.as_str(), pg_prams.as_slice()).await {
+            Ok(row_op) => {
+                if let Some(row) = row_op {
+                    Ok(Some(RdbcOrmRow::from(row)))
+                } else {
+                    Ok(None)
+                }
+            }
+            Err(e) => {
+                Err(RdbcError::new(RdbcErrorType::SQLError, &e.to_string()))
+            }
+        }
     }
-    async fn select_list(&self, query: &str, params: &[RdbcValue]) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
+    async fn select_list_by_sql(&self, query: &str, params: &[RdbcValue]) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
         let pg_prams = params.iter().filter_map(|v| Self::to_pg_sql(v)).collect::<Vec<_>>();
         match self.client.read().await.query(query, pg_prams.as_slice()).await {
             Ok(rows) => {
