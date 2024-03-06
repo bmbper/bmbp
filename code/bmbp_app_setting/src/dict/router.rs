@@ -10,11 +10,11 @@ pub fn build_dict_router() -> Router {
         .push(Router::with_path("/save").post(save_dict))
         .push(Router::with_path("/insert").post(insert_dict))
         .push(Router::with_path("/update").post(update_dict))
-        .push(Router::with_path("/info/<record_id>").post(find_dict_info).get(find_dict_info))
-        .push(Router::with_path("/enable/<record_id>").post(enable_dict))
-        .push(Router::with_path("/disable/<record_id>").post(disable_dict))
-        .push(Router::with_path("/delete/<record_id>").post(delete_dict))
-        .push(Router::with_path("/change/parent/tree/<id>").post(find_dict_tree_exclude_by_id))
-        .push(Router::with_path("/change/parent/save/<id>").post(save_dict_parent));
+        .push(Router::with_path("/info/<recordId>").post(find_dict_info).get(find_dict_info))
+        .push(Router::with_path("/enable/<recordId>").post(enable_dict))
+        .push(Router::with_path("/disable/<recordId>").post(disable_dict))
+        .push(Router::with_path("/delete/<recordId>").post(delete_dict))
+        .push(Router::with_path("/change/parent/tree/<recordId>").post(find_dict_tree_exclude_by_id))
+        .push(Router::with_path("/change/parent/save/<recordId>").post(save_dict_parent));
     dict_router
 }

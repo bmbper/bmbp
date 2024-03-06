@@ -30,7 +30,7 @@ pub trait RdbcTransConnInner {
 }
 
 #[async_trait]
-pub trait RdbcPreapermentInner{}
+pub trait RdbcPreparedStatementInner {}
 
 
 

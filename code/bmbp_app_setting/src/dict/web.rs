@@ -1,21 +1,13 @@
 use salvo::{handler, Request, Response};
-use tracing::info;
-use bmbp_app_common::{BmbpPageParam, BmbpResp, HttpRespListVo, HttpRespPageVo, HttpRespVo, PageVo, RespVo};
+use bmbp_app_common::{BmbpError, BmbpPageParam, HttpRespListVo, HttpRespPageVo, HttpRespVo, RespVo};
 use bmbp_app_utils::{is_empty_string};
 use crate::dict::model::{BmbpSettingDictOrmModel, DictQueryParams};
-use bmbp_rdbc_orm::{Query, RdbcModel, RdbcORM, RdbcPage};
-use crate::dict::scripts::build_query_script;
-use crate::dict::service::{insert_dict_info, query_dict_by_id, query_dict_list, query_dict_page, query_dict_tree, update_dict_info};
+use crate::dict::service::{BmbpRbacDictService};
 
 #[handler]
-pub async fn find_dict_tree(
-    req: &mut Request,
-    _res: &mut Response,
-) -> HttpRespListVo<BmbpSettingDictOrmModel> {
+pub async fn find_dict_tree(req: &mut Request, _res: &mut Response) -> HttpRespListVo<BmbpSettingDictOrmModel> {
     let params = req.parse_json::<DictQueryParams>().await?;
-    info!("find_dict_tree params: {:#?}", params);
-    // 拼接查询条件
-    Ok(RespVo::ok_option(query_dict_tree(params).await?))
+    Ok(RespVo::ok_option(BmbpRbacDictService::query_dict_tree(params).await?))
 }
 
 #[handler]
@@ -24,8 +16,7 @@ pub async fn find_dict_page(
     _res: &mut Response,
 ) -> HttpRespPageVo<BmbpSettingDictOrmModel> {
     let params = req.parse_json::<BmbpPageParam<DictQueryParams>>().await?;
-    info!("find_dict_tree params: {:#?}", params);
-    Ok(RespVo::ok_data(query_dict_page(params).await?))
+    Ok(RespVo::ok_data(BmbpRbacDictService::query_dict_page(params).await?))
 }
 
 #[handler]
@@ -34,9 +25,7 @@ pub async fn find_dict_list(
     _res: &mut Response,
 ) -> HttpRespListVo<BmbpSettingDictOrmModel> {
     let params = req.parse_json::<DictQueryParams>().await?;
-    info!("find_dict_tree params: {:#?}", params);
-    // 拼接查询条件
-    Ok(RespVo::ok_option(query_dict_list(params).await?))
+    Ok(RespVo::ok_option(BmbpRbacDictService::query_dict_list(params).await?))
 }
 
 #[handler]
@@ -44,8 +33,8 @@ pub async fn find_dict_info(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
-    let dict = BmbpSettingDictOrmModel::default();
-    Ok(RespVo::ok_option(None))
+    let dict_id = req.param::<String>("recordId");
+    Ok(RespVo::ok_option(BmbpRbacDictService::query_dict_by_id(dict_id).await?))
 }
 
 #[handler]
@@ -55,25 +44,22 @@ pub async fn save_dict(
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
     let mut dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
     let dict_id = dict_params.get_data_id().clone().cloned();
-    let mut dict_info = query_dict_by_id(dict_id.clone()).await?;
+    let mut dict_info = BmbpRbacDictService::query_dict_by_id(dict_id.clone()).await?;
     if dict_info.is_none() {
-        insert_dict_info(dict_params).await?;
+        BmbpRbacDictService::insert_dict_info(dict_params).await?;
     } else {
-        update_dict_info(dict_params).await?;
+        BmbpRbacDictService::update_dict_info(dict_params).await?;
     }
-    dict_info = query_dict_by_id(dict_id).await?;
+    dict_info = BmbpRbacDictService::query_dict_by_id(dict_id).await?;
     Ok(RespVo::ok_option(dict_info))
 }
 
 #[handler]
-pub async fn insert_dict(
-    req: &mut Request,
-    _res: &mut Response,
-) -> HttpRespVo<BmbpSettingDictOrmModel> {
+pub async fn insert_dict(req: &mut Request, _res: &mut Response) -> HttpRespVo<BmbpSettingDictOrmModel> {
     let mut dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
     let dict_id = dict_params.get_data_id().clone().cloned();
-    insert_dict_info(dict_params).await?;
-    let dict_info = query_dict_by_id(dict_id).await?;
+    BmbpRbacDictService::insert_dict_info(dict_params).await?;
+    let dict_info = BmbpRbacDictService::query_dict_by_id(dict_id).await?;
     Ok(RespVo::ok_option(dict_info))
 }
 
@@ -84,8 +70,8 @@ pub async fn update_dict(
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
     let mut dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
     let dict_id = dict_params.get_data_id().clone().cloned();
-    update_dict_info(dict_params).await?;
-    let dict_info = query_dict_by_id(dict_id).await?;
+    BmbpRbacDictService::update_dict_info(dict_params).await?;
+    let dict_info = BmbpRbacDictService::query_dict_by_id(dict_id).await?;
     Ok(RespVo::ok_option(dict_info))
 }
 
@@ -94,7 +80,8 @@ pub async fn disable_dict(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<usize> {
-    Ok(RespVo::ok_option(None))
+    let dict_id = req.param::<String>("recordId");
+    Ok(RespVo::ok_data(BmbpRbacDictService::disable_dict_status(dict_id).await?))
 }
 
 #[handler]
@@ -102,7 +89,8 @@ pub async fn enable_dict(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<usize> {
-    Ok(RespVo::ok_option(None))
+    let dict_id = req.param::<String>("recordId");
+    Ok(RespVo::ok_data(BmbpRbacDictService::enable_dict_status(dict_id).await?))
 }
 
 #[handler]
@@ -110,7 +98,8 @@ pub async fn delete_dict(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<usize> {
-    Ok(RespVo::ok_option(None))
+    let dict_id = req.param::<String>("recordId");
+    Ok(RespVo::ok_data(BmbpRbacDictService::delete_dict_info(dict_id).await?))
 }
 
 #[handler]
@@ -118,7 +107,8 @@ pub async fn find_dict_tree_exclude_by_id(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespListVo<BmbpSettingDictOrmModel> {
-    Ok(RespVo::ok_data(vec![]))
+    let dict_id = req.param::<String>("recordId");
+    Ok(RespVo::ok_option(BmbpRbacDictService::query_dict_tree_exclude_by_id(dict_id).await?))
 }
 
 #[handler]
@@ -126,5 +116,14 @@ pub async fn save_dict_parent(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<usize> {
-    Ok(RespVo::ok_option(None))
+    let dict_id = req.param::<String>("recordId");
+    if is_empty_string(dict_id.as_ref()) {
+        return Err(BmbpError::service("请指定字典要变更的字典！"));
+    }
+    let params = req.parse_json::<DictQueryParams>().await?;
+    let parent_code = params.get_parent_code().clone().cloned();
+    if is_empty_string(parent_code.as_ref()) {
+        return Err(BmbpError::service("请指定字典上级字典"));
+    }
+    Ok(RespVo::ok_data(BmbpRbacDictService::update_dict_parent(dict_id, parent_code).await?))
 }

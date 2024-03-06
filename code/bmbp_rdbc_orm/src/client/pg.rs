@@ -5,7 +5,7 @@ use tokio::sync::RwLock;
 use tokio_postgres::{Client, connect, Error, NoTls, Row};
 use tokio_postgres::types::{ToSql};
 use bmbp_rdbc_macro::RdbcOrmRow;
-use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcSQL, RdbcValue, Update};
+use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcSQL, RdbcSQLParser, RdbcValue, Update};
 use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 use crate::pool::RdbcConnInner;
 use crate::RdbcDataSource;
@@ -14,6 +14,26 @@ pub struct PgDbClient {
     data_source: Arc<RdbcDataSource>,
     client: RwLock<Client>,
 }
+
+
+impl RdbcSQLParser for PgDbClient {
+    fn to_query(&self, query: &Query) -> (String, Vec<RdbcValue>) {
+        ("".to_string(), vec![])
+    }
+
+    fn to_insert(&self, query: &Insert) -> (String, Vec<RdbcValue>) {
+        ("".to_string(), vec![])
+    }
+
+    fn to_update(&self, query: &Update) -> (String, Vec<RdbcValue>) {
+        ("".to_string(), vec![])
+    }
+
+    fn to_delete(&self, query: &Delete) -> (String, Vec<RdbcValue>) {
+        ("".to_string(), vec![])
+    }
+}
+
 
 impl PgDbClient {
     pub(crate) async fn new(data_source: Arc<RdbcDataSource>) -> RdbcResult<Self> {
@@ -83,8 +103,8 @@ impl RdbcConnInner for PgDbClient {
         self.client.read().await.execute(test_url, &[]).await.is_ok()
     }
     async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
-        let (sql, params) = query.to_sql_params();
-        self.select_list_by_sql(sql.as_str(), params.as_slice()).await
+        let (pg_sql, page_prams) = self.to_query(query);
+        self.select_list_by_sql(pg_sql.as_str(), pg_sql.as_slice()).await
     }
     async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>> {
         let (sql, params) = query.to_sql_params();
