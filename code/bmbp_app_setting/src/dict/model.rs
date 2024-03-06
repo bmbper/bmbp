@@ -62,7 +62,7 @@ impl BmbpSettingDict {
         BmbpSettingDict {
             dict_alise: "".to_string(),
             dict_value: "".to_string(),
-            dict_type: BmbpDictType::Custom,
+            dict_type: Custom,
         }
     }
     pub fn get_dict_alise(&self) -> &String {
@@ -130,7 +130,7 @@ impl BmbpDictType {
 
 impl Default for BmbpDictType {
     fn default() -> Self {
-        BmbpDictType::Custom
+        Custom
     }
 }
 
