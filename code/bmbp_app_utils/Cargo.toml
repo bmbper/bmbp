@@ -6,16 +6,17 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-case_style = "0.2"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-serde_repr = "0.1"
-uuid = {version = "1",features=["serde","v4"]}
-md5 = "0.7"
-rs_sha256 = "0.1.*"
-libsm = "0.6.0"
-chrono = "0.4"
-base64 = "0.21.7"
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-bmbp_app_common = {path="../bmbp_app_common"}
+bmbp_app_common = { path = "../bmbp_app_common" }
+case_style = { workspace = true }
+
+md5 = { workspace = true }
+rs_sha256 = { workspace = true }
+libsm = { workspace = true }
+base64 = { workspace = true }
+chrono = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_repr = { workspace = true }
+uuid = { workspace = true }

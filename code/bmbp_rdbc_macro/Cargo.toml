@@ -12,11 +12,10 @@ serde = { version = "1.0.195", features = ["derive"] }
 bmbp_rdbc_sql = { path = "../bmbp_rdbc_sql" }
 
 # 日志
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["fmt"] }
-
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
 # 数据库
-tokio-postgres = { version = "0.7" ,features=["with-chrono-0_4"] }
+tokio-postgres = { workspace = true }
 # 时间库
-chrono = "0"
-log = "0.4.20"
+chrono = { workspace = true }
+log = { workspace = true }

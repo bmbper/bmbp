@@ -9,8 +9,8 @@ proc-macro = true
 bmbp_app_common = { path = "../bmbp_app_common" }
 bmbp_app_utils = { path = "../bmbp_app_utils" }
 # 宏语法解析器
-syn = "2.0.48"
-quote = "1"
+syn = { workspace = true }
+quote = { workspace = true }
 
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+serde = { workspace = true }
+serde_json = { workspace = true }
