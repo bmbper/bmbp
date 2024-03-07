@@ -844,7 +844,6 @@ impl From<Row> for RdbcOrmRow {
                     if let Some(value) = col_value {
                         orm_row.get_data_mut().insert(col_name, RdbcValue::BigInt(value));
                     }
-
                 }
                 "float4" | "float8" => {
                     let col_value: Option<f32> = row.get(col_name.as_str());
@@ -873,5 +872,6 @@ impl From<Row> for RdbcOrmRow {
         orm_row
     }
 }
+
 
 

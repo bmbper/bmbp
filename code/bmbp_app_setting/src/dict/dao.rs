@@ -7,7 +7,7 @@ pub struct BmbpRbacDictDao {}
 impl BmbpRbacDictDao {
     pub async fn select_page_by_query(page_no: &usize, page_size: &usize, query: &Query) -> BmbpResp<PageVo<BmbpSettingDictOrmModel>> {
         let mut page: RdbcPage<BmbpSettingDictOrmModel> = RdbcPage::new();
-        page.set_page_num(page_no.clone()).set_page_size(page_size().clone());
+        page.set_page_num(page_no.clone()).set_page_size(page_size.clone());
         match RdbcORM.await.select_page_by_query::<BmbpSettingDictOrmModel>(&mut page, &query).await {
             Ok(page_) => {
                 let rbac_page = PageVo::new_page(page_.page_num().clone(),

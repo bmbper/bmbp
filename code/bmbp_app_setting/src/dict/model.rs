@@ -115,7 +115,7 @@ pub enum BmbpDictType {
 }
 
 impl BmbpDictType {
-    fn value_of(data: String) -> Option<Self> {
+    pub fn value_of(data: String) -> Option<Self> {
         match data.as_str() {
             "0" => {
                 Some(Inner)
@@ -124,6 +124,16 @@ impl BmbpDictType {
                 Some(Custom)
             }
             _ => { None }
+        }
+    }
+    pub fn value(&self) -> i8 {
+        match self {
+            Inner => {
+                0
+            }
+            Custom => {
+                1
+            }
         }
     }
 }

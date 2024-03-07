@@ -1,4 +1,5 @@
-use bmbp_rdbc_orm::{Delete, Insert, Query, RDBC_DATA_STATUS, RdbcModel, Update};
+use bmbp_app_utils::uuid;
+use bmbp_rdbc_orm::{Delete, Insert, Query, RDBC_DATA_ID, RDBC_DATA_STATUS, RdbcModel, Update};
 use crate::dict::model::{BmbpSettingDict, BmbpSettingDictOrmModel};
 
 pub struct BmbpRdbcDictScript;
@@ -14,8 +15,17 @@ impl BmbpRdbcDictScript {
         query.order_by("data_sort", true);
         query
     }
-    pub fn build_insert(_dict: &BmbpSettingDictOrmModel) -> Insert {
-        Insert::new()
+    pub fn build_insert(dict: &BmbpSettingDictOrmModel) -> Insert {
+        let mut insert = Insert::new();
+        insert.insert_table(BmbpSettingDict::get_table_name());
+        insert.insert_column_value(RDBC_DATA_ID, uuid());
+
+        let dict_ext = dict.get_ext_props();
+        insert.insert_column_value("dict_alise", dict_ext.get_dict_alise().clone());
+        insert.insert_column_value("dict_value", dict_ext.get_dict_value().clone());
+        insert.insert_column_value("dict_type", dict_ext.get_dict_type().value());
+
+        insert
     }
     pub fn build_update(_dict: &BmbpSettingDictOrmModel) -> Update {
         Update::new()

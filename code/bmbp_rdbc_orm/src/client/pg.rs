@@ -104,7 +104,7 @@ impl RdbcConnInner for PgDbClient {
     }
     async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
         let (pg_sql, page_prams) = self.to_query(query);
-        self.select_list_by_sql(pg_sql.as_str(), pg_sql.as_slice()).await
+        self.select_list_by_sql(pg_sql.as_str(), page_prams.as_slice()).await
     }
     async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>> {
         let (sql, params) = query.to_sql_params();
