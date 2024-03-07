@@ -9,7 +9,23 @@ description = """
     A power full MIS template
 """
 [workspace.dependencies]
-
-
-
+salvo = { version = "*", features = ["default", "serve-static", "cors", "size-limiter"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_repr = "0.1"
+uuid = {version = "1",features=["serde","v4"]}
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tokio = { version = "1", features = ["full"] }
+async-trait = "0.1.73"
+reqwest = "0.11"
+toml = "0.8"
+once_cell = "1"
+svg = "*"
+chrono = "0.4"
+tera = "1.19.0"
+rust-embed = "8.0.0"
+async-once-cell = "0.5.3"
+async_static = "0.1"
+async-lock = "3.3.0"
 

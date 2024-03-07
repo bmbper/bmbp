@@ -7,10 +7,12 @@ edition = "2021"
 
 [dependencies]
 bmbp_app_common = { path = "../bmbp_app_common" }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-tracing = "0.1"
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_repr = { workspace = true }
+async-trait = { workspace = true }
+tokio = { workspace = true }
+salvo = { workspace = true }
 
-salvo = { version = "*",features=["default","serve-static","cors"] }
-tokio = { version = "1", features = ["full"] }
-async-trait = "0.1.73"

@@ -9,11 +9,9 @@ edition = "2021"
 
 bmbp_app_common = { path = "../bmbp_app_common" }
 bmbp_app_utils = { path = "../bmbp_app_utils" }
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-
-salvo = { version = "*" ,features=["default","serve-static","cors"]}
-tokio = { version = "1", features = ["full"] }
-tera = "1.19.0"
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tokio = { workspace = true }
+salvo = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

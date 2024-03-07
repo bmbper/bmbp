@@ -6,12 +6,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-svg = "0.14.0"
-async-trait = "0.1.73"
-tokio = { version = "1", features = ["full"] }
-bmbp_app_common = { path = "../bmbp_app_common" }
 bmbp_app_utils = { path = "../bmbp_app_utils" }
+bmbp_app_common = { path = "../bmbp_app_common" }
+
+serde = { workspace = true }
+serde_json ={ workspace = true }
+svg = { workspace = true }
+async-trait ={ workspace = true }
+tokio = { workspace = true }
+
 
