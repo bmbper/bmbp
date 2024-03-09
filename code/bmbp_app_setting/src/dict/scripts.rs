@@ -16,17 +16,17 @@ impl BmbpRdbcDictScript {
         query
     }
     pub fn build_insert(dict: &BmbpSettingDictOrmModel) -> Insert {
-        let mut insert = Insert::new();
-        insert.insert_table(BmbpSettingDict::get_table_name());
+        let mut insert = dict.build_insert();
         let dict_ext = dict.get_ext_props();
         insert.insert_column_value("dict_alise", dict_ext.get_dict_alise().clone());
         insert.insert_column_value("dict_value", dict_ext.get_dict_value().clone());
         insert.insert_column_value("dict_type", dict_ext.get_dict_type().value());
-
         insert
     }
     pub fn build_update(_dict: &BmbpSettingDictOrmModel) -> Update {
-        Update::new()
+       let update =  Update::new();
+
+        update
     }
     pub fn build_update_status(dict_id: Option<String>, status: i8) -> Update {
         let mut update = Update::new();
