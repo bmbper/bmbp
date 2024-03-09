@@ -24,8 +24,10 @@ impl BmbpRdbcDictScript {
         insert
     }
     pub fn build_update(_dict: &BmbpSettingDictOrmModel) -> Update {
-       let update =  Update::new();
-
+        let mut update = Update::new();
+        update.update_table(BmbpSettingDict::get_table_name());
+        update.set_("dict_value", _dict.get_ext_props().get_dict_value());
+        update.eq(RDBC_DATA_ID, _dict.get_data_id());
         update
     }
     pub fn build_update_status(dict_id: Option<String>, status: i8) -> Update {
