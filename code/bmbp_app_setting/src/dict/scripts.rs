@@ -18,8 +18,6 @@ impl BmbpRdbcDictScript {
     pub fn build_insert(dict: &BmbpSettingDictOrmModel) -> Insert {
         let mut insert = Insert::new();
         insert.insert_table(BmbpSettingDict::get_table_name());
-        insert.insert_column_value(RDBC_DATA_ID, uuid());
-
         let dict_ext = dict.get_ext_props();
         insert.insert_column_value("dict_alise", dict_ext.get_dict_alise().clone());
         insert.insert_column_value("dict_value", dict_ext.get_dict_value().clone());

@@ -58,14 +58,26 @@ impl Insert {
         }
         self
     }
-    pub fn insert_column_value<T, V>(&mut self, column: T, value: V) -> &mut Self where T: ToString, V: ToString {
+    fn init_column_values(&mut self) {
         if self.column_values.is_none() {
             let mut map = HashMap::new();
-            map.insert(column.to_string(), RdbcDmlValue::VALUE(RdbcValue::String(value.to_string())));
             self.column_values = Some(map);
-        } else {
-            self.column_values.as_mut().unwrap().insert(column.to_string(), RdbcDmlValue::VALUE(RdbcValue::String(value.to_string())));
         }
+    }
+
+    pub fn insert_column_value<T, V>(&mut self, column: T, value: V) -> &mut Self where T: ToString, V: ToString {
+        self.init_column_values();
+        self.column_values.as_mut().unwrap().insert(column.to_string(), RdbcDmlValue::VALUE(RdbcValue::String(value.to_string())));
+        self
+    }
+
+    pub fn insert_op_column_value<T, V>(&mut self, column: T, value: Option<V>) -> &mut Self where T: ToString, V: ToString {
+        self.init_column_values();
+        let rdbc_value = match value {
+            Some(v) => RdbcValue::String(v.to_string()),
+            None => RdbcValue::Null,
+        };
+        self.column_values.as_mut().unwrap().insert(column.to_string(), RdbcDmlValue::VALUE(rdbc_value));
         self
     }
 }

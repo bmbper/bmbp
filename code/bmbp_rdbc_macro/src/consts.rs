@@ -10,6 +10,17 @@ pub const RDBC_DATA_UPDATE_TIME: &str = "data_update_time";
 pub const RDBC_DATA_UPDATE_USER: &str = "data_update_user";
 pub const RDBC_DATA_OWNER_ORG: &str = "data_owner_org";
 pub const RDBC_DATA_SIGN: &str = "data_sign";
+
+pub const RDBC_TREE_CODE: &str = "code";
+pub const RDBC_TREE_CODE_PATH: &str = "code_path";
+pub const RDBC_TREE_PARENT_CODE: &str = "parent_code";
+
+pub const RDBC_TREE_NAME: &str = "name";
+pub const RDBC_TREE_NAME_PATH: &str = "name_path";
+pub const RDBC_TREE_NODE_TYPE: &str = "node_type";
+pub const RDBC_TREE_NODE_LEVEL: &str = "node_level";
+pub const RDBC_TREE_NODE_LEAF: &str = "node_leaf";
+
 pub const RDBC_DATA_TABLE_PRIMARY_KEY: &str = RDBC_DATA_ID;
 
 

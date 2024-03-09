@@ -3,7 +3,8 @@ use std::fmt::Debug;
 use serde::{Deserialize, Serialize};
 use tokio_postgres::Row;
 use tokio_postgres::types::Date;
-use bmbp_rdbc_sql::RdbcValue;
+use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcValue};
+use crate::{RDBC_DATA_CREATE_TIME, RDBC_DATA_CREATE_USER, RDBC_DATA_FLAG, RDBC_DATA_ID, RDBC_DATA_LEVEL, RDBC_DATA_OWNER_ORG, RDBC_DATA_REMARK, RDBC_DATA_SIGN, RDBC_DATA_SORT, RDBC_DATA_STATUS, RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_TREE_CODE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH, RDBC_TREE_NODE_LEAF, RDBC_TREE_NODE_LEVEL, RDBC_TREE_NODE_TYPE, RDBC_TREE_PARENT_CODE};
 
 /// RdbcModel 定义数据库表标记
 pub trait RdbcModel {
@@ -144,24 +145,58 @@ impl<T> BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcMode
     }
 }
 
+impl<T> BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcModel {
+    pub fn build_insert(&self) -> Insert {
+        let mut insert = Insert::new();
+        insert.insert_table(T::get_table_name());
+        insert.insert_op_column_value(RDBC_DATA_ID, self.get_data_id());
+        insert.insert_op_column_value(RDBC_DATA_FLAG, self.get_data_flag());
+        insert.insert_op_column_value(RDBC_DATA_SORT, self.get_data_sort());
+        insert.insert_op_column_value(RDBC_DATA_REMARK, self.get_data_remark());
+        insert.insert_op_column_value(RDBC_DATA_CREATE_TIME, self.get_data_create_time());
+        insert.insert_op_column_value(RDBC_DATA_CREATE_USER, self.get_data_create_user());
+        insert.insert_op_column_value(RDBC_DATA_UPDATE_TIME, self.get_data_update_time());
+        insert.insert_op_column_value(RDBC_DATA_UPDATE_USER, self.get_data_update_user());
+        insert.insert_op_column_value(RDBC_DATA_OWNER_ORG, self.get_data_owner_org());
+        insert.insert_op_column_value(RDBC_DATA_SIGN, self.get_data_sign());
+        insert.insert_op_column_value(RDBC_DATA_LEVEL, self.get_data_level());
+        insert.insert_op_column_value(RDBC_DATA_STATUS, self.get_data_status());
+        insert
+    }
+    pub fn build_query() -> Query {
+        let mut query = Query::new();
+        query.query_table(T::get_table_name());
+        let fields = Self::get_table_fields();
+        for field in fields {
+            query.select(field);
+        }
+        query
+    }
+    pub fn build_delete() -> Delete {
+        let mut delete = Delete::new();
+        delete.delete_table(T::get_table_name());
+        delete
+    }
+}
+
 impl<T> RdbcModel for BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcModel {
     fn get_table_name() -> String {
         T::get_table_name()
     }
     fn get_table_fields() -> Vec<String> {
         let mut row_fields = vec![
-            "data_id".to_string(),
-            "data_level".to_string(),
-            "data_status".to_string(),
-            "data_flag".to_string(),
-            "data_sort".to_string(),
-            "data_remark".to_string(),
-            "data_create_time".to_string(),
-            "data_create_user".to_string(),
-            "data_update_time".to_string(),
-            "data_update_user".to_string(),
-            "data_owner_org".to_string(),
-            "data_sign".to_string(),
+            RDBC_DATA_ID.to_string(),
+            RDBC_DATA_LEVEL.to_string(),
+            RDBC_DATA_STATUS.to_string(),
+            RDBC_DATA_FLAG.to_string(),
+            RDBC_DATA_SORT.to_string(),
+            RDBC_DATA_REMARK.to_string(),
+            RDBC_DATA_CREATE_TIME.to_string(),
+            RDBC_DATA_CREATE_USER.to_string(),
+            RDBC_DATA_UPDATE_TIME.to_string(),
+            RDBC_DATA_UPDATE_USER.to_string(),
+            RDBC_DATA_OWNER_ORG.to_string(),
+            RDBC_DATA_SIGN.to_string(),
         ];
         let table_fields = T::get_table_fields();
         row_fields.extend_from_slice(table_fields.as_slice());
@@ -173,32 +208,32 @@ impl<T> RdbcModel for BmbpRdbcModel<T> where T: Default + Debug + Clone + Serial
         if pri != "" {
             pri
         } else {
-            "data_id".to_string()
+            RDBC_DATA_ID.to_string()
         }
     }
 }
 
 /// RdbcTree 定义树型抽象
 pub trait RdbcTree<T> where T: RdbcTree<T> {
-    fn get_code(&self) -> &String;
+    fn get_code(&self) -> Option<&String>;
     fn set_code(&mut self, code: String) -> &mut Self;
-    fn get_code_path(&self) -> &String;
+    fn get_code_path(&self) -> Option<&String>;
     fn set_code_path(&mut self, code_path: String) -> &mut Self;
-    fn get_parent_code(&self) -> &String;
+    fn get_parent_code(&self) -> Option<&String>;
     fn set_parent_code(&mut self, parent_code: String) -> &mut Self;
-    fn get_name(&self) -> &String;
+    fn get_name(&self) -> Option<&String>;
     fn set_name(&mut self, name: String) -> &mut Self;
-    fn get_name_path(&self) -> &String;
+    fn get_name_path(&self) -> Option<&String>;
     fn set_name_path(&mut self, name_path: String) -> &mut Self;
     fn get_children(&self) -> &Vec<T>;
     fn get_children_mut(&mut self) -> &mut Vec<T>;
     fn set_children(&mut self, children: Vec<T>) -> &mut Self;
-    fn get_node_type(&self) -> &Option<String>;
-    fn set_node_type(&mut self, node_type: Option<String>) -> &mut Self;
-    fn get_node_level(&self) -> &Option<usize>;
-    fn set_node_level(&mut self, node_level: Option<usize>) -> &mut Self;
-    fn get_node_leaf(&self) -> &Option<usize>;
-    fn set_node_leaf(&mut self, node_leaf: Option<usize>) -> &mut Self;
+    fn get_node_type(&self) -> Option<&String>;
+    fn set_node_type(&mut self, node_type: String) -> &mut Self;
+    fn get_node_level(&self) -> Option<&usize>;
+    fn set_node_level(&mut self, node_level: usize) -> &mut Self;
+    fn get_node_leaf(&self) -> Option<&usize>;
+    fn set_node_leaf(&mut self, node_leaf: usize) -> &mut Self;
 }
 
 /// BmbpRdbcTree 定义平台提供的树节点
@@ -207,15 +242,15 @@ pub trait RdbcTree<T> where T: RdbcTree<T> {
 #[serde(default)]
 pub struct BmbpRdbcTree<T> where T: Default + Debug + Clone + Serialize {
     // 节点编码
-    code: String,
+    code: Option<String>,
     // 节点路径编码
-    code_path: String,
+    code_path: Option<String>,
     // 父节点编码
-    parent_code: String,
+    parent_code: Option<String>,
     // 节点名称
-    name: String,
+    name: Option<String>,
     // 节点路径名称
-    name_path: String,
+    name_path: Option<String>,
     // 子节点
     children: Vec<BmbpRdbcTree<T>>,
     // 节点类型
@@ -229,39 +264,39 @@ pub struct BmbpRdbcTree<T> where T: Default + Debug + Clone + Serialize {
 }
 
 impl<T> RdbcTree<BmbpRdbcTree<T>> for BmbpRdbcTree<T> where T: Default + Debug + Clone + Serialize {
-    fn get_code(&self) -> &String {
-        &self.code
+    fn get_code(&self) -> Option<&String> {
+        self.code.as_ref()
     }
     fn set_code(&mut self, code: String) -> &mut Self {
-        self.code = code;
+        self.code = Some(code);
         self
     }
-    fn get_code_path(&self) -> &String {
-        &self.code_path
+    fn get_code_path(&self) -> Option<&String> {
+        self.code_path.as_ref()
     }
     fn set_code_path(&mut self, code_path: String) -> &mut Self {
-        self.code_path = code_path;
+        self.code_path = Some(code_path);
         self
     }
-    fn get_parent_code(&self) -> &String {
-        &self.parent_code
+    fn get_parent_code(&self) -> Option<&String> {
+        self.parent_code.as_ref()
     }
     fn set_parent_code(&mut self, parent_code: String) -> &mut Self {
-        self.parent_code = parent_code;
+        self.parent_code = Some(parent_code);
         self
     }
-    fn get_name(&self) -> &String {
-        &self.name
+    fn get_name(&self) -> Option<&String> {
+        self.name.as_ref()
     }
     fn set_name(&mut self, name: String) -> &mut Self {
-        self.name = name;
+        self.name = Some(name);
         self
     }
-    fn get_name_path(&self) -> &String {
-        &self.name_path
+    fn get_name_path(&self) -> Option<&String> {
+        self.name_path.as_ref()
     }
     fn set_name_path(&mut self, name_path: String) -> &mut Self {
-        self.name_path = name_path;
+        self.name_path = Some(name_path);
         self
     }
     fn get_children(&self) -> &Vec<BmbpRdbcTree<T>> {
@@ -274,25 +309,25 @@ impl<T> RdbcTree<BmbpRdbcTree<T>> for BmbpRdbcTree<T> where T: Default + Debug +
         self.children = children;
         self
     }
-    fn get_node_type(&self) -> &Option<String> {
-        &self.node_type
+    fn get_node_type(&self) -> Option<&String> {
+        self.node_type.as_ref()
     }
-    fn set_node_type(&mut self, node_type: Option<String>) -> &mut Self {
-        self.node_type = node_type;
+    fn set_node_type(&mut self, node_type: String) -> &mut Self {
+        self.node_type = Some(node_type);
         self
     }
-    fn get_node_level(&self) -> &Option<usize> {
-        &self.node_level
+    fn get_node_level(&self) -> Option<&usize> {
+        self.node_level.as_ref()
     }
-    fn set_node_level(&mut self, node_level: Option<usize>) -> &mut Self {
-        self.node_level = node_level;
+    fn set_node_level(&mut self, node_level: usize) -> &mut Self {
+        self.node_level = Some(node_level);
         self
     }
-    fn get_node_leaf(&self) -> &Option<usize> {
-        &self.node_leaf
+    fn get_node_leaf(&self) -> Option<&usize> {
+        self.node_leaf.as_ref()
     }
-    fn set_node_leaf(&mut self, node_leaf: Option<usize>) -> &mut Self {
-        self.node_leaf = node_leaf;
+    fn set_node_leaf(&mut self, node_leaf: usize) -> &mut Self {
+        self.node_leaf = Some(node_leaf);
         self
     }
 }
@@ -340,15 +375,15 @@ pub struct BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + Rdb
     /// 记录防串改标识
     data_sign: Option<String>,
     // 节点编码
-    code: String,
+    code: Option<String>,
     // 节点路径编码
-    code_path: String,
+    code_path: Option<String>,
     // 父节点编码
-    parent_code: String,
+    parent_code: Option<String>,
     // 节点名称
-    name: String,
+    name: Option<String>,
     // 节点路径名称
-    name_path: String,
+    name_path: Option<String>,
     // 子节点
     children: Vec<BmbpOrmRdbcTree<T>>,
     // 节点类型
@@ -368,26 +403,25 @@ impl<T> RdbcModel for BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Seri
 
     fn get_table_fields() -> Vec<String> {
         let mut row_fields = vec![
-            "data_id".to_string(),
-            "data_level".to_string(),
-            "data_status".to_string(),
-            "data_flag".to_string(),
-            "data_sort".to_string(),
-            "data_remark".to_string(),
-            "data_create_time".to_string(),
-            "data_create_user".to_string(),
-            "data_update_time".to_string(),
-            "data_update_user".to_string(),
-            "data_owner_org".to_string(),
-            "data_sign".to_string(),
-            "code".to_string(),
-            "code_path".to_string(),
-            "parent_code".to_string(),
-            "name".to_string(),
-            "name_path".to_string(),
-            "node_type".to_string(),
-            "node_level".to_string(),
-            "node_leaf".to_string(),
+            RDBC_DATA_ID.to_string(),
+            RDBC_DATA_LEVEL.to_string(),
+            RDBC_DATA_STATUS.to_string(),
+            RDBC_DATA_FLAG.to_string(),
+            RDBC_DATA_SORT.to_string(),
+            RDBC_DATA_REMARK.to_string(),
+            RDBC_DATA_CREATE_TIME.to_string(),
+            RDBC_DATA_CREATE_USER.to_string(),
+            RDBC_DATA_UPDATE_TIME.to_string(),
+            RDBC_DATA_UPDATE_USER.to_string(),
+            RDBC_DATA_OWNER_ORG.to_string(),
+            RDBC_DATA_SIGN.to_string(),
+            RDBC_TREE_CODE.to_string(),
+            RDBC_TREE_CODE_PATH.to_string(),
+            RDBC_TREE_PARENT_CODE.to_string(),
+            RDBC_TREE_NAME.to_string(),
+            RDBC_TREE_NODE_TYPE.to_string(),
+            RDBC_TREE_NODE_LEVEL.to_string(),
+            RDBC_TREE_NODE_LEAF.to_string(),
         ];
         let table_fields = T::get_table_fields();
         row_fields.extend_from_slice(table_fields.as_slice());
@@ -395,44 +429,44 @@ impl<T> RdbcModel for BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Seri
     }
 
     fn get_table_primary_key() -> String {
-        "data_id".to_string()
+        RDBC_DATA_ID.to_string()
     }
 }
 
 impl<T> RdbcTree<BmbpOrmRdbcTree<T>> for BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + RdbcModel {
-    fn get_code(&self) -> &String {
-        &self.code
+    fn get_code(&self) -> Option<&String> {
+        self.code.as_ref()
     }
     fn set_code(&mut self, code: String) -> &mut Self {
-        self.code = code;
+        self.code = Some(code);
         self
     }
-    fn get_code_path(&self) -> &String {
-        &self.code_path
+    fn get_code_path(&self) -> Option<&String> {
+        self.code_path.as_ref()
     }
     fn set_code_path(&mut self, code_path: String) -> &mut Self {
-        self.code_path = code_path;
+        self.code_path = Some(code_path);
         self
     }
-    fn get_parent_code(&self) -> &String {
-        &self.parent_code
+    fn get_parent_code(&self) -> Option<&String> {
+        self.parent_code.as_ref()
     }
     fn set_parent_code(&mut self, parent_code: String) -> &mut Self {
-        self.parent_code = parent_code;
+        self.parent_code = Some(parent_code);
         self
     }
-    fn get_name(&self) -> &String {
-        &self.name
+    fn get_name(&self) -> Option<&String> {
+        self.name.as_ref()
     }
     fn set_name(&mut self, name: String) -> &mut Self {
-        self.name = name;
+        self.name = Some(name);
         self
     }
-    fn get_name_path(&self) -> &String {
-        &self.name_path
+    fn get_name_path(&self) -> Option<&String> {
+        self.name_path.as_ref()
     }
     fn set_name_path(&mut self, name_path: String) -> &mut Self {
-        self.name_path = name_path;
+        self.name_path = Some(name_path);
         self
     }
     fn get_children(&self) -> &Vec<BmbpOrmRdbcTree<T>> {
@@ -445,25 +479,25 @@ impl<T> RdbcTree<BmbpOrmRdbcTree<T>> for BmbpOrmRdbcTree<T> where T: Default + D
         self.children = children;
         self
     }
-    fn get_node_type(&self) -> &Option<String> {
-        &self.node_type
+    fn get_node_type(&self) -> Option<&String> {
+        self.node_type.as_ref()
     }
-    fn set_node_type(&mut self, node_type: Option<String>) -> &mut Self {
-        self.node_type = node_type;
+    fn set_node_type(&mut self, node_type: String) -> &mut Self {
+        self.node_type = Some(node_type);
         self
     }
-    fn get_node_level(&self) -> &Option<usize> {
-        &self.node_level
+    fn get_node_level(&self) -> Option<&usize> {
+        self.node_level.as_ref()
     }
-    fn set_node_level(&mut self, node_level: Option<usize>) -> &mut Self {
-        self.node_level = node_level;
+    fn set_node_level(&mut self, node_level: usize) -> &mut Self {
+        self.node_level = Some(node_level);
         self
     }
-    fn get_node_leaf(&self) -> &Option<usize> {
-        &self.node_leaf
+    fn get_node_leaf(&self) -> Option<&usize> {
+        self.node_leaf.as_ref()
     }
-    fn set_node_leaf(&mut self, node_leaf: Option<usize>) -> &mut Self {
-        self.node_leaf = node_leaf;
+    fn set_node_leaf(&mut self, node_leaf: usize) -> &mut Self {
+        self.node_leaf = Some(node_leaf);
         self
     }
 }
@@ -564,6 +598,48 @@ impl<T> BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + RdbcMo
         self
     }
 }
+
+impl<T> BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + RdbcModel {
+    pub fn build_insert(&self) -> Insert {
+        let mut insert = Insert::new();
+        insert.insert_table(T::get_table_name());
+        insert.insert_op_column_value(RDBC_DATA_ID, self.get_data_id());
+        insert.insert_op_column_value(RDBC_DATA_FLAG, self.get_data_flag());
+        insert.insert_op_column_value(RDBC_DATA_SORT, self.get_data_sort());
+        insert.insert_op_column_value(RDBC_DATA_REMARK, self.get_data_remark());
+        insert.insert_op_column_value(RDBC_DATA_CREATE_TIME, self.get_data_create_time());
+        insert.insert_op_column_value(RDBC_DATA_CREATE_USER, self.get_data_create_user());
+        insert.insert_op_column_value(RDBC_DATA_UPDATE_TIME, self.get_data_update_time());
+        insert.insert_op_column_value(RDBC_DATA_UPDATE_USER, self.get_data_update_user());
+        insert.insert_op_column_value(RDBC_DATA_OWNER_ORG, self.get_data_owner_org());
+        insert.insert_op_column_value(RDBC_DATA_SIGN, self.get_data_sign());
+        insert.insert_op_column_value(RDBC_DATA_LEVEL, self.get_data_level());
+        insert.insert_op_column_value(RDBC_DATA_STATUS, self.get_data_status());
+        insert.insert_op_column_value(RDBC_TREE_CODE, self.get_code().clone());
+        insert.insert_op_column_value(RDBC_TREE_CODE_PATH, self.get_code_path());
+        insert.insert_op_column_value(RDBC_TREE_PARENT_CODE, self.get_parent_code());
+        insert.insert_op_column_value(RDBC_TREE_NAME, self.get_name());
+        insert.insert_op_column_value(RDBC_TREE_NODE_TYPE, self.get_node_type());
+        insert.insert_op_column_value(RDBC_TREE_NODE_LEVEL, self.get_node_level());
+        insert.insert_op_column_value(RDBC_TREE_NODE_LEAF, self.get_node_leaf());
+        insert
+    }
+    pub fn build_query() -> Query {
+        let mut query = Query::new();
+        query.query_table(T::get_table_name());
+        let fields = Self::get_table_fields();
+        for field in fields {
+            query.select(field);
+        }
+        query
+    }
+    pub fn build_delete() -> Delete {
+        let mut delete = Delete::new();
+        delete.delete_table(T::get_table_name());
+        delete
+    }
+}
+
 
 /// 定义返回值类型
 /// RdbcOrmRow 数据库查询结果 实现各个数据库的FromRow
@@ -708,29 +784,33 @@ impl<T> From<RdbcOrmRow> for BmbpRdbcModel<T> where T: From<RdbcOrmRow> + Defaul
 impl<T> From<RdbcOrmRow> for BmbpRdbcTree<T> where T: From<RdbcOrmRow> + Default + Debug + Clone + Serialize {
     fn from(row: RdbcOrmRow) -> Self {
         let mut model = BmbpRdbcTree::<T>::default();
-        if let Some(code) = row.data.get("code") {
+        if let Some(code) = row.data.get(RDBC_TREE_CODE) {
             model.set_code(code.get_string());
         }
-        if let Some(data) = row.data.get("code_path") {
+        if let Some(data) = row.data.get(RDBC_TREE_CODE_PATH) {
             model.set_code_path(data.get_string());
         }
-        if let Some(data) = row.data.get("parent_code") {
+        if let Some(data) = row.data.get(RDBC_TREE_PARENT_CODE) {
             model.set_parent_code(data.get_string());
         }
-        if let Some(data) = row.data.get("name") {
+        if let Some(data) = row.data.get(RDBC_TREE_NAME) {
             model.set_name(data.get_string());
         }
-        if let Some(data) = row.data.get("name_path") {
+        if let Some(data) = row.data.get(RDBC_TREE_NAME_PATH) {
             model.set_name_path(data.get_string());
         }
-        if let Some(data) = row.data.get("node_type") {
-            model.set_node_type(Some(data.get_string()));
+        if let Some(data) = row.data.get(RDBC_TREE_NODE_TYPE) {
+            model.set_node_type(data.get_string());
         }
-        if let Some(data) = row.data.get("node_level") {
-            model.set_node_level(data.get_usize());
+        if let Some(data) = row.data.get(RDBC_TREE_NODE_LEVEL) {
+            if let Some(v) = data.get_usize() {
+                model.set_node_level(v);
+            }
         }
-        if let Some(data) = row.data.get("node_leaf") {
-            model.set_node_leaf(data.get_usize());
+        if let Some(data) = row.data.get(RDBC_TREE_NODE_LEAF) {
+            if let Some(v) = data.get_usize() {
+                model.set_node_leaf(v);
+            }
         }
         let ext_ops = T::from(row);
         model.set_ext_props(ext_ops);
@@ -741,68 +821,70 @@ impl<T> From<RdbcOrmRow> for BmbpRdbcTree<T> where T: From<RdbcOrmRow> + Default
 impl<T> From<RdbcOrmRow> for BmbpOrmRdbcTree<T> where T: From<RdbcOrmRow> + Default + Debug + Clone + Serialize + RdbcModel {
     fn from(row: RdbcOrmRow) -> Self {
         let mut model = BmbpOrmRdbcTree::<T>::default();
-        if let Some(data) = row.data.get("data_id") {
+        if let Some(data) = row.data.get(RDBC_DATA_ID) {
             model.set_data_id(data.get_string());
         }
-        if let Some(data) = row.data.get("data_level") {
+        if let Some(data) = row.data.get(RDBC_DATA_LEVEL) {
             model.set_data_level(data.get_string());
         }
-        if let Some(data) = row.data.get("data_status") {
+        if let Some(data) = row.data.get(RDBC_DATA_STATUS) {
             model.set_data_status(data.get_string());
         }
-        if let Some(data) = row.data.get("data_flag") {
+        if let Some(data) = row.data.get(RDBC_DATA_FLAG) {
             model.set_data_flag(data.get_string());
         }
-        if let Some(data) = row.data.get("data_sort") {
+        if let Some(data) = row.data.get(RDBC_DATA_SORT) {
             if let Some(v) = data.get_usize() {
                 model.set_data_sort(v);
             }
         }
-        if let Some(data) = row.data.get("data_remark") {
+        if let Some(data) = row.data.get(RDBC_DATA_REMARK) {
             model.set_data_remark(data.get_string());
         }
-        if let Some(data) = row.data.get("data_create_time") {
+        if let Some(data) = row.data.get(RDBC_DATA_CREATE_TIME) {
             model.set_data_create_time(data.get_string());
         }
-        if let Some(data) = row.data.get("data_create_user") {
+        if let Some(data) = row.data.get(RDBC_DATA_CREATE_TIME) {
             model.set_data_create_user(data.get_string());
         }
-        if let Some(data) = row.data.get("data_update_time") {
+        if let Some(data) = row.data.get(RDBC_DATA_UPDATE_TIME) {
             model.set_data_update_time(data.get_string());
         }
-        if let Some(data) = row.data.get("data_update_user") {
+        if let Some(data) = row.data.get(RDBC_DATA_UPDATE_USER) {
             model.set_data_update_user(data.get_string());
         }
-        if let Some(data) = row.data.get("data_owner_org") {
+        if let Some(data) = row.data.get(RDBC_DATA_OWNER_ORG) {
             model.set_data_owner_org(data.get_string());
         }
-        if let Some(data) = row.data.get("data_sign") {
+        if let Some(data) = row.data.get(RDBC_DATA_SIGN) {
             model.set_data_sign(data.get_string());
         }
-        if let Some(code) = row.data.get("code") {
+        if let Some(code) = row.data.get(RDBC_TREE_CODE) {
             model.set_code(code.get_string());
         }
-        if let Some(data) = row.data.get("code_path") {
+        if let Some(data) = row.data.get(RDBC_TREE_CODE_PATH) {
             model.set_code_path(data.get_string());
         }
-        if let Some(data) = row.data.get("parent_code") {
+        if let Some(data) = row.data.get(RDBC_TREE_PARENT_CODE) {
             model.set_parent_code(data.get_string());
         }
-        if let Some(data) = row.data.get("name") {
+        if let Some(data) = row.data.get(RDBC_TREE_NAME) {
             model.set_name(data.get_string());
         }
-        if let Some(data) = row.data.get("name_path") {
+        if let Some(data) = row.data.get(RDBC_TREE_NAME_PATH) {
             model.set_name_path(data.get_string());
         }
-        if let Some(data) = row.data.get("node_type") {
-            model.set_node_type(Some(data.get_string()));
+        if let Some(data) = row.data.get(RDBC_TREE_NODE_TYPE) {
+            model.set_node_type(data.get_string());
         }
-        if let Some(data) = row.data.get("node_level") {
-            model.set_node_level(data.get_usize());
-        }
-        if let Some(data) = row.data.get("node_leaf") {
+        if let Some(data) = row.data.get(RDBC_TREE_NODE_LEVEL) {
             if let Some(v) = data.get_usize() {
-                model.set_node_leaf(Some(v));
+                model.set_node_level(v);
+            }
+        }
+        if let Some(data) = row.data.get(RDBC_TREE_NODE_LEAF) {
+            if let Some(v) = data.get_usize() {
+                model.set_node_leaf(v);
             }
         }
         let ext_ops = T::from(row);
