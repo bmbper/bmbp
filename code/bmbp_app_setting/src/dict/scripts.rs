@@ -1,4 +1,3 @@
-use bmbp_app_utils::uuid;
 use bmbp_rdbc_orm::{Delete, Insert, Query, RDBC_DATA_ID, RDBC_DATA_STATUS, RdbcModel, Update};
 use crate::dict::model::{BmbpSettingDict, BmbpSettingDictOrmModel};
 
