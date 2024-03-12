@@ -246,8 +246,7 @@ impl Update {
         self.set_values_.as_mut().unwrap().insert(column.to_string(), Some(RdbcDmlValue::VALUE(r_value)));
         self
     }
-
-    pub fn set_column<V>(&mut self, column: RdbcTableColumn, value: V) -> &mut Self where V: ToString {
+    pub fn set_table_column<V>(&mut self, column: RdbcTableColumn, value: V) -> &mut Self where V: ToString {
         if self.set_values_.is_none() {
             self.set_values_ = Some(HashMap::new());
         }
@@ -255,14 +254,28 @@ impl Update {
         self.set_values_.as_mut().unwrap().insert(column.to_sql(), Some(value));
         self
     }
-
-    pub fn set_column_value(&mut self, column: RdbcTableColumn, value: RdbcDmlValue) -> &mut Self {
+    pub fn set_table_column_value(&mut self, column: RdbcTableColumn, value: RdbcDmlValue) -> &mut Self {
         if self.set_values_.is_none() {
             self.set_values_ = Some(HashMap::new());
         }
         self.set_values_.as_mut().unwrap().insert(column.to_sql(), Some(value));
         self
     }
+    pub fn set_table_column_column<V>(&mut self, column: RdbcTableColumn, value: RdbcColumn) -> &mut Self where V: ToString {
+        if self.set_values_.is_none() {
+            self.set_values_ = Some(HashMap::new());
+        }
+        self.set_values_.as_mut().unwrap().insert(column.to_sql(), Some(RdbcDmlValue::COLUMN(value)));
+        self
+    }
+    pub fn set_rdbc_column_column(&mut self, column: RdbcColumn, value: RdbcColumn) -> &mut Self {
+        if self.set_values_.is_none() {
+            self.set_values_ = Some(HashMap::new());
+        }
+        self.set_values_.as_mut().unwrap().insert(column.to_sql(), Some(RdbcDmlValue::COLUMN(value)));
+        self
+    }
+
 }
 
 impl Update {

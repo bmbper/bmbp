@@ -1,7 +1,7 @@
 use serde_json::to_string;
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
 use bmbp_app_utils::{is_empty_string, simple_uuid_upper};
-use bmbp_rdbc_orm::{RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_ROOT_NODE, RdbcColumn, RdbcModel, RdbcTable, RdbcTree, simple_column, Update};
+use bmbp_rdbc_orm::{RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_ROOT_NODE, RdbcColumn, RdbcModel, RdbcTable, RdbcTree, simple_column, table_column, Update, value_column};
 use crate::dict::dao::{BmbpRbacDictDao};
 use crate::dict::model::{BmbpDictType, BmbpSettingDict, BmbpSettingDictOrmModel, DictQueryParams};
 use crate::dict::scripts::BmbpRdbcDictScript;
@@ -210,9 +210,9 @@ impl BmbpRbacDictService {
         let mut join_table = RdbcTable::table_alias(BmbpSettingDict::get_table_name(), "t2".to_string());
         join_table.on_eq("t2", "parent_code", "t1", "code");
         update.join_rdbc_table(join_table);
-        let concat_column = RdbcColumn::concat(simple_column("t2", "name_path"), simple_column("t1", "name"), "/".to_string());
-        update.set_alias_column_value("t1", "name_path", concat_column);
-        update.like_left_alias("t1", "code_path", code_path);
+        let concat_column = RdbcColumn::concat(vec![simple_column("t2", "name_path"), simple_column("t1", "name"), value_column("/")]);
+        update.set_rdbc_column_column(simple_column("t1", "name_path"), concat_column);
+        update.like_left(simple_column("t1", "code_path"), Some(code_path));
         BmbpRbacDictDao::execute_update(&update).await
     }
     async fn update_code_path_for_children(parent_code_path: &str, dict_code: &String) -> BmbpResp<usize> {
@@ -225,9 +225,9 @@ impl BmbpRbacDictService {
         let mut join_table = RdbcTable::table_alias(BmbpSettingDict::get_table_name(), "t2".to_string());
         join_table.on_eq("t2", "parent_code", "t1", "code");
         update.join_rdbc_table(join_table);
-        let concat_column = RdbcColumn::concat(simple_column("t2", "code_path"), simple_column("t1", "code"), "/".to_string());
-        update.set_alias_column_value("t1", "code_path", concat_column);
-        update.like_left_alias("t1", "code_path", parent_code_path);
+        let concat_column = RdbcColumn::concat(vec![simple_column("t2", "code_path"), simple_column("t1", "code"), value_column("/")]);
+        update.set_rdbc_column_column(simple_column("t1", "code_path"), concat_column);
+        update.like_left(simple_column("t1", "code_path"), Some(parent_code_path));
         BmbpRbacDictDao::execute_update(&update).await
     }
     pub async fn disable_dict_status(dict_id: Option<String>) -> BmbpResp<usize> {

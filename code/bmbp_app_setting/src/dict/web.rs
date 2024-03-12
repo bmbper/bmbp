@@ -59,7 +59,7 @@ pub async fn insert_dict(req: &mut Request, _res: &mut Response) -> HttpRespVo<B
     let mut dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
     let dict_id = dict_params.get_data_id().clone().cloned();
     BmbpRbacDictService::insert_dict_info(dict_params).await?;
-    let dict_info = BmbpRbacDictService::query_dict_by_id(dict_id).await?;
+    let dict_info = BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?;
     Ok(RespVo::ok_option(dict_info))
 }
 
@@ -71,7 +71,7 @@ pub async fn update_dict(
     let mut dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
     let dict_id = dict_params.get_data_id().clone().cloned();
     BmbpRbacDictService::update_dict_info(dict_params).await?;
-    let dict_info = BmbpRbacDictService::query_dict_by_id(dict_id).await?;
+    let dict_info = BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?;
     Ok(RespVo::ok_option(dict_info))
 }
 

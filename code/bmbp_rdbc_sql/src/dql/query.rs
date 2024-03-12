@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::{RdbcFilter, RdbcOrder, RdbcSQL, RdbcColumn, RdbcTable, RdbcValue, RdbcFunc, RdbcCompareType, RdbcConcatType, RdbcTableFilterColumn, RdbcFilterColumn, RdbcTableJoinType, table, DatabaseType};
+use crate::{RdbcFilter, RdbcOrder, RdbcSQL, RdbcColumn, RdbcTable, RdbcValue, RdbcFunc, RdbcCompareType, RdbcConcatType, RdbcValueFilterItem, RdbcFilterItem, RdbcTableJoinType, table, DatabaseType};
 
 pub struct Query {
     driver_: Option<DatabaseType>,

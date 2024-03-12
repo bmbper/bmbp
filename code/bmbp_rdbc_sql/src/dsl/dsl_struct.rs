@@ -68,6 +68,14 @@ impl RdbcColumn {
     pub fn query_alias<T>(query: Query, alias: T) -> RdbcColumn where T: ToString {
         RdbcColumn::Query(RdbcQueryColumn::query_alias(query, alias))
     }
+
+
+    pub fn concat_split(columns: Vec<RdbcColumn>, split_: Option<String>) -> RdbcColumn {
+        RdbcColumn::Func(RdbcFuncColumn::concat_split(columns, split_))
+    }
+    pub fn concat(columns: Vec<RdbcColumn>) -> RdbcColumn {
+        RdbcColumn::Func(RdbcFuncColumn::concat(columns))
+    }
 }
 
 pub struct RdbcTableColumn {
@@ -193,6 +201,21 @@ impl RdbcValueColumn {
 pub struct RdbcFuncColumn {
     columns_: RdbcFunc,
     alias_: Option<String>,
+}
+
+impl RdbcFuncColumn {
+    fn concat_split(columns: Vec<RdbcColumn>, split_: Option<String>) -> RdbcFuncColumn {
+        RdbcFuncColumn {
+            columns_: RdbcFunc::concat_split(columns, split_),
+            alias_: None,
+        }
+    }
+    fn concat(columns: Vec<RdbcColumn>) -> RdbcFuncColumn {
+        RdbcFuncColumn {
+            columns_: RdbcFunc::concat(columns),
+            alias_: None,
+        }
+    }
 }
 
 pub struct RdbcQueryColumn {
@@ -475,7 +498,7 @@ pub enum RdbcConcatType {
 
 pub struct RdbcFilter {
     concat_: RdbcConcatType,
-    compare: Vec<RdbcFilterColumn>,
+    item_: Vec<RdbcFilterItem>,
     params_: Option<HashMap<String, RdbcValue>>,
 }
 
@@ -489,16 +512,16 @@ impl RdbcFilter {
     pub(crate) fn concat_with_filter(concat: RdbcConcatType, filter: RdbcFilter) -> RdbcFilter {
         RdbcFilter {
             concat_: concat,
-            compare: vec![RdbcFilterColumn::filter(filter)],
+            item_: vec![RdbcFilterItem::filter(filter)],
             params_: None,
         }
     }
     pub fn eq<T, V>(&mut self, column: T, value: V) -> &mut Self where T: ToString, V: ToString {
-        self.compare.push(RdbcFilterColumn::eq(column, value));
+        self.item_.push(RdbcFilterItem::eq(column, value));
         self
     }
     pub fn eq_column(&mut self, column: RdbcColumn, value: RdbcColumn) -> &mut Self {
-        self.compare.push(RdbcFilterColumn::eq_column(column, value));
+        self.item_.push(RdbcFilterItem::eq_column(column, value));
         self
     }
 }
@@ -507,61 +530,53 @@ impl RdbcFilter {
     pub fn new() -> RdbcFilter {
         RdbcFilter {
             concat_: RdbcConcatType::And,
-            compare: vec![],
+            item_: vec![],
             params_: None,
         }
     }
 }
 
-pub enum RdbcFilterColumn {
-    Table(RdbcTableFilterColumn),
-    Func(RdbcFuncFilterColumn),
-    Query(RdbcQueryFilterColumn),
+pub enum RdbcFilterItem {
+    Value(RdbcValueFilterItem),
+    Column(RdbcColumnFilterItem),
     Filter(RdbcFilter),
 }
 
-impl RdbcFilterColumn {
-    fn filter(filter: RdbcFilter) -> RdbcFilterColumn {
-        RdbcFilterColumn::Filter(filter)
+impl RdbcFilterItem {
+    fn filter(filter: RdbcFilter) -> RdbcFilterItem {
+        RdbcFilterItem::Filter(filter)
     }
 }
 
-impl RdbcFilterColumn {
-    pub fn eq<T, V>(column: T, value: V) -> RdbcFilterColumn where T: ToString, V: ToString {
-        RdbcFilterColumn::Table(RdbcTableFilterColumn {
+impl RdbcFilterItem {
+    pub fn eq<T, V>(column: T, value: V) -> RdbcFilterItem where T: ToString, V: ToString {
+        RdbcFilterItem::Value(RdbcValueFilterItem {
             column_: RdbcColumn::column(column),
             compare_: RdbcCompareType::Eq,
-            value: Some(RdbcColumn::rdbc_value(RdbcValue::String(value.to_string()))),
+            value: Some(RdbcValue::String(value.to_string())),
             ignore_null: false,
         })
     }
-    pub fn eq_column(column: RdbcColumn, value: RdbcColumn) -> RdbcFilterColumn {
-        RdbcFilterColumn::Table(RdbcTableFilterColumn {
+    pub fn eq_column(column: RdbcColumn, value: RdbcColumn) -> RdbcFilterItem {
+        RdbcFilterItem::Column(RdbcColumnFilterItem {
             column_: column,
             compare_: RdbcCompareType::Eq,
             value: Some(value),
-            ignore_null: false,
         })
     }
 }
 
-pub struct RdbcTableFilterColumn {
+pub struct RdbcValueFilterItem {
     column_: RdbcColumn,
     compare_: RdbcCompareType,
-    value: Option<RdbcColumn>,
+    value: Option<RdbcValue>,
     ignore_null: bool,
 }
 
-pub struct RdbcFuncFilterColumn {
-    column_: RdbcFunc,
-    compare_: RdbcCompareType,
-    value: Option<RdbcValue>,
-}
-
-pub struct RdbcQueryFilterColumn {
+pub struct RdbcColumnFilterItem {
     column_: RdbcColumn,
     compare_: RdbcCompareType,
-    value: Option<Query>,
+    value: Option<RdbcColumn>,
 }
 
 pub enum RdbcCompareType {
@@ -604,7 +619,7 @@ pub enum RdbcOrderType {
 
 pub enum RdbcDmlValue {
     VALUE(RdbcValue),
-    FUNC(RdbcFunc),
+    COLUMN(RdbcColumn),
 }
 
 pub fn table<T>(table: T) -> RdbcTable where T: ToString {
@@ -625,6 +640,10 @@ pub fn right_table<T>(table: T) -> RdbcTable where T: ToString {
 
 pub fn full_table<T>(table: T) -> RdbcTable where T: ToString {
     RdbcTable::table(table)
+}
+
+pub fn table_column<T, V>(table: T, column: V) -> RdbcTableColumn where T: ToString, V: ToString {
+    RdbcTableColumn::table_column(table, column)
 }
 
 pub fn simple_column<T, V>(table: T, column: V) -> RdbcColumn where T: ToString, V: ToString {
