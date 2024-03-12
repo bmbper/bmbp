@@ -19,3 +19,4 @@ tokio-postgres = { workspace = true }
 # 时间库
 chrono = { workspace = true }
 log = { workspace = true }
+uuid = { workspace = true }

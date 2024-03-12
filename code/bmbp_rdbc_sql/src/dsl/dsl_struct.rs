@@ -233,7 +233,7 @@ impl RdbcTable {
     pub(crate) fn table<T>(table: T) -> RdbcTable where T: ToString {
         RdbcTable::Table(RdbcSchemaTable::table(table))
     }
-    pub fn table_alias<T>(table: T, alias: T) -> RdbcTable where T: ToString {
+    pub fn table_alias<T, V>(table: T, alias: V) -> RdbcTable where T: ToString, V: ToString {
         RdbcTable::Table(RdbcSchemaTable::table_alias(table, alias))
     }
     pub fn schema_table<T>(schema: T, table: T) -> RdbcTable where T: ToString {
@@ -293,6 +293,18 @@ impl RdbcTable {
         }
         self
     }
+
+    pub fn on_eq<T, V, E, F>(&mut self, t1: T, c1: V, t2: E, c2: F) -> &mut Self where T: ToString, E: ToString, V: ToString, F: ToString {
+        match self {
+            RdbcTable::Table(ref mut table) => {
+                table.eq_column(simple_column(t1, c1), simple_column(t2, c2));
+            }
+            RdbcTable::Query(ref mut table) => {
+                table.eq_column(simple_column(t1, c1), simple_column(t2, c2));
+            }
+        }
+        self
+    }
 }
 
 pub enum RdbcTableJoinType {
@@ -338,7 +350,7 @@ impl RdbcSchemaTable {
             params_: None,
         }
     }
-    fn table_alias<T>(table: T, alias: T) -> RdbcSchemaTable where T: ToString {
+    fn table_alias<T, V>(table: T, alias: V) -> RdbcSchemaTable where T: ToString, V: ToString {
         RdbcSchemaTable {
             schema_: None,
             name_: table.to_string(),
@@ -365,7 +377,7 @@ impl RdbcSchemaTable {
             alias_: Some(alias.to_string()),
             join_: None,
             filter_: Some(RdbcFilter::new()),
-            params_:None
+            params_: None,
         }
     }
     fn left_join_table<T>(table: T) -> RdbcSchemaTable where T: ToString {
@@ -375,7 +387,7 @@ impl RdbcSchemaTable {
             alias_: None,
             join_: Some(RdbcTableJoinType::Left),
             filter_: Some(RdbcFilter::new()),
-            params_:None
+            params_: None,
         }
     }
     fn left_join_table_alias<T, A>(table: T, alias: A) -> RdbcSchemaTable where T: ToString, A: ToString {
@@ -385,7 +397,7 @@ impl RdbcSchemaTable {
             alias_: Some(alias.to_string()),
             join_: Some(RdbcTableJoinType::Left),
             filter_: Some(RdbcFilter::new()),
-            params_:None
+            params_: None,
         }
     }
 }
@@ -405,7 +417,10 @@ impl RdbcSchemaTable {
         self.filter_.as_mut().unwrap().eq(column, value);
         self
     }
-
+    pub fn eq_column(&mut self, col: RdbcColumn, val: RdbcColumn) -> &mut Self {
+        self.filter_.as_mut().unwrap().eq_column(col, val);
+        self
+    }
     pub fn or(&mut self) -> &mut Self {
         self.create_filter(RdbcConcatType::Or);
         self
@@ -447,6 +462,10 @@ impl RdbcQueryTable {
             filter_: None,
         }
     }
+    pub fn eq_column(&mut self, col: RdbcColumn, val: RdbcColumn) -> &mut Self {
+        self.filter_.as_mut().unwrap().eq_column(col, val);
+        self
+    }
 }
 
 pub enum RdbcConcatType {
@@ -476,6 +495,10 @@ impl RdbcFilter {
     }
     pub fn eq<T, V>(&mut self, column: T, value: V) -> &mut Self where T: ToString, V: ToString {
         self.compare.push(RdbcFilterColumn::eq(column, value));
+        self
+    }
+    pub fn eq_column(&mut self, column: RdbcColumn, value: RdbcColumn) -> &mut Self {
+        self.compare.push(RdbcFilterColumn::eq_column(column, value));
         self
     }
 }
@@ -508,7 +531,15 @@ impl RdbcFilterColumn {
         RdbcFilterColumn::Table(RdbcTableFilterColumn {
             column_: RdbcColumn::column(column),
             compare_: RdbcCompareType::Eq,
-            value: Some(RdbcValue::String(value.to_string())),
+            value: Some(RdbcColumn::rdbc_value(RdbcValue::String(value.to_string()))),
+            ignore_null: false,
+        })
+    }
+    pub fn eq_column(column: RdbcColumn, value: RdbcColumn) -> RdbcFilterColumn {
+        RdbcFilterColumn::Table(RdbcTableFilterColumn {
+            column_: column,
+            compare_: RdbcCompareType::Eq,
+            value: Some(value),
             ignore_null: false,
         })
     }
@@ -517,7 +548,7 @@ impl RdbcFilterColumn {
 pub struct RdbcTableFilterColumn {
     column_: RdbcColumn,
     compare_: RdbcCompareType,
-    value: Option<RdbcValue>,
+    value: Option<RdbcColumn>,
     ignore_null: bool,
 }
 
@@ -594,4 +625,12 @@ pub fn right_table<T>(table: T) -> RdbcTable where T: ToString {
 
 pub fn full_table<T>(table: T) -> RdbcTable where T: ToString {
     RdbcTable::table(table)
+}
+
+pub fn simple_column<T, V>(table: T, column: V) -> RdbcColumn where T: ToString, V: ToString {
+    RdbcColumn::column_as_alias(table, column)
+}
+
+pub fn value_column<V>(column: V) -> RdbcColumn where V: ToString {
+    RdbcColumn::rdbc_value(RdbcValue::String(column.to_string()))
 }

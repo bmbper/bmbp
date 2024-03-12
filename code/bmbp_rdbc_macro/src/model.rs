@@ -1,10 +1,12 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use tokio_postgres::Row;
 use tokio_postgres::types::Date;
 use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcValue};
-use crate::{RDBC_DATA_CREATE_TIME, RDBC_DATA_CREATE_USER, RDBC_DATA_FLAG, RDBC_DATA_ID, RDBC_DATA_LEVEL, RDBC_DATA_OWNER_ORG, RDBC_DATA_REMARK, RDBC_DATA_SIGN, RDBC_DATA_SORT, RDBC_DATA_STATUS, RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_TREE_CODE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH, RDBC_TREE_NODE_LEAF, RDBC_TREE_NODE_LEVEL, RDBC_TREE_NODE_TYPE, RDBC_TREE_PARENT_CODE};
+use uuid::{uuid, Uuid};
+use crate::{RDBC_DATA_CREATE_TIME, RDBC_DATA_CREATE_USER, RDBC_DATA_FLAG, RDBC_DATA_ID, RDBC_DATA_LEVEL, RDBC_DATA_OWNER_ORG, RDBC_DATA_REMARK, RDBC_DATA_SIGN, RDBC_DATA_SORT, RDBC_DATA_STATUS, RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_ENABLE, RDBC_NEW_FLAG, RDBC_TREE_CODE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH, RDBC_TREE_NODE_LEAF, RDBC_TREE_NODE_LEVEL, RDBC_TREE_NODE_TYPE, RDBC_TREE_PARENT_CODE};
 
 /// RdbcModel 定义数据库表标记
 pub trait RdbcModel {
@@ -177,6 +179,41 @@ impl<T> BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcMode
         delete.delete_table(T::get_table_name());
         delete
     }
+
+    pub fn init_values(&mut self) -> &mut Self{
+        if self.get_data_id().is_none(){
+            self.set_data_id(Uuid::new_v4().to_string());
+        }
+        if self.get_data_flag().is_none(){
+            self.set_data_flag(RDBC_NEW_FLAG.to_string());
+        }
+        if self.get_data_sort().is_none(){
+            self.set_data_sort(0);
+        }
+        if self.get_data_remark().is_none(){
+            self.set_data_remark("".to_string());
+        }
+        if self.get_data_create_time().is_none(){
+            self.set_data_create_time( Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
+        }
+        if self.get_data_create_user().is_none(){
+            self.set_data_create_user("".to_string());
+        }
+        if self.get_data_update_time().is_none(){
+            self.set_data_update_time( Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
+        }
+        if self.get_data_update_user().is_none(){
+            self.set_data_update_user("".to_string());
+        }
+        if self.get_data_owner_org().is_none(){
+            self.set_data_owner_org("".to_string());
+        }
+        if self.get_data_sign().is_none(){
+            self.set_data_sign("".to_string());
+        }
+        self
+    }
+
 }
 
 impl<T> RdbcModel for BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcModel {
@@ -637,6 +674,45 @@ impl<T> BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + RdbcMo
         let mut delete = Delete::new();
         delete.delete_table(T::get_table_name());
         delete
+    }
+    pub fn init_values(&mut self) -> &mut Self{
+        if self.get_data_id().is_none(){
+            self.set_data_id(Uuid::new_v4().to_string());
+        }
+        if self.get_data_flag().is_none(){
+            self.set_data_flag(RDBC_NEW_FLAG.to_string());
+        }
+        if self.get_data_level().is_none(){
+            self.set_data_level("0".to_string());
+        }
+        if self.get_data_status().is_none(){
+            self.set_data_status(RDBC_ENABLE.to_string());
+        }
+        if self.get_data_sort().is_none(){
+            self.set_data_sort(0);
+        }
+        if self.get_data_remark().is_none(){
+            self.set_data_remark("".to_string());
+        }
+        if self.get_data_create_time().is_none(){
+            self.set_data_create_time( Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
+        }
+        if self.get_data_create_user().is_none(){
+            self.set_data_create_user("".to_string());
+        }
+        if self.get_data_update_time().is_none(){
+            self.set_data_update_time( Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
+        }
+        if self.get_data_update_user().is_none(){
+            self.set_data_update_user("".to_string());
+        }
+        if self.get_data_owner_org().is_none(){
+            self.set_data_owner_org("".to_string());
+        }
+        if self.get_data_sign().is_none(){
+            self.set_data_sign("".to_string());
+        }
+        self
     }
 }
 

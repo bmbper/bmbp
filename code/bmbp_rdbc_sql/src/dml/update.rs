@@ -3,7 +3,7 @@ use crate::{DatabaseType, RdbcColumn, RdbcFilter, RdbcDmlValue, RdbcOrder, RdbcT
 
 pub struct Update {
     driver_: Option<DatabaseType>,
-    set_values_: Option<HashMap<String, RdbcDmlValue>>,
+    set_values_: Option<HashMap<String, Option<RdbcDmlValue>>>,
     table_: Vec<RdbcTable>,
     join_: Option<Vec<RdbcTable>>,
     filter_: Option<RdbcFilter>,
@@ -73,7 +73,7 @@ impl Update {
         self.table_.push(RdbcTable::schema_table(schema, table));
         self
     }
-    pub fn update_table_alias<T>(&mut self, table: T, alias: T) -> &mut Self where T: ToString {
+    pub fn update_table_alias<T, V>(&mut self, table: T, alias: V) -> &mut Self where T: ToString, V: ToString {
         self.table_.push(RdbcTable::table_alias(table, alias));
         self
     }
@@ -228,17 +228,31 @@ impl Update {
             self.set_values_ = Some(HashMap::new());
         }
         let value = RdbcDmlValue::VALUE(RdbcValue::String(value.to_string()));
-        self.set_values_.as_mut().unwrap().insert(column.to_string(), value);
+        self.set_values_.as_mut().unwrap().insert(column.to_string(), Some(value));
         self
     }
-
+    pub fn set_op<T, V>(&mut self, column: T, value: Option<V>) -> &mut Self where T: ToString, V: ToString {
+        if self.set_values_.is_none() {
+            self.set_values_ = Some(HashMap::new());
+        }
+        let r_value = match value {
+            Some(v) => {
+                RdbcValue::String(v.to_string())
+            }
+            None => {
+                RdbcValue::Null
+            }
+        };
+        self.set_values_.as_mut().unwrap().insert(column.to_string(), Some(RdbcDmlValue::VALUE(r_value)));
+        self
+    }
 
     pub fn set_column<V>(&mut self, column: RdbcTableColumn, value: V) -> &mut Self where V: ToString {
         if self.set_values_.is_none() {
             self.set_values_ = Some(HashMap::new());
         }
         let value = RdbcDmlValue::VALUE(RdbcValue::String(value.to_string()));
-        self.set_values_.as_mut().unwrap().insert(column.to_sql(), value);
+        self.set_values_.as_mut().unwrap().insert(column.to_sql(), Some(value));
         self
     }
 
@@ -246,12 +260,12 @@ impl Update {
         if self.set_values_.is_none() {
             self.set_values_ = Some(HashMap::new());
         }
-        self.set_values_.as_mut().unwrap().insert(column.to_sql(), value);
+        self.set_values_.as_mut().unwrap().insert(column.to_sql(), Some(value));
         self
     }
 }
 
-impl Update{
+impl Update {
     pub fn and(&mut self) -> &mut Self {
         self.create_filter(RdbcConcatType::And);
         self
@@ -419,5 +433,4 @@ impl Update{
     pub fn not_exists_query<T>(&mut self, column: RdbcColumn, value: Query) -> &mut Self {
         self
     }
-
 }

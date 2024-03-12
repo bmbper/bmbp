@@ -34,7 +34,7 @@ pub async fn find_dict_info(
     _res: &mut Response,
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
     let dict_id = req.param::<String>("recordId");
-    Ok(RespVo::ok_option(BmbpRbacDictService::query_dict_by_id(dict_id).await?))
+    Ok(RespVo::ok_option(BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?))
 }
 
 #[handler]
@@ -43,14 +43,14 @@ pub async fn save_dict(
     _res: &mut Response,
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
     let mut dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
-    let dict_id = dict_params.get_data_id().clone().cloned();
-    let mut dict_info = BmbpRbacDictService::query_dict_by_id(dict_id.clone()).await?;
+    let dict_id = dict_params.get_data_id().cloned();
+    let mut dict_info = BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?;
     if dict_info.is_none() {
         BmbpRbacDictService::insert_dict_info(dict_params).await?;
     } else {
         BmbpRbacDictService::update_dict_info(dict_params).await?;
     }
-    dict_info = BmbpRbacDictService::query_dict_by_id(dict_id).await?;
+    dict_info = BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?;
     Ok(RespVo::ok_option(dict_info))
 }
 

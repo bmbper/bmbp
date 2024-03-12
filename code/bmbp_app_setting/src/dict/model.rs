@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 use bmbp_app_common::{BmbpPageParam};
 use bmbp_rdbc_orm::{RdbcModel, BmbpOrmRdbcTree, RdbcOrmRow};
@@ -50,40 +51,40 @@ type DictPageQueryParams = BmbpPageParam<DictQueryParams>;
 #[serde(default)]
 pub struct BmbpSettingDict {
     // 字典别名
-    dict_alise: String,
+    dict_alias: Option<String>,
     // 字典值
-    dict_value: String,
+    dict_value: Option<String>,
     // 字典类型
-    dict_type: BmbpDictType,
+    dict_type: Option<BmbpDictType>,
 }
 
 impl BmbpSettingDict {
     pub fn new() -> Self {
         BmbpSettingDict {
-            dict_alise: "".to_string(),
-            dict_value: "".to_string(),
-            dict_type: Custom,
+            dict_alias:None,
+            dict_value: None,
+            dict_type: None,
         }
     }
-    pub fn get_dict_alise(&self) -> &String {
-        &self.dict_alise
+    pub fn get_dict_alias(&self) -> Option<&String> {
+        self.dict_alias.as_ref()
     }
-    pub fn set_dict_alise(&mut self, dict_alise: String) -> &mut Self {
-        self.dict_alise = dict_alise;
+    pub fn set_dict_alias(&mut self, dict_alias: String) -> &mut Self {
+        self.dict_alias = Some(dict_alias);
         self
     }
-    pub fn get_dict_value(&self) -> &String {
-        &self.dict_value
+    pub fn get_dict_value(&self) -> Option<&String> {
+        self.dict_value.as_ref()
     }
     pub fn set_dict_value(&mut self, dict_value: String) -> &mut Self {
-        self.dict_value = dict_value;
+        self.dict_value = Some(dict_value);
         self
     }
-    pub fn get_dict_type(&self) -> &BmbpDictType {
-        &self.dict_type
+    pub fn get_dict_type(&self) -> Option<&BmbpDictType> {
+        self.dict_type.as_ref()
     }
     pub fn set_dict_type(&mut self, dict_type: BmbpDictType) -> &mut Self {
-        self.dict_type = dict_type;
+        self.dict_type = Some(dict_type);
         self
     }
 }
@@ -92,7 +93,7 @@ impl From<RdbcOrmRow> for BmbpSettingDict {
     fn from(row: RdbcOrmRow) -> Self {
         let mut dict = BmbpSettingDict::default();
         if let Some(data) = row.get_data().get("dict_alias") {
-            dict.set_dict_alise(data.to_string());
+            dict.set_dict_alias(data.to_string());
         }
         if let Some(data) = row.get_data().get("dict_value") {
             dict.set_dict_value(data.to_string());
@@ -141,6 +142,19 @@ impl BmbpDictType {
 impl Default for BmbpDictType {
     fn default() -> Self {
         Custom
+    }
+}
+impl Display for BmbpDictType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            Inner => {
+                "0".to_string()
+            }
+            Custom => {
+                "1".to_string()
+            }
+        };
+        write!(f, "{}", str)
     }
 }
 

@@ -28,3 +28,5 @@ pub const RDBC_ENABLE: i8 = 1;
 pub const RDBC_DISABLE: i8 = 0;
 pub const RDBC_DELETE_FLAG: i8 = -1;
 pub const RDBC_NEW_FLAG: i8 = 0;
+
+pub const RDBC_TREE_ROOT_NODE:&str ="0";
