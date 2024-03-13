@@ -12,6 +12,12 @@ pub enum RdbcValue {
     Null,
 }
 
+impl From<i64> for RdbcValue{
+    fn from(i: i64) -> RdbcValue {
+        RdbcValue::BigInt(i)
+    }
+}
+
 impl RdbcValue {
     pub fn get_string(&self) -> String {
         match self {

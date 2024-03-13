@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::{DatabaseType, RdbcColumn, RdbcFilter, RdbcDmlValue, RdbcOrder, RdbcTable, RdbcValue, RdbcTableColumn, RdbcSQL, table, Query, RdbcTableJoinType, RdbcConcatType};
+use crate::{DatabaseType, RdbcColumn, RdbcFilter, RdbcDmlValue, RdbcOrder, RdbcTable, RdbcValue, RdbcTableColumn, RdbcSQL, table, Query, RdbcTableJoinType, RdbcConcatType, RdbcQueryFilter, Delete};
 
 pub struct Update {
     driver_: Option<DatabaseType>,
@@ -57,6 +57,7 @@ impl Update {
         }
     }
 }
+
 
 impl Update {
     fn create_filter(&mut self, concat: RdbcConcatType) -> &mut Self {
@@ -275,7 +276,6 @@ impl Update {
         self.set_values_.as_mut().unwrap().insert(column.to_sql(), Some(RdbcDmlValue::COLUMN(value)));
         self
     }
-
 }
 
 impl Update {

@@ -180,40 +180,39 @@ impl<T> BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcMode
         delete
     }
 
-    pub fn init_values(&mut self) -> &mut Self{
-        if self.get_data_id().is_none(){
+    pub fn init_values(&mut self) -> &mut Self {
+        if self.get_data_id().is_none() {
             self.set_data_id(Uuid::new_v4().to_string());
         }
-        if self.get_data_flag().is_none(){
+        if self.get_data_flag().is_none() {
             self.set_data_flag(RDBC_NEW_FLAG.to_string());
         }
-        if self.get_data_sort().is_none(){
+        if self.get_data_sort().is_none() {
             self.set_data_sort(0);
         }
-        if self.get_data_remark().is_none(){
+        if self.get_data_remark().is_none() {
             self.set_data_remark("".to_string());
         }
-        if self.get_data_create_time().is_none(){
-            self.set_data_create_time( Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
+        if self.get_data_create_time().is_none() {
+            self.set_data_create_time(Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
         }
-        if self.get_data_create_user().is_none(){
+        if self.get_data_create_user().is_none() {
             self.set_data_create_user("".to_string());
         }
-        if self.get_data_update_time().is_none(){
-            self.set_data_update_time( Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
+        if self.get_data_update_time().is_none() {
+            self.set_data_update_time(Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
         }
-        if self.get_data_update_user().is_none(){
+        if self.get_data_update_user().is_none() {
             self.set_data_update_user("".to_string());
         }
-        if self.get_data_owner_org().is_none(){
+        if self.get_data_owner_org().is_none() {
             self.set_data_owner_org("".to_string());
         }
-        if self.get_data_sign().is_none(){
+        if self.get_data_sign().is_none() {
             self.set_data_sign("".to_string());
         }
         self
     }
-
 }
 
 impl<T> RdbcModel for BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcModel {
@@ -675,41 +674,41 @@ impl<T> BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + RdbcMo
         delete.delete_table(T::get_table_name());
         delete
     }
-    pub fn init_values(&mut self) -> &mut Self{
-        if self.get_data_id().is_none(){
+    pub fn init_values(&mut self) -> &mut Self {
+        if self.get_data_id().is_none() {
             self.set_data_id(Uuid::new_v4().to_string());
         }
-        if self.get_data_flag().is_none(){
+        if self.get_data_flag().is_none() {
             self.set_data_flag(RDBC_NEW_FLAG.to_string());
         }
-        if self.get_data_level().is_none(){
+        if self.get_data_level().is_none() {
             self.set_data_level("0".to_string());
         }
-        if self.get_data_status().is_none(){
+        if self.get_data_status().is_none() {
             self.set_data_status(RDBC_ENABLE.to_string());
         }
-        if self.get_data_sort().is_none(){
+        if self.get_data_sort().is_none() {
             self.set_data_sort(0);
         }
-        if self.get_data_remark().is_none(){
+        if self.get_data_remark().is_none() {
             self.set_data_remark("".to_string());
         }
-        if self.get_data_create_time().is_none(){
-            self.set_data_create_time( Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
+        if self.get_data_create_time().is_none() {
+            self.set_data_create_time(Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
         }
-        if self.get_data_create_user().is_none(){
+        if self.get_data_create_user().is_none() {
             self.set_data_create_user("".to_string());
         }
-        if self.get_data_update_time().is_none(){
-            self.set_data_update_time( Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
+        if self.get_data_update_time().is_none() {
+            self.set_data_update_time(Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
         }
-        if self.get_data_update_user().is_none(){
+        if self.get_data_update_user().is_none() {
             self.set_data_update_user("".to_string());
         }
-        if self.get_data_owner_org().is_none(){
+        if self.get_data_owner_org().is_none() {
             self.set_data_owner_org("".to_string());
         }
-        if self.get_data_sign().is_none(){
+        if self.get_data_sign().is_none() {
             self.set_data_sign("".to_string());
         }
         self
@@ -1031,5 +1030,13 @@ impl From<Row> for RdbcOrmRow {
     }
 }
 
+
+pub struct RdbcTreeUtil;
+
+impl RdbcTreeUtil {
+    pub fn build_tree<T>(data: Vec<T>) -> Vec<T> where T: RdbcTree<T> {
+        data
+    }
+}
 
 

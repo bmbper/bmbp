@@ -1,7 +1,6 @@
-use serde_json::to_string;
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
 use bmbp_app_utils::{is_empty_string, simple_uuid_upper};
-use bmbp_rdbc_orm::{RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_ROOT_NODE, RdbcColumn, RdbcModel, RdbcTable, RdbcTree, simple_column, table_column, Update, value_column};
+use bmbp_rdbc_orm::{RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_ROOT_NODE, RdbcColumn, RdbcModel, RdbcTable, RdbcTree, RdbcTreeUtil, RdbcValue, simple_column, table_column, Update, value_column};
 use crate::dict::dao::{BmbpRbacDictDao};
 use crate::dict::model::{BmbpDictType, BmbpSettingDict, BmbpSettingDictOrmModel, DictQueryParams};
 use crate::dict::scripts::BmbpRdbcDictScript;
@@ -11,7 +10,8 @@ pub struct BmbpRbacDictService {}
 impl BmbpRbacDictService {
     pub async fn query_dict_tree(params: DictQueryParams) -> BmbpResp<Option<Vec<BmbpSettingDictOrmModel>>> {
         if let Some(dict_list) = Self::query_dict_list(params).await? {
-            return Ok(Some(dict_list));
+            let dict_tree = RdbcTreeUtil::build_tree(dict_list);
+            return Ok(Some(dict_tree));
         }
         Ok(None)
     }
@@ -255,9 +255,22 @@ impl BmbpRbacDictService {
         BmbpRbacDictDao::execute_delete(&delete_dict).await
     }
 
-    pub async fn query_dict_tree_exclude_by_id(_dict_id: Option<String>) -> BmbpResp<Option<Vec<BmbpSettingDictOrmModel>>> {
+    pub async fn query_dict_tree_exclude_by_id(dict_id: Option<String>) -> BmbpResp<Option<Vec<BmbpSettingDictOrmModel>>> {
+        if let Some(dict_list) = Self::query_dict_list_exclude_by_id(dict_id).await? {
+            let dict_tree = RdbcTreeUtil::build_tree(dict_list);
+            return Ok(Some(dict_tree));
+        }
         Ok(None)
     }
+    pub async fn query_dict_list_exclude_by_id(dict_id: Option<String>) -> BmbpResp<Option<Vec<BmbpSettingDictOrmModel>>> {
+        let mut query = BmbpRdbcDictScript::build_query_script();
+        if !dict_id.is_none() {
+            query.not_like_left("code_path", dict_id);
+        }
+
+        BmbpRbacDictDao::select_list_by_query(&query).await
+    }
+
 
     pub async fn update_dict_parent(_dict_id: Option<String>, _parent_code: Option<String>) -> BmbpResp<usize> {
         Ok(0)

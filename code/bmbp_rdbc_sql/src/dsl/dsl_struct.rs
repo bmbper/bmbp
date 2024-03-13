@@ -653,3 +653,4 @@ pub fn simple_column<T, V>(table: T, column: V) -> RdbcColumn where T: ToString,
 pub fn value_column<V>(column: V) -> RdbcColumn where V: ToString {
     RdbcColumn::rdbc_value(RdbcValue::String(column.to_string()))
 }
+

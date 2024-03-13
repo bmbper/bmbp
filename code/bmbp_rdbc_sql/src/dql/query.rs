@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::{RdbcFilter, RdbcOrder, RdbcSQL, RdbcColumn, RdbcTable, RdbcValue, RdbcFunc, RdbcCompareType, RdbcConcatType, RdbcValueFilterItem, RdbcFilterItem, RdbcTableJoinType, table, DatabaseType};
+use crate::{RdbcFilter, RdbcOrder, RdbcSQL, RdbcColumn, RdbcTable, RdbcValue, RdbcFunc, RdbcCompareType, RdbcConcatType, RdbcValueFilterItem, RdbcFilterItem, RdbcTableJoinType, table, DatabaseType, RdbcQueryFilter};
 
 pub struct Query {
     driver_: Option<DatabaseType>,
@@ -474,13 +474,13 @@ impl Query {
         self
     }
 
-    pub fn like<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+    pub fn like<V, T>(&mut self, column: V, value: Option<T>) -> &mut Self where V: ToString, T: ToString {
         self
     }
-    pub fn like_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+    pub fn column_like<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
         self
     }
-    pub fn like_string<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+    pub fn column_like_column<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
         self
     }
 
@@ -514,7 +514,10 @@ impl Query {
         self
     }
 
-    pub fn not_like_left<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
+    pub fn not_like_left<T, V>(&mut self, column: T, value: Option<V>) -> &mut Self where T: ToString, V: ToString {
+        self
+    }
+    pub fn column_not_like_left<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {
         self
     }
     pub fn not_like_left_raw<T>(&mut self, column: RdbcColumn, value: Option<T>) -> &mut Self where T: ToString {

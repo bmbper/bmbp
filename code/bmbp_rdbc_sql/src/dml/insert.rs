@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::{DatabaseType, Query, RdbcDmlValue, RdbcSQL, RdbcTable, RdbcValue};
+use crate::{DatabaseType, Delete, Query, RdbcDmlValue, RdbcQueryFilter, RdbcSQL, RdbcTable, RdbcValue};
 
 pub struct Insert {
     driver_: Option<DatabaseType>,

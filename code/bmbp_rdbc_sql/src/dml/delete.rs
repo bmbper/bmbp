@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::{DatabaseType, Query, RdbcColumn, RdbcConcatType, RdbcFilter, RdbcOrder, RdbcSQL, RdbcTable, RdbcTableJoinType, RdbcValue, Update};
+use crate::{DatabaseType, Query, RdbcColumn, RdbcConcatType, RdbcFilter, RdbcOrder, RdbcQueryFilter, RdbcSQL, RdbcTable, RdbcTableJoinType, RdbcValue, Update};
 
 pub struct Delete {
     driver_: Option<DatabaseType>,
@@ -221,7 +221,7 @@ impl Delete {
     }
 }
 
-impl Delete{
+impl Delete {
     pub fn and(&mut self) -> &mut Self {
         self.create_filter(RdbcConcatType::And);
         self
@@ -389,5 +389,4 @@ impl Delete{
     pub fn not_exists_query<T>(&mut self, column: RdbcColumn, value: Query) -> &mut Self {
         self
     }
-
 }
