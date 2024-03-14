@@ -1,14 +1,14 @@
 use std::collections::HashMap;
-use crate::{DatabaseType, RdbcColumn, RdbcFilter, RdbcDmlValue, RdbcOrder, RdbcTable, RdbcValue, RdbcTableColumn, RdbcSQL, table, Query, RdbcTableJoinType, RdbcConcatType, RdbcQueryFilter, Delete};
+use crate::{DatabaseType, RdbcColumn, RdbcFilterInner, RdbcDmlValue, RdbcOrder, RdbcTableInner, RdbcValue, RdbcTableColumn, RdbcSQL, table, Query, RdbcTableJoinType, RdbcConcatType, RdbcFilter, Delete};
 
 pub struct Update {
     driver_: Option<DatabaseType>,
     set_values_: Option<HashMap<String, Option<RdbcDmlValue>>>,
-    table_: Vec<RdbcTable>,
-    join_: Option<Vec<RdbcTable>>,
-    filter_: Option<RdbcFilter>,
+    table_: Vec<RdbcTableInner>,
+    join_: Option<Vec<RdbcTableInner>>,
+    filter_: Option<RdbcFilterInner>,
     group_by_: Option<Vec<RdbcColumn>>,
-    having_: Option<RdbcFilter>,
+    having_: Option<RdbcFilterInner>,
     order_: Option<Vec<RdbcOrder>>,
     limit_: Option<u64>,
     offset_: Option<u64>,
@@ -62,75 +62,75 @@ impl Update {
 impl Update {
     fn create_filter(&mut self, concat: RdbcConcatType) -> &mut Self {
         let filter = self.filter_.take().unwrap();
-        let new_filter = RdbcFilter::concat_with_filter(concat, filter);
+        let new_filter = RdbcFilterInner::concat_with_filter(concat, filter);
         self.filter_ = Some(new_filter);
         self
     }
     pub fn update_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
-        self.table_.push(RdbcTable::table(table));
+        self.table_.push(RdbcTableInner::table(table));
         self
     }
     pub fn update_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
-        self.table_.push(RdbcTable::schema_table(schema, table));
+        self.table_.push(RdbcTableInner::schema_table(schema, table));
         self
     }
     pub fn update_table_alias<T, V>(&mut self, table: T, alias: V) -> &mut Self where T: ToString, V: ToString {
-        self.table_.push(RdbcTable::table_alias(table, alias));
+        self.table_.push(RdbcTableInner::table_alias(table, alias));
         self
     }
     pub fn update_schema_table_alias<T>(&mut self, schema: T, table: T, alias: T) -> &mut Self where T: ToString {
-        self.table_.push(RdbcTable::schema_table_alias(schema, table, alias));
+        self.table_.push(RdbcTableInner::schema_table_alias(schema, table, alias));
         self
     }
     pub fn update_temp_table(&mut self, table: Query) -> &mut Self {
-        self.table_.push(RdbcTable::temp_table(table));
+        self.table_.push(RdbcTableInner::temp_table(table));
         self
     }
     pub fn update_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
-        self.table_.push(RdbcTable::temp_table_alias(table, alias));
+        self.table_.push(RdbcTableInner::temp_table_alias(table, alias));
         self
     }
-    pub fn update_rdbc_table(&mut self, table: RdbcTable) -> &mut Self {
+    pub fn update_rdbc_table(&mut self, table: RdbcTableInner) -> &mut Self {
         self.table_.push(table);
         self
     }
 
     pub fn join_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
-        self.join_.as_mut().unwrap().push(RdbcTable::table(table));
+        self.join_.as_mut().unwrap().push(RdbcTableInner::table(table));
         self
     }
-    pub fn on(&mut self) -> Option<&mut RdbcTable> {
+    pub fn on(&mut self) -> Option<&mut RdbcTableInner> {
         self.join_.as_mut().unwrap().get_mut(0)
     }
-    pub fn on_index(&mut self, index: usize) -> Option<&mut RdbcTable> {
+    pub fn on_index(&mut self, index: usize) -> Option<&mut RdbcTableInner> {
         self.join_.as_mut().unwrap().get_mut(index)
     }
     pub fn join_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
-        self.join_.as_mut().unwrap().push(RdbcTable::schema_table(schema, table));
+        self.join_.as_mut().unwrap().push(RdbcTableInner::schema_table(schema, table));
         self
     }
     pub fn join_table_alias<T>(&mut self, table: T, alias: T) -> &mut Self where T: ToString {
-        self.join_.as_mut().unwrap().push(RdbcTable::table_alias(table, alias));
+        self.join_.as_mut().unwrap().push(RdbcTableInner::table_alias(table, alias));
         self
     }
     pub fn join_schema_table_alias<T>(&mut self, schema: T, table: T, alias: T) -> &mut Self where T: ToString {
-        self.join_.as_mut().unwrap().push(RdbcTable::schema_table_alias(schema, table, alias));
+        self.join_.as_mut().unwrap().push(RdbcTableInner::schema_table_alias(schema, table, alias));
         self
     }
     pub fn join_temp_table(&mut self, table: Query) -> &mut Self {
-        self.join_.as_mut().unwrap().push(RdbcTable::temp_table(table));
+        self.join_.as_mut().unwrap().push(RdbcTableInner::temp_table(table));
         self
     }
     pub fn join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
-        self.join_.as_mut().unwrap().push(RdbcTable::temp_table_alias(table, alias));
+        self.join_.as_mut().unwrap().push(RdbcTableInner::temp_table_alias(table, alias));
         self
     }
-    pub fn join_rdbc_table(&mut self, table: RdbcTable) -> &mut Self {
+    pub fn join_rdbc_table(&mut self, table: RdbcTableInner) -> &mut Self {
         self.join_.as_mut().unwrap().push(table);
         self
     }
     pub fn left_join_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
-        self.join_.as_mut().unwrap().push(RdbcTable::left_join_table(table));
+        self.join_.as_mut().unwrap().push(RdbcTableInner::left_join_table(table));
         self
     }
     pub fn left_join_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
@@ -148,7 +148,7 @@ impl Update {
     pub fn left_join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
         self
     }
-    pub fn left_join_rdbc_table(&mut self, mut table: RdbcTable) -> &mut Self {
+    pub fn left_join_rdbc_table(&mut self, mut table: RdbcTableInner) -> &mut Self {
         table.join(RdbcTableJoinType::Left);
         self.join_.as_mut().unwrap().push(table);
         self
@@ -171,7 +171,7 @@ impl Update {
     pub fn right_join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
         self
     }
-    pub fn right_join_rdbc_table(&mut self, mut table: RdbcTable) -> &mut Self {
+    pub fn right_join_rdbc_table(&mut self, mut table: RdbcTableInner) -> &mut Self {
         table.join(RdbcTableJoinType::Right);
         self.join_.as_mut().unwrap().push(table);
         self
@@ -195,7 +195,7 @@ impl Update {
     pub fn full_join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
         self
     }
-    pub fn full_join_rdbc_table(&mut self, mut table: RdbcTable) -> &mut Self {
+    pub fn full_join_rdbc_table(&mut self, mut table: RdbcTableInner) -> &mut Self {
         table.join(RdbcTableJoinType::Full);
         self.join_.as_mut().unwrap().push(table);
         self
@@ -218,7 +218,7 @@ impl Update {
     pub fn inner_join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self where T: ToString {
         self
     }
-    pub fn inner_join_rdbc_table(&mut self, mut table: RdbcTable) -> &mut Self {
+    pub fn inner_join_rdbc_table(&mut self, mut table: RdbcTableInner) -> &mut Self {
         table.join(RdbcTableJoinType::Inner);
         self.join_.as_mut().unwrap().push(table);
         self

@@ -1,6 +1,7 @@
 use std::fmt::Display;
 use chrono::Utc;
-#[derive(Debug,Clone)]
+
+#[derive(Debug, Clone)]
 pub enum RdbcValue {
     Int(i16),
     BigInt(i64),
@@ -12,9 +13,36 @@ pub enum RdbcValue {
     Null,
 }
 
-impl From<i64> for RdbcValue{
+impl From<i64> for RdbcValue {
     fn from(i: i64) -> RdbcValue {
         RdbcValue::BigInt(i)
+    }
+}
+
+impl From<String> for RdbcValue {
+    fn from(s: String) -> RdbcValue {
+        RdbcValue::String(s)
+    }
+}
+
+impl From<&String> for RdbcValue {
+    fn from(s: &String) -> RdbcValue {
+        RdbcValue::String(s.to_string())
+    }
+}
+
+impl From<&str> for RdbcValue {
+    fn from(s: &str) -> RdbcValue {
+        RdbcValue::String(s.to_string())
+    }
+}
+
+impl From<Option<String>> for RdbcValue {
+    fn from(value: Option<String>) -> Self {
+        match value {
+            Some(s) => RdbcValue::String(s.to_string()),
+            None => RdbcValue::Null
+        }
     }
 }
 

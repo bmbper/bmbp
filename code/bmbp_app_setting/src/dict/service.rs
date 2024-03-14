@@ -1,6 +1,6 @@
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
 use bmbp_app_utils::{is_empty_string, simple_uuid_upper};
-use bmbp_rdbc_orm::{RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_ROOT_NODE, RdbcColumn, RdbcModel, RdbcTable, RdbcTree, RdbcTreeUtil, RdbcValue, simple_column, table_column, Update, value_column};
+use bmbp_rdbc_orm::{RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_ROOT_NODE, RdbcColumn, RdbcFilter, RdbcModel, RdbcTableInner, RdbcTree, RdbcTreeUtil, RdbcValue, simple_column, table_column, Update, value_column};
 use crate::dict::dao::{BmbpRbacDictDao};
 use crate::dict::model::{BmbpDictType, BmbpSettingDict, BmbpSettingDictOrmModel, DictQueryParams};
 use crate::dict::scripts::BmbpRdbcDictScript;
@@ -33,7 +33,7 @@ impl BmbpRbacDictService {
             return Ok(None);
         }
         let mut query = BmbpRdbcDictScript::build_query_script();
-        query.eq(BmbpSettingDict::get_table_primary_key(), id.unwrap());
+        query.eq_(BmbpSettingDict::get_table_primary_key(), id.unwrap());
         BmbpRbacDictDao::select_one_by_query(&query).await
     }
 
@@ -92,7 +92,7 @@ impl BmbpRbacDictService {
 
     async fn query_dict_by_code(code: &String) -> BmbpResp<Option<BmbpSettingDictOrmModel>> {
         let mut query = BmbpRdbcDictScript::build_query_script();
-        query.eq("code", code);
+        query.eq_("code", code);
         BmbpRbacDictDao::select_one_by_query(&query).await
     }
 
@@ -207,7 +207,7 @@ impl BmbpRbacDictService {
         // WHERE t1.CODE_PATH LIKE '/9bd807b3c9db4aa6891e2fa4b099094e/95164d9eed66476387a8417154843672/%';
         let mut update = Update::new();
         update.update_table_alias(BmbpSettingDict::get_table_name(), "t1".to_string());
-        let mut join_table = RdbcTable::table_alias(BmbpSettingDict::get_table_name(), "t2".to_string());
+        let mut join_table = RdbcTableInner::table_alias(BmbpSettingDict::get_table_name(), "t2".to_string());
         join_table.on_eq("t2", "parent_code", "t1", "code");
         update.join_rdbc_table(join_table);
         let concat_column = RdbcColumn::concat(vec![simple_column("t2", "name_path"), simple_column("t1", "name"), value_column("/")]);
@@ -222,7 +222,7 @@ impl BmbpRbacDictService {
         // WHERE t1.CODE_PATH LIKE '/9bd807b3c9db4aa6891e2fa4b099094e/95164d9eed66476387a8417154843672/%';
         let mut update = Update::new();
         update.update_table_alias(BmbpSettingDict::get_table_name(), "t1".to_string());
-        let mut join_table = RdbcTable::table_alias(BmbpSettingDict::get_table_name(), "t2".to_string());
+        let mut join_table = RdbcTableInner::table_alias(BmbpSettingDict::get_table_name(), "t2".to_string());
         join_table.on_eq("t2", "parent_code", "t1", "code");
         update.join_rdbc_table(join_table);
         let concat_column = RdbcColumn::concat(vec![simple_column("t2", "code_path"), simple_column("t1", "code"), value_column("/")]);

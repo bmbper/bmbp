@@ -1,9 +1,9 @@
 use std::collections::HashMap;
-use crate::{DatabaseType, Delete, Query, RdbcDmlValue, RdbcQueryFilter, RdbcSQL, RdbcTable, RdbcValue};
+use crate::{DatabaseType, Delete, Query, RdbcDmlValue, RdbcFilter, RdbcSQL, RdbcTable, RdbcTableInner, RdbcValue};
 
 pub struct Insert {
     driver_: Option<DatabaseType>,
-    table_: Vec<RdbcTable>,
+    table_: Vec<RdbcTableInner>,
     column_: Option<Vec<String>>,
     values_: Option<Vec<RdbcDmlValue>>,
     column_values: Option<HashMap<String, RdbcDmlValue>>,
@@ -29,11 +29,11 @@ impl Insert {
         self
     }
     pub fn insert_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
-        self.table_.push(RdbcTable::table(table));
+        self.table_.push(RdbcTableInner::table(table));
         self
     }
     pub fn insert_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
-        self.table_.push(RdbcTable::schema_table(schema, table));
+        self.table_.push(RdbcTableInner::schema_table(schema, table));
         self
     }
     pub fn insert_select_query(&mut self, query: Query) -> &mut Self {
@@ -81,6 +81,7 @@ impl Insert {
         self
     }
 }
+impl RdbcTable for Insert{}
 
 impl RdbcSQL for Insert {
     fn to_sql(&self) -> String {

@@ -1,4 +1,4 @@
-use bmbp_rdbc_orm::{Delete, Insert, Query, RDBC_DATA_ID, RDBC_DATA_STATUS, RdbcModel, RdbcTree, Update};
+use bmbp_rdbc_orm::{Delete, Insert, Query, RDBC_DATA_ID, RDBC_DATA_STATUS, RdbcFilter, RdbcModel, RdbcTable, RdbcTree, Update};
 use crate::dict::model::{BmbpSettingDict, BmbpSettingDictOrmModel};
 
 pub struct BmbpRdbcDictScript;
@@ -10,7 +10,7 @@ impl BmbpRdbcDictScript {
         for field in fields {
             query.select(field);
         }
-        query.query_table(BmbpSettingDictOrmModel::get_table_name());
+        query.table(BmbpSettingDictOrmModel::get_table_name());
         query.order_by("data_sort", true);
         query
     }
@@ -42,7 +42,7 @@ impl BmbpRdbcDictScript {
     }
     pub fn build_delete_script(dict_id: Option<String>) -> Delete {
         let mut delete_dict = Delete::new();
-        delete_dict.delete_table(BmbpSettingDict::get_table_name()).eq(BmbpSettingDict::get_table_primary_key(), dict_id.unwrap());
+        delete_dict.table(BmbpSettingDict::get_table_name()).eq_(BmbpSettingDict::get_table_primary_key(), dict_id.unwrap());
         delete_dict
     }
 }

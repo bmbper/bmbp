@@ -4,7 +4,7 @@ use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use tokio_postgres::Row;
 use tokio_postgres::types::Date;
-use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcValue};
+use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcTable, RdbcValue};
 use uuid::{uuid, Uuid};
 use crate::{RDBC_DATA_CREATE_TIME, RDBC_DATA_CREATE_USER, RDBC_DATA_FLAG, RDBC_DATA_ID, RDBC_DATA_LEVEL, RDBC_DATA_OWNER_ORG, RDBC_DATA_REMARK, RDBC_DATA_SIGN, RDBC_DATA_SORT, RDBC_DATA_STATUS, RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_ENABLE, RDBC_NEW_FLAG, RDBC_TREE_CODE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH, RDBC_TREE_NODE_LEAF, RDBC_TREE_NODE_LEVEL, RDBC_TREE_NODE_TYPE, RDBC_TREE_PARENT_CODE};
 
@@ -167,7 +167,7 @@ impl<T> BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcMode
     }
     pub fn build_query() -> Query {
         let mut query = Query::new();
-        query.query_table(T::get_table_name());
+        query.table(T::get_table_name());
         let fields = Self::get_table_fields();
         for field in fields {
             query.select(field);
@@ -176,7 +176,7 @@ impl<T> BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcMode
     }
     pub fn build_delete() -> Delete {
         let mut delete = Delete::new();
-        delete.delete_table(T::get_table_name());
+        delete.table(T::get_table_name());
         delete
     }
 
@@ -662,7 +662,7 @@ impl<T> BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + RdbcMo
     }
     pub fn build_query() -> Query {
         let mut query = Query::new();
-        query.query_table(T::get_table_name());
+        query.table(T::get_table_name());
         let fields = Self::get_table_fields();
         for field in fields {
             query.select(field);
@@ -671,7 +671,7 @@ impl<T> BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + RdbcMo
     }
     pub fn build_delete() -> Delete {
         let mut delete = Delete::new();
-        delete.delete_table(T::get_table_name());
+        delete.table(T::get_table_name());
         delete
     }
     pub fn init_values(&mut self) -> &mut Self {

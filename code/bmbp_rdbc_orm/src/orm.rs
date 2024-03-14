@@ -2,7 +2,7 @@ use std::fmt::Debug;
 use std::sync::Arc;
 use serde::Serialize;
 use bmbp_rdbc_macro::{RdbcModel, RdbcOrmRow, RdbcPage};
-use bmbp_rdbc_sql::{Delete, Insert, Query, Update};
+use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
 use crate::ds::RdbcDataSource;
 use crate::pool::{RdbcConn, RdbcConnPool};
 use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
@@ -72,7 +72,7 @@ impl RdbcOrmInner {
             return Err(RdbcError::new(RdbcErrorType::PrimaryRequired, "请指定要删除的记录"));
         }
         let mut delete_sql = Delete::new();
-        delete_sql.delete_table(T::get_table_name()).eq(T::get_table_primary_key(), id);
+        delete_sql.table(T::get_table_name()).eq_(T::get_table_primary_key(), id);
         self.pool.get_conn().await?.execute_delete(&delete_sql).await
     }
 }

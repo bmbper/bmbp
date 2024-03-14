@@ -1,9 +1,10 @@
-mod dsl_struct;
+mod dsl_model;
 mod dsl_func;
 mod dsl_trait;
 mod dsl_value;
+mod func;
 
-pub use dsl_struct::*;
+pub use dsl_model::*;
 pub use dsl_func::*;
 pub use dsl_trait::*;
 pub use dsl_value::*;
