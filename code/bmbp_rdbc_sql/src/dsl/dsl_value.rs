@@ -1,4 +1,5 @@
 use std::fmt::Display;
+
 use chrono::Utc;
 
 #[derive(Debug, Clone)]
@@ -16,6 +17,12 @@ pub enum RdbcValue {
 impl From<i64> for RdbcValue {
     fn from(i: i64) -> RdbcValue {
         RdbcValue::BigInt(i)
+    }
+}
+
+impl From<i8> for RdbcValue {
+    fn from(i: i8) -> RdbcValue {
+        RdbcValue::Int(i as i16)
     }
 }
 
@@ -37,14 +44,6 @@ impl From<&str> for RdbcValue {
     }
 }
 
-impl From<Option<String>> for RdbcValue {
-    fn from(value: Option<String>) -> Self {
-        match value {
-            Some(s) => RdbcValue::String(s.to_string()),
-            None => RdbcValue::Null
-        }
-    }
-}
 
 impl RdbcValue {
     pub fn get_string(&self) -> String {
@@ -56,7 +55,7 @@ impl RdbcValue {
             RdbcValue::String(i) => i.to_string(),
             RdbcValue::DateTime(i) => i.to_string(),
             RdbcValue::Bool(i) => i.to_string(),
-            RdbcValue::Null => "".to_string()
+            RdbcValue::Null => "".to_string(),
         }
     }
     pub fn get_isize(&self) -> Option<isize> {
@@ -65,7 +64,7 @@ impl RdbcValue {
             RdbcValue::BigInt(i) => Some(i.clone() as isize),
             RdbcValue::Float(i) => Some(i.clone() as isize),
             RdbcValue::BigFloat(i) => Some(i.clone() as isize),
-            _ => None
+            _ => None,
         }
     }
     pub fn get_usize(&self) -> Option<usize> {
@@ -74,7 +73,7 @@ impl RdbcValue {
             RdbcValue::BigInt(i) => Some(i.clone() as usize),
             RdbcValue::Float(i) => Some(i.clone() as usize),
             RdbcValue::BigFloat(i) => Some(i.clone() as usize),
-            _ => None
+            _ => None,
         }
     }
 }

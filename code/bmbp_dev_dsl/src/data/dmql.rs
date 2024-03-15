@@ -2,10 +2,10 @@
 // DML (Data Manipulation Language) 数据操纵语言, 用于对数据库进行增删改查操作
 // DQL (Data Query Language) 数据查询语言, 用于对数据库进行查询操作
 
-use serde::{Deserialize, Serialize};
 use crate::data::ddl::BmbpDBColumn;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug,Clone,Serialize,Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InsetTable {
     // 数据库模式编码
     schema_code: String,
@@ -15,7 +15,11 @@ pub struct InsetTable {
     columns: Vec<BmbpDBDmlColumn>,
 }
 impl InsetTable {
-    pub fn new(schema_code: String, table_code: String, columns: Vec<BmbpDBDmlColumn>) -> InsetTable {
+    pub fn new(
+        schema_code: String,
+        table_code: String,
+        columns: Vec<BmbpDBDmlColumn>,
+    ) -> InsetTable {
         InsetTable {
             schema_code,
             table_code,
@@ -39,15 +43,24 @@ impl InsetTable {
         column_names
     }
     pub fn get_column_values(&self) -> Vec<BmbpDmlColumnValue> {
-        self.columns.iter().map(|column| column.value.clone()).collect()
+        self.columns
+            .iter()
+            .map(|column| column.value.clone())
+            .collect()
     }
 }
 impl Into<String> for InsetTable {
     fn into(self) -> String {
-        format!("INSERT INTO {}.{} ({}) VALUES ({})", self.schema_code, self.table_code, self.columns.join(","), self.columns.join(","))
+        format!(
+            "INSERT INTO {}.{} ({}) VALUES ({})",
+            self.schema_code,
+            self.table_code,
+            self.columns.join(","),
+            self.columns.join(",")
+        )
     }
 }
-#[derive(Debug,Clone,Serialize,Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UpdateTable {
     // 数据库模式编码
     schema_code: String,
@@ -57,14 +70,14 @@ pub struct UpdateTable {
     columns: Vec<BmbpDBDmlColumn>,
 }
 
-#[derive(Debug,Clone,Serialize,Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BmbpDBDmlColumn {
     // 数据库表字段
     column: BmbpDBColumn,
     // 数据库表字段值
     value: BmbpDmlColumnValue,
 }
-#[derive(Debug,Clone,Serialize,Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum BmbpDmlColumnValue {
     // 字符串
     String(String),
@@ -83,7 +96,7 @@ pub enum BmbpDmlColumnValue {
     // SQL
     Sql(String),
 }
-#[derive(Debug,Clone,Serialize,Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DeleteTable {
     // 数据库模式编码
     schema_code: String,
@@ -91,7 +104,7 @@ pub struct DeleteTable {
     table_code: String,
     filter: Option<BmbpDBQueryFilterPart>,
 }
-#[derive(Debug,Clone,Serialize,Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SelectTable {
     // 数据库模式编码
     schema_code: String,
@@ -101,12 +114,12 @@ pub struct SelectTable {
     columns: Vec<BmbpDBQuerySelectColumn>,
     filter: Option<BmbpDBQueryFilterPart>,
 }
-#[derive(Debug,Clone,Serialize,Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BmbpDBQuerySelectColumn {
     typ: BmbpDBQueryColumnType,
     alias: String,
 }
-#[derive(Debug,Clone,Serialize,Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum BmbpDBQueryColumnType {
     // Column
     Column(BmbpDBColumn),
@@ -129,20 +142,20 @@ pub enum BmbpDBQueryColumnType {
     // SQL
     Sql(String),
 }
-#[derive(Debug,Clone,Serialize,Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum BmbpDBQueryFilter {
     And(Vec<BmbpDBQueryFilterPart>),
     OR(Vec<BmbpDBQueryFilterPart>),
     AndQuote(Vec<BmbpDBQueryFilter>),
     OrQuote(Vec<BmbpDBQueryFilter>),
 }
-#[derive(Debug,Clone,Serialize,Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BmbpDBQueryFilterPart {
     column: BmbpDBQueryFilterColumn,
     value: BmbpDmlColumnValue,
 }
 
-#[derive(Debug,Clone,Serialize,Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum BmbpDBQueryFilterColumn {
     // Column
     Column(BmbpDBColumn),
@@ -165,7 +178,7 @@ pub enum BmbpDBQueryFilterColumn {
     // SQL
     Sql(String),
 }
-#[derive(Debug,Clone,Serialize,Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum BmbpDBQueryFilterColumnType {
     // 等于
     Equal,

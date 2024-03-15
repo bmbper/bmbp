@@ -1,5 +1,8 @@
-use bmbp_dev_dsl::{BmbpDBColumn, BmbpDbConstraint, BmbpDbEvent, BmbpDbIndex, BmbpDbProcedure, BmbpDBSchema, BmbpDBTable, BmbpDbTrigger, BmbpDbView};
 use crate::meta::meta::BmbpDbMetaEngine;
+use bmbp_dev_dsl::{
+    BmbpDBColumn, BmbpDBSchema, BmbpDBTable, BmbpDbConstraint, BmbpDbEvent, BmbpDbIndex,
+    BmbpDbProcedure, BmbpDbTrigger, BmbpDbView,
+};
 
 pub struct MysqlMetaEngine;
 impl BmbpDbMetaEngine for MysqlMetaEngine {

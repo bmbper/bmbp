@@ -1,12 +1,18 @@
-use std::collections::{HashMap, HashSet};
-use std::fmt::Debug;
+use crate::{
+    RDBC_DATA_CREATE_TIME, RDBC_DATA_CREATE_USER, RDBC_DATA_FLAG, RDBC_DATA_ID, RDBC_DATA_LEVEL,
+    RDBC_DATA_OWNER_ORG, RDBC_DATA_REMARK, RDBC_DATA_SIGN, RDBC_DATA_SORT, RDBC_DATA_STATUS,
+    RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_ENABLE, RDBC_NEW_FLAG, RDBC_TREE_CODE,
+    RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH, RDBC_TREE_NODE_LEAF,
+    RDBC_TREE_NODE_LEVEL, RDBC_TREE_NODE_TYPE, RDBC_TREE_PARENT_CODE,
+};
+use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcTable, RdbcValue};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use tokio_postgres::Row;
+use std::collections::{HashMap, HashSet};
+use std::fmt::Debug;
 use tokio_postgres::types::Date;
-use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcTable, RdbcValue};
+use tokio_postgres::Row;
 use uuid::{uuid, Uuid};
-use crate::{RDBC_DATA_CREATE_TIME, RDBC_DATA_CREATE_USER, RDBC_DATA_FLAG, RDBC_DATA_ID, RDBC_DATA_LEVEL, RDBC_DATA_OWNER_ORG, RDBC_DATA_REMARK, RDBC_DATA_SIGN, RDBC_DATA_SORT, RDBC_DATA_STATUS, RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_ENABLE, RDBC_NEW_FLAG, RDBC_TREE_CODE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH, RDBC_TREE_NODE_LEAF, RDBC_TREE_NODE_LEVEL, RDBC_TREE_NODE_TYPE, RDBC_TREE_PARENT_CODE};
 
 /// RdbcModel 定义数据库表标记
 pub trait RdbcModel {
@@ -24,7 +30,10 @@ pub trait RdbcModel {
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
-pub struct BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcModel {
+pub struct BmbpRdbcModel<T>
+where
+    T: Default + Debug + Clone + Serialize + RdbcModel,
+{
     /// 记录主键
     data_id: Option<String>,
     /// 记录密级
@@ -53,7 +62,10 @@ pub struct BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcM
     ext_props: T,
 }
 
-impl<T> BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcModel {
+impl<T> BmbpRdbcModel<T>
+where
+    T: Default + Debug + Clone + Serialize + RdbcModel,
+{
     pub fn get_data_id(&self) -> Option<&String> {
         self.data_id.as_ref()
     }
@@ -147,7 +159,10 @@ impl<T> BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcMode
     }
 }
 
-impl<T> BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcModel {
+impl<T> BmbpRdbcModel<T>
+where
+    T: Default + Debug + Clone + Serialize + RdbcModel,
+{
     pub fn build_insert(&self) -> Insert {
         let mut insert = Insert::new();
         insert.insert_table(T::get_table_name());
@@ -215,7 +230,10 @@ impl<T> BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcMode
     }
 }
 
-impl<T> RdbcModel for BmbpRdbcModel<T> where T: Default + Debug + Clone + Serialize + RdbcModel {
+impl<T> RdbcModel for BmbpRdbcModel<T>
+where
+    T: Default + Debug + Clone + Serialize + RdbcModel,
+{
     fn get_table_name() -> String {
         T::get_table_name()
     }
@@ -250,7 +268,10 @@ impl<T> RdbcModel for BmbpRdbcModel<T> where T: Default + Debug + Clone + Serial
 }
 
 /// RdbcTree 定义树型抽象
-pub trait RdbcTree<T> where T: RdbcTree<T> {
+pub trait RdbcTree<T>
+where
+    T: RdbcTree<T>,
+{
     fn get_code(&self) -> Option<&String>;
     fn set_code(&mut self, code: String) -> &mut Self;
     fn get_code_path(&self) -> Option<&String>;
@@ -276,7 +297,10 @@ pub trait RdbcTree<T> where T: RdbcTree<T> {
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
-pub struct BmbpRdbcTree<T> where T: Default + Debug + Clone + Serialize {
+pub struct BmbpRdbcTree<T>
+where
+    T: Default + Debug + Clone + Serialize,
+{
     // 节点编码
     code: Option<String>,
     // 节点路径编码
@@ -299,7 +323,10 @@ pub struct BmbpRdbcTree<T> where T: Default + Debug + Clone + Serialize {
     ext_props: T,
 }
 
-impl<T> RdbcTree<BmbpRdbcTree<T>> for BmbpRdbcTree<T> where T: Default + Debug + Clone + Serialize {
+impl<T> RdbcTree<BmbpRdbcTree<T>> for BmbpRdbcTree<T>
+where
+    T: Default + Debug + Clone + Serialize,
+{
     fn get_code(&self) -> Option<&String> {
         self.code.as_ref()
     }
@@ -368,7 +395,10 @@ impl<T> RdbcTree<BmbpRdbcTree<T>> for BmbpRdbcTree<T> where T: Default + Debug +
     }
 }
 
-impl<T> BmbpRdbcTree<T> where T: Default + Debug + Clone + Serialize {
+impl<T> BmbpRdbcTree<T>
+where
+    T: Default + Debug + Clone + Serialize,
+{
     pub fn get_ext_props(&self) -> &T {
         &self.ext_props
     }
@@ -385,7 +415,10 @@ impl<T> BmbpRdbcTree<T> where T: Default + Debug + Clone + Serialize {
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
-pub struct BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + RdbcModel {
+pub struct BmbpOrmRdbcTree<T>
+where
+    T: Default + Debug + Clone + Serialize + RdbcModel,
+{
     /// 记录主键
     data_id: Option<String>,
     /// 记录密级
@@ -432,7 +465,10 @@ pub struct BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + Rdb
     ext_props: T,
 }
 
-impl<T> RdbcModel for BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + RdbcModel {
+impl<T> RdbcModel for BmbpOrmRdbcTree<T>
+where
+    T: Default + Debug + Clone + Serialize + RdbcModel,
+{
     fn get_table_name() -> String {
         T::get_table_name()
     }
@@ -469,7 +505,10 @@ impl<T> RdbcModel for BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Seri
     }
 }
 
-impl<T> RdbcTree<BmbpOrmRdbcTree<T>> for BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + RdbcModel {
+impl<T> RdbcTree<BmbpOrmRdbcTree<T>> for BmbpOrmRdbcTree<T>
+where
+    T: Default + Debug + Clone + Serialize + RdbcModel,
+{
     fn get_code(&self) -> Option<&String> {
         self.code.as_ref()
     }
@@ -538,7 +577,10 @@ impl<T> RdbcTree<BmbpOrmRdbcTree<T>> for BmbpOrmRdbcTree<T> where T: Default + D
     }
 }
 
-impl<T> BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + RdbcModel {
+impl<T> BmbpOrmRdbcTree<T>
+where
+    T: Default + Debug + Clone + Serialize + RdbcModel,
+{
     pub fn get_data_id(&self) -> Option<&String> {
         self.data_id.as_ref()
     }
@@ -635,7 +677,10 @@ impl<T> BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + RdbcMo
     }
 }
 
-impl<T> BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + RdbcModel {
+impl<T> BmbpOrmRdbcTree<T>
+where
+    T: Default + Debug + Clone + Serialize + RdbcModel,
+{
     pub fn build_insert(&self) -> Insert {
         let mut insert = Insert::new();
         insert.insert_table(T::get_table_name());
@@ -715,7 +760,6 @@ impl<T> BmbpOrmRdbcTree<T> where T: Default + Debug + Clone + Serialize + RdbcMo
     }
 }
 
-
 /// 定义返回值类型
 /// RdbcOrmRow 数据库查询结果 实现各个数据库的FromRow
 /// RdbcPage 分页返回值
@@ -748,14 +792,20 @@ impl RdbcOrmRow {
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
-pub struct RdbcPage<T> where T: Default + Debug + Clone + Serialize + From<RdbcOrmRow> {
+pub struct RdbcPage<T>
+where
+    T: Default + Debug + Clone + Serialize + From<RdbcOrmRow>,
+{
     page_size: usize,
     page_num: usize,
     total: usize,
     data: Option<Vec<T>>,
 }
 
-impl<T> RdbcPage<T> where T: Default + Debug + Clone + Serialize + From<RdbcOrmRow> {
+impl<T> RdbcPage<T>
+where
+    T: Default + Debug + Clone + Serialize + From<RdbcOrmRow>,
+{
     pub fn new() -> Self {
         RdbcPage {
             page_size: 10,
@@ -774,7 +824,10 @@ impl<T> RdbcPage<T> where T: Default + Debug + Clone + Serialize + From<RdbcOrmR
     }
 }
 
-impl<T> RdbcPage<T> where T: Default + Debug + Clone + Serialize + From<RdbcOrmRow> {
+impl<T> RdbcPage<T>
+where
+    T: Default + Debug + Clone + Serialize + From<RdbcOrmRow>,
+{
     pub fn page_num(&self) -> &usize {
         &self.page_num
     }
@@ -808,8 +861,10 @@ impl<T> RdbcPage<T> where T: Default + Debug + Clone + Serialize + From<RdbcOrmR
     }
 }
 
-
-impl<T> From<RdbcOrmRow> for BmbpRdbcModel<T> where T: From<RdbcOrmRow> + Default + Debug + Clone + Serialize + RdbcModel {
+impl<T> From<RdbcOrmRow> for BmbpRdbcModel<T>
+where
+    T: From<RdbcOrmRow> + Default + Debug + Clone + Serialize + RdbcModel,
+{
     fn from(row: RdbcOrmRow) -> Self {
         let mut model = BmbpRdbcModel::<T>::default();
         if let Some(data) = row.data.get("data_id") {
@@ -856,7 +911,10 @@ impl<T> From<RdbcOrmRow> for BmbpRdbcModel<T> where T: From<RdbcOrmRow> + Defaul
     }
 }
 
-impl<T> From<RdbcOrmRow> for BmbpRdbcTree<T> where T: From<RdbcOrmRow> + Default + Debug + Clone + Serialize {
+impl<T> From<RdbcOrmRow> for BmbpRdbcTree<T>
+where
+    T: From<RdbcOrmRow> + Default + Debug + Clone + Serialize,
+{
     fn from(row: RdbcOrmRow) -> Self {
         let mut model = BmbpRdbcTree::<T>::default();
         if let Some(code) = row.data.get(RDBC_TREE_CODE) {
@@ -893,7 +951,10 @@ impl<T> From<RdbcOrmRow> for BmbpRdbcTree<T> where T: From<RdbcOrmRow> + Default
     }
 }
 
-impl<T> From<RdbcOrmRow> for BmbpOrmRdbcTree<T> where T: From<RdbcOrmRow> + Default + Debug + Clone + Serialize + RdbcModel {
+impl<T> From<RdbcOrmRow> for BmbpOrmRdbcTree<T>
+where
+    T: From<RdbcOrmRow> + Default + Debug + Clone + Serialize + RdbcModel,
+{
     fn from(row: RdbcOrmRow) -> Self {
         let mut model = BmbpOrmRdbcTree::<T>::default();
         if let Some(data) = row.data.get(RDBC_DATA_ID) {
@@ -968,7 +1029,6 @@ impl<T> From<RdbcOrmRow> for BmbpOrmRdbcTree<T> where T: From<RdbcOrmRow> + Defa
     }
 }
 
-
 impl From<Row> for RdbcOrmRow {
     fn from(row: Row) -> Self {
         let mut orm_row = RdbcOrmRow::new();
@@ -981,43 +1041,58 @@ impl From<Row> for RdbcOrmRow {
                 "text" | "varchar" | "char" | "json" | "xml" => {
                     let col_value: Option<String> = row.get(col_name.as_str());
                     if let Some(value) = col_value {
-                        orm_row.get_data_mut().insert(col_name, RdbcValue::String(value));
+                        orm_row
+                            .get_data_mut()
+                            .insert(col_name, RdbcValue::String(value));
                     }
                 }
                 "int2" => {
                     let col_value: Option<i16> = row.get(col_name.as_str());
                     if let Some(value) = col_value {
-                        orm_row.get_data_mut().insert(col_name, RdbcValue::Int(value));
+                        orm_row
+                            .get_data_mut()
+                            .insert(col_name, RdbcValue::Int(value));
                     }
                 }
                 "int4" => {
                     let col_value: Option<i32> = row.get(col_name.as_str());
                     if let Some(value) = col_value {
-                        orm_row.get_data_mut().insert(col_name, RdbcValue::BigInt(value as i64));
+                        orm_row
+                            .get_data_mut()
+                            .insert(col_name, RdbcValue::BigInt(value as i64));
                     }
                 }
                 "int8" => {
                     let col_value: Option<i64> = row.get(col_name.as_str());
                     if let Some(value) = col_value {
-                        orm_row.get_data_mut().insert(col_name, RdbcValue::BigInt(value));
+                        orm_row
+                            .get_data_mut()
+                            .insert(col_name, RdbcValue::BigInt(value));
                     }
                 }
                 "float4" | "float8" => {
                     let col_value: Option<f32> = row.get(col_name.as_str());
                     if let Some(value) = col_value {
-                        orm_row.get_data_mut().insert(col_name, RdbcValue::Float(value));
+                        orm_row
+                            .get_data_mut()
+                            .insert(col_name, RdbcValue::Float(value));
                     }
                 }
                 "date" | "time" | "timestamp" => {
-                    let col_value: Option<chrono::DateTime<chrono::Utc>> = row.get(col_name.as_str());
+                    let col_value: Option<chrono::DateTime<chrono::Utc>> =
+                        row.get(col_name.as_str());
                     if let Some(value) = col_value {
-                        orm_row.get_data_mut().insert(col_name, RdbcValue::DateTime(value));
+                        orm_row
+                            .get_data_mut()
+                            .insert(col_name, RdbcValue::DateTime(value));
                     }
                 }
                 "bool" => {
                     let col_value: Option<bool> = row.get(col_name.as_str());
                     if let Some(value) = col_value {
-                        orm_row.get_data_mut().insert(col_name, RdbcValue::Bool(value));
+                        orm_row
+                            .get_data_mut()
+                            .insert(col_name, RdbcValue::Bool(value));
                     }
                 }
                 _ => {
@@ -1030,13 +1105,13 @@ impl From<Row> for RdbcOrmRow {
     }
 }
 
-
 pub struct RdbcTreeUtil;
 
 impl RdbcTreeUtil {
-    pub fn build_tree<T>(data: Vec<T>) -> Vec<T> where T: RdbcTree<T> {
+    pub fn build_tree<T>(data: Vec<T>) -> Vec<T>
+    where
+        T: RdbcTree<T>,
+    {
         data
     }
 }
-
-

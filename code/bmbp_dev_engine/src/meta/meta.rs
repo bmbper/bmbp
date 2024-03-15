@@ -1,5 +1,8 @@
+use bmbp_dev_dsl::{
+    BmbpDBColumn, BmbpDBSchema, BmbpDBTable, BmbpDbConstraint, BmbpDbEvent, BmbpDbIndex,
+    BmbpDbProcedure, BmbpDbTrigger, BmbpDbView,
+};
 use std::format;
-use bmbp_dev_dsl::{BmbpDBColumn, BmbpDbConstraint, BmbpDbEvent, BmbpDbIndex, BmbpDbProcedure, BmbpDBSchema, BmbpDBTable, BmbpDbTrigger, BmbpDbView};
 
 // /code/bmbp_dev_engine/src/meta.rs
 pub trait BmbpDbMetaEngine {
@@ -14,5 +17,3 @@ pub trait BmbpDbMetaEngine {
     fn query_event_meta(&self, event_name: String) -> Option<BmbpDbEvent>;
     fn get_table_meta(&self, table_name: String) -> String;
 }
-
-

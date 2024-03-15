@@ -1,20 +1,19 @@
-use std::fmt::Debug;
-use std::sync::{Arc};
-use async_trait::async_trait;
-use tokio::sync::RwLock;
-use tokio_postgres::{Client, connect, Error, NoTls, Row};
-use tokio_postgres::types::{ToSql};
-use bmbp_rdbc_macro::RdbcOrmRow;
-use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcSQL, RdbcSQLParser, RdbcValue, Update};
 use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 use crate::pool::RdbcConnInner;
 use crate::RdbcDataSource;
+use async_trait::async_trait;
+use bmbp_rdbc_macro::RdbcOrmRow;
+use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcSQL, RdbcSQLParser, RdbcValue, Update};
+use std::fmt::Debug;
+use std::sync::Arc;
+use tokio::sync::RwLock;
+use tokio_postgres::types::ToSql;
+use tokio_postgres::{connect, Client, Error, NoTls, Row};
 
 pub struct PgDbClient {
     data_source: Arc<RdbcDataSource>,
     client: RwLock<Client>,
 }
-
 
 impl RdbcSQLParser for PgDbClient {
     fn to_query(&self, query: &Query) -> (String, Vec<RdbcValue>) {
@@ -34,7 +33,6 @@ impl RdbcSQLParser for PgDbClient {
     }
 }
 
-
 impl PgDbClient {
     pub(crate) async fn new(data_source: Arc<RdbcDataSource>) -> RdbcResult<Self> {
         let url = Self::build_url(data_source.clone())?;
@@ -50,9 +48,7 @@ impl PgDbClient {
                     client: RwLock::new(client),
                 })
             }
-            Err(e) => {
-                Err(RdbcError::new(RdbcErrorType::ConnectError, &e.to_string()))
-            }
+            Err(e) => Err(RdbcError::new(RdbcErrorType::ConnectError, &e.to_string())),
         }
     }
     fn build_url(ds: Arc<RdbcDataSource>) -> RdbcResult<String> {
@@ -71,27 +67,30 @@ impl PgDbClient {
 impl PgDbClient {
     fn to_pg_sql(value: &RdbcValue) -> Option<&(dyn ToSql + Sync)> {
         match value {
-            RdbcValue::Int(i) => { Some(i as &(dyn ToSql + Sync)) }
-            RdbcValue::BigInt(i) => { Some(i as &(dyn ToSql + Sync)) }
-            RdbcValue::Float(i) => { Some(i as &(dyn ToSql + Sync)) }
-            RdbcValue::BigFloat(i) => { Some(i as &(dyn ToSql + Sync)) }
-            RdbcValue::String(i) => { Some(i as &(dyn ToSql + Sync)) }
-            RdbcValue::DateTime(i) => { Some(i as &(dyn ToSql + Sync)) }
-            RdbcValue::Bool(i) => { Some(i as &(dyn ToSql + Sync)) }
-            RdbcValue::Null => {
-                { Some(&"" as &(dyn ToSql + Sync)) }
-            }
+            RdbcValue::Int(i) => Some(i as &(dyn ToSql + Sync)),
+            RdbcValue::BigInt(i) => Some(i as &(dyn ToSql + Sync)),
+            RdbcValue::Float(i) => Some(i as &(dyn ToSql + Sync)),
+            RdbcValue::BigFloat(i) => Some(i as &(dyn ToSql + Sync)),
+            RdbcValue::String(i) => Some(i as &(dyn ToSql + Sync)),
+            RdbcValue::DateTime(i) => Some(i as &(dyn ToSql + Sync)),
+            RdbcValue::Bool(i) => Some(i as &(dyn ToSql + Sync)),
+            RdbcValue::Null => Some(&"" as &(dyn ToSql + Sync)),
         }
     }
     async fn execute(&self, sql: &str, params: &[RdbcValue]) -> RdbcResult<u64> {
-        let pg_prams = params.iter().filter_map(|v| Self::to_pg_sql(v)).collect::<Vec<_>>();
-        match self.client.read().await.execute(sql, pg_prams.as_slice()).await {
-            Ok(row_count) => {
-                Ok(row_count)
-            }
-            Err(e) => {
-                Err(RdbcError::new(RdbcErrorType::SQLError, &e.to_string()))
-            }
+        let pg_prams = params
+            .iter()
+            .filter_map(|v| Self::to_pg_sql(v))
+            .collect::<Vec<_>>();
+        match self
+            .client
+            .read()
+            .await
+            .execute(sql, pg_prams.as_slice())
+            .await
+        {
+            Ok(row_count) => Ok(row_count),
+            Err(e) => Err(RdbcError::new(RdbcErrorType::SQLError, &e.to_string())),
         }
     }
 }
@@ -100,16 +99,31 @@ impl PgDbClient {
 impl RdbcConnInner for PgDbClient {
     async fn valid(&self) -> bool {
         let test_url = "select 1";
-        self.client.read().await.execute(test_url, &[]).await.is_ok()
+        self.client
+            .read()
+            .await
+            .execute(test_url, &[])
+            .await
+            .is_ok()
     }
     async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
         let (pg_sql, page_prams) = self.to_query(query);
-        self.select_list_by_sql(pg_sql.as_str(), page_prams.as_slice()).await
+        self.select_list_by_sql(pg_sql.as_str(), page_prams.as_slice())
+            .await
     }
     async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>> {
         let (sql, params) = query.to_sql_params();
-        let pg_prams = params.iter().filter_map(|v| Self::to_pg_sql(v)).collect::<Vec<_>>();
-        match self.client.read().await.query_opt(sql.as_str(), pg_prams.as_slice()).await {
+        let pg_prams = params
+            .iter()
+            .filter_map(|v| Self::to_pg_sql(v))
+            .collect::<Vec<_>>();
+        match self
+            .client
+            .read()
+            .await
+            .query_opt(sql.as_str(), pg_prams.as_slice())
+            .await
+        {
             Ok(row_op) => {
                 if let Some(row) = row_op {
                     Ok(Some(RdbcOrmRow::from(row)))
@@ -117,14 +131,25 @@ impl RdbcConnInner for PgDbClient {
                     Ok(None)
                 }
             }
-            Err(e) => {
-                Err(RdbcError::new(RdbcErrorType::SQLError, &e.to_string()))
-            }
+            Err(e) => Err(RdbcError::new(RdbcErrorType::SQLError, &e.to_string())),
         }
     }
-    async fn select_list_by_sql(&self, query: &str, params: &[RdbcValue]) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
-        let pg_prams = params.iter().filter_map(|v| Self::to_pg_sql(v)).collect::<Vec<_>>();
-        match self.client.read().await.query(query, pg_prams.as_slice()).await {
+    async fn select_list_by_sql(
+        &self,
+        query: &str,
+        params: &[RdbcValue],
+    ) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
+        let pg_prams = params
+            .iter()
+            .filter_map(|v| Self::to_pg_sql(v))
+            .collect::<Vec<_>>();
+        match self
+            .client
+            .read()
+            .await
+            .query(query, pg_prams.as_slice())
+            .await
+        {
             Ok(rows) => {
                 let mut list = Vec::new();
                 for row in rows {
@@ -133,9 +158,7 @@ impl RdbcConnInner for PgDbClient {
                 }
                 Ok(Some(list))
             }
-            Err(e) => {
-                Err(RdbcError::new(RdbcErrorType::SQLError, &e.to_string()))
-            }
+            Err(e) => Err(RdbcError::new(RdbcErrorType::SQLError, &e.to_string())),
         }
     }
 

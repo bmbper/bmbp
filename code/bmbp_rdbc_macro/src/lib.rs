@@ -1,5 +1,5 @@
-mod model;
 mod consts;
+mod model;
 
-pub use model::*;
 pub use consts::*;
+pub use model::*;

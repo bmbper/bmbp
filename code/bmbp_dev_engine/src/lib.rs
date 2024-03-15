@@ -1,3 +1,3 @@
 mod db;
-mod meta;
 mod ddl;
+mod meta;

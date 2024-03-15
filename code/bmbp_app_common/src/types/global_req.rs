@@ -4,7 +4,10 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Default, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
-pub struct BmbpPageParam<T> where T: Serialize + Clone + Default + Send + Sync {
+pub struct BmbpPageParam<T>
+where
+    T: Serialize + Clone + Default + Send + Sync,
+{
     page_no: usize,
     page_size: usize,
     params: Option<T>,
@@ -12,8 +15,8 @@ pub struct BmbpPageParam<T> where T: Serialize + Clone + Default + Send + Sync {
 
 #[allow(unused)]
 impl<T> BmbpPageParam<T>
-    where
-        T: Serialize + Clone + Default + Send + Sync,
+where
+    T: Serialize + Clone + Default + Send + Sync,
 {
     pub fn get_page_no(&self) -> &usize {
         &self.page_no

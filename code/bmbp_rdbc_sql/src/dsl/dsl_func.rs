@@ -1,7 +1,7 @@
-use crate::{RdbcColumn};
+use crate::RdbcColumn;
 
 pub enum RdbcFunc {
-    CONCAT(RdbcConcatFunc)
+    CONCAT(RdbcConcatFunc),
 }
 
 impl RdbcFunc {
@@ -13,11 +13,11 @@ impl RdbcFunc {
     }
 }
 
+
 pub struct RdbcConcatFunc {
     liter_: Option<String>,
     columns_: Vec<RdbcColumn>,
 }
-
 
 impl RdbcConcatFunc {
     pub fn concat_split(columns: Vec<RdbcColumn>, split_: Option<String>) -> RdbcConcatFunc {

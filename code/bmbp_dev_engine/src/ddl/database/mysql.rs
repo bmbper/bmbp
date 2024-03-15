@@ -1,5 +1,5 @@
-use bmbp_dev_dsl::{BmbpDBSchema, BmbpDBTable};
 use crate::ddl::ddl::*;
+use bmbp_dev_dsl::{BmbpDBSchema, BmbpDBTable};
 
 pub struct MysqlBmbpDbDdlSchemaEngine;
 

@@ -1,5 +1,5 @@
-use salvo::Router;
 use crate::login::login;
+use salvo::Router;
 
 pub fn build_home_router() -> Router {
     let api_router = Router::new()

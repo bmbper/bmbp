@@ -1,11 +1,11 @@
 // 用户、角色、模式、表、列、索引、视图、触发器、存储过程、函数、
-mod user;
+mod column;
+mod func_;
+mod index;
+mod procedure;
 mod role;
 mod schema;
 mod table;
-mod column;
-mod index;
-mod view;
 mod trigger;
-mod procedure;
-mod func_;
+mod user;
+mod view;

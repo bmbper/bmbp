@@ -1,2 +1,2 @@
-mod ddl;
 mod database;
+mod ddl;

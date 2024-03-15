@@ -59,13 +59,21 @@ impl BmbpDdlConstraintEngine {
     pub fn add_constraint(&self, table: BmbpDBTable, constraint: BmbpDbConstraint) -> String {
         return "".to_string();
     }
-    pub fn add_or_replace_constraint(&self, table: BmbpDBTable, constraint: BmbpDbConstraint) -> String {
+    pub fn add_or_replace_constraint(
+        &self,
+        table: BmbpDBTable,
+        constraint: BmbpDbConstraint,
+    ) -> String {
         return "".to_string();
     }
     pub fn drop_constraint(&self, table: BmbpDBTable, constraint: BmbpDbConstraint) -> String {
         return "".to_string();
     }
-    pub fn drop_constraint_if_exists(&self, table: BmbpDBTable, constraint: BmbpDbConstraint) -> String {
+    pub fn drop_constraint_if_exists(
+        &self,
+        table: BmbpDBTable,
+        constraint: BmbpDbConstraint,
+    ) -> String {
         return "".to_string();
     }
 }
@@ -117,7 +125,6 @@ impl BmbpDbProcedureEngine {
         return "".to_string();
     }
 }
-
 
 pub struct BmbpDbEventEngine;
 impl BmbpDbEventEngine {

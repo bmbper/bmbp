@@ -1,7 +1,10 @@
 use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
-use bmbp_app_common::{BmbpPageParam};
-use bmbp_rdbc_orm::{RdbcModel, BmbpOrmRdbcTree, RdbcOrmRow};
+
+use bmbp_app_common::BmbpPageParam;
+use bmbp_rdbc_orm::{BmbpOrmRdbcTree, RdbcModel, RdbcOrmRow};
+
 use crate::dict::model::BmbpDictType::{Custom, Inner};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
@@ -61,7 +64,7 @@ pub struct BmbpSettingDict {
 impl BmbpSettingDict {
     pub fn new() -> Self {
         BmbpSettingDict {
-            dict_alias:None,
+            dict_alias: None,
             dict_value: None,
             dict_type: None,
         }
@@ -115,26 +118,19 @@ pub enum BmbpDictType {
     Custom = 1,
 }
 
+
 impl BmbpDictType {
     pub fn value_of(data: String) -> Option<Self> {
         match data.as_str() {
-            "0" => {
-                Some(Inner)
-            }
-            "1" => {
-                Some(Custom)
-            }
-            _ => { None }
+            "0" => Some(Inner),
+            "1" => Some(Custom),
+            _ => None,
         }
     }
     pub fn value(&self) -> i8 {
         match self {
-            Inner => {
-                0
-            }
-            Custom => {
-                1
-            }
+            Inner => 0,
+            Custom => 1,
         }
     }
 }
@@ -147,12 +143,8 @@ impl Default for BmbpDictType {
 impl Display for BmbpDictType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            Inner => {
-                "0".to_string()
-            }
-            Custom => {
-                "1".to_string()
-            }
+            Inner => "0".to_string(),
+            Custom => "1".to_string(),
         };
         write!(f, "{}", str)
     }
@@ -163,7 +155,11 @@ impl RdbcModel for BmbpSettingDict {
         "BMBP_SETTING_DICT".to_string()
     }
     fn get_table_fields() -> Vec<String> {
-        vec!["dict_alias".to_string(), "dict_value".to_string(), "dict_type".to_string()]
+        vec![
+            "dict_alias".to_string(),
+            "dict_value".to_string(),
+            "dict_type".to_string(),
+        ]
     }
 }
 

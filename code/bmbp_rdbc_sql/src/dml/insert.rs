@@ -1,5 +1,8 @@
+use crate::{
+    DatabaseType, Delete, Query, RdbcDmlValue, RdbcFilter, RdbcSQL, RdbcTable, RdbcTableInner,
+    RdbcValue,
+};
 use std::collections::HashMap;
-use crate::{DatabaseType, Delete, Query, RdbcDmlValue, RdbcFilter, RdbcSQL, RdbcTable, RdbcTableInner, RdbcValue};
 
 pub struct Insert {
     driver_: Option<DatabaseType>,
@@ -28,12 +31,19 @@ impl Insert {
         self.driver_ = Some(driver);
         self
     }
-    pub fn insert_table<T>(&mut self, table: T) -> &mut Self where T: ToString {
+    pub fn insert_table<T>(&mut self, table: T) -> &mut Self
+    where
+        T: ToString,
+    {
         self.table_.push(RdbcTableInner::table(table));
         self
     }
-    pub fn insert_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self where T: ToString {
-        self.table_.push(RdbcTableInner::schema_table(schema, table));
+    pub fn insert_schema_table<T>(&mut self, schema: T, table: T) -> &mut Self
+    where
+        T: ToString,
+    {
+        self.table_
+            .push(RdbcTableInner::schema_table(schema, table));
         self
     }
     pub fn insert_select_query(&mut self, query: Query) -> &mut Self {
@@ -41,7 +51,10 @@ impl Insert {
         self
     }
 
-    pub fn insert_column<T>(&mut self, column: T) -> &mut Self where T: ToString {
+    pub fn insert_column<T>(&mut self, column: T) -> &mut Self
+    where
+        T: ToString,
+    {
         if self.column_.is_none() {
             self.column_ = Some(vec![column.to_string()]);
         } else {
@@ -49,7 +62,10 @@ impl Insert {
         }
         self
     }
-    pub fn insert_value<T>(&mut self, column: T) -> &mut Self where T: ToString {
+    pub fn insert_value<T>(&mut self, column: T) -> &mut Self
+    where
+        T: ToString,
+    {
         let value_ = RdbcDmlValue::VALUE(RdbcValue::String(column.to_string()));
         if self.values_.is_none() {
             self.values_ = Some(vec![value_]);
@@ -65,23 +81,41 @@ impl Insert {
         }
     }
 
-    pub fn insert_column_value<T, V>(&mut self, column: T, value: V) -> &mut Self where T: ToString, V: ToString {
+    pub fn insert_column_value<T, V>(&mut self, column: T, value: V) -> &mut Self
+    where
+        T: ToString,
+        V: ToString,
+    {
         self.init_column_values();
-        self.column_values.as_mut().unwrap().insert(column.to_string(), RdbcDmlValue::VALUE(RdbcValue::String(value.to_string())));
+        self.column_values.as_mut().unwrap().insert(
+            column.to_string(),
+            RdbcDmlValue::VALUE(RdbcValue::String(value.to_string())),
+        );
         self
     }
 
-    pub fn insert_op_column_value<T, V>(&mut self, column: T, value: Option<V>) -> &mut Self where T: ToString, V: ToString {
+    pub fn insert_op_column_value<T, V>(&mut self, column: T, value: Option<V>) -> &mut Self
+    where
+        T: ToString,
+        V: ToString,
+    {
         self.init_column_values();
         let rdbc_value = match value {
             Some(v) => RdbcValue::String(v.to_string()),
             None => RdbcValue::Null,
         };
-        self.column_values.as_mut().unwrap().insert(column.to_string(), RdbcDmlValue::VALUE(rdbc_value));
+        self.column_values
+            .as_mut()
+            .unwrap()
+            .insert(column.to_string(), RdbcDmlValue::VALUE(rdbc_value));
         self
     }
 }
-impl RdbcTable for Insert{}
+impl RdbcTable for Insert {
+    fn get_table_mut(&mut self) -> &mut Vec<RdbcTableInner> {
+        self.table_.as_mut()
+    }
+}
 
 impl RdbcSQL for Insert {
     fn to_sql(&self) -> String {

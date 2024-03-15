@@ -3,9 +3,9 @@ use env::init_app_env;
 use routes::init_webapp_router;
 use salvo::prelude::*;
 
+mod data;
 mod env;
 mod routes;
-mod data;
 
 pub struct BmbpWebApp {}
 
@@ -29,7 +29,11 @@ impl BmbpWebApp {
     pub async fn start(&mut self) {
         let host = self.host().clone();
         let context = self.app_context();
-        tracing::info!("启动WebApp应用服务,监听地址:{}{}......", host.clone(),context.clone());
+        tracing::info!(
+            "启动WebApp应用服务,监听地址:{}{}......",
+            host.clone(),
+            context.clone()
+        );
         let acceptor = TcpListener::new(host.as_str()).bind().await;
         let router = self.init_router();
         Server::new(acceptor).serve(router).await;
@@ -48,7 +52,8 @@ impl BmbpWebApp {
         format!("{}:{}", host, port)
     }
     fn app_context(&self) -> String {
-        let mut context = global_hash_map_vars("bmbp_server".to_string(), "server_context".to_string());
+        let mut context =
+            global_hash_map_vars("bmbp_server".to_string(), "server_context".to_string());
         if context.is_empty() {
             context = "".to_string();
         }

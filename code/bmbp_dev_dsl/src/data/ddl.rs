@@ -20,7 +20,14 @@ pub struct BmbpDBSchema {
     owner: String,
 }
 impl BmbpDBSchema {
-    pub fn new(code: String, name: String, title: String, remark: String, charset: String, owner: String) -> Self {
+    pub fn new(
+        code: String,
+        name: String,
+        title: String,
+        remark: String,
+        charset: String,
+        owner: String,
+    ) -> Self {
         BmbpDBSchema {
             code,
             name,
@@ -105,7 +112,15 @@ pub struct BmbpDBTable {
     constraint: Vec<BmbpDbIndex>,
 }
 impl BmbpDBTable {
-    pub fn new(schema_code: String, code: String, name: String, title: String, remark: String, charset: String, columns: Vec<BmbpDBColumn>) -> Self {
+    pub fn new(
+        schema_code: String,
+        code: String,
+        name: String,
+        title: String,
+        remark: String,
+        charset: String,
+        columns: Vec<BmbpDBColumn>,
+    ) -> Self {
         BmbpDBTable {
             schema_code,
             code,
@@ -262,7 +277,20 @@ pub struct BmbpDBColumn {
     remark: String,
 }
 impl BmbpDBColumn {
-    pub fn new(schema_code: String, table_code: String, code: String, name: String, title: String, column_type: BmbpDBColumnType, is_primary: bool, is_null: bool, length: usize, scale: usize, default_value: BmbpDbColumnDefaultValue, remark: String) -> Self {
+    pub fn new(
+        schema_code: String,
+        table_code: String,
+        code: String,
+        name: String,
+        title: String,
+        column_type: BmbpDBColumnType,
+        is_primary: bool,
+        is_null: bool,
+        length: usize,
+        scale: usize,
+        default_value: BmbpDbColumnDefaultValue,
+        remark: String,
+    ) -> Self {
         BmbpDBColumn {
             schema_code,
             table_code,
@@ -448,7 +476,7 @@ impl BmbpDbIndex {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize,Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub enum BmbpDbIndexType {
     Primary,
     Unique,
@@ -463,7 +491,13 @@ impl BmbpDbIndexType {
     }
 }
 impl BmbpDbIndex {
-    pub fn new(schema_code: String, table_code: String, typ: BmbpDbIndexType, name: String, columns: Vec<String>) -> Self {
+    pub fn new(
+        schema_code: String,
+        table_code: String,
+        typ: BmbpDbIndexType,
+        name: String,
+        columns: Vec<String>,
+    ) -> Self {
         BmbpDbIndex {
             schema_code,
             table_code,
@@ -516,7 +550,6 @@ impl BmbpDbIndex {
         serde_json::from_str(&json).unwrap()
     }
 }
-
 
 #[derive(serde::Serialize, serde::Deserialize, Default, Clone)]
 pub struct BmbpDbConstraint {
@@ -635,7 +668,7 @@ pub struct BmbpDbTrigger {
     sql: String,
 }
 
-#[derive(serde::Serialize, serde::Deserialize,  Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub enum BmbpDbTriggerType {
     Before,
     After,
@@ -730,33 +763,24 @@ impl BmbpDbEvent {
 }
 
 #[cfg(test)]
-mod tests{
+mod tests {
     #[test]
-    fn test_bmbp_db_schema(){
-    }
+    fn test_bmbp_db_schema() {}
 
     #[test]
-    fn test_bmbp_db_table(){
-    }
+    fn test_bmbp_db_table() {}
     #[test]
-    fn test_bmbp_db_column(){
-    }
+    fn test_bmbp_db_column() {}
     #[test]
-    fn test_bmbp_db_index(){
-    }
+    fn test_bmbp_db_index() {}
     #[test]
-    fn test_bmbp_db_constraint(){
-    }
+    fn test_bmbp_db_constraint() {}
     #[test]
-    fn test_bmbp_db_view(){
-    }
+    fn test_bmbp_db_view() {}
     #[test]
-    fn test_bmbp_db_trigger(){
-    }
+    fn test_bmbp_db_trigger() {}
     #[test]
-    fn test_bmbp_db_procedure(){
-    }
+    fn test_bmbp_db_procedure() {}
     #[test]
-    fn test_bmbp_db_event(){
-    }
+    fn test_bmbp_db_event() {}
 }

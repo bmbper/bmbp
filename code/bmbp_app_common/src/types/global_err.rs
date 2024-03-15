@@ -1,6 +1,6 @@
-use std::fmt::Display;
 use async_trait::async_trait;
 use salvo::{http::ParseError, writing::Json, Depot, Request, Response, Writer};
+use std::fmt::Display;
 
 use crate::RespVo;
 

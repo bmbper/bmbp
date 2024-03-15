@@ -1,7 +1,7 @@
+use bmbp_app_base::build_app_base_router;
 use bmbp_app_file::build_file_router;
 use bmbp_app_portal::build_home_router;
 use bmbp_app_rbac::build_rbac_router;
-use bmbp_app_base::build_app_base_router;
 use bmbp_app_setting::build_setting_router;
 use salvo::{
     cors::{Cors, CorsHandler},

@@ -1,19 +1,19 @@
+use crate::err::RdbcResult;
 use async_static::async_static;
-use bmbp_app_common::map::{global_hash_map_vars, global_hash_map_vars_to_bool, global_hash_map_vars_to_usize};
+use bmbp_app_common::map::{
+    global_hash_map_vars, global_hash_map_vars_to_bool, global_hash_map_vars_to_usize,
+};
 pub use bmbp_rdbc_macro::*;
 pub use bmbp_rdbc_sql::*;
 pub use ds::*;
 pub use orm::*;
-use crate::err::RdbcResult;
 
-
+mod client;
 mod ds;
+mod err;
 mod orm;
 mod pool;
-mod client;
-mod err;
 mod val;
-
 
 async_static! {
     pub static ref RdbcORM:RdbcOrmInner = build_orm().await;
@@ -21,14 +21,12 @@ async_static! {
 async fn build_orm() -> RdbcOrmInner {
     let ds_rs = build_data_source_from_vars();
     match ds_rs {
-        Ok(ds) => {
-            match RdbcOrmInner::new(ds).await {
-                Ok(orm) => orm,
-                Err(err) => {
-                    panic!("连接数据库失败:{:#?}", err);
-                }
+        Ok(ds) => match RdbcOrmInner::new(ds).await {
+            Ok(orm) => orm,
+            Err(err) => {
+                panic!("连接数据库失败:{:#?}", err);
             }
-        }
+        },
         Err(err) => {
             panic!("不支持的数据库类型:{:#?}", err);
         }
@@ -36,20 +34,16 @@ async fn build_orm() -> RdbcOrmInner {
 }
 fn build_data_source_from_vars() -> RdbcResult<RdbcDataSource> {
     let mut data_source = RdbcDataSource::new();
-    let driver = global_hash_map_vars(
-        "bmbp_ds".to_string(),
-        "ds_driver".to_string(),
-    );
+    let driver = global_hash_map_vars("bmbp_ds".to_string(), "ds_driver".to_string());
     data_source.set_driver(RdbcDataBaseDriver::value_of(driver)?);
     data_source
         .set_host(global_hash_map_vars(
             "bmbp_ds".to_string(),
             "ds_host".to_string(),
         ))
-        .set_port(global_hash_map_vars_to_usize(
-            "bmbp_ds".to_string(),
-            "ds_port".to_string(),
-        ) as u16)
+        .set_port(
+            global_hash_map_vars_to_usize("bmbp_ds".to_string(), "ds_port".to_string()) as u16,
+        )
         .set_database(global_hash_map_vars(
             "bmbp_ds".to_string(),
             "ds_database".to_string(),

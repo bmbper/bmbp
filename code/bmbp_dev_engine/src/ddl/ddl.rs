@@ -24,7 +24,8 @@ pub trait BmbpDbDdlIndexEngine {
 }
 pub trait BmbpDbDdlConstraintEngine {
     fn add_constraint(&self, table: BmbpDBTable, constraint: BmbpDbConstraint) -> String;
-    fn add_or_replace_constraint(&self, table: BmbpDBTable, constraint: BmbpDbConstraint) -> String;
+    fn add_or_replace_constraint(&self, table: BmbpDBTable, constraint: BmbpDbConstraint)
+        -> String;
     fn drop_constraint(&self, table: BmbpDBTable, constraint: BmbpDbConstraint) -> String;
 }
 pub trait BmbpDbDdlViewEngine {

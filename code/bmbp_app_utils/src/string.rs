@@ -55,7 +55,10 @@ pub fn render_to_json_string(value: &BmbpHashMap) -> String {
     serde_json::to_string_pretty(value).unwrap()
 }
 
-pub fn is_empty_string<T>(value: Option<T>) -> bool where T: ToString {
+pub fn is_empty_string<T>(value: Option<T>) -> bool
+where
+    T: ToString,
+{
     if value.is_none() {
         return true;
     }

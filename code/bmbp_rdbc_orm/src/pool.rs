@@ -1,15 +1,15 @@
-use std::fmt::Debug;
-use crate::ds::RdbcDataSource;
-use std::sync::{Arc};
-use std::sync::{RwLock};
-use std::time::{Duration, Instant};
 use crate::client;
+use crate::ds::RdbcDataSource;
+use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 use async_trait::async_trait;
-use serde::Serialize;
-use tokio_postgres::types::IsNull::No;
 use bmbp_rdbc_macro::RdbcOrmRow;
 use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcValue, Update};
-use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
+use serde::Serialize;
+use std::fmt::Debug;
+use std::sync::Arc;
+use std::sync::RwLock;
+use std::time::{Duration, Instant};
+use tokio_postgres::types::IsNull::No;
 
 /// RdbcConnInner 定义数据库连接抽象
 #[async_trait]
@@ -17,7 +17,11 @@ pub trait RdbcConnInner {
     async fn valid(&self) -> bool;
     async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>>;
     async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>>;
-    async fn select_list_by_sql(&self, query: &str, params: &[RdbcValue]) -> RdbcResult<Option<Vec<RdbcOrmRow>>>;
+    async fn select_list_by_sql(
+        &self,
+        query: &str,
+        params: &[RdbcValue],
+    ) -> RdbcResult<Option<Vec<RdbcOrmRow>>>;
     async fn execute_insert(&self, delete: &Insert) -> RdbcResult<u64>;
     async fn execute_update(&self, delete: &Update) -> RdbcResult<u64>;
     async fn execute_delete(&self, delete: &Delete) -> RdbcResult<u64>;
@@ -31,8 +35,6 @@ pub trait RdbcTransConnInner {
 
 #[async_trait]
 pub trait RdbcPreparedStatementInner {}
-
-
 
 ///RdbcConn 定义数据库连接池链接
 pub struct RdbcConn<'a> {
@@ -48,7 +50,6 @@ pub struct RdbcTransConn<'a> {
     inner: Option<Box<dyn RdbcConnInner + Send + Sync + 'static>>,
 }
 
-
 impl<'a> RdbcConn<'a> {
     pub async fn valid(&self) -> bool {
         if let Some(con) = &self.inner {
@@ -61,21 +62,30 @@ impl<'a> RdbcConn<'a> {
         if let Some(con) = &self.inner {
             con.select_list_by_query(query).await
         } else {
-            Err(RdbcError::new(RdbcErrorType::ConnectError, "获取到有效的数据库连接"))
+            Err(RdbcError::new(
+                RdbcErrorType::ConnectError,
+                "获取到有效的数据库连接",
+            ))
         }
     }
     pub async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>> {
         if let Some(con) = &self.inner {
             con.select_one_by_query(query).await
         } else {
-            Err(RdbcError::new(RdbcErrorType::ConnectError, "获取到有效的数据库连接"))
+            Err(RdbcError::new(
+                RdbcErrorType::ConnectError,
+                "获取到有效的数据库连接",
+            ))
         }
     }
     pub async fn execute_insert(&self, insert: &Insert) -> RdbcResult<u64> {
         if let Some(con) = &self.inner {
             con.execute_insert(insert).await
         } else {
-            Err(RdbcError::new(RdbcErrorType::ConnectError, "获取到有效的数据库连接"))
+            Err(RdbcError::new(
+                RdbcErrorType::ConnectError,
+                "获取到有效的数据库连接",
+            ))
         }
     }
 
@@ -83,7 +93,10 @@ impl<'a> RdbcConn<'a> {
         if let Some(con) = &self.inner {
             con.execute_update(update).await
         } else {
-            Err(RdbcError::new(RdbcErrorType::ConnectError, "获取到有效的数据库连接"))
+            Err(RdbcError::new(
+                RdbcErrorType::ConnectError,
+                "获取到有效的数据库连接",
+            ))
         }
     }
 
@@ -91,7 +104,10 @@ impl<'a> RdbcConn<'a> {
         if let Some(con) = &self.inner {
             con.execute_delete(delete).await
         } else {
-            Err(RdbcError::new(RdbcErrorType::ConnectError, "获取到有效的数据库连接"))
+            Err(RdbcError::new(
+                RdbcErrorType::ConnectError,
+                "获取到有效的数据库连接",
+            ))
         }
     }
 }
@@ -118,7 +134,11 @@ impl RdbcConnPool {
             conn_size: RwLock::new(0),
             conn_map: RwLock::new(vec![]),
         };
-        tracing::info!("创建数据库连接池=> 初始连接数: {} ,可用连接数：{} ", pool.conn_size().clone(), pool.conn_idle_size().clone());
+        tracing::info!(
+            "创建数据库连接池=> 初始连接数: {} ,可用连接数：{} ",
+            pool.conn_size().clone(),
+            pool.conn_idle_size().clone()
+        );
         pool
     }
 }
@@ -126,11 +146,19 @@ impl RdbcConnPool {
 impl RdbcConnPool {
     pub async fn init(&self) -> RdbcResult<()> {
         let ds = self.data_source.clone();
-        tracing::info!("初始化连接池 => 数据库类型：{}， 初始连接数: {} ", ds.driver().value(), ds.init_conn_size().unwrap_or(5));
+        tracing::info!(
+            "初始化连接池 => 数据库类型：{}， 初始连接数: {} ",
+            ds.driver().value(),
+            ds.init_conn_size().unwrap_or(5)
+        );
         let init_conn_size = ds.init_conn_size().unwrap_or(5);
         *self.conn_size.write().unwrap() = init_conn_size.clone();
         self.create_conn_by_size(init_conn_size).await?;
-        tracing::info!("数据库连接池初始化完成=> 初始连接数: {} ,可用连接数：{} ", self.conn_size().clone(), self.conn_idle_size().clone());
+        tracing::info!(
+            "数据库连接池初始化完成=> 初始连接数: {} ,可用连接数：{} ",
+            self.conn_size().clone(),
+            self.conn_idle_size().clone()
+        );
         Ok(())
     }
     pub async fn get_conn(&self) -> RdbcResult<RdbcConn> {
@@ -143,7 +171,7 @@ impl RdbcConnPool {
                 let times = timer.elapsed().as_millis();
                 let max_wait_time = self.data_source.max_wait_time().unwrap_or(1000) as u128;
                 if times > max_wait_time {
-                    tracing::info!("获取数据库连接超时，最大等待时间：{}ms",max_wait_time);
+                    tracing::info!("获取数据库连接超时，最大等待时间：{}ms", max_wait_time);
                     return Err(RdbcError::new(RdbcErrorType::TimeOut, "获取数据库连接超时"));
                 }
                 tokio::time::sleep(Duration::from_millis(50)).await;
@@ -159,12 +187,8 @@ impl RdbcConnPool {
     }
     pub async fn valid(&self) -> bool {
         return match self.get_conn().await {
-            Ok(conn) => {
-                conn.valid().await
-            }
-            Err(_) => {
-                false
-            }
+            Ok(conn) => conn.valid().await,
+            Err(_) => false,
         };
     }
 }
@@ -186,13 +210,18 @@ impl RdbcConnPool {
         let mut grow_size = ds.grow_conn_size().unwrap_or(5);
         let mut conn_size = self.conn_size.read().unwrap().clone();
         if conn_size >= max_conn_size {
-            tracing::info!("数据库连接池=> 资源已满，最大连接数：{}，已用连接数：{} ， 空闲连接数：{}",self.conn_size().clone(), self.conn_used_size().clone(), self.conn_idle_size().clone());
+            tracing::info!(
+                "数据库连接池=> 资源已满，最大连接数：{}，已用连接数：{} ， 空闲连接数：{}",
+                self.conn_size().clone(),
+                self.conn_used_size().clone(),
+                self.conn_idle_size().clone()
+            );
             return Ok(());
         }
         if conn_size + grow_size > max_conn_size {
             grow_size = max_conn_size - conn_size;
         }
-        tracing::info!("数据库连接池=> 新创建连接数{}",grow_size);
+        tracing::info!("数据库连接池=> 新创建连接数{}", grow_size);
         self.create_conn_by_size(grow_size).await?;
         *self.conn_size.write().unwrap() = conn_size + grow_size;
         Ok(())
@@ -208,7 +237,7 @@ impl RdbcConnPool {
                     return Err(e);
                 }
             }
-        };
+        }
         Ok(())
     }
     fn receive_conn(&self, conn: Box<dyn RdbcConnInner + Send + Sync + 'static>) {
@@ -218,12 +247,12 @@ impl RdbcConnPool {
 
 #[cfg(test)]
 pub mod tests {
+    use crate::err::RdbcResult;
+    use crate::pool::RdbcConnPool;
+    use crate::{RdbcDataBaseDriver, RdbcDataSource, RdbcOrmInner};
     use std::sync::Arc;
     use tracing_subscriber::fmt::init;
     use tracing_subscriber::util::SubscriberInitExt;
-    use crate::{RdbcDataBaseDriver, RdbcDataSource, RdbcOrmInner};
-    use crate::err::RdbcResult;
-    use crate::pool::RdbcConnPool;
 
     fn build_datasource() -> RdbcDataSource {
         let mut ds = RdbcDataSource::new();
@@ -236,7 +265,8 @@ pub mod tests {
             .set_schema("public".to_string())
             .set_ignore_case(true);
         ds.set_init_conn_size(5)
-            .set_max_conn_size(10).set_max_wait_time(10_000)
+            .set_max_conn_size(10)
+            .set_max_wait_time(10_000)
             .set_max_idle_conn(1);
 
         ds
@@ -262,29 +292,49 @@ pub mod tests {
         let pool = RdbcConnPool::new(Arc::new(build_datasource()));
         let init_rs = pool.init().await;
         assert!(init_rs.is_ok());
-        tracing::info!("连接池准备就绪： ===> init {} used {} idle {}", pool.conn_size(), pool.conn_used_size(), pool.conn_idle_size());
+        tracing::info!(
+            "连接池准备就绪： ===> init {} used {} idle {}",
+            pool.conn_size(),
+            pool.conn_used_size(),
+            pool.conn_idle_size()
+        );
         for _ in 0..10 {
             let con_rs = pool.get_conn().await;
             if con_rs.is_err() {
-                tracing::error!("数据库连接池获取链接失败:{:#?}",con_rs.err().unwrap());
+                tracing::error!("数据库连接池获取链接失败:{:#?}", con_rs.err().unwrap());
                 assert!(false);
                 return;
             }
             let con = con_rs.unwrap();
-            tracing::info!("获取一个连接 > init {} used {} idle {}", pool.conn_size(), pool.conn_used_size(), pool.conn_idle_size());
+            tracing::info!(
+                "获取一个连接 > init {} used {} idle {}",
+                pool.conn_size(),
+                pool.conn_used_size(),
+                pool.conn_idle_size()
+            );
             tracing::info!("===========>:{}", con.valid().await);
             assert!(con.valid().await);
         }
-        tracing::info!("释放连接后 > init {} used {} idle {}", pool.conn_size(), pool.conn_used_size(), pool.conn_idle_size());
+        tracing::info!(
+            "释放连接后 > init {} used {} idle {}",
+            pool.conn_size(),
+            pool.conn_used_size(),
+            pool.conn_idle_size()
+        );
         let con_rs = pool.get_conn().await;
         if con_rs.is_err() {
-            tracing::error!("数据库连接池获取链接失败:{:#?}",con_rs.err().unwrap());
+            tracing::error!("数据库连接池获取链接失败:{:#?}", con_rs.err().unwrap());
             assert!(false);
             return;
         }
 
         let con = con_rs.unwrap();
-        tracing::info!("获取一个连接 > init {} used {} idle {}", pool.conn_size(), pool.conn_used_size(), pool.conn_idle_size());
+        tracing::info!(
+            "获取一个连接 > init {} used {} idle {}",
+            pool.conn_size(),
+            pool.conn_used_size(),
+            pool.conn_idle_size()
+        );
         tracing::info!("===========>:{}", con.valid().await);
         assert!(con.valid().await);
         assert!(true)
@@ -295,10 +345,15 @@ pub mod tests {
         tracing_subscriber::fmt().init();
         let pool = RdbcConnPool::new(Arc::new(build_datasource()));
         let init_rs = pool.init().await;
-        tracing::info!("连接池准备就绪： ===> init {} used {} idle {}", pool.conn_size(), pool.conn_used_size(), pool.conn_idle_size());
+        tracing::info!(
+            "连接池准备就绪： ===> init {} used {} idle {}",
+            pool.conn_size(),
+            pool.conn_used_size(),
+            pool.conn_idle_size()
+        );
         let con_rs = pool.get_conn().await;
         if con_rs.is_err() {
-            tracing::error!("数据库连接池获取链接失败:{:#?}",con_rs.err().unwrap());
+            tracing::error!("数据库连接池获取链接失败:{:#?}", con_rs.err().unwrap());
             assert!(false);
             return;
         }

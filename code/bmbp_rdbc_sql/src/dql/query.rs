@@ -1,5 +1,9 @@
 use std::collections::HashMap;
-use crate::{RdbcFilterInner, RdbcOrder, RdbcSQL, RdbcColumn, RdbcTableInner, RdbcValue, RdbcConcatType, DatabaseType, RdbcFilter, RdbcTable, RdbcValueColumn};
+
+use crate::{
+    DatabaseType, RdbcColumn, RdbcConcatType, RdbcFilter, RdbcFilterInner, RdbcOrder, RdbcSQL,
+    RdbcTable, RdbcTableInner, RdbcValue, RdbcValueColumn,
+};
 
 pub struct Query {
     driver_: Option<DatabaseType>,
@@ -14,7 +18,6 @@ pub struct Query {
     offset_: Option<u64>,
     params_: Option<HashMap<String, RdbcValue>>,
 }
-
 
 impl Query {
     pub fn new() -> Query {
@@ -44,56 +47,125 @@ impl Query {
     }
 }
 
-
 impl Query {
     // RdbcColumn: From<RC>, RdbcValue: From<RV>, SS: ToString, ST: ToString, SC: ToString, SA: ToString
-    pub fn select<RC>(&mut self, column: RC) -> &mut Self where RdbcColumn: From<RC> {
+    pub fn select<RC>(&mut self, column: RC) -> &mut Self
+        where
+            RdbcColumn: From<RC>,
+    {
         self.select_.push(RdbcColumn::from(column));
         self
     }
-    pub fn select_vec<RC>(&mut self, columns: Vec<RC>) -> &mut Self where RdbcColumn: From<RC> {
+    pub fn select_vec<RC>(&mut self, columns: Vec<RC>) -> &mut Self
+        where
+            RdbcColumn: From<RC>,
+    {
         for column in columns {
             self.select(column);
         }
         self
     }
-    pub fn select_table_column<ST, SC>(&mut self, table: ST, column: SC) -> &mut Self where SC: ToString, ST: ToString {
+    pub fn select_table_column<ST, SC>(&mut self, table: ST, column: SC) -> &mut Self
+        where
+            SC: ToString,
+            ST: ToString,
+    {
         self.select_.push(RdbcColumn::table_column(table, column));
         self
     }
-    pub fn select_table_column_as_alias<ST, SC, SA>(&mut self, table: ST, column: SC, alias: SA) -> &mut Self where ST: ToString, SC: ToString, SA: ToString {
-        self.select_.push(RdbcColumn::table_column_as_alias(table, column, alias));
+    pub fn select_table_column_as_alias<ST, SC, SA>(
+        &mut self,
+        table: ST,
+        column: SC,
+        alias: SA,
+    ) -> &mut Self
+        where
+            ST: ToString,
+            SC: ToString,
+            SA: ToString,
+    {
+        self.select_
+            .push(RdbcColumn::table_column_as_alias(table, column, alias));
         self
     }
-    pub fn select_schema_table_column<SS, ST, SC>(&mut self, schema: SS, table: ST, column: SC) -> &mut Self where SS: ToString, ST: ToString, SC: ToString {
-        self.select_.push(RdbcColumn::schema_table_column(schema, table, column));
+    pub fn select_schema_table_column<SS, ST, SC>(
+        &mut self,
+        schema: SS,
+        table: ST,
+        column: SC,
+    ) -> &mut Self
+        where
+            SS: ToString,
+            ST: ToString,
+            SC: ToString,
+    {
+        self.select_
+            .push(RdbcColumn::schema_table_column(schema, table, column));
         self
     }
-    pub fn select_schema_table_column_as_alias<SS, ST, SC, SA>(&mut self, schema: SS, table: ST, column: SC, alias: SA) -> &mut Self where SS: ToString, ST: ToString, SC: ToString, SA: ToString {
-        self.select_.push(RdbcColumn::schema_table_column_as_alias(schema, table, column, alias));
+    pub fn select_schema_table_column_as_alias<SS, ST, SC, SA>(
+        &mut self,
+        schema: SS,
+        table: ST,
+        column: SC,
+        alias: SA,
+    ) -> &mut Self
+        where
+            SS: ToString,
+            ST: ToString,
+            SC: ToString,
+            SA: ToString,
+    {
+        self.select_.push(RdbcColumn::schema_table_column_as_alias(
+            schema, table, column, alias,
+        ));
         self
     }
-    pub fn select_value<RV>(&mut self, column: RV) -> &mut Self where RdbcValue: From<RV> {
-        self.select_.push(RdbcColumn::Value(RdbcValueColumn::rdbc_value(RdbcValue::from(column))));
+    pub fn select_value<RV>(&mut self, column: RV) -> &mut Self
+        where
+            RdbcValue: From<RV>,
+    {
+        self.select_
+            .push(RdbcColumn::Value(RdbcValueColumn::rdbc_value(
+                RdbcValue::from(column),
+            )));
         self
     }
 
-    pub fn order_by<SC>(&mut self, column: SC, is_asc: bool) -> &mut Self where SC: ToString {
+    pub fn order_by<SC>(&mut self, column: SC, is_asc: bool) -> &mut Self
+        where
+            SC: ToString,
+    {
         self
     }
-    pub fn order_asc<SC>(&mut self, column: SC) -> &mut Self where SC: ToString {
+    pub fn order_asc<SC>(&mut self, column: SC) -> &mut Self
+        where
+            SC: ToString,
+    {
         self
     }
-    pub fn order_desc<SC>(&mut self, column: SC) -> &mut Self where SC: ToString {
+    pub fn order_desc<SC>(&mut self, column: SC) -> &mut Self
+        where
+            SC: ToString,
+    {
         self
     }
-    pub fn order_slice<SC>(&mut self, column: &[SC], is_asc: bool) -> &mut Self where SC: ToString {
+    pub fn order_slice<SC>(&mut self, column: &[SC], is_asc: bool) -> &mut Self
+        where
+            SC: ToString,
+    {
         self
     }
-    pub fn order_slice_asc<SC>(&mut self, column: &[SC]) -> &mut Self where SC: ToString {
+    pub fn order_slice_asc<SC>(&mut self, column: &[SC]) -> &mut Self
+        where
+            SC: ToString,
+    {
         self
     }
-    pub fn order_slice_desc<SC>(&mut self, column: &[SC]) -> &mut Self where SC: ToString {
+    pub fn order_slice_desc<SC>(&mut self, column: &[SC]) -> &mut Self
+        where
+            SC: ToString,
+    {
         self
     }
     pub fn order_column(&mut self, column: RdbcColumn, is_asc: bool) -> &mut Self {
@@ -123,24 +195,40 @@ impl Query {
     pub fn order_column_slice_desc(&mut self, column: &[RdbcColumn]) -> &mut Self {
         self
     }
-    pub fn group_by<RC>(&mut self, column: RC) -> &mut Self where RdbcColumn: From<RC> {
+    pub fn group_by<RC>(&mut self, column: RC) -> &mut Self
+        where
+            RdbcColumn: From<RC>,
+    {
         self
     }
 }
 
-
-impl RdbcTable for Query {}
+impl RdbcTable for Query {
+    fn get_table_mut(&mut self) -> &mut Vec<RdbcTableInner> {
+        self.table_.as_mut()
+    }
+}
 
 impl RdbcFilter for Query {
     fn init_filter(&mut self) -> &mut Self {
+        if self.filter_.is_none() {
+            self.filter_ = Some(RdbcFilterInner::new());
+        }
         self
     }
-
     fn get_filter_mut(&mut self) -> &mut RdbcFilterInner {
-        todo!()
+        self.init_filter();
+        self.filter_.as_mut().unwrap()
     }
-
-    fn add_filter(&mut self, concat_type: RdbcConcatType) -> &mut Self {
+    fn with_filter(&mut self, concat_type: RdbcConcatType) -> &mut Self {
+        let filter_ = {
+            if self.filter_.is_some() {
+                RdbcFilterInner::concat_with_filter(concat_type, self.filter_.take().unwrap())
+            } else {
+                RdbcFilterInner::concat(concat_type)
+            }
+        };
+        self.filter_ = Some(filter_);
         self
     }
 }
@@ -149,16 +237,30 @@ impl RdbcSQL for Query {
     fn to_sql(&self) -> String {
         let mut sql = vec![];
         if !self.select_.is_empty() {
-            let select = self.select_.iter().map(|c| c.to_sql()).collect::<Vec<_>>().join(",");
+            let select = self
+                .select_
+                .iter()
+                .map(|c| c.to_sql())
+                .collect::<Vec<_>>()
+                .join(",");
             sql.push(format!("SELECT {}", select));
         }
 
         if !self.table_.is_empty() {
-            let table = self.table_.iter().map(|t| t.to_sql()).collect::<Vec<_>>().join(",");
+            let table = self
+                .table_
+                .iter()
+                .map(|t| t.to_sql())
+                .collect::<Vec<_>>()
+                .join(",");
             sql.push(format!("FROM {}", table));
         }
         if let Some(ref join) = self.join_ {
-            let table = join.iter().map(|t| t.to_sql()).collect::<Vec<_>>().join("\n");
+            let table = join
+                .iter()
+                .map(|t| t.to_sql())
+                .collect::<Vec<_>>()
+                .join("\n");
             sql.push(format!("{}", table));
         }
         if let Some(ref filter) = self.filter_ {
@@ -168,7 +270,11 @@ impl RdbcSQL for Query {
             }
         }
         if let Some(ref group_by) = self.group_by_ {
-            let group_by = group_by.iter().map(|c| c.to_sql()).collect::<Vec<_>>().join(",");
+            let group_by = group_by
+                .iter()
+                .map(|c| c.to_sql())
+                .collect::<Vec<_>>()
+                .join(",");
             sql.push(format!("GROUP BY {}", group_by));
         }
         if let Some(ref having) = self.having_ {
@@ -176,7 +282,11 @@ impl RdbcSQL for Query {
             sql.push(format!("HAVING {}", having));
         }
         if let Some(ref order) = self.order_ {
-            let order = order.iter().map(|o| o.to_sql()).collect::<Vec<_>>().join(",");
+            let order = order
+                .iter()
+                .map(|o| o.to_sql())
+                .collect::<Vec<_>>()
+                .join(",");
             sql.push(format!("ORDER BY {}", order));
         }
         sql.join(" \n")

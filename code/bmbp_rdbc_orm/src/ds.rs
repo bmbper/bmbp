@@ -16,7 +16,10 @@ impl RdbcDataBaseDriver {
         match driver.to_lowercase().as_str() {
             "postgres" => Ok(RdbcDataBaseDriver::Postgres),
             "mysql" => Ok(RdbcDataBaseDriver::Mysql),
-            _ => Err(RdbcError::new(RdbcErrorType::NotSupportDatabase, "暂不支持的数据库类型")),
+            _ => Err(RdbcError::new(
+                RdbcErrorType::NotSupportDatabase,
+                "暂不支持的数据库类型",
+            )),
         }
     }
 }
@@ -37,7 +40,6 @@ pub struct RdbcDataSource {
     max_idle_conn: Option<usize>,
     max_wait_time: Option<usize>,
     max_idle_time: Option<usize>,
-
 }
 
 impl RdbcDataSource {

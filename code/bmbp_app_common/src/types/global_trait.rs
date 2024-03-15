@@ -42,4 +42,3 @@ pub trait BmbpBaseModelTrait {
     fn set_base_r_owner_user(&mut self, r_id: String) -> &mut Self;
     fn set_base_r_sign(&mut self, r_id: String) -> &mut Self;
 }
-

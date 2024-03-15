@@ -1,5 +1,8 @@
+use crate::{
+    DatabaseType, RdbcColumn, RdbcConcatType, RdbcFilter, RdbcFilterInner, RdbcOrder, RdbcSQL,
+    RdbcTable, RdbcTableInner, RdbcTableJoinType, RdbcValue, Update,
+};
 use std::collections::HashMap;
-use crate::{DatabaseType, Query, RdbcColumn, RdbcConcatType, RdbcFilterInner, RdbcOrder, RdbcFilter, RdbcSQL, RdbcTable, RdbcTableInner, RdbcTableJoinType, RdbcValue, Update};
 
 pub struct Delete {
     driver_: Option<DatabaseType>,
@@ -13,6 +16,7 @@ pub struct Delete {
     offset_: Option<u64>,
     params_: Option<HashMap<String, RdbcValue>>,
 }
+
 impl Delete {
     pub fn new() -> Delete {
         Delete {
@@ -44,17 +48,32 @@ impl Delete {
     }
 }
 
-impl RdbcTable for Delete {}
+impl RdbcTable for Delete {
+    fn get_table_mut(&mut self) -> &mut Vec<RdbcTableInner> {
+        self.table_.as_mut()
+    }
+}
+
 impl RdbcFilter for Delete {
     fn init_filter(&mut self) -> &mut Self {
+        if self.filter_.is_none() {
+            self.filter_ = Some(RdbcFilterInner::new());
+        }
         self
     }
-
     fn get_filter_mut(&mut self) -> &mut RdbcFilterInner {
-        todo!()
+        self.init_filter();
+        self.filter_.as_mut().unwrap()
     }
-
-    fn add_filter(&mut self, concat_type: RdbcConcatType) -> &mut Self {
+    fn with_filter(&mut self, concat_type: RdbcConcatType) -> &mut Self {
+        let filter_ = {
+            if self.filter_.is_some() {
+                RdbcFilterInner::concat_with_filter(concat_type, self.filter_.take().unwrap())
+            } else {
+                RdbcFilterInner::concat(concat_type)
+            }
+        };
+        self.filter_ = Some(filter_);
         self
     }
 }
