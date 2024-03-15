@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use serde::Serialize;
 
-use bmbp_rdbc_macro::{RdbcModel, RdbcOrmRow, RdbcPage};
+use bmbp_rdbc_model::{RdbcModel, RdbcOrmRow, RdbcPage};
 use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
 
 use crate::ds::RdbcDataSource;

@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_rdbc_macro"
+name = "bmbp_rdbc_model"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
