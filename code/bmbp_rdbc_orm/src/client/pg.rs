@@ -7,8 +7,9 @@ use tokio_postgres::{Client, connect, NoTls};
 use tokio_postgres::types::ToSql;
 
 use bmbp_rdbc_model::RdbcOrmRow;
-use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcSQLParser, RdbcValue, Update};
+use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcSQL, RdbcValue, Update};
 
+use crate::client::sql::PgSQL;
 use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 use crate::pool::RdbcConnInner;
 use crate::RdbcDataSource;
@@ -18,7 +19,7 @@ pub struct PgDbClient {
     client: RwLock<Client>,
 }
 
-impl RdbcSQLParser for PgDbClient {
+impl RdbcSQL for PgDbClient {
     fn to_query(&self, query: &Query) -> (String, Vec<RdbcValue>) {
         ("".to_string(), vec![])
     }
@@ -110,12 +111,12 @@ impl RdbcConnInner for PgDbClient {
             .is_ok()
     }
     async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
-        let (pg_sql, page_prams) = self.to_query(query);
+        let (pg_sql, page_prams) = PgSQL::to_query(query);
         self.select_list_by_sql(pg_sql.as_str(), page_prams.as_slice())
             .await
     }
     async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>> {
-        let (sql, params) = ("".to_string(), vec![]);
+        let (sql, params) = PgSQL::to_query(query);
         let pg_prams = params
             .iter()
             .filter_map(|v| Self::to_pg_sql(v))
@@ -166,17 +167,17 @@ impl RdbcConnInner for PgDbClient {
     }
 
     async fn execute_insert(&self, insert: &Insert) -> RdbcResult<u64> {
-        let (sql, params) = ("".to_string(), vec![]);
+        let (sql, params) = PgSQL::to_insert(insert);
         self.execute(sql.as_str(), params.as_slice()).await
     }
 
     async fn execute_update(&self, update: &Update) -> RdbcResult<u64> {
-        let (sql, params) = ("".to_string(), vec![]);
+        let (sql, params) = PgSQL::to_update(update);
         self.execute(sql.as_str(), params.as_slice()).await
     }
 
     async fn execute_delete(&self, delete: &Delete) -> RdbcResult<u64> {
-        let (sql, params) = ("".to_string(), vec![]);
+        let (sql, params) = PgSQL::to_delete(delete);
         self.execute(sql.as_str(), params.as_slice()).await
     }
 }

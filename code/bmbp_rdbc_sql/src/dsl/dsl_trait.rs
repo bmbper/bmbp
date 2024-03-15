@@ -1053,9 +1053,9 @@ pub trait RdbcTable {
 }
 
 /// RdbcSQLParser 语句解析器
-pub trait RdbcSQLParser {
-    fn to_query(&self, query: &Query) -> (String, Vec<RdbcValue>);
-    fn to_insert(&self, query: &Insert) -> (String, Vec<RdbcValue>);
-    fn to_update(&self, query: &Update) -> (String, Vec<RdbcValue>);
-    fn to_delete(&self, query: &Delete) -> (String, Vec<RdbcValue>);
+pub trait RdbcSQL {
+    fn to_query(query: &Query) -> (String, Vec<RdbcValue>);
+    fn to_insert(query: &Insert) -> (String, Vec<RdbcValue>);
+    fn to_update(query: &Update) -> (String, Vec<RdbcValue>);
+    fn to_delete(query: &Delete) -> (String, Vec<RdbcValue>);
 }

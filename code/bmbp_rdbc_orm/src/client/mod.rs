@@ -1,6 +1,4 @@
-mod mysql;
-mod pg;
-mod sqlite;
+use std::sync::Arc;
 
 use crate::client::mysql::MysqlDbClient;
 use crate::client::pg::PgDbClient;
@@ -9,8 +7,11 @@ use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 use crate::pool::RdbcConnInner;
 use crate::RdbcDataBaseDriver::*;
 use crate::RdbcDataSource;
-use std::clone;
-use std::sync::Arc;
+
+mod mysql;
+mod pg;
+mod sqlite;
+mod sql;
 
 pub async fn build_conn(
     ds: Arc<RdbcDataSource>,
