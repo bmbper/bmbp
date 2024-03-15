@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{Query, RdbcFunc, RdbcSQL, RdbcValue};
+use crate::{Query, RdbcFunc, RdbcValue};
 
 /// RdbcColumn SELECT 返回列
 
@@ -50,17 +50,6 @@ impl From<&String> for RdbcColumn {
 impl From<&str> for RdbcColumn {
     fn from(name: &str) -> Self {
         RdbcColumn::Table(RdbcTableColumn::column(name.to_string()))
-    }
-}
-
-impl RdbcSQL for RdbcColumn {
-    fn to_sql(&self) -> String {
-        match self {
-            RdbcColumn::Table(t) => t.to_sql(),
-            RdbcColumn::Query(_) => "".to_string(),
-            RdbcColumn::Func(_) => "".to_string(),
-            RdbcColumn::Value(_) => "".to_string(),
-        }
     }
 }
 
@@ -178,22 +167,6 @@ pub struct RdbcTableColumn {
     alias_: Option<String>,
 }
 
-impl RdbcSQL for RdbcTableColumn {
-    fn to_sql(&self) -> String {
-        let mut column = self.name_.clone();
-        if let Some(ref alias) = self.alias_ {
-            column = format!("{} AS {}", column, alias);
-        }
-        if let Some(ref table) = self.table_ {
-            column = format!("{}.{}", table, column);
-        }
-        if let Some(ref schema) = self.schema_ {
-            column = format!("{}.{}", schema, column);
-        }
-        column
-    }
-}
-
 impl RdbcTableColumn {
     fn column<T>(name: T) -> RdbcTableColumn
         where
@@ -274,6 +247,15 @@ impl RdbcTableColumn {
             name_: name.to_string(),
             alias_: Some(alias.to_string()),
         }
+    }
+}
+
+impl<T> From<T> for RdbcTableColumn
+    where
+        T: ToString,
+{
+    fn from(value: T) -> Self {
+        RdbcTableColumn::column(value)
     }
 }
 
@@ -383,15 +365,6 @@ impl RdbcQueryColumn {
 pub enum RdbcTableInner {
     Table(RdbcSchemaTable),
     Query(RdbcQueryTable),
-}
-
-impl RdbcSQL for RdbcTableInner {
-    fn to_sql(&self) -> String {
-        match self {
-            RdbcTableInner::Table(ref table) => table.to_sql(),
-            RdbcTableInner::Query(ref query) => query.to_sql(),
-        }
-    }
 }
 
 impl RdbcTableInner {
@@ -519,22 +492,6 @@ pub struct RdbcSchemaTable {
     params_: Option<HashMap<String, RdbcValue>>,
 }
 
-impl RdbcSQL for RdbcSchemaTable {
-    fn to_sql(&self) -> String {
-        let mut sql = String::new();
-        if let Some(ref schema) = self.schema_ {
-            sql.push_str(&schema);
-            sql.push_str(".");
-        }
-        sql.push_str(&self.name_);
-        if let Some(ref alias) = self.alias_ {
-            sql.push_str(" AS ");
-            sql.push_str(&alias);
-        }
-        sql
-    }
-}
-
 impl RdbcSchemaTable {
     fn table<T>(table: T) -> RdbcSchemaTable
         where
@@ -660,12 +617,6 @@ pub struct RdbcQueryTable {
     filter_: Option<RdbcFilterInner>,
 }
 
-impl RdbcSQL for RdbcQueryTable {
-    fn to_sql(&self) -> String {
-        format!("({})", self.name_.to_sql())
-    }
-}
-
 impl RdbcQueryTable {
     fn query(table: Query) -> RdbcQueryTable {
         RdbcQueryTable {
@@ -701,12 +652,6 @@ pub struct RdbcFilterInner {
     concat_: RdbcConcatType,
     item_: Vec<RdbcFilterItem>,
     params_: Option<HashMap<String, RdbcValue>>,
-}
-
-impl RdbcSQL for RdbcFilterInner {
-    fn to_sql(&self) -> String {
-        "".to_string()
-    }
 }
 
 impl RdbcFilterInner {
@@ -820,12 +765,6 @@ pub enum RdbcOrder {
     Column(RdbcColumnOrder),
 }
 
-impl RdbcSQL for RdbcOrder {
-    fn to_sql(&self) -> String {
-        "".to_string()
-    }
-}
-
 pub struct RdbcColumnOrder {
     column: RdbcColumn,
     order: RdbcOrderType,
@@ -855,7 +794,6 @@ impl<T> From<T> for RdbcDmlValue
         RdbcDmlValue::VALUE(RdbcValue::from(value))
     }
 }
-
 
 impl<T> From<Option<T>> for RdbcDmlValue
     where

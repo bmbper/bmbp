@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
     DatabaseType, RdbcColumn, RdbcConcatType, RdbcDmlValue, RdbcFilter, RdbcFilterInner, RdbcOrder,
-    RdbcSQL, RdbcTable, RdbcTableInner, RdbcValue,
+    RdbcTable, RdbcTableInner, RdbcValue,
 };
 
 pub struct Update {
@@ -90,15 +90,5 @@ impl RdbcFilter for Update {
         };
         self.filter_ = Some(filter_);
         self
-    }
-}
-
-impl RdbcSQL for Update {
-    fn to_sql(&self) -> String {
-        "".to_string()
-    }
-
-    fn to_sql_with_params(&self) -> (String, Vec<RdbcValue>) {
-        ("".to_string(), vec![])
     }
 }

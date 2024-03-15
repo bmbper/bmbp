@@ -1,8 +1,9 @@
-use crate::{
-    DatabaseType, RdbcColumn, RdbcConcatType, RdbcFilter, RdbcFilterInner, RdbcOrder, RdbcSQL,
-    RdbcTable, RdbcTableInner, RdbcTableJoinType, RdbcValue, Update,
-};
 use std::collections::HashMap;
+
+use crate::{
+    DatabaseType, RdbcColumn, RdbcConcatType, RdbcFilter, RdbcFilterInner, RdbcOrder,
+    RdbcTable, RdbcTableInner, RdbcValue,
+};
 
 pub struct Delete {
     driver_: Option<DatabaseType>,
@@ -75,15 +76,5 @@ impl RdbcFilter for Delete {
         };
         self.filter_ = Some(filter_);
         self
-    }
-}
-
-impl RdbcSQL for Delete {
-    fn to_sql(&self) -> String {
-        "".to_string()
-    }
-
-    fn to_sql_with_params(&self) -> (String, Vec<RdbcValue>) {
-        ("".to_string(), vec![])
     }
 }

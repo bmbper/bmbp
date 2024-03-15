@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    DatabaseType, RdbcColumn, RdbcConcatType, RdbcFilter, RdbcFilterInner, RdbcOrder, RdbcSQL,
+    DatabaseType, RdbcColumn, RdbcConcatType, RdbcFilter, RdbcFilterInner, RdbcOrder,
     RdbcTable, RdbcTableInner, RdbcValue, RdbcValueColumn,
 };
 
@@ -34,16 +34,6 @@ impl Query {
             offset_: None,
             params_: None,
         }
-    }
-    pub fn to_params(&self) -> Vec<RdbcValue> {
-        if let Some(params) = self.params_.as_ref() {
-            vec![]
-        } else {
-            vec![]
-        }
-    }
-    pub fn to_sql_params(&self) -> (String, Vec<RdbcValue>) {
-        (self.to_sql(), self.to_params())
     }
 }
 
@@ -230,76 +220,5 @@ impl RdbcFilter for Query {
         };
         self.filter_ = Some(filter_);
         self
-    }
-}
-
-impl RdbcSQL for Query {
-    fn to_sql(&self) -> String {
-        let mut sql = vec![];
-        if !self.select_.is_empty() {
-            let select = self
-                .select_
-                .iter()
-                .map(|c| c.to_sql())
-                .collect::<Vec<_>>()
-                .join(",");
-            sql.push(format!("SELECT {}", select));
-        }
-
-        if !self.table_.is_empty() {
-            let table = self
-                .table_
-                .iter()
-                .map(|t| t.to_sql())
-                .collect::<Vec<_>>()
-                .join(",");
-            sql.push(format!("FROM {}", table));
-        }
-        if let Some(ref join) = self.join_ {
-            let table = join
-                .iter()
-                .map(|t| t.to_sql())
-                .collect::<Vec<_>>()
-                .join("\n");
-            sql.push(format!("{}", table));
-        }
-        if let Some(ref filter) = self.filter_ {
-            let filter = filter.to_sql();
-            if !filter.is_empty() {
-                sql.push(format!("WHERE {}", filter));
-            }
-        }
-        if let Some(ref group_by) = self.group_by_ {
-            let group_by = group_by
-                .iter()
-                .map(|c| c.to_sql())
-                .collect::<Vec<_>>()
-                .join(",");
-            sql.push(format!("GROUP BY {}", group_by));
-        }
-        if let Some(ref having) = self.having_ {
-            let having = having.to_sql();
-            sql.push(format!("HAVING {}", having));
-        }
-        if let Some(ref order) = self.order_ {
-            let order = order
-                .iter()
-                .map(|o| o.to_sql())
-                .collect::<Vec<_>>()
-                .join(",");
-            sql.push(format!("ORDER BY {}", order));
-        }
-        sql.join(" \n")
-    }
-    fn to_sql_with_params(&self) -> (String, Vec<RdbcValue>) {
-        let mut sql = self.to_sql();
-        let mut sql_params = vec![];
-        if let Some(ref params) = self.params_ {
-            for (key, value) in params {
-                sql = sql.replace(key, format!("${}", params.len()).as_str());
-                sql_params.push(value.clone());
-            }
-        };
-        (sql, sql_params)
     }
 }

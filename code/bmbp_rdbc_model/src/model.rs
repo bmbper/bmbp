@@ -1,3 +1,14 @@
+use std::collections::{HashMap, HashSet};
+use std::fmt::Debug;
+
+use chrono::Utc;
+use serde::{Deserialize, Serialize};
+use tokio_postgres::Row;
+use tokio_postgres::types::Date;
+use uuid::{uuid, Uuid};
+
+use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcTable, RdbcValue};
+
 use crate::{
     RDBC_DATA_CREATE_TIME, RDBC_DATA_CREATE_USER, RDBC_DATA_FLAG, RDBC_DATA_ID, RDBC_DATA_LEVEL,
     RDBC_DATA_OWNER_ORG, RDBC_DATA_REMARK, RDBC_DATA_SIGN, RDBC_DATA_SORT, RDBC_DATA_STATUS,
@@ -5,14 +16,6 @@ use crate::{
     RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH, RDBC_TREE_NODE_LEAF,
     RDBC_TREE_NODE_LEVEL, RDBC_TREE_NODE_TYPE, RDBC_TREE_PARENT_CODE,
 };
-use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcTable, RdbcValue};
-use chrono::Utc;
-use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
-use std::fmt::Debug;
-use tokio_postgres::types::Date;
-use tokio_postgres::Row;
-use uuid::{uuid, Uuid};
 
 /// RdbcModel 定义数据库表标记
 pub trait RdbcModel {
@@ -165,19 +168,19 @@ where
 {
     pub fn build_insert(&self) -> Insert {
         let mut insert = Insert::new();
-        insert.insert_table(T::get_table_name());
-        insert.insert_op_column_value(RDBC_DATA_ID, self.get_data_id());
-        insert.insert_op_column_value(RDBC_DATA_FLAG, self.get_data_flag());
-        insert.insert_op_column_value(RDBC_DATA_SORT, self.get_data_sort());
-        insert.insert_op_column_value(RDBC_DATA_REMARK, self.get_data_remark());
-        insert.insert_op_column_value(RDBC_DATA_CREATE_TIME, self.get_data_create_time());
-        insert.insert_op_column_value(RDBC_DATA_CREATE_USER, self.get_data_create_user());
-        insert.insert_op_column_value(RDBC_DATA_UPDATE_TIME, self.get_data_update_time());
-        insert.insert_op_column_value(RDBC_DATA_UPDATE_USER, self.get_data_update_user());
-        insert.insert_op_column_value(RDBC_DATA_OWNER_ORG, self.get_data_owner_org());
-        insert.insert_op_column_value(RDBC_DATA_SIGN, self.get_data_sign());
-        insert.insert_op_column_value(RDBC_DATA_LEVEL, self.get_data_level());
-        insert.insert_op_column_value(RDBC_DATA_STATUS, self.get_data_status());
+        insert.table(T::get_table_name());
+        insert.insert_column_value(RDBC_DATA_ID, self.get_data_id());
+        insert.insert_column_value(RDBC_DATA_FLAG, self.get_data_flag());
+        insert.insert_column_value(RDBC_DATA_SORT, self.get_data_sort());
+        insert.insert_column_value(RDBC_DATA_REMARK, self.get_data_remark());
+        insert.insert_column_value(RDBC_DATA_CREATE_TIME, self.get_data_create_time());
+        insert.insert_column_value(RDBC_DATA_CREATE_USER, self.get_data_create_user());
+        insert.insert_column_value(RDBC_DATA_UPDATE_TIME, self.get_data_update_time());
+        insert.insert_column_value(RDBC_DATA_UPDATE_USER, self.get_data_update_user());
+        insert.insert_column_value(RDBC_DATA_OWNER_ORG, self.get_data_owner_org());
+        insert.insert_column_value(RDBC_DATA_SIGN, self.get_data_sign());
+        insert.insert_column_value(RDBC_DATA_LEVEL, self.get_data_level());
+        insert.insert_column_value(RDBC_DATA_STATUS, self.get_data_status());
         insert
     }
     pub fn build_query() -> Query {
@@ -683,26 +686,26 @@ where
 {
     pub fn build_insert(&self) -> Insert {
         let mut insert = Insert::new();
-        insert.insert_table(T::get_table_name());
-        insert.insert_op_column_value(RDBC_DATA_ID, self.get_data_id());
-        insert.insert_op_column_value(RDBC_DATA_FLAG, self.get_data_flag());
-        insert.insert_op_column_value(RDBC_DATA_SORT, self.get_data_sort());
-        insert.insert_op_column_value(RDBC_DATA_REMARK, self.get_data_remark());
-        insert.insert_op_column_value(RDBC_DATA_CREATE_TIME, self.get_data_create_time());
-        insert.insert_op_column_value(RDBC_DATA_CREATE_USER, self.get_data_create_user());
-        insert.insert_op_column_value(RDBC_DATA_UPDATE_TIME, self.get_data_update_time());
-        insert.insert_op_column_value(RDBC_DATA_UPDATE_USER, self.get_data_update_user());
-        insert.insert_op_column_value(RDBC_DATA_OWNER_ORG, self.get_data_owner_org());
-        insert.insert_op_column_value(RDBC_DATA_SIGN, self.get_data_sign());
-        insert.insert_op_column_value(RDBC_DATA_LEVEL, self.get_data_level());
-        insert.insert_op_column_value(RDBC_DATA_STATUS, self.get_data_status());
-        insert.insert_op_column_value(RDBC_TREE_CODE, self.get_code().clone());
-        insert.insert_op_column_value(RDBC_TREE_CODE_PATH, self.get_code_path());
-        insert.insert_op_column_value(RDBC_TREE_PARENT_CODE, self.get_parent_code());
-        insert.insert_op_column_value(RDBC_TREE_NAME, self.get_name());
-        insert.insert_op_column_value(RDBC_TREE_NODE_TYPE, self.get_node_type());
-        insert.insert_op_column_value(RDBC_TREE_NODE_LEVEL, self.get_node_level());
-        insert.insert_op_column_value(RDBC_TREE_NODE_LEAF, self.get_node_leaf());
+        insert.table(T::get_table_name());
+        insert.insert_column_value(RDBC_DATA_ID, self.get_data_id());
+        insert.insert_column_value(RDBC_DATA_FLAG, self.get_data_flag());
+        insert.insert_column_value(RDBC_DATA_SORT, self.get_data_sort());
+        insert.insert_column_value(RDBC_DATA_REMARK, self.get_data_remark());
+        insert.insert_column_value(RDBC_DATA_CREATE_TIME, self.get_data_create_time());
+        insert.insert_column_value(RDBC_DATA_CREATE_USER, self.get_data_create_user());
+        insert.insert_column_value(RDBC_DATA_UPDATE_TIME, self.get_data_update_time());
+        insert.insert_column_value(RDBC_DATA_UPDATE_USER, self.get_data_update_user());
+        insert.insert_column_value(RDBC_DATA_OWNER_ORG, self.get_data_owner_org());
+        insert.insert_column_value(RDBC_DATA_SIGN, self.get_data_sign());
+        insert.insert_column_value(RDBC_DATA_LEVEL, self.get_data_level());
+        insert.insert_column_value(RDBC_DATA_STATUS, self.get_data_status());
+        insert.insert_column_value(RDBC_TREE_CODE, self.get_code().clone());
+        insert.insert_column_value(RDBC_TREE_CODE_PATH, self.get_code_path());
+        insert.insert_column_value(RDBC_TREE_PARENT_CODE, self.get_parent_code());
+        insert.insert_column_value(RDBC_TREE_NAME, self.get_name());
+        insert.insert_column_value(RDBC_TREE_NODE_TYPE, self.get_node_type());
+        insert.insert_column_value(RDBC_TREE_NODE_LEVEL, self.get_node_level());
+        insert.insert_column_value(RDBC_TREE_NODE_LEAF, self.get_node_leaf());
         insert
     }
     pub fn build_query() -> Query {

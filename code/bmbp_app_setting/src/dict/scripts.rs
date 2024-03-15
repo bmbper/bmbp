@@ -21,9 +21,11 @@ impl BmbpRdbcDictScript {
     pub fn build_insert(dict: &BmbpSettingDictOrmModel) -> Insert {
         let mut insert = dict.build_insert();
         let dict_ext = dict.get_ext_props();
-        insert.insert_op_column_value("dict_alise", dict_ext.get_dict_alias());
-        insert.insert_op_column_value("dict_value", dict_ext.get_dict_value());
-        insert.insert_op_column_value("dict_type", dict_ext.get_dict_type());
+        insert.insert_column_value("dict_alise", dict_ext.get_dict_alias());
+        insert.insert_column_value("dict_value", dict_ext.get_dict_value());
+        if let Some(dict_type) = dict_ext.get_dict_type() {
+            insert.insert_column_value("dict_type", dict_type.value());
+        }
         insert
     }
     pub fn build_update(dict: &mut BmbpSettingDictOrmModel) -> Update {

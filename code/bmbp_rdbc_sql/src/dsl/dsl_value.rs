@@ -26,6 +26,18 @@ impl From<i8> for RdbcValue {
     }
 }
 
+impl From<usize> for RdbcValue {
+    fn from(i: usize) -> RdbcValue {
+        RdbcValue::BigInt(i as i64)
+    }
+}
+
+impl From<&usize> for RdbcValue {
+    fn from(i: &usize) -> RdbcValue {
+        RdbcValue::BigInt(i.clone() as i64)
+    }
+}
+
 impl From<String> for RdbcValue {
     fn from(s: String) -> RdbcValue {
         RdbcValue::String(s)
@@ -43,7 +55,6 @@ impl From<&str> for RdbcValue {
         RdbcValue::String(s.to_string())
     }
 }
-
 
 impl RdbcValue {
     pub fn get_string(&self) -> String {
