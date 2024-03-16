@@ -1,12 +1,14 @@
 use std::collections::HashMap;
+use std::sync::RwLock;
 
 use crate::{
-    DatabaseType, RdbcColumn, RdbcConcatType, RdbcFilter, RdbcFilterInner, RdbcOrder,
+    DatabaseType, RdbcColumn, RdbcConcatType, RdbcFilter, RdbcFilterInner, RdbcOrder, RdbcSQL,
     RdbcTable, RdbcTableInner, RdbcValue,
 };
+use crate::build::{mysql_build_delete_script, pg_build_delete_script};
 
 pub struct Delete {
-    driver_: Option<DatabaseType>,
+    driver_: RwLock<Option<DatabaseType>>,
     table_: Vec<RdbcTableInner>,
     join_: Option<Vec<RdbcTableInner>>,
     filter_: Option<RdbcFilterInner>,
@@ -21,7 +23,7 @@ pub struct Delete {
 impl Delete {
     pub fn new() -> Delete {
         Delete {
-            driver_: None,
+            driver_: RwLock::new(None),
             table_: Vec::new(),
             join_: None,
             filter_: None,
@@ -33,19 +35,10 @@ impl Delete {
             params_: None,
         }
     }
-    pub fn driver(driver: DatabaseType) -> Self {
-        Delete {
-            driver_: Some(driver),
-            table_: Vec::new(),
-            join_: None,
-            filter_: None,
-            group_by_: None,
-            having_: None,
-            order_: None,
-            limit_: None,
-            offset_: None,
-            params_: None,
-        }
+
+    pub fn set_driver(&self, driver: DatabaseType) -> &Self {
+        *self.driver_.write().unwrap() = Some(driver);
+        self
     }
 }
 
@@ -76,5 +69,14 @@ impl RdbcFilter for Delete {
         };
         self.filter_ = Some(filter_);
         self
+    }
+}
+
+impl RdbcSQL for Delete {
+    fn build_script(&self, database_type: DatabaseType) -> (String, HashMap<String, RdbcValue>) {
+        match database_type {
+            DatabaseType::Postgres => pg_build_delete_script(self),
+            DatabaseType::MySQL => mysql_build_delete_script(self),
+        }
     }
 }

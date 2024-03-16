@@ -1,12 +1,14 @@
 use std::collections::HashMap;
+use std::sync::RwLock;
 
+use crate::build::{mysql_build_query_script, pg_build_query_script};
 use crate::{
-    DatabaseType, RdbcColumn, RdbcConcatType, RdbcFilter, RdbcFilterInner, RdbcOrder,
+    DatabaseType, RdbcColumn, RdbcConcatType, RdbcFilter, RdbcFilterInner, RdbcOrder, RdbcSQL,
     RdbcTable, RdbcTableInner, RdbcValue, RdbcValueColumn,
 };
 
 pub struct Query {
-    driver_: Option<DatabaseType>,
+    driver_: RwLock<Option<DatabaseType>>,
     select_: Vec<RdbcColumn>,
     table_: Vec<RdbcTableInner>,
     join_: Option<Vec<RdbcTableInner>>,
@@ -22,7 +24,7 @@ pub struct Query {
 impl Query {
     pub fn new() -> Query {
         Query {
-            driver_: None,
+            driver_: RwLock::new(None),
             select_: vec![],
             table_: vec![],
             join_: Some(vec![]),
@@ -37,18 +39,53 @@ impl Query {
     }
 }
 
+// Query的查询方法
+impl Query {
+    pub fn set_driver(&self, driver: DatabaseType) -> &Self {
+        *self.driver_.write().unwrap() = Some(driver);
+        self
+    }
+
+    pub fn get_select(&self) -> &Vec<RdbcColumn> {
+        &self.select_
+    }
+    pub fn get_table(&self) -> &Vec<RdbcTableInner> {
+        &self.table_
+    }
+    pub fn get_join(&self) -> &Option<Vec<RdbcTableInner>> {
+        &self.join_
+    }
+    pub fn get_filter(&self) -> &Option<RdbcFilterInner> {
+        &self.filter_
+    }
+    pub fn get_group_by(&self) -> &Option<Vec<RdbcColumn>> {
+        &self.group_by_
+    }
+    pub fn get_having(&self) -> &Option<RdbcFilterInner> {
+        &self.having_
+    }
+    pub fn get_order(&self) -> &Option<Vec<RdbcOrder>> {
+        &self.order_
+    }
+    pub fn get_limit(&self) -> &Option<u64> {
+        &self.limit_
+    }
+    pub fn get_offset(&self) -> &Option<u64> {
+        &self.offset_
+    }
+}
 impl Query {
     // RdbcColumn: From<RC>, RdbcValue: From<RV>, SS: ToString, ST: ToString, SC: ToString, SA: ToString
     pub fn select<RC>(&mut self, column: RC) -> &mut Self
-        where
-            RdbcColumn: From<RC>,
+    where
+        RdbcColumn: From<RC>,
     {
         self.select_.push(RdbcColumn::from(column));
         self
     }
     pub fn select_vec<RC>(&mut self, columns: Vec<RC>) -> &mut Self
-        where
-            RdbcColumn: From<RC>,
+    where
+        RdbcColumn: From<RC>,
     {
         for column in columns {
             self.select(column);
@@ -56,9 +93,9 @@ impl Query {
         self
     }
     pub fn select_table_column<ST, SC>(&mut self, table: ST, column: SC) -> &mut Self
-        where
-            SC: ToString,
-            ST: ToString,
+    where
+        SC: ToString,
+        ST: ToString,
     {
         self.select_.push(RdbcColumn::table_column(table, column));
         self
@@ -69,10 +106,10 @@ impl Query {
         column: SC,
         alias: SA,
     ) -> &mut Self
-        where
-            ST: ToString,
-            SC: ToString,
-            SA: ToString,
+    where
+        ST: ToString,
+        SC: ToString,
+        SA: ToString,
     {
         self.select_
             .push(RdbcColumn::table_column_as_alias(table, column, alias));
@@ -84,10 +121,10 @@ impl Query {
         table: ST,
         column: SC,
     ) -> &mut Self
-        where
-            SS: ToString,
-            ST: ToString,
-            SC: ToString,
+    where
+        SS: ToString,
+        ST: ToString,
+        SC: ToString,
     {
         self.select_
             .push(RdbcColumn::schema_table_column(schema, table, column));
@@ -100,11 +137,11 @@ impl Query {
         column: SC,
         alias: SA,
     ) -> &mut Self
-        where
-            SS: ToString,
-            ST: ToString,
-            SC: ToString,
-            SA: ToString,
+    where
+        SS: ToString,
+        ST: ToString,
+        SC: ToString,
+        SA: ToString,
     {
         self.select_.push(RdbcColumn::schema_table_column_as_alias(
             schema, table, column, alias,
@@ -112,8 +149,8 @@ impl Query {
         self
     }
     pub fn select_value<RV>(&mut self, column: RV) -> &mut Self
-        where
-            RdbcValue: From<RV>,
+    where
+        RdbcValue: From<RV>,
     {
         self.select_
             .push(RdbcColumn::Value(RdbcValueColumn::rdbc_value(
@@ -123,38 +160,38 @@ impl Query {
     }
 
     pub fn order_by<SC>(&mut self, column: SC, is_asc: bool) -> &mut Self
-        where
-            SC: ToString,
+    where
+        SC: ToString,
     {
         self
     }
     pub fn order_asc<SC>(&mut self, column: SC) -> &mut Self
-        where
-            SC: ToString,
+    where
+        SC: ToString,
     {
         self
     }
     pub fn order_desc<SC>(&mut self, column: SC) -> &mut Self
-        where
-            SC: ToString,
+    where
+        SC: ToString,
     {
         self
     }
     pub fn order_slice<SC>(&mut self, column: &[SC], is_asc: bool) -> &mut Self
-        where
-            SC: ToString,
+    where
+        SC: ToString,
     {
         self
     }
     pub fn order_slice_asc<SC>(&mut self, column: &[SC]) -> &mut Self
-        where
-            SC: ToString,
+    where
+        SC: ToString,
     {
         self
     }
     pub fn order_slice_desc<SC>(&mut self, column: &[SC]) -> &mut Self
-        where
-            SC: ToString,
+    where
+        SC: ToString,
     {
         self
     }
@@ -186,8 +223,8 @@ impl Query {
         self
     }
     pub fn group_by<RC>(&mut self, column: RC) -> &mut Self
-        where
-            RdbcColumn: From<RC>,
+    where
+        RdbcColumn: From<RC>,
     {
         self
     }
@@ -220,5 +257,14 @@ impl RdbcFilter for Query {
         };
         self.filter_ = Some(filter_);
         self
+    }
+}
+
+impl RdbcSQL for Query {
+    fn build_script(&self, database_type: DatabaseType) -> (String, HashMap<String, RdbcValue>) {
+        match database_type {
+            DatabaseType::Postgres => pg_build_query_script(self),
+            DatabaseType::MySQL => mysql_build_query_script(self),
+        }
     }
 }

@@ -1,15 +1,13 @@
-use std::fmt::Debug;
 use std::sync::Arc;
 
 use async_trait::async_trait;
 use tokio::sync::RwLock;
-use tokio_postgres::{Client, connect, NoTls};
 use tokio_postgres::types::ToSql;
+use tokio_postgres::{connect, Client, NoTls};
 
 use bmbp_rdbc_model::RdbcOrmRow;
-use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcSQL, RdbcValue, Update};
+use bmbp_rdbc_sql::{DatabaseType, Delete, Insert, Query, RdbcSQL, RdbcValue, Update};
 
-use crate::client::sql::PgSQL;
 use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 use crate::pool::RdbcConnInner;
 use crate::RdbcDataSource;
@@ -18,25 +16,6 @@ pub struct PgDbClient {
     data_source: Arc<RdbcDataSource>,
     client: RwLock<Client>,
 }
-
-impl RdbcSQL for PgDbClient {
-    fn to_query(&self, query: &Query) -> (String, Vec<RdbcValue>) {
-        ("".to_string(), vec![])
-    }
-
-    fn to_insert(&self, query: &Insert) -> (String, Vec<RdbcValue>) {
-        ("".to_string(), vec![])
-    }
-
-    fn to_update(&self, query: &Update) -> (String, Vec<RdbcValue>) {
-        ("".to_string(), vec![])
-    }
-
-    fn to_delete(&self, query: &Delete) -> (String, Vec<RdbcValue>) {
-        ("".to_string(), vec![])
-    }
-}
-
 impl PgDbClient {
     pub(crate) async fn new(data_source: Arc<RdbcDataSource>) -> RdbcResult<Self> {
         let url = Self::build_url(data_source.clone())?;
@@ -111,12 +90,12 @@ impl RdbcConnInner for PgDbClient {
             .is_ok()
     }
     async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
-        let (pg_sql, page_prams) = PgSQL::to_query(query);
+        let (pg_sql, page_prams) = query.build_sql(DatabaseType::Postgres);
         self.select_list_by_sql(pg_sql.as_str(), page_prams.as_slice())
             .await
     }
     async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>> {
-        let (sql, params) = PgSQL::to_query(query);
+        let (sql, params) = query.build_sql(DatabaseType::Postgres);
         let pg_prams = params
             .iter()
             .filter_map(|v| Self::to_pg_sql(v))
@@ -167,17 +146,17 @@ impl RdbcConnInner for PgDbClient {
     }
 
     async fn execute_insert(&self, insert: &Insert) -> RdbcResult<u64> {
-        let (sql, params) = PgSQL::to_insert(insert);
+        let (sql, params) = insert.build_sql(DatabaseType::Postgres);
         self.execute(sql.as_str(), params.as_slice()).await
     }
 
     async fn execute_update(&self, update: &Update) -> RdbcResult<u64> {
-        let (sql, params) = PgSQL::to_update(update);
+        let (sql, params) = update.build_sql(DatabaseType::Postgres);
         self.execute(sql.as_str(), params.as_slice()).await
     }
 
     async fn execute_delete(&self, delete: &Delete) -> RdbcResult<u64> {
-        let (sql, params) = PgSQL::to_delete(delete);
+        let (sql, params) = delete.build_sql(DatabaseType::Postgres);
         self.execute(sql.as_str(), params.as_slice()).await
     }
 }

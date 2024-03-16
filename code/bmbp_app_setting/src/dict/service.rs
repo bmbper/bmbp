@@ -1,8 +1,8 @@
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
 use bmbp_app_utils::{is_empty_string, simple_uuid_upper};
 use bmbp_rdbc_orm::{
-    RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_ROOT_NODE, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable,
-    RdbcTableInner, RdbcTree, RdbcTreeUtil, simple_column, Update, value_column,
+    simple_column, value_column, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable, RdbcTableInner,
+    RdbcTree, RdbcTreeUtil, Update, RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_ROOT_NODE,
 };
 
 use crate::dict::dao::BmbpRbacDictDao;
@@ -65,11 +65,11 @@ impl BmbpRbacDictService {
         dict.set_data_id(simple_uuid_upper());
         dict.set_code(simple_uuid_upper());
         dict.get_ext_props_mut().set_dict_type(BmbpDictType::Custom);
-        /// 根据上级节点设置本级的编码路径、本级的名称路径
-        /// 当上级节点编码为空时，赋值为根节点
-        /// 根据上级编码去查询节点信息，查询不到节点时，
-        /// 当前节点编码为根节点，设置根路径， 不为根节点时，提示找不到指定的上级节点
-        /// 计算本级节点编码路径、本级节点名称路径
+        // 根据上级节点设置本级的编码路径、本级的名称路径
+        // 当上级节点编码为空时，赋值为根节点
+        // 根据上级编码去查询节点信息，查询不到节点时，
+        // 当前节点编码为根节点，设置根路径， 不为根节点时，提示找不到指定的上级节点
+        // 计算本级节点编码路径、本级节点名称路径
         if is_empty_string(dict.get_parent_code().as_ref()) {
             dict.set_parent_code(RDBC_TREE_ROOT_NODE.to_string());
         }
@@ -164,7 +164,7 @@ impl BmbpRbacDictService {
         if is_empty_string(parent_dict_code) {
             parent_dict_code = dict.get_parent_code();
         }
-        if (is_empty_string(parent_dict_code)) {
+        if is_empty_string(parent_dict_code) {
             return Err(BmbpError::service(
                 "指定的字典数据缺少上级字典，请联系管理员修复！",
             ));
@@ -212,22 +212,13 @@ impl BmbpRbacDictService {
         let update = BmbpRdbcDictScript::build_update(&mut dict);
         let mut row_count = BmbpRbacDictDao::execute_update(&update).await?;
         // 更新子表数据
-        row_count = row_count
-            + Self::update_name_path_for_children(
-            dict.get_code_path().unwrap(),
-            parent_name_path.as_str(),
-            dict.get_name().unwrap(),
-        )
-            .await?;
+        row_count =
+            row_count + Self::update_name_path_for_children(dict.get_code_path().unwrap()).await?;
 
         Ok(row_count)
     }
 
-    async fn update_name_path_for_children(
-        code_path: &str,
-        parent_name_path: &str,
-        dict_name: &String,
-    ) -> BmbpResp<usize> {
+    async fn update_name_path_for_children(code_path: &str) -> BmbpResp<usize> {
         // UPDATE damp_base_dict AS t1
         // JOIN damp_base_dict AS t2 ON t2.CODE = t1.parent_code
         // SET t1.NAME_PATH = CONCAT(t2.NAME_PATH, t1.name, '/')
@@ -247,10 +238,7 @@ impl BmbpRbacDictService {
         update.like_left_col(simple_column("t1", "code_path"), code_path);
         BmbpRbacDictDao::execute_update(&update).await
     }
-    async fn update_code_path_for_children(
-        parent_code_path: &str,
-        dict_code: &String,
-    ) -> BmbpResp<usize> {
+    async fn update_code_path_for_children(parent_code_path: &str) -> BmbpResp<usize> {
         // UPDATE damp_base_dict AS t1
         // JOIN damp_base_dict AS t2 ON t2.CODE = t1.parent_code
         // SET t1.CODE_PATH = CONCAT(t2.CODE_PATH, t1.code, '/')

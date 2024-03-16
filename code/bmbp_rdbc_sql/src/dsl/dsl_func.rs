@@ -13,10 +13,18 @@ impl RdbcFunc {
     }
 }
 
-
 pub struct RdbcConcatFunc {
     liter_: Option<String>,
     columns_: Vec<RdbcColumn>,
+}
+
+impl RdbcConcatFunc {
+    pub fn get_liter(&self) -> Option<&String> {
+        self.liter_.as_ref()
+    }
+    pub fn get_columns(&self) -> &Vec<RdbcColumn> {
+        &self.columns_
+    }
 }
 
 impl RdbcConcatFunc {

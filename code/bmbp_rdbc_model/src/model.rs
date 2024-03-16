@@ -1,11 +1,10 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::fmt::Debug;
 
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use tokio_postgres::Row;
-use tokio_postgres::types::Date;
-use uuid::{uuid, Uuid};
+use uuid::Uuid;
 
 use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcTable, RdbcValue};
 

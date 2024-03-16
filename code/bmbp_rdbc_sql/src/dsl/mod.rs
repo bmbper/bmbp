@@ -9,32 +9,10 @@ mod dsl_trait;
 mod dsl_value;
 mod func;
 
-
+#[derive(Clone)]
 pub enum DatabaseType {
     MySQL,
-    SQLite,
     Postgres,
-    MSSQL,
-    Oracle,
-    DB2,
-    Firebird,
-    Informix,
-    Sybase,
-    Access,
-    Ingres,
-    Interbase,
-    SQLite3,
-    Virtuoso,
-    H2,
-    HSQLDB,
-    MemSQL,
-    MonetDB,
-    Crate,
-    Redshift,
-    ClickHouse,
-    BigQuery,
-    Snowflake,
-    Presto,
 }
 
 #[cfg(test)]

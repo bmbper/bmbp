@@ -1,12 +1,16 @@
 use std::collections::HashMap;
+use std::sync::RwLock;
 
 use crate::{
     DatabaseType, RdbcColumn, RdbcConcatType, RdbcDmlValue, RdbcFilter, RdbcFilterInner, RdbcOrder,
-    RdbcTable, RdbcTableInner, RdbcValue,
+    RdbcSQL, RdbcTable, RdbcTableInner, RdbcValue,
+};
+use crate::build::{
+    mysql_build_update_script, pg_build_update_script,
 };
 
 pub struct Update {
-    driver_: Option<DatabaseType>,
+    driver_: RwLock<Option<DatabaseType>>,
     set_values_: Vec<(RdbcColumn, Option<RdbcDmlValue>)>,
     table_: Vec<RdbcTableInner>,
     join_: Option<Vec<RdbcTableInner>>,
@@ -22,7 +26,7 @@ pub struct Update {
 impl Update {
     pub fn new() -> Update {
         Update {
-            driver_: None,
+            driver_: RwLock::new(None),
             set_values_: vec![],
             table_: Vec::new(),
             join_: None,
@@ -35,30 +39,20 @@ impl Update {
             params_: None,
         }
     }
-    pub fn driver(driver_: DatabaseType) -> Self {
-        Update {
-            driver_: Some(driver_),
-            set_values_: vec![],
-            table_: Vec::new(),
-            join_: None,
-            filter_: None,
-            group_by_: None,
-            having_: None,
-            order_: None,
-            limit_: None,
-            offset_: None,
-            params_: None,
-        }
+    pub fn set_driver(&self, driver: DatabaseType) -> &Self {
+        *self.driver_.write().unwrap() = Some(driver);
+        self
     }
 }
 
 impl Update {
     pub fn set<SC, RV>(&mut self, column: SC, value: RV) -> &mut Self
-        where
-            RdbcColumn: From<SC>,
-            RdbcDmlValue: From<RV>,
+    where
+        RdbcColumn: From<SC>,
+        RdbcDmlValue: From<RV>,
     {
-        self.set_values_.push((RdbcColumn::from(column), Some(RdbcDmlValue::from(value))));
+        self.set_values_
+            .push((RdbcColumn::from(column), Some(RdbcDmlValue::from(value))));
         self
     }
 }
@@ -90,5 +84,14 @@ impl RdbcFilter for Update {
         };
         self.filter_ = Some(filter_);
         self
+    }
+}
+
+impl RdbcSQL for Update {
+    fn build_script(&self, database_type: DatabaseType) -> (String, HashMap<String, RdbcValue>) {
+        match database_type {
+            DatabaseType::Postgres => pg_build_update_script(self),
+            DatabaseType::MySQL => mysql_build_update_script(self),
+        }
     }
 }
