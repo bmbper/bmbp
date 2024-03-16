@@ -110,8 +110,7 @@ fn pg_build_order(order_column: &Vec<RdbcOrder>) -> Vec<String> {
 fn pg_build_order_column(order_: &RdbcOrder) -> String {
     match order_ {
         RdbcOrder::Column(column) => {
-            let (column_sql, column_params) =
-                pg_build_select_column_sql(column.get_column(), false);
+            let (column_sql, _) = pg_build_select_column_sql(column.get_column(), false);
             match column.get_order() {
                 RdbcOrderType::Asc => format!("{} ASC", column_sql),
                 RdbcOrderType::Desc => format!("{} DESC", column_sql),
@@ -410,7 +409,7 @@ fn pg_build_filter_column_sql(
 fn pg_build_filter_value_sql(value: &RdbcValueFilterItem) -> (String, HashMap<String, RdbcValue>) {
     let (mut item_sql, mut item_params) = ("".to_string(), HashMap::new());
     let column = value.get_column();
-    let (column_sql, column_params) = pg_build_select_column_sql(column, false);
+    let (column_sql, _) = pg_build_select_column_sql(column, false);
     let column_key = Uuid::new_v4().to_string();
     let column_value = value.get_value();
     let ignore_null = value.get_ignore_null();
@@ -631,14 +630,14 @@ fn pg_build_select_value_column_sql(
     let mut sql = "".to_string();
     let value = column.get_name();
     sql = match value {
-        RdbcValue::String(value) => format!("'{}'", value),
-        RdbcValue::Int(value) => value.to_string(),
-        RdbcValue::Float(value) => value.to_string(),
-        RdbcValue::Bool(value) => value.to_string(),
-        RdbcValue::DateTime(value) => format!("'{}'", value),
+        RdbcValue::String(v) => format!("'{}'", v),
+        RdbcValue::Int(v) => v.to_string(),
+        RdbcValue::Float(v) => v.to_string(),
+        RdbcValue::Bool(v) => v.to_string(),
+        RdbcValue::DateTime(v) => format!("'{}'", v),
         RdbcValue::Null => "null".to_string(),
-        RdbcValue::BigInt(v) => value.to_string(),
-        RdbcValue::BigFloat(v) => value.to_string(),
+        RdbcValue::BigInt(v) => v.to_string(),
+        RdbcValue::BigFloat(v) => v.to_string(),
     };
     if with_alias {
         if let Some(alias) = column.get_alias() {
