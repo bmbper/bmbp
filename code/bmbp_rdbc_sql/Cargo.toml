@@ -14,3 +14,4 @@ serde_repr ={ workspace = true }
 # 时间库
 chrono = "0"
 tokio-postgres = { version = "0.7" ,features=["with-chrono-0_4"] }
+uuid = { version = "1.6.1", features = ["v4"] }

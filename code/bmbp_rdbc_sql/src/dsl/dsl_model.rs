@@ -10,6 +10,33 @@ pub enum RdbcColumn {
     Func(RdbcFuncColumn),
     Value(RdbcValueColumn),
 }
+impl RdbcColumn {
+    pub fn is_value(&self) -> bool {
+        match self {
+            RdbcColumn::Value(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn get_value(&self) -> Option<&RdbcValue> {
+        match self {
+            RdbcColumn::Value(column) => Some(column.get_name()),
+            _ => None,
+        }
+    }
+    pub fn is_query(&self) -> bool {
+        match self {
+            RdbcColumn::Query(_) => true,
+            _ => false,
+        }
+    }
+    pub fn get_query(&self) -> Option<&Query> {
+        match self {
+            RdbcColumn::Query(column) => Some(column.get_name()),
+            _ => None,
+        }
+    }
+}
 
 impl From<RdbcTableColumn> for RdbcColumn {
     fn from(column: RdbcTableColumn) -> Self {
@@ -533,6 +560,24 @@ pub struct RdbcSchemaTable {
 }
 
 impl RdbcSchemaTable {
+    pub fn get_schema(&self) -> Option<&String> {
+        self.schema_.as_ref()
+    }
+    pub fn get_name(&self) -> &String {
+        &self.name_
+    }
+    pub fn get_alias(&self) -> Option<&String> {
+        self.alias_.as_ref()
+    }
+    pub fn get_join(&self) -> Option<&RdbcTableJoinType> {
+        self.join_.as_ref()
+    }
+    pub fn get_filter(&self) -> Option<&RdbcFilterInner> {
+        self.filter_.as_ref()
+    }
+}
+
+impl RdbcSchemaTable {
     fn table<T>(table: T) -> RdbcSchemaTable
     where
         T: ToString,
@@ -658,6 +703,21 @@ pub struct RdbcQueryTable {
 }
 
 impl RdbcQueryTable {
+    pub fn get_name(&self) -> &Query {
+        &self.name_
+    }
+    pub fn get_alias(&self) -> Option<&String> {
+        self.alias_.as_ref()
+    }
+    pub fn get_join(&self) -> Option<&RdbcTableJoinType> {
+        self.join_.as_ref()
+    }
+    pub fn get_filter(&self) -> Option<&RdbcFilterInner> {
+        self.filter_.as_ref()
+    }
+}
+
+impl RdbcQueryTable {
     fn query(table: Query) -> RdbcQueryTable {
         RdbcQueryTable {
             name_: table,
@@ -692,6 +752,15 @@ pub struct RdbcFilterInner {
     concat_: RdbcConcatType,
     item_: Vec<RdbcFilterItem>,
     params_: Option<HashMap<String, RdbcValue>>,
+}
+
+impl RdbcFilterInner {
+    pub fn get_concat(&self) -> &RdbcConcatType {
+        &self.concat_
+    }
+    pub fn get_item(&self) -> &Vec<RdbcFilterItem> {
+        &self.item_
+    }
 }
 
 impl RdbcFilterInner {
@@ -778,10 +847,37 @@ pub struct RdbcValueFilterItem {
     ignore_null: bool,
 }
 
+impl RdbcValueFilterItem {
+    pub fn get_column(&self) -> &RdbcColumn {
+        &self.column_
+    }
+    pub fn get_compare(&self) -> &RdbcCompareType {
+        &self.compare_
+    }
+    pub fn get_value(&self) -> Option<&RdbcValue> {
+        self.value.as_ref()
+    }
+    pub fn get_ignore_null(&self) -> bool {
+        self.ignore_null
+    }
+}
+
 pub struct RdbcColumnFilterItem {
     column_: RdbcColumn,
     compare_: RdbcCompareType,
     value: Option<RdbcColumn>,
+}
+
+impl RdbcColumnFilterItem {
+    pub fn get_column(&self) -> &RdbcColumn {
+        &self.column_
+    }
+    pub fn get_compare(&self) -> &RdbcCompareType {
+        &self.compare_
+    }
+    pub fn get_value(&self) -> Option<&RdbcColumn> {
+        self.value.as_ref()
+    }
 }
 
 pub enum RdbcCompareType {
@@ -792,7 +888,11 @@ pub enum RdbcCompareType {
     Lt,
     LtEq,
     Like,
+    LikeLeft,
+    LikeRight,
     NotLike,
+    NotLikeLeft,
+    NotLikeRight,
     In,
     NotIn,
     IsNull,
