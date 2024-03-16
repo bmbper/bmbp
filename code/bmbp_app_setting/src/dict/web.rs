@@ -1,10 +1,12 @@
-use crate::dict::model::{BmbpSettingDictOrmModel, DictQueryParams};
-use crate::dict::service::BmbpRbacDictService;
+use salvo::{handler, Request, Response};
+
 use bmbp_app_common::{
     BmbpError, BmbpPageParam, HttpRespListVo, HttpRespPageVo, HttpRespVo, RespVo,
 };
 use bmbp_app_utils::is_empty_string;
-use salvo::{handler, Request, Response};
+
+use crate::dict::model::{BmbpSettingDictOrmModel, DictQueryParams};
+use crate::dict::service::BmbpRbacDictService;
 
 #[handler]
 pub async fn find_dict_tree(
@@ -55,7 +57,7 @@ pub async fn save_dict(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
-    let mut dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
+    let dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
     let dict_id = dict_params.get_data_id().cloned();
     let mut dict_info = BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?;
     if dict_info.is_none() {
@@ -70,9 +72,9 @@ pub async fn save_dict(
 #[handler]
 pub async fn insert_dict(
     req: &mut Request,
-    _res: &mut Response,
+    _res: &Response,
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
-    let mut dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
+    let dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
     let dict_id = dict_params.get_data_id().clone().cloned();
     BmbpRbacDictService::insert_dict_info(dict_params).await?;
     let dict_info = BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?;
@@ -82,9 +84,9 @@ pub async fn insert_dict(
 #[handler]
 pub async fn update_dict(
     req: &mut Request,
-    _res: &mut Response,
+    _res: &Response,
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
-    let mut dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
+    let dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
     let dict_id = dict_params.get_data_id().clone().cloned();
     BmbpRbacDictService::update_dict_info(dict_params).await?;
     let dict_info = BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?;

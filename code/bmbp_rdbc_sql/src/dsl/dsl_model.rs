@@ -910,6 +910,15 @@ pub struct RdbcColumnOrder {
     order: RdbcOrderType,
 }
 
+impl RdbcColumnOrder {
+    pub fn get_column(&self) -> &RdbcColumn {
+        &self.column
+    }
+    pub fn get_order(&self) -> &RdbcOrderType {
+        &self.order
+    }
+}
+
 pub enum RdbcOrderType {
     Asc,
     Desc,

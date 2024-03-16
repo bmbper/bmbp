@@ -18,6 +18,8 @@ pub struct Query {
     order_: Option<Vec<RdbcOrder>>,
     limit_: Option<u64>,
     offset_: Option<u64>,
+    union_all: Option<Vec<Query>>,
+    union_only: Option<Vec<Query>>,
     params_: Option<HashMap<String, RdbcValue>>,
 }
 
@@ -34,6 +36,8 @@ impl Query {
             order_: None,
             limit_: None,
             offset_: None,
+            union_all: None,
+            union_only: None,
             params_: None,
         }
     }
@@ -52,26 +56,32 @@ impl Query {
     pub fn get_table(&self) -> &Vec<RdbcTableInner> {
         &self.table_
     }
-    pub fn get_join(&self) -> &Option<Vec<RdbcTableInner>> {
-        &self.join_
+    pub fn get_join(&self) -> Option<&Vec<RdbcTableInner>> {
+        self.join_.as_ref()
     }
-    pub fn get_filter(&self) -> &Option<RdbcFilterInner> {
-        &self.filter_
+    pub fn get_filter(&self) -> Option<&RdbcFilterInner> {
+        self.filter_.as_ref()
     }
-    pub fn get_group_by(&self) -> &Option<Vec<RdbcColumn>> {
-        &self.group_by_
+    pub fn get_group_by(&self) -> Option<&Vec<RdbcColumn>> {
+        self.group_by_.as_ref()
     }
-    pub fn get_having(&self) -> &Option<RdbcFilterInner> {
-        &self.having_
+    pub fn get_having(&self) -> Option<&RdbcFilterInner> {
+        self.having_.as_ref()
     }
-    pub fn get_order(&self) -> &Option<Vec<RdbcOrder>> {
-        &self.order_
+    pub fn get_order(&self) -> Option<&Vec<RdbcOrder>> {
+        self.order_.as_ref()
     }
-    pub fn get_limit(&self) -> &Option<u64> {
-        &self.limit_
+    pub fn get_limit(&self) -> Option<&u64> {
+        self.limit_.as_ref()
     }
-    pub fn get_offset(&self) -> &Option<u64> {
-        &self.offset_
+    pub fn get_offset(&self) -> Option<&u64> {
+        self.offset_.as_ref()
+    }
+    pub fn get_union_all(&self) -> Option<&Vec<Query>> {
+        self.union_all.as_ref()
+    }
+    pub fn get_union_only(&self) -> Option<&Vec<Query>> {
+        self.union_only.as_ref()
     }
 }
 impl Query {
