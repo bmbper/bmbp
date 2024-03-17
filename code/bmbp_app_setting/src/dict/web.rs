@@ -46,7 +46,7 @@ pub async fn find_dict_info(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
-    let dict_id = req.param::<String>("recordId");
+    let dict_id = req.param::<String>("dataId");
     Ok(RespVo::ok_option(
         BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?,
     ))
@@ -57,15 +57,15 @@ pub async fn save_dict(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
-    let dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
-    let dict_id = dict_params.get_data_id().cloned();
-    let mut dict_info = BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?;
+    let mut dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
+    let dict_id = dict_params.get_data_id();
+    let mut dict_info = BmbpRbacDictService::query_dict_by_id(dict_id).await?;
     if dict_info.is_none() {
-        BmbpRbacDictService::insert_dict_info(dict_params).await?;
+        BmbpRbacDictService::insert_dict_info(&mut dict_params).await?;
     } else {
-        BmbpRbacDictService::update_dict_info(dict_params).await?;
+        BmbpRbacDictService::update_dict_info(&mut dict_params).await?;
     }
-    dict_info = BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?;
+    dict_info = BmbpRbacDictService::query_dict_by_id(dict_params.get_data_id()).await?;
     Ok(RespVo::ok_option(dict_info))
 }
 
@@ -74,9 +74,9 @@ pub async fn insert_dict(
     req: &mut Request,
     _res: &Response,
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
-    let dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
+    let mut dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
     let dict_id = dict_params.get_data_id().clone().cloned();
-    BmbpRbacDictService::insert_dict_info(dict_params).await?;
+    BmbpRbacDictService::insert_dict_info(&mut dict_params).await?;
     let dict_info = BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?;
     Ok(RespVo::ok_option(dict_info))
 }
@@ -86,16 +86,16 @@ pub async fn update_dict(
     req: &mut Request,
     _res: &Response,
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
-    let dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
+    let mut dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
     let dict_id = dict_params.get_data_id().clone().cloned();
-    BmbpRbacDictService::update_dict_info(dict_params).await?;
+    BmbpRbacDictService::update_dict_info(&mut dict_params).await?;
     let dict_info = BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?;
     Ok(RespVo::ok_option(dict_info))
 }
 
 #[handler]
 pub async fn disable_dict(req: &mut Request, _res: &mut Response) -> HttpRespVo<usize> {
-    let dict_id = req.param::<String>("recordId");
+    let dict_id = req.param::<String>("dataId");
     Ok(RespVo::ok_data(
         BmbpRbacDictService::disable_dict_status(dict_id).await?,
     ))
@@ -103,7 +103,7 @@ pub async fn disable_dict(req: &mut Request, _res: &mut Response) -> HttpRespVo<
 
 #[handler]
 pub async fn enable_dict(req: &mut Request, _res: &mut Response) -> HttpRespVo<usize> {
-    let dict_id = req.param::<String>("recordId");
+    let dict_id = req.param::<String>("dataId");
     Ok(RespVo::ok_data(
         BmbpRbacDictService::enable_dict_status(dict_id).await?,
     ))
@@ -111,7 +111,7 @@ pub async fn enable_dict(req: &mut Request, _res: &mut Response) -> HttpRespVo<u
 
 #[handler]
 pub async fn delete_dict(req: &mut Request, _res: &mut Response) -> HttpRespVo<usize> {
-    let dict_id = req.param::<String>("recordId");
+    let dict_id = req.param::<String>("dataId");
     Ok(RespVo::ok_data(
         BmbpRbacDictService::delete_dict_info(dict_id).await?,
     ))
@@ -122,7 +122,7 @@ pub async fn find_dict_tree_exclude_by_id(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespListVo<BmbpSettingDictOrmModel> {
-    let dict_id = req.param::<String>("recordId");
+    let dict_id = req.param::<String>("dataId");
     Ok(RespVo::ok_option(
         BmbpRbacDictService::query_dict_tree_exclude_by_id(dict_id).await?,
     ))
@@ -130,7 +130,7 @@ pub async fn find_dict_tree_exclude_by_id(
 
 #[handler]
 pub async fn save_dict_parent(req: &mut Request, _res: &mut Response) -> HttpRespVo<usize> {
-    let dict_id = req.param::<String>("recordId");
+    let dict_id = req.param::<String>("dataId");
     if is_empty_string(dict_id.as_ref()) {
         return Err(BmbpError::service("请指定字典要变更的字典！"));
     }

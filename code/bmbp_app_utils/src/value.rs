@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-use bmbp_app_common::BmbpBaseModelTrait;
 use bmbp_app_common::{BmbpHashMap, BmbpValue};
+use bmbp_app_common::BmbpBaseModelTrait;
 
-use crate::crypto::md5_encode;
 use crate::{date_time_now, is_empty_prop, simple_uuid_upper};
+use crate::crypto::md5_encode;
 
 pub fn insert_decorate<'a, T>(data: &mut T)
 where
@@ -58,8 +58,8 @@ where
 }
 
 pub fn add_insert_default_value(params: &mut BmbpHashMap) {
-    if is_empty_prop(params, "recordId") {
-        params.insert("recordId".to_string(), BmbpValue::from(simple_uuid_upper()));
+    if is_empty_prop(params, "dataId") {
+        params.insert("dataId".to_string(), BmbpValue::from(simple_uuid_upper()));
     }
 
     if is_empty_prop(params, "recordLevel") {

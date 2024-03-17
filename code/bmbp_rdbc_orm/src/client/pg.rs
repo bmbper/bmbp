@@ -2,8 +2,8 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use tokio::sync::RwLock;
+use tokio_postgres::{Client, connect, NoTls};
 use tokio_postgres::types::ToSql;
-use tokio_postgres::{connect, Client, NoTls};
 use tracing::info;
 
 use bmbp_rdbc_model::RdbcOrmRow;
@@ -62,6 +62,7 @@ impl PgDbClient {
         }
     }
     async fn execute(&self, sql: &str, params: &[RdbcValue]) -> RdbcResult<u64> {
+        info!("sql=>{}; \n params={:#?}", sql, params);
         let pg_prams = params
             .iter()
             .filter_map(|v| Self::to_pg_sql(v))
@@ -97,6 +98,7 @@ impl RdbcConnInner for PgDbClient {
     }
     async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>> {
         let (sql, params) = query.build_sql(DatabaseType::Postgres);
+        info!("sql=>{}; \n params={:#?}", sql, params);
         let pg_prams = params
             .iter()
             .filter_map(|v| Self::to_pg_sql(v))
@@ -123,6 +125,7 @@ impl RdbcConnInner for PgDbClient {
         query: &str,
         params: &[RdbcValue],
     ) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
+        info!("sql=>{}; \n params={:#?}", query, params);
         let pg_prams = params
             .iter()
             .filter_map(|v| Self::to_pg_sql(v))
@@ -148,8 +151,6 @@ impl RdbcConnInner for PgDbClient {
 
     async fn execute_insert(&self, insert: &Insert) -> RdbcResult<u64> {
         let (sql, params) = insert.build_sql(DatabaseType::Postgres);
-        info!("sql=>{}", sql);
-        info!("params=>{:#?}", params);
         self.execute(sql.as_str(), params.as_slice()).await
     }
 

@@ -21,7 +21,7 @@ pub trait RdbcModel {
     fn get_table_name() -> String;
     fn get_table_fields() -> Vec<String>;
     fn get_table_primary_key() -> String {
-        "".to_string()
+        RDBC_DATA_ID.to_string()
     }
     fn get_table_union_primary_key() -> Vec<String> {
         return vec![];

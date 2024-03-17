@@ -501,10 +501,10 @@ impl RdbcTableInner {
         }
         self
     }
-    pub fn eq<C, V>(&mut self, column: C, value: V) -> &mut Self
+    fn eq_<T, V>(&mut self, column: T, value: V) -> &mut Self
     where
-        V: ToString,
-        C: ToString,
+        RdbcColumn: From<T>,
+        RdbcValue: From<V>,
     {
         match self {
             RdbcTableInner::Table(ref mut table) => {
@@ -673,12 +673,12 @@ impl RdbcSchemaTable {
         self.join_ = Some(RdbcTableJoinType::Left);
         self
     }
-    pub fn eq<C, V>(&mut self, column: C, value: V) -> &mut Self
+    pub fn eq<RC, RV>(&mut self, column: RC, value: RV) -> &mut Self
     where
-        V: ToString,
-        C: ToString,
+        RdbcColumn: From<RC>,
+        RdbcValue: From<RV>,
     {
-        self.filter_.as_mut().unwrap().eq(column, value);
+        self.filter_.as_mut().unwrap().eq_(column, value);
         self
     }
     pub fn eq_column(&mut self, col: RdbcColumn, val: RdbcColumn) -> &mut Self {
@@ -768,12 +768,12 @@ impl RdbcFilterInner {
         self.item_.push(RdbcFilterItem::Filter(filter));
         self
     }
-    pub fn eq<T, V>(&mut self, column: T, value: V) -> &mut Self
+    pub(crate) fn eq_<T, V>(&mut self, column: T, value: V) -> &mut Self
     where
-        T: ToString,
-        V: ToString,
+        RdbcColumn: From<T>,
+        RdbcValue: From<V>,
     {
-        self.item_.push(RdbcFilterItem::eq(column, value));
+        self.item_.push(RdbcFilterItem::eq_(column, value));
         self
     }
     pub fn eq_column(&mut self, column: RdbcColumn, value: RdbcColumn) -> &mut Self {
@@ -819,17 +819,12 @@ impl RdbcFilterItem {
 }
 
 impl RdbcFilterItem {
-    pub fn eq<T, V>(column: T, value: V) -> RdbcFilterItem
+    pub(crate) fn eq_<T, V>(column: T, value: V) -> RdbcFilterItem
     where
-        T: ToString,
-        V: ToString,
+        RdbcColumn: From<T>,
+        RdbcValue: From<V>,
     {
-        RdbcFilterItem::Value(RdbcValueFilterItem {
-            column_: RdbcColumn::column(column),
-            compare_: RdbcCompareType::Eq,
-            value: Some(RdbcValue::String(value.to_string())),
-            ignore_null: false,
-        })
+        RdbcFilterItem::Value(RdbcValueFilterItem::eq_(column, value))
     }
     pub fn eq_column(column: RdbcColumn, value: RdbcColumn) -> RdbcFilterItem {
         RdbcFilterItem::Column(RdbcColumnFilterItem {
@@ -845,6 +840,21 @@ pub struct RdbcValueFilterItem {
     compare_: RdbcCompareType,
     value: Option<RdbcValue>,
     ignore_null: bool,
+}
+
+impl RdbcValueFilterItem {
+    pub fn eq_<T, V>(column: T, value: V) -> RdbcValueFilterItem
+    where
+        RdbcColumn: From<T>,
+        RdbcValue: From<V>,
+    {
+        RdbcValueFilterItem {
+            column_: RdbcColumn::from(column),
+            compare_: RdbcCompareType::Eq,
+            value: Some(RdbcValue::from(value)),
+            ignore_null: false,
+        }
+    }
 }
 
 impl RdbcValueFilterItem {

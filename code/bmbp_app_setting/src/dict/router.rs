@@ -1,5 +1,6 @@
-use crate::dict::web::*;
 use salvo::Router;
+
+use crate::dict::web::*;
 
 pub fn build_dict_router() -> Router {
     let mut dict_router = Router::with_path("/dict");
@@ -11,16 +12,14 @@ pub fn build_dict_router() -> Router {
         .push(Router::with_path("/insert").post(insert_dict))
         .push(Router::with_path("/update").post(update_dict))
         .push(
-            Router::with_path("/info/<recordId>")
+            Router::with_path("/info/<dataId>")
                 .post(find_dict_info)
                 .get(find_dict_info),
         )
-        .push(Router::with_path("/enable/<recordId>").post(enable_dict))
-        .push(Router::with_path("/disable/<recordId>").post(disable_dict))
-        .push(Router::with_path("/delete/<recordId>").post(delete_dict))
-        .push(
-            Router::with_path("/change/parent/tree/<recordId>").post(find_dict_tree_exclude_by_id),
-        )
-        .push(Router::with_path("/change/parent/save/<recordId>").post(save_dict_parent));
+        .push(Router::with_path("/enable/<dataId>").post(enable_dict))
+        .push(Router::with_path("/disable/<dataId>").post(disable_dict))
+        .push(Router::with_path("/delete/<dataId>").post(delete_dict))
+        .push(Router::with_path("/change/parent/tree/<dataId>").post(find_dict_tree_exclude_by_id))
+        .push(Router::with_path("/change/parent/save/<dataId>").post(save_dict_parent));
     dict_router
 }

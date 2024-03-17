@@ -1,8 +1,10 @@
+use tracing::info;
+
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
 use bmbp_app_utils::{is_empty_string, simple_uuid_upper};
 use bmbp_rdbc_orm::{
-    simple_column, value_column, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable, RdbcTableInner,
-    RdbcTree, RdbcTreeUtil, Update, RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_ROOT_NODE,
+    RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_ROOT_NODE, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable,
+    RdbcTableInner, RdbcTree, RdbcTreeUtil, simple_column, Update, value_column,
 };
 
 use crate::dict::dao::BmbpRbacDictDao;
@@ -46,10 +48,14 @@ impl BmbpRbacDictService {
         }
         let mut query = BmbpRdbcDictScript::build_query_script();
         query.eq_(BmbpSettingDict::get_table_primary_key(), id.unwrap());
+        info!(
+            "query_dict_by_id: id={}",
+            BmbpSettingDict::get_table_primary_key()
+        );
         BmbpRbacDictDao::select_one_by_query(&query).await
     }
 
-    pub async fn insert_dict_info(mut dict: BmbpSettingDictOrmModel) -> BmbpResp<usize> {
+    pub async fn insert_dict_info(dict: &mut BmbpSettingDictOrmModel) -> BmbpResp<usize> {
         // 设置公共默认值
         dict.init_values();
         if is_empty_string(dict.get_name()) {
@@ -109,7 +115,7 @@ impl BmbpRbacDictService {
         BmbpRbacDictDao::select_one_by_query(&query).await
     }
 
-    pub async fn update_dict_info(mut dict: BmbpSettingDictOrmModel) -> BmbpResp<usize> {
+    pub async fn update_dict_info(dict: &mut BmbpSettingDictOrmModel) -> BmbpResp<usize> {
         let old_dict_op = Self::query_dict_by_id(dict.get_data_id()).await?;
         if old_dict_op.is_none() {
             return Err(BmbpError::service("指定的字典不存在!"));
@@ -209,7 +215,7 @@ impl BmbpRbacDictService {
             return Err(BmbpError::service("字典编码不允许为空"));
         }
 
-        let update = BmbpRdbcDictScript::build_update(&mut dict);
+        let update = BmbpRdbcDictScript::build_update(dict);
         let mut row_count = BmbpRbacDictDao::execute_update(&update).await?;
         // 更新子表数据
         row_count =

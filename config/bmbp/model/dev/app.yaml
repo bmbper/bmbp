@@ -84,15 +84,15 @@ models: # 具体的数据模型列表
       primary: # 主键约束
         name: "bmbpDevAppPrimary" # 主键名称
         field: # 主建字段 ["",""] 字段数组，对应列code
-          - recordId
+          - dataId
       unique: # 惟一约束
-          name: "bmbpDevAppUnique"
-          field:
-            - tableName
-            - schema
+        name: "bmbpDevAppUnique"
+        field:
+          - tableName
+          - schema
       normal: # 正常约束
-          name: "bmbpDevAppNormal"
-          filed:
-            - code
-            - tableName
-            - schema
+        name: "bmbpDevAppNormal"
+        filed:
+          - code
+          - tableName
+          - schema

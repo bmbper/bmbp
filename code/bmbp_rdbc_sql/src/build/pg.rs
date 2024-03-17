@@ -711,7 +711,7 @@ pub fn pg_build_insert_script(insert: &Insert) -> (String, HashMap<String, RdbcV
     let mut insert_params = HashMap::new();
 
     if !insert.get_table().is_empty() {
-        let (table_vec_sql, table_params) = pg_build_table_vec_sql(insert.get_table());
+        let (table_vec_sql, _) = pg_build_table_vec_sql(insert.get_table());
         insert_sql = format!("INSERT INTO {} ", table_vec_sql.join(",").as_str());
     }
 
@@ -719,12 +719,12 @@ pub fn pg_build_insert_script(insert: &Insert) -> (String, HashMap<String, RdbcV
     let mut value_vec = vec![];
 
     let columns = insert.get_column();
-    for (i, column) in columns.iter().enumerate() {
+    for column in columns {
         let column_name = column.get_name();
         column_vec.push(column_name.clone());
     }
     let values = insert.get_values();
-    for (i, val_) in values.iter().enumerate() {
+    for val_ in values {
         pg_build_insert_value(val_, &mut value_vec, &mut insert_params);
     }
 
@@ -746,6 +746,7 @@ pub fn pg_build_insert_script(insert: &Insert) -> (String, HashMap<String, RdbcV
         if let Some(query) = query_value {
             let (query_sql, query_params) = query.build_script(DatabaseType::Postgres);
             insert_sql = format!("{}{}", insert_sql, query_sql);
+            insert_params.extend(query_params.into_iter());
         }
     }
 
