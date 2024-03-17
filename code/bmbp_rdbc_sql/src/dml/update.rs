@@ -5,9 +5,7 @@ use crate::{
     DatabaseType, RdbcColumn, RdbcConcatType, RdbcDmlValue, RdbcFilter, RdbcFilterInner, RdbcOrder,
     RdbcSQL, RdbcTable, RdbcTableInner, RdbcValue,
 };
-use crate::build::{
-    mysql_build_update_script, pg_build_update_script,
-};
+use crate::build::{mysql_build_update_script, pg_build_update_script};
 
 pub struct Update {
     driver_: RwLock<Option<DatabaseType>>,
@@ -42,6 +40,33 @@ impl Update {
     pub fn set_driver(&self, driver: DatabaseType) -> &Self {
         *self.driver_.write().unwrap() = Some(driver);
         self
+    }
+    pub fn get_table(&self) -> &Vec<RdbcTableInner> {
+        &self.table_
+    }
+    pub fn get_set_values(&self) -> &Vec<(RdbcColumn, Option<RdbcDmlValue>)> {
+        &self.set_values_
+    }
+    pub fn get_join(&self) -> Option<&Vec<RdbcTableInner>> {
+        self.join_.as_ref()
+    }
+    pub fn get_filter(&self) -> Option<&RdbcFilterInner> {
+        self.filter_.as_ref()
+    }
+    pub fn get_group_by(&self) -> Option<&Vec<RdbcColumn>> {
+        self.group_by_.as_ref()
+    }
+    pub fn get_having(&self) -> Option<&RdbcFilterInner> {
+        self.having_.as_ref()
+    }
+    pub fn get_order(&self) -> Option<&Vec<RdbcOrder>> {
+        self.order_.as_ref()
+    }
+    pub fn get_limit(&self) -> Option<u64> {
+        self.limit_
+    }
+    pub fn get_offset(&self) -> Option<u64> {
+        self.offset_
     }
 }
 

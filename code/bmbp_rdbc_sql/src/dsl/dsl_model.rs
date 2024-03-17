@@ -929,6 +929,33 @@ pub enum RdbcDmlValue {
     COLUMN(RdbcColumn),
 }
 
+impl RdbcDmlValue {
+    pub fn is_value(&self) -> bool {
+        match self {
+            RdbcDmlValue::VALUE(value) => true,
+            RdbcDmlValue::COLUMN(column) => false,
+        }
+    }
+    pub fn is_column(&self) -> bool {
+        match self {
+            RdbcDmlValue::VALUE(value) => false,
+            RdbcDmlValue::COLUMN(column) => true,
+        }
+    }
+    pub fn get_value(&self) -> Option<&RdbcValue> {
+        match self {
+            RdbcDmlValue::VALUE(value) => Some(value),
+            RdbcDmlValue::COLUMN(column) => None,
+        }
+    }
+    pub fn get_column(&self) -> Option<&RdbcColumn> {
+        match self {
+            RdbcDmlValue::VALUE(value) => None,
+            RdbcDmlValue::COLUMN(column) => Some(column),
+        }
+    }
+}
+
 impl From<RdbcColumn> for RdbcDmlValue {
     fn from(value: RdbcColumn) -> Self {
         RdbcDmlValue::COLUMN(value)

@@ -4,10 +4,10 @@ use uuid::Uuid;
 
 use crate::{
     DatabaseType, Delete, Insert, Query, RdbcColumn, RdbcColumnFilterItem, RdbcCompareType,
-    RdbcConcatFunc, RdbcConcatType, RdbcFilterInner, RdbcFilterItem, RdbcFunc, RdbcFuncColumn,
-    RdbcOrder, RdbcOrderType, RdbcQueryColumn, RdbcQueryTable, RdbcSchemaTable, RdbcSQL,
-    RdbcTableColumn, RdbcTableInner, RdbcTableJoinType, RdbcValue, RdbcValueColumn,
-    RdbcValueFilterItem, Update,
+    RdbcConcatFunc, RdbcConcatType, RdbcDmlValue, RdbcFilterInner, RdbcFilterItem, RdbcFunc,
+    RdbcFuncColumn, RdbcOrder, RdbcOrderType, RdbcQueryColumn, RdbcQueryTable, RdbcSchemaTable,
+    RdbcSQL, RdbcTableColumn, RdbcTableInner, RdbcTableJoinType, RdbcValue,
+    RdbcValueColumn, RdbcValueFilterItem, Update,
 };
 use crate::build::base::base_build_sql;
 use crate::build::vars::PG_PARAMS_TAG;
@@ -705,13 +705,251 @@ fn pg_build_select_table_column_sql(
 }
 
 pub fn pg_build_insert_script(insert: &Insert) -> (String, HashMap<String, RdbcValue>) {
-    ("".to_string(), HashMap::new())
+    let mut insert_sql = "".to_string();
+    let mut insert_params = HashMap::new();
+
+    if !insert.get_table().is_empty() {
+        let (table_vec_sql, table_params) = pg_build_table_vec_sql(insert.get_table());
+        insert_sql = format!("INSERT INTO {} ", table_vec_sql.join(",").as_str());
+    }
+
+    let mut column_vec = vec![];
+    let mut value_vec = vec![];
+
+    let columns = insert.get_column();
+    for (i, column) in columns.iter().enumerate() {
+        let column_name = column.get_name();
+        column_vec.push(column_name.clone());
+    }
+    let values = insert.get_values();
+    for (i, val_) in values.iter().enumerate() {
+        pg_build_insert_value(val_, &mut value_vec, &mut insert_params);
+    }
+
+    let column_values = insert.get_column_values();
+    for (col_, val_) in column_values {
+        let col_name = col_.get_name();
+        column_vec.push(col_name.clone());
+        pg_build_insert_value(val_, &mut value_vec, &mut insert_params);
+    }
+
+    if !column_vec.is_empty() {
+        insert_sql = format!("{}({})  ", insert_sql, column_vec.join(","));
+    }
+
+    if !value_vec.is_empty() {
+        insert_sql = format!("{} VALUES ({})  ", insert_sql, value_vec.join(","));
+    } else {
+        let query_value = insert.get_query();
+        if let Some(query) = query_value {
+            let (query_sql, query_params) = query.build_script(DatabaseType::Postgres);
+            insert_sql = format!("{}{}", insert_sql, query_sql);
+        }
+    }
+
+    (insert_sql, insert_params)
 }
+
+fn pg_build_insert_value(
+    val_: &RdbcDmlValue,
+    value_vec: &mut Vec<String>,
+    insert_params: &mut HashMap<String, RdbcValue>,
+) {
+    let col_key = Uuid::new_v4().to_string();
+    match val_ {
+        RdbcDmlValue::VALUE(val) => {
+            value_vec.push(format!("${{{}}}", col_key));
+            insert_params.insert(col_key, val.clone());
+        }
+        RdbcDmlValue::COLUMN(val) => match val {
+            RdbcColumn::Table(tb) => {
+                let (col_sql, col_params) = pg_build_select_table_column_sql(&tb, false);
+                value_vec.push(col_sql);
+                insert_params.extend(col_params.into_iter());
+            }
+            RdbcColumn::Query(q) => {
+                let (query_sql, query_params) = q.get_name().build_script(DatabaseType::Postgres);
+                value_vec.push(query_sql);
+                insert_params.extend(query_params.into_iter());
+            }
+            RdbcColumn::Func(func_) => {
+                let (func_sql, func_params) = pg_build_select_func_column_sql(&func_, false);
+                value_vec.push(func_sql);
+                insert_params.extend(func_params.into_iter());
+            }
+            RdbcColumn::Value(v) => {
+                value_vec.push(format!("${{{}}}", col_key));
+                insert_params.insert(col_key, v.get_name().clone());
+            }
+        },
+    }
+}
+
 pub fn pg_build_update_script(update: &Update) -> (String, HashMap<String, RdbcValue>) {
-    ("".to_string(), HashMap::new())
+    let mut sql = "".to_string();
+    let mut sql_prams = HashMap::new();
+
+    // 解析表结构
+    if !update.get_table().is_empty() {
+        let (table_sql, table_params) = pg_build_table_vec_sql(update.get_table());
+        sql = format!("UPDATE {} ", table_sql.join(","));
+        sql_prams.extend(table_params.into_iter());
+    }
+    // 关联表
+    if update.get_join().is_some() {
+        let (join_sql, join_params) = pg_build_table_vec_sql(update.get_join().unwrap());
+        sql = format!("{}  {} ", sql, join_sql.join("\n"));
+        sql_prams.extend(join_params.into_iter());
+    }
+
+    // 赋值
+    if !update.get_set_values().is_empty() {
+        let mut set_sql: Vec<String> = vec![];
+        for (column, val_) in update.get_set_values() {
+            match column {
+                RdbcColumn::Table(tb) => {
+                    let (column_set, _) = pg_build_select_table_column_sql(tb, false);
+                    let column_key = Uuid::new_v4().to_string();
+                    if let Some(v) = val_ {
+                        match v {
+                            RdbcDmlValue::VALUE(val) => {
+                                set_sql.push(format!("{} = ${{{}}}", column_set, column_key));
+                                sql_prams.insert(column_key, val.clone());
+                            }
+                            RdbcDmlValue::COLUMN(val) => match val {
+                                RdbcColumn::Value(v) => {
+                                    set_sql.push(format!("{} = ${{{}}}", column_set, column_key));
+                                    sql_prams.insert(column_key, v.get_name().clone());
+                                }
+                                RdbcColumn::Table(tb) => {
+                                    let (col_sql, col_params) =
+                                        pg_build_select_table_column_sql(&tb, false);
+                                    set_sql.push(format!("{} = {}", column_set, col_sql));
+                                    sql_prams.extend(col_params.into_iter());
+                                }
+                                RdbcColumn::Query(q) => {
+                                    let (query_sql, query_params) =
+                                        q.get_name().build_script(DatabaseType::Postgres);
+                                    set_sql.push(format!("{} = {}", column_set, query_sql));
+                                    sql_prams.extend(query_params.into_iter());
+                                }
+                                RdbcColumn::Func(func_) => {
+                                    let (func_sql, func_params) =
+                                        pg_build_select_func_column_sql(&func_, false);
+                                    set_sql.push(format!("{} = {}", column_set, func_sql));
+                                    sql_prams.extend(func_params.into_iter());
+                                }
+                            },
+                        }
+                    } else {
+                        set_sql.push(format!("{} = NULL", column_set));
+                    }
+                }
+                _ => {}
+            }
+        }
+        sql = format!("{} SET {} ", sql, set_sql.join(","));
+    }
+
+    // 查询条件
+    if update.get_filter().is_some() {
+        let (filter_sql, filter_params) = pg_build_filter_sql(update.get_filter());
+        if !filter_sql.is_empty() {
+            sql = format!("{} WHERE {} ", sql, filter_sql);
+            sql_prams.extend(filter_params.into_iter());
+        }
+    }
+    // 分组
+    if update.get_group_by().is_some() {
+        let (group_by_sql, group_by_params) = pg_build_group_by(update.get_group_by().unwrap());
+        if !group_by_sql.is_empty() {
+            sql = format!(" {} GROUP BY {} ", sql, group_by_sql.join(","));
+            sql_prams.extend(group_by_params.into_iter());
+        }
+    }
+    // 分组条件
+    if update.get_having().is_some() {
+        let (having_sql, having_params) = pg_build_filter_sql(update.get_having());
+        if !having_sql.is_empty() {
+            sql = format!(" {} HAVING {} ", sql, having_sql);
+            sql_prams.extend(having_params.into_iter());
+        }
+    }
+    // 排序条件
+    if update.get_order().is_some() {
+        let order_sql = pg_build_order(update.get_order().unwrap());
+        if !order_sql.is_empty() {
+            sql = format!("{} ORDER BY {} ", sql, order_sql.join(","));
+        }
+    }
+    // 分页
+    if update.get_limit().is_some() {
+        let limit = update.get_limit().unwrap();
+        sql = format!("{} LIMIT {} ", sql, limit);
+    }
+    if update.get_offset().is_some() {
+        let offset = update.get_offset().unwrap();
+        sql = format!("{} OFFSET {} ", sql, offset);
+    }
+    (sql, sql_prams)
 }
 pub fn pg_build_delete_script(delete: &Delete) -> (String, HashMap<String, RdbcValue>) {
-    ("".to_string(), HashMap::new())
+    let mut sql = "".to_string();
+    let mut sql_prams = HashMap::new();
+
+    // 解析表结构
+    if !delete.get_table().is_empty() {
+        let (table_sql, table_params) = pg_build_table_vec_sql(delete.get_table());
+        sql = format!("DELETE FROM {} ", table_sql.join(","));
+        sql_prams.extend(table_params.into_iter());
+    }
+    // 关联表
+    if delete.get_join().is_some() {
+        let (join_sql, join_params) = pg_build_table_vec_sql(delete.get_join().unwrap());
+        sql = format!("{}  {} ", sql, join_sql.join("\n"));
+        sql_prams.extend(join_params.into_iter());
+    }
+    // 查询条件
+    if delete.get_filter().is_some() {
+        let (filter_sql, filter_params) = pg_build_filter_sql(delete.get_filter());
+        if !filter_sql.is_empty() {
+            sql = format!("{} WHERE {} ", sql, filter_sql);
+            sql_prams.extend(filter_params.into_iter());
+        }
+    }
+    // 分组
+    if delete.get_group_by().is_some() {
+        let (group_by_sql, group_by_params) = pg_build_group_by(delete.get_group_by().unwrap());
+        if !group_by_sql.is_empty() {
+            sql = format!(" {} GROUP BY {} ", sql, group_by_sql.join(","));
+            sql_prams.extend(group_by_params.into_iter());
+        }
+    }
+    // 分组条件
+    if delete.get_having().is_some() {
+        let (having_sql, having_params) = pg_build_filter_sql(delete.get_having());
+        if !having_sql.is_empty() {
+            sql = format!(" {} HAVING {} ", sql, having_sql);
+            sql_prams.extend(having_params.into_iter());
+        }
+    }
+    // 排序条件
+    if delete.get_order().is_some() {
+        let order_sql = pg_build_order(delete.get_order().unwrap());
+        if !order_sql.is_empty() {
+            sql = format!("{} ORDER BY {} ", sql, order_sql.join(","));
+        }
+    }
+    // 分页
+    if delete.get_limit().is_some() {
+        let limit = delete.get_limit().unwrap();
+        sql = format!("{} LIMIT {} ", sql, limit);
+    }
+    if delete.get_offset().is_some() {
+        let offset = delete.get_offset().unwrap();
+        sql = format!("{} OFFSET {} ", sql, offset);
+    }
+    (sql, sql_prams)
 }
 
 fn pg_build_func_concat_sql(

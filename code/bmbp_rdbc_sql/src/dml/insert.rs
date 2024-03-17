@@ -31,6 +31,22 @@ impl Insert {
         *self.driver_.write().unwrap() = Some(driver);
         self
     }
+
+    pub fn get_table(&self) -> &Vec<RdbcTableInner> {
+        &self.table_
+    }
+    pub fn get_column(&self) -> &Vec<RdbcTableColumn> {
+        &self.column_
+    }
+    pub fn get_values(&self) -> &Vec<RdbcDmlValue> {
+        &self.values_
+    }
+    pub fn get_column_values(&self) -> &Vec<(RdbcTableColumn, RdbcDmlValue)> {
+        &self.column_values
+    }
+    pub fn get_query(&self) -> Option<&Query> {
+        self.query_.as_ref()
+    }
 }
 
 impl Insert {
