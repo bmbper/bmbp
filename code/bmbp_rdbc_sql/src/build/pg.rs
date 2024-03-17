@@ -171,12 +171,14 @@ fn pg_build_filter_sql(filter: Option<&RdbcFilterInner>) -> (String, HashMap<Str
     if let Some(rdbc_filter) = filter {
         let (item_vec, item_params) = pg_build_filter_items_sql(rdbc_filter.get_item());
         filter_params.extend(item_params.into_iter());
-        match rdbc_filter.get_concat() {
-            RdbcConcatType::And => {
-                filter_sql = format!(" {} ", item_vec.join(" AND "));
-            }
-            RdbcConcatType::Or => {
-                filter_sql = format!(" {} ", item_vec.join(" OR "));
+        if !item_vec.is_empty() {
+            match rdbc_filter.get_concat() {
+                RdbcConcatType::And => {
+                    filter_sql = format!(" {} ", item_vec.join(" AND "));
+                }
+                RdbcConcatType::Or => {
+                    filter_sql = format!(" {} ", item_vec.join(" OR "));
+                }
             }
         }
     }

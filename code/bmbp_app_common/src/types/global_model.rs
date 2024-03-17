@@ -5,8 +5,8 @@ use std::sync::{Arc, RwLock};
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::BmbpValue;
 use crate::{BmbpHashMap, ROOT_TREE_NODE};
+use crate::BmbpValue;
 
 /// BmbpBaseModel 基础模型 用于存放公共字段
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
@@ -272,7 +272,7 @@ where
     /// 记录标识
     data_flag: Option<String>,
     /// 记录显示顺序
-    data_sort: Option<usize>,
+    data_sort: Option<i32>,
     /// 记录备注
     data_remark: Option<String>,
     /// 记录创建时间
@@ -314,7 +314,7 @@ where
         self
     }
 
-    pub fn set_data_sort(&mut self, data_sort: usize) -> &mut Self {
+    pub fn set_data_sort(&mut self, data_sort: i32) -> &mut Self {
         self.data_sort = Some(data_sort);
         self
     }
@@ -365,7 +365,7 @@ where
         self.data_flag.as_ref()
     }
 
-    pub fn get_data_sort(&self) -> Option<&usize> {
+    pub fn get_data_sort(&self) -> Option<&i32> {
         self.data_sort.as_ref()
     }
     pub fn get_data_remark(&self) -> Option<&String> {
@@ -466,9 +466,9 @@ where
     // 节点类型
     node_type: Option<String>,
     // 节点层级
-    node_level: Option<usize>,
+    node_level: Option<i32>,
     // 是否叶子节点
-    node_leaf: Option<bool>,
+    node_leaf: Option<i32>,
     // 扩展属性
     #[serde(flatten)]
     node_props: Option<T>,
@@ -552,11 +552,11 @@ where
         self.node_type = Some(node_type);
         self
     }
-    pub fn set_node_level(&mut self, node_level: usize) -> &mut Self {
+    pub fn set_node_level(&mut self, node_level: i32) -> &mut Self {
         self.node_level = Some(node_level);
         self
     }
-    pub fn set_node_leaf(&mut self, node_leaf: bool) -> &mut Self {
+    pub fn set_node_leaf(&mut self, node_leaf: i32) -> &mut Self {
         self.node_leaf = Some(node_leaf);
         self
     }
@@ -601,10 +601,10 @@ where
         self.node_type.as_ref()
     }
 
-    pub fn get_node_level(&self) -> Option<&usize> {
+    pub fn get_node_level(&self) -> Option<&i32> {
         self.node_level.as_ref()
     }
-    pub fn get_node_leaf(&self) -> Option<&bool> {
+    pub fn get_node_leaf(&self) -> Option<&i32> {
         self.node_leaf.as_ref()
     }
     pub fn get_node_props(&self) -> Option<&T> {

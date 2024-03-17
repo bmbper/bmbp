@@ -702,6 +702,7 @@ where
         insert.insert_column_value(RDBC_TREE_CODE_PATH, self.get_code_path());
         insert.insert_column_value(RDBC_TREE_PARENT_CODE, self.get_parent_code());
         insert.insert_column_value(RDBC_TREE_NAME, self.get_name());
+        insert.insert_column_value(RDBC_TREE_NAME_PATH, self.get_name_path());
         insert.insert_column_value(RDBC_TREE_NODE_TYPE, self.get_node_type());
         insert.insert_column_value(RDBC_TREE_NODE_LEVEL, self.get_node_level());
         insert.insert_column_value(RDBC_TREE_NODE_LEAF, self.get_node_leaf());

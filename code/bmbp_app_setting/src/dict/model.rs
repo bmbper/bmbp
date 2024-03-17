@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use bmbp_app_common::BmbpPageParam;
 use bmbp_rdbc_orm::{BmbpOrmRdbcTree, RdbcModel, RdbcOrmRow};
@@ -110,14 +111,13 @@ impl From<RdbcOrmRow> for BmbpSettingDict {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize_repr, Deserialize_repr)]
 #[serde(untagged)]
 #[repr(u8)]
 pub enum BmbpDictType {
     Inner = 0,
     Custom = 1,
 }
-
 
 impl BmbpDictType {
     pub fn value_of(data: String) -> Option<Self> {
@@ -127,10 +127,10 @@ impl BmbpDictType {
             _ => None,
         }
     }
-    pub fn value(&self) -> i8 {
+    pub fn value(&self) -> String {
         match self {
-            Inner => 0,
-            Custom => 1,
+            Inner => "0".to_string(),
+            Custom => "1".to_string(),
         }
     }
 }

@@ -4,6 +4,7 @@ use async_trait::async_trait;
 use tokio::sync::RwLock;
 use tokio_postgres::types::ToSql;
 use tokio_postgres::{connect, Client, NoTls};
+use tracing::info;
 
 use bmbp_rdbc_model::RdbcOrmRow;
 use bmbp_rdbc_sql::{DatabaseType, Delete, Insert, Query, RdbcSQL, RdbcValue, Update};
@@ -147,6 +148,8 @@ impl RdbcConnInner for PgDbClient {
 
     async fn execute_insert(&self, insert: &Insert) -> RdbcResult<u64> {
         let (sql, params) = insert.build_sql(DatabaseType::Postgres);
+        info!("sql=>{}", sql);
+        info!("params=>{:#?}", params);
         self.execute(sql.as_str(), params.as_slice()).await
     }
 
