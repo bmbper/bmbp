@@ -15,6 +15,7 @@ use crate::build::vars::PG_PARAMS_TAG;
 pub fn pg_build_sql(sql: String, params: HashMap<String, RdbcValue>) -> (String, Vec<RdbcValue>) {
     base_build_sql(PG_PARAMS_TAG, sql, params)
 }
+
 pub fn pg_build_query_script(query: &Query) -> (String, HashMap<String, RdbcValue>) {
     let mut sql = "".to_string();
     let mut sql_prams = HashMap::new();
@@ -798,12 +799,6 @@ pub fn pg_build_update_script(update: &Update) -> (String, HashMap<String, RdbcV
         sql = format!("UPDATE {} ", table_sql.join(","));
         sql_prams.extend(table_params.into_iter());
     }
-    // 关联表
-    if update.get_join().is_some() {
-        let (join_sql, join_params) = pg_build_table_vec_sql(update.get_join().unwrap());
-        sql = format!("{}  {} ", sql, join_sql.join("\n"));
-        sql_prams.extend(join_params.into_iter());
-    }
 
     // 赋值
     if !update.get_set_values().is_empty() {
@@ -811,7 +806,7 @@ pub fn pg_build_update_script(update: &Update) -> (String, HashMap<String, RdbcV
         for (column, val_) in update.get_set_values() {
             match column {
                 RdbcColumn::Table(tb) => {
-                    let (column_set, _) = pg_build_select_table_column_sql(tb, false);
+                    let column_set = pg_build_update_table_column_sql(tb);
                     let column_key = Uuid::new_v4().to_string();
                     if let Some(v) = val_ {
                         match v {
@@ -852,6 +847,13 @@ pub fn pg_build_update_script(update: &Update) -> (String, HashMap<String, RdbcV
             }
         }
         sql = format!("{} SET {} ", sql, set_sql.join(","));
+    }
+
+    // 关联表
+    if update.get_join().is_some() {
+        let (join_sql, join_params) = pg_build_table_vec_sql(update.get_join().unwrap());
+        sql = format!("{}  {} ", sql, join_sql.join("\n"));
+        sql_prams.extend(join_params.into_iter());
     }
 
     // 查询条件
@@ -896,6 +898,11 @@ pub fn pg_build_update_script(update: &Update) -> (String, HashMap<String, RdbcV
     }
     (sql, sql_prams)
 }
+
+pub fn pg_build_update_table_column_sql(tc: &RdbcTableColumn) -> String {
+    tc.get_name().clone()
+}
+
 pub fn pg_build_delete_script(delete: &Delete) -> (String, HashMap<String, RdbcValue>) {
     let mut sql = "".to_string();
     let mut sql_prams = HashMap::new();
