@@ -3,8 +3,10 @@ use tracing::info;
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
 use bmbp_app_utils::{is_empty_string, simple_uuid_upper};
 use bmbp_rdbc_orm::{
-    RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_ROOT_NODE, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable,
-    RdbcTableInner, RdbcTree, RdbcTreeUtil, simple_column, Update, value_column,
+    simple_column, value_column, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable, RdbcTableInner,
+    RdbcTree, RdbcTreeUtil, Update, RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_DISABLE,
+    RDBC_ENABLE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH, RDBC_TREE_PARENT_CODE,
+    RDBC_TREE_ROOT_NODE,
 };
 
 use crate::dict::dao::BmbpRbacDictDao;
@@ -105,6 +107,32 @@ impl BmbpRbacDictService {
         dict.set_node_leaf(1);
         let node_levels = code_path.split("/").count() - 2;
         dict.set_node_level(node_levels);
+        if Self::has_same_name(
+            dict.get_name().unwrap(),
+            dict.get_parent_code(),
+            dict.get_data_id(),
+        )
+        .await?
+        {
+            return Err(BmbpError::service("字典名称已被占用，请修改后重试"));
+        }
+        if Self::has_same_alias(
+            dict.get_ext_props().get_dict_alias().unwrap(),
+            dict.get_data_id(),
+        )
+        .await?
+        {
+            return Err(BmbpError::service("字典别名已被占用，请修改后重试"));
+        }
+        if Self::has_same_value(
+            dict.get_ext_props().get_dict_value().unwrap(),
+            dict.get_parent_code(),
+            dict.get_data_id(),
+        )
+        .await?
+        {
+            return Err(BmbpError::service("字典别名已被占用，请修改后重试"));
+        }
         let insert = BmbpRdbcDictScript::build_insert(&dict);
         BmbpRbacDictDao::execute_insert(&insert).await
     }
@@ -215,16 +243,42 @@ impl BmbpRbacDictService {
             return Err(BmbpError::service("字典编码不允许为空"));
         }
 
+        if Self::has_same_name(
+            dict.get_name().unwrap(),
+            dict.get_parent_code(),
+            dict.get_data_id(),
+        )
+        .await?
+        {
+            return Err(BmbpError::service("字典名称已被占用，请修改后重试"));
+        }
+        if Self::has_same_alias(
+            dict.get_ext_props().get_dict_alias().unwrap(),
+            dict.get_data_id(),
+        )
+        .await?
+        {
+            return Err(BmbpError::service("字典别名已被占用，请修改后重试"));
+        }
+        if Self::has_same_value(
+            dict.get_ext_props().get_dict_value().unwrap(),
+            dict.get_parent_code(),
+            dict.get_data_id(),
+        )
+        .await?
+        {
+            return Err(BmbpError::service("字典别名已被占用，请修改后重试"));
+        }
+
         let update = BmbpRdbcDictScript::build_update(dict);
         let mut row_count = BmbpRbacDictDao::execute_update(&update).await?;
         // 更新子表数据
-        row_count =
-            row_count + Self::update_name_path_for_children(dict.get_code_path().unwrap()).await?;
-
+        row_count = row_count
+            + Self::update_name_path_for_children(old_dict.get_name_path().unwrap()).await?;
         Ok(row_count)
     }
 
-    async fn update_name_path_for_children(code_path: &str) -> BmbpResp<usize> {
+    async fn update_name_path_for_children(parent_name_path: &str) -> BmbpResp<usize> {
         // UPDATE damp_base_dict AS t1
         // JOIN damp_base_dict AS t2 ON t2.CODE = t1.parent_code
         // SET t1.NAME_PATH = CONCAT(t2.NAME_PATH, t1.name, '/')
@@ -241,7 +295,7 @@ impl BmbpRbacDictService {
             value_column("/"),
         ]);
         update.set(simple_column("t1", "name_path"), concat_column);
-        update.like_left_col(simple_column("t1", "code_path"), code_path);
+        update.like_left_col(simple_column("t1", "code_path"), parent_name_path);
         BmbpRbacDictDao::execute_update(&update).await
     }
     async fn update_code_path_for_children(parent_code_path: &str) -> BmbpResp<usize> {
@@ -300,18 +354,149 @@ impl BmbpRbacDictService {
     pub async fn query_dict_list_exclude_by_id(
         dict_id: Option<String>,
     ) -> BmbpResp<Option<Vec<BmbpSettingDictOrmModel>>> {
-        let mut query = BmbpRdbcDictScript::build_query_script();
-        if !dict_id.is_none() {
-            query.not_like_left("code_path", dict_id);
+        let dict_info = Self::query_dict_by_id(dict_id.as_ref()).await?;
+        if dict_info.is_none() {
+            return Err(BmbpError::service("指定的字典不存在!"));
         }
-
+        let dict_info = dict_info.unwrap();
+        let dict_code_path = dict_info.get_code_path();
+        if dict_code_path.is_none() {
+            return Err(BmbpError::service("字典数据不准确，请联系管理员!"));
+        }
+        let code_path = dict_code_path.unwrap().clone();
+        let mut query = BmbpRdbcDictScript::build_query_script();
+        query.not_like_left("code_path", code_path);
         BmbpRbacDictDao::select_list_by_query(&query).await
     }
 
     pub async fn update_dict_parent(
-        _dict_id: Option<String>,
-        _parent_code: Option<String>,
+        dict_id: Option<String>,
+        parent_code: Option<String>,
     ) -> BmbpResp<usize> {
-        Ok(0)
+        let dict_info = Self::query_dict_by_id(dict_id.as_ref()).await?;
+        if dict_info.is_none() {
+            return Err(BmbpError::service("指定的字典不存在!"));
+        }
+        let mut dict = dict_info.unwrap();
+        let old_code_path = dict.get_code_path().unwrap().clone();
+        let old_name_path = dict.get_name_path().unwrap().clone();
+        if parent_code.is_none() {
+            return Err(BmbpError::service("请指定变更的目标字典!"));
+        }
+        let parent_code = parent_code.unwrap().clone();
+        let mut parent_code_path = "".to_string();
+        let mut parent_name_path = "".to_string();
+        if RDBC_TREE_ROOT_NODE == parent_code {
+            parent_code_path = "/".to_string();
+            parent_name_path = "/".to_string();
+        } else {
+            let parent_dict = Self::query_dict_by_code(&parent_code).await?;
+            if parent_dict.is_none() {
+                return Err(BmbpError::service("请指定变更的目标字典!"));
+            }
+            let parent_dict = parent_dict.unwrap();
+            parent_code_path = parent_dict.get_code_path().unwrap().clone();
+            parent_name_path = parent_dict.get_name_path().unwrap().clone();
+        }
+        dict.set_parent_code(parent_code.clone());
+        dict.set_code_path(format!("{}{}/", parent_code_path, dict.get_code().unwrap()));
+        dict.set_name_path(format!("{}{}/", parent_name_path, dict.get_name().unwrap()));
+        if Self::has_same_name(
+            dict.get_name().unwrap(),
+            dict.get_parent_code(),
+            dict.get_data_id(),
+        )
+        .await?
+        {
+            return Err(BmbpError::service("目标字典下已存在相同名称字典，无法变更"));
+        }
+        if Self::has_same_alias(
+            dict.get_ext_props().get_dict_alias().unwrap(),
+            dict.get_data_id(),
+        )
+        .await?
+        {
+            return Err(BmbpError::service("目标字典下已存在相同别名字典，无法变更"));
+        }
+        if Self::has_same_value(
+            dict.get_ext_props().get_dict_value().unwrap(),
+            dict.get_parent_code(),
+            dict.get_data_id(),
+        )
+        .await?
+        {
+            return Err(BmbpError::service(
+                "目标字典下已存在相同字典值的字典，无法变更",
+            ));
+        }
+        dict.init_update_values();
+        let mut update = Update::new();
+        update
+            .table(BmbpSettingDict::get_table_name())
+            .set(RDBC_TREE_PARENT_CODE, dict.get_parent_code())
+            .set(RDBC_TREE_CODE_PATH, dict.get_code_path())
+            .set(RDBC_TREE_NAME_PATH, dict.get_name_path())
+            .set(RDBC_DATA_UPDATE_TIME, dict.get_data_update_time())
+            .set(RDBC_DATA_UPDATE_USER, dict.get_data_update_user())
+            .eq_(
+                BmbpSettingDict::get_table_primary_key(),
+                dict.get_data_id().unwrap(),
+            );
+        let mut row_count = BmbpRbacDictDao::execute_update(&update).await?;
+        row_count += Self::update_code_path_for_children(old_code_path.as_str()).await?;
+        let _ = Self::update_name_path_for_children(old_name_path.as_str()).await?;
+        Ok(row_count)
+    }
+
+    pub async fn has_same_name(
+        name: &String,
+        parent_code: Option<&String>,
+        data_id: Option<&String>,
+    ) -> BmbpResp<bool> {
+        let mut query = BmbpRdbcDictScript::build_query_script();
+        query.eq_(RDBC_TREE_NAME, name);
+        if parent_code.is_some() {
+            query.eq_(RDBC_TREE_PARENT_CODE, parent_code.unwrap());
+        }
+        if data_id.is_some() {
+            query.ne_(BmbpSettingDict::get_table_primary_key(), data_id.unwrap());
+        }
+        let dict_vec = BmbpRbacDictDao::select_list_by_query(&query).await?;
+        match dict_vec {
+            Some(dict_vec) => Ok(dict_vec.is_empty()),
+            None => Ok(false),
+        }
+    }
+    pub async fn has_same_value(
+        value: &String,
+        parent_code: Option<&String>,
+        data_id: Option<&String>,
+    ) -> BmbpResp<bool> {
+        let mut query = BmbpRdbcDictScript::build_query_script();
+        query.eq_("dict_value", value);
+        if parent_code.is_some() {
+            query.eq_(RDBC_TREE_PARENT_CODE, parent_code.unwrap());
+        }
+        if data_id.is_some() {
+            query.ne_(BmbpSettingDict::get_table_primary_key(), data_id.unwrap());
+        }
+        let dict_vec = BmbpRbacDictDao::select_list_by_query(&query).await?;
+        match dict_vec {
+            Some(dict_vec) => Ok(dict_vec.is_empty()),
+            None => Ok(false),
+        }
+    }
+
+    pub async fn has_same_alias(alias: &String, data_id: Option<&String>) -> BmbpResp<bool> {
+        let mut query = BmbpRdbcDictScript::build_query_script();
+        query.eq_("dict_alias", alias);
+        if data_id.is_some() {
+            query.ne_(BmbpSettingDict::get_table_primary_key(), data_id.unwrap());
+        }
+        let dict_vec = BmbpRbacDictDao::select_list_by_query(&query).await?;
+        match dict_vec {
+            Some(dict_vec) => Ok(dict_vec.is_empty()),
+            None => Ok(false),
+        }
     }
 }

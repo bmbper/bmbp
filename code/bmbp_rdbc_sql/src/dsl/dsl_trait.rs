@@ -78,7 +78,7 @@ pub trait RdbcFilter {
         self
     }
 
-    fn ne<T, V>(&mut self, column: T, value: V) -> &mut Self
+    fn ne_<T, V>(&mut self, column: T, value: V) -> &mut Self
     where
         RdbcColumn: From<T>,
         RdbcValue: From<V>,

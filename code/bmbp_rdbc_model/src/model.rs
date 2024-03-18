@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
 
-use chrono::Utc;
+use chrono::{Duration, Utc};
+use chrono::format::Fixed::{TimezoneOffset, TimezoneOffsetColonZ};
 use serde::{Deserialize, Serialize};
 use tokio_postgres::Row;
 use uuid::Uuid;
@@ -227,6 +228,15 @@ where
         }
         if self.get_data_sign().is_none() {
             self.set_data_sign("".to_string());
+        }
+        self
+    }
+    pub fn init_update_values(&mut self) -> &mut Self {
+        if self.get_data_update_time().is_none() {
+            self.set_data_update_time(Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
+        }
+        if self.get_data_update_user().is_none() {
+            self.set_data_update_user("".to_string());
         }
         self
     }
@@ -759,6 +769,15 @@ where
         }
         if self.get_data_sign().is_none() {
             self.set_data_sign("".to_string());
+        }
+        self
+    }
+    pub fn init_update_values(&mut self) -> &mut Self {
+        if self.get_data_update_time().is_none() {
+            self.set_data_update_time(Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
+        }
+        if self.get_data_update_user().is_none() {
+            self.set_data_update_user("".to_string());
         }
         self
     }
