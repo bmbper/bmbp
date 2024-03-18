@@ -493,6 +493,7 @@ where
             RDBC_TREE_CODE_PATH.to_string(),
             RDBC_TREE_PARENT_CODE.to_string(),
             RDBC_TREE_NAME.to_string(),
+            RDBC_TREE_NAME_PATH.to_string(),
             RDBC_TREE_NODE_TYPE.to_string(),
             RDBC_TREE_NODE_LEVEL.to_string(),
             RDBC_TREE_NODE_LEAF.to_string(),
@@ -1105,16 +1106,5 @@ impl From<Row> for RdbcOrmRow {
             }
         }
         orm_row
-    }
-}
-
-pub struct RdbcTreeUtil;
-
-impl RdbcTreeUtil {
-    pub fn build_tree<T>(data: Vec<T>) -> Vec<T>
-    where
-        T: RdbcTree<T>,
-    {
-        data
     }
 }
