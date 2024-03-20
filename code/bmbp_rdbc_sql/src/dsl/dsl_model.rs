@@ -435,6 +435,21 @@ pub enum RdbcTableInner {
 }
 
 impl RdbcTableInner {
+    pub fn get_join(&self) -> Option<&RdbcTableJoinType> {
+        match self {
+            RdbcTableInner::Table(table) => table.get_join(),
+            RdbcTableInner::Query(query) => query.get_join(),
+        }
+    }
+    pub fn get_filter(&self) -> Option<&RdbcFilterInner> {
+        match self {
+            RdbcTableInner::Table(table) => table.get_filter(),
+            RdbcTableInner::Query(query) => query.get_filter(),
+        }
+    }
+}
+
+impl RdbcTableInner {
     pub(crate) fn table<T>(table: T) -> RdbcTableInner
     where
         T: ToString,
@@ -776,8 +791,25 @@ impl RdbcFilterInner {
         self.item_.push(RdbcFilterItem::eq_(column, value));
         self
     }
+    pub(crate) fn ne_<T, V>(&mut self, column: T, value: V) -> &mut Self
+    where
+        RdbcColumn: From<T>,
+        RdbcValue: From<V>,
+    {
+        self.item_.push(RdbcFilterItem::ne_(column, value));
+        self
+    }
     pub fn eq_column(&mut self, column: RdbcColumn, value: RdbcColumn) -> &mut Self {
         self.item_.push(RdbcFilterItem::eq_column(column, value));
+        self
+    }
+    pub fn like_left_col<RC, RV>(&mut self, column: RC, value: RV) -> &mut Self
+    where
+        RdbcColumn: From<RC>,
+        RdbcColumn: From<RV>,
+    {
+        self.item_
+            .push(RdbcFilterItem::like_left_col(column, value));
         self
     }
 }
@@ -826,11 +858,29 @@ impl RdbcFilterItem {
     {
         RdbcFilterItem::Value(RdbcValueFilterItem::eq_(column, value))
     }
+    pub(crate) fn ne_<T, V>(column: T, value: V) -> RdbcFilterItem
+    where
+        RdbcColumn: From<T>,
+        RdbcValue: From<V>,
+    {
+        RdbcFilterItem::Value(RdbcValueFilterItem::ne_(column, value))
+    }
     pub fn eq_column(column: RdbcColumn, value: RdbcColumn) -> RdbcFilterItem {
         RdbcFilterItem::Column(RdbcColumnFilterItem {
             column_: column,
             compare_: RdbcCompareType::Eq,
             value: Some(value),
+        })
+    }
+    pub fn like_left_col<RC, RV>(column: RC, value: RV) -> RdbcFilterItem
+    where
+        RdbcColumn: From<RC>,
+        RdbcColumn: From<RV>,
+    {
+        RdbcFilterItem::Column(RdbcColumnFilterItem {
+            column_: RdbcColumn::from(column),
+            compare_: RdbcCompareType::LikeLeft,
+            value: Some(RdbcColumn::from(value)),
         })
     }
 }
@@ -851,6 +901,18 @@ impl RdbcValueFilterItem {
         RdbcValueFilterItem {
             column_: RdbcColumn::from(column),
             compare_: RdbcCompareType::Eq,
+            value: Some(RdbcValue::from(value)),
+            ignore_null: false,
+        }
+    }
+    pub fn ne_<T, V>(column: T, value: V) -> RdbcValueFilterItem
+    where
+        RdbcColumn: From<T>,
+        RdbcValue: From<V>,
+    {
+        RdbcValueFilterItem {
+            column_: RdbcColumn::from(column),
+            compare_: RdbcCompareType::NotEq,
             value: Some(RdbcValue::from(value)),
             ignore_null: false,
         }

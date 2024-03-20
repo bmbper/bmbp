@@ -83,6 +83,7 @@ pub trait RdbcFilter {
         RdbcColumn: From<T>,
         RdbcValue: From<V>,
     {
+        self.get_filter_mut().ne_(column, value);
         self
     }
     fn ne_col<T, V>(&mut self, column: T, value: V) -> &mut Self
@@ -405,6 +406,7 @@ pub trait RdbcFilter {
         RdbcColumn: From<RC>,
         RdbcColumn: From<RV>,
     {
+        self.get_filter_mut().like_left_col(column, value);
         self
     }
     fn like_left_value<T, V>(&mut self, column: T, value: RdbcValue) -> &mut Self
