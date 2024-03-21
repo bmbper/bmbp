@@ -556,6 +556,22 @@ impl RdbcTableInner {
         }
         self
     }
+
+    pub fn on_eq_col<RT, RC>(&mut self, column1: RT, column2: RC) -> &mut Self
+    where
+        RdbcColumn: From<RT>,
+        RdbcColumn: From<RC>,
+    {
+        match self {
+            RdbcTableInner::Table(ref mut table) => {
+                table.eq_column(RdbcColumn::from(column1), RdbcColumn::from(column2));
+            }
+            RdbcTableInner::Query(ref mut table) => {
+                table.eq_column(RdbcColumn::from(column1), RdbcColumn::from(column2));
+            }
+        }
+        self
+    }
 }
 
 pub enum RdbcTableJoinType {
@@ -812,6 +828,15 @@ impl RdbcFilterInner {
             .push(RdbcFilterItem::like_left_col(column, value));
         self
     }
+    pub fn like_left_value<RC, RV>(&mut self, column: RC, value: RV) -> &mut Self
+    where
+        RdbcColumn: From<RC>,
+        RdbcValue: From<RV>,
+    {
+        self.item_
+            .push(RdbcFilterItem::like_left_value(column, value));
+        self
+    }
 }
 
 impl RdbcFilterInner {
@@ -881,6 +906,18 @@ impl RdbcFilterItem {
             column_: RdbcColumn::from(column),
             compare_: RdbcCompareType::LikeLeft,
             value: Some(RdbcColumn::from(value)),
+        })
+    }
+    pub fn like_left_value<RC, RV>(column: RC, value: RV) -> RdbcFilterItem
+    where
+        RdbcColumn: From<RC>,
+        RdbcValue: From<RV>,
+    {
+        RdbcFilterItem::Value(RdbcValueFilterItem {
+            column_: RdbcColumn::from(column),
+            compare_: RdbcCompareType::LikeLeft,
+            value: Some(RdbcValue::from(value)),
+            ignore_null: true,
         })
     }
 }
@@ -1104,7 +1141,7 @@ where
     T: ToString,
     V: ToString,
 {
-    RdbcColumn::column_as_alias(table, column)
+    RdbcColumn::table_column(table, column)
 }
 
 pub fn value_column<V>(column: V) -> RdbcColumn

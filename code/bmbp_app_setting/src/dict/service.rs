@@ -3,10 +3,10 @@ use tracing::info;
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
 use bmbp_app_utils::{is_empty_string, simple_uuid_upper};
 use bmbp_rdbc_orm::{
-    simple_column, value_column, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable, RdbcTableInner,
-    RdbcTree, RdbcTreeUtil, Update, RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_DISABLE,
-    RDBC_ENABLE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH, RDBC_TREE_PARENT_CODE,
-    RDBC_TREE_ROOT_NODE,
+    RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH,
+    RDBC_TREE_PARENT_CODE, RDBC_TREE_ROOT_NODE, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable,
+    RdbcTableInner, RdbcTree, RdbcTreeUtil, simple_column, Update,
+    value_column,
 };
 
 use crate::dict::dao::BmbpRbacDictDao;
@@ -285,17 +285,22 @@ impl BmbpRbacDictService {
         // WHERE t1.CODE_PATH LIKE '/9bd807b3c9db4aa6891e2fa4b099094e/95164d9eed66476387a8417154843672/%';
         let mut update = Update::new();
         update.table_alias(BmbpSettingDict::get_table_name(), "t1".to_string());
+
         let mut join_table =
             RdbcTableInner::table_alias(BmbpSettingDict::get_table_name(), "t2".to_string());
-        join_table.on_eq("t2", "parent_code", "t1", "code");
+        join_table.on_eq_col(
+            RdbcColumn::table_column("t1", "parent_code"),
+            RdbcColumn::table_column("t2", "code"),
+        );
         update.join_rdbc_table(join_table);
+
         let concat_column = RdbcColumn::concat(vec![
             simple_column("t2", "name_path"),
             simple_column("t1", "name"),
             value_column("/"),
         ]);
-        update.set(simple_column("t1", "name_path"), concat_column);
-        update.like_left_col(simple_column("t1", "code_path"), parent_name_path);
+        update.set("name_path", concat_column);
+        update.like_left_value(simple_column("t1", "name_path"), parent_name_path);
         BmbpRbacDictDao::execute_update(&update).await
     }
     async fn update_code_path_for_children(parent_code_path: &str) -> BmbpResp<usize> {
@@ -305,17 +310,20 @@ impl BmbpRbacDictService {
         // WHERE t1.CODE_PATH LIKE '/9bd807b3c9db4aa6891e2fa4b099094e/95164d9eed66476387a8417154843672/%';
         let mut update = Update::new();
         update.table_alias(BmbpSettingDict::get_table_name(), "t1".to_string());
-        let mut join_table =
-            RdbcTableInner::table_alias(BmbpSettingDict::get_table_name(), "t2".to_string());
-        join_table.on_eq("t2", "parent_code", "t1", "code");
-        update.join_rdbc_table(join_table);
         let concat_column = RdbcColumn::concat(vec![
             simple_column("t2", "code_path"),
             simple_column("t1", "code"),
             value_column("/"),
         ]);
         update.set(simple_column("t1", "code_path"), concat_column);
-        update.like_left_col(simple_column("t1", "code_path"), parent_code_path);
+        let mut join_table =
+            RdbcTableInner::table_alias(BmbpSettingDict::get_table_name(), "t2".to_string());
+        join_table.on_eq_col(
+            RdbcColumn::table_column("t1", "parent_code"),
+            RdbcColumn::table_column("t2", "code"),
+        );
+        update.join_rdbc_table(join_table);
+        update.like_left_value(simple_column("t1", "code_path"), parent_code_path);
         BmbpRbacDictDao::execute_update(&update).await
     }
     pub async fn disable_dict_status(dict_id: Option<String>) -> BmbpResp<usize> {
@@ -463,7 +471,7 @@ impl BmbpRbacDictService {
         }
         let dict_vec = BmbpRbacDictDao::select_list_by_query(&query).await?;
         match dict_vec {
-            Some(dict_vec) => Ok(dict_vec.is_empty()),
+            Some(dict_vec) => Ok(!dict_vec.is_empty()),
             None => Ok(false),
         }
     }
@@ -482,7 +490,7 @@ impl BmbpRbacDictService {
         }
         let dict_vec = BmbpRbacDictDao::select_list_by_query(&query).await?;
         match dict_vec {
-            Some(dict_vec) => Ok(dict_vec.is_empty()),
+            Some(dict_vec) => Ok(!dict_vec.is_empty()),
             None => Ok(false),
         }
     }
@@ -495,7 +503,7 @@ impl BmbpRbacDictService {
         }
         let dict_vec = BmbpRbacDictDao::select_list_by_query(&query).await?;
         match dict_vec {
-            Some(dict_vec) => Ok(dict_vec.is_empty()),
+            Some(dict_vec) => Ok(!dict_vec.is_empty()),
             None => Ok(false),
         }
     }

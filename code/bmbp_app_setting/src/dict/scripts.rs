@@ -40,7 +40,7 @@ impl BmbpRdbcDictScript {
             update.set("dict_type", dict_type.value());
         }
 
-        update.set("dict_alise", dict.get_ext_props().get_dict_alias());
+        update.set("dict_alias", dict.get_ext_props().get_dict_alias());
         update.set("dict_value", dict.get_ext_props().get_dict_value());
         update.eq_(RDBC_DATA_ID, dict.get_data_id().unwrap());
         update

@@ -310,48 +310,72 @@ fn pg_build_filter_column_sql(
         RdbcCompareType::Like => {
             if let Some(value) = column_right {
                 if value.is_value() {
-                    item_sql = format!(" {} LIKE '%${{{}}}%'", left_column_sql, column_key);
-                    item_params.insert(column_key.clone(), value.get_value().unwrap().clone());
+                    item_sql = format!(" {} LIKE ${{{}}}", left_column_sql, column_key);
+                    let val_str = value.get_value().unwrap().get_string();
+                    item_params.insert(
+                        column_key.clone(),
+                        RdbcValue::String(format!("%{}%", val_str)),
+                    );
                 }
             }
         }
         RdbcCompareType::LikeLeft => {
             if let Some(value) = column_right {
                 if value.is_value() {
-                    item_sql = format!(" {} LIKE '${{{}}}%'", left_column_sql, column_key);
-                    item_params.insert(column_key.clone(), value.get_value().unwrap().clone());
+                    item_sql = format!(" {} LIKE ${{{}}}", left_column_sql, column_key);
+                    let val_str = value.get_value().unwrap().get_string();
+                    item_params.insert(
+                        column_key.clone(),
+                        RdbcValue::String(format!("{}%", val_str)),
+                    );
                 }
             }
         }
         RdbcCompareType::LikeRight => {
             if let Some(value) = column_right {
                 if value.is_value() {
-                    item_sql = format!(" {} LIKE '%${{{}}}'", left_column_sql, column_key);
-                    item_params.insert(column_key.clone(), value.get_value().unwrap().clone());
+                    item_sql = format!(" {} LIKE ${{{}}}", left_column_sql, column_key);
+                    let val_str = value.get_value().unwrap().get_string();
+                    item_params.insert(
+                        column_key.clone(),
+                        RdbcValue::String(format!("{}%", val_str)),
+                    );
                 }
             }
         }
         RdbcCompareType::NotLike => {
             if let Some(value) = column_right {
                 if value.is_value() {
-                    item_sql = format!(" {} NOT LIKE '%${{{}}}%'", left_column_sql, column_key);
-                    item_params.insert(column_key.clone(), value.get_value().unwrap().clone());
+                    item_sql = format!(" {} NOT LIKE ${{{}}}", left_column_sql, column_key);
+                    let val_str = value.get_value().unwrap().get_string();
+                    item_params.insert(
+                        column_key.clone(),
+                        RdbcValue::String(format!("%{}%", val_str)),
+                    );
                 }
             }
         }
         RdbcCompareType::NotLikeLeft => {
             if let Some(value) = column_right {
                 if value.is_value() {
-                    item_sql = format!(" {} NOT LIKE '${{{}}}%'", left_column_sql, column_key);
-                    item_params.insert(column_key.clone(), value.get_value().unwrap().clone());
+                    item_sql = format!(" {} NOT LIKE ${{{}}}", left_column_sql, column_key);
+                    let val_str = value.get_value().unwrap().get_string();
+                    item_params.insert(
+                        column_key.clone(),
+                        RdbcValue::String(format!("%{}", val_str)),
+                    );
                 }
             }
         }
         RdbcCompareType::NotLikeRight => {
             if let Some(value) = column_right {
                 if value.is_value() {
-                    item_sql = format!(" {} NOT LIKE '%${{{}}}'", left_column_sql, column_key);
-                    item_params.insert(column_key.clone(), value.get_value().unwrap().clone());
+                    item_sql = format!(" {} NOT LIKE ${{{}}}", left_column_sql, column_key);
+                    let val_str = value.get_value().unwrap().get_string();
+                    item_params.insert(
+                        column_key.clone(),
+                        RdbcValue::String(format!("{}%", val_str)),
+                    );
                 }
             }
         }
@@ -487,30 +511,49 @@ fn pg_build_filter_value_sql(value: &RdbcValueFilterItem) -> (String, HashMap<St
         }
         RdbcCompareType::Like => {
             if let Some(value) = column_value {
-                item_sql = format!(" {} LIKE '%${{{}}}%'", column_sql, column_key);
-                item_params.insert(column_key.clone(), value.clone());
+                item_sql = format!(" {}  LIKE ${{{}}}", column_sql, column_key);
+                let val_str = value.get_string();
+                item_params.insert(
+                    column_key.clone(),
+                    RdbcValue::String(format!(
+                        "%{}%                                                                   ",
+                        val_str
+                    )),
+                );
             } else {
                 if !ignore_null {
-                    item_sql = format!(" {} LIKE '%%' ", column_sql);
+                    item_sql = format!(" {} LIKE %% ", column_sql);
                 }
             }
         }
         RdbcCompareType::LikeLeft => {
             if let Some(value) = column_value {
-                item_sql = format!(" {} LIKE '${{{}}}%'", column_sql, column_key);
-                item_params.insert(column_key.clone(), value.clone());
+                item_sql = format!(" {}  LIKE ${{{}}}", column_sql, column_key);
+                let val_str = value.get_string();
+                item_params.insert(
+                    column_key.clone(),
+                    RdbcValue::String(format!("{}%", val_str)),
+                );
             }
         }
         RdbcCompareType::LikeRight => {
             if let Some(value) = column_value {
-                item_sql = format!(" {} LIKE '$%{{{}}}'", column_sql, column_key);
-                item_params.insert(column_key.clone(), value.clone());
+                item_sql = format!(" {}  LIKE ${{{}}}", column_sql, column_key);
+                let val_str = value.get_string();
+                item_params.insert(
+                    column_key.clone(),
+                    RdbcValue::String(format!("%{}", val_str)),
+                );
             }
         }
         RdbcCompareType::NotLike => {
             if let Some(value) = column_value {
-                item_sql = format!(" {} NOT LIKE '%${{{}}}%'", column_sql, column_key);
-                item_params.insert(column_key.clone(), value.clone());
+                item_sql = format!(" {} NOT  LIKE ${{{}}}", column_sql, column_key);
+                let val_str = value.get_string();
+                item_params.insert(
+                    column_key.clone(),
+                    RdbcValue::String(format!("%{}%", val_str)),
+                );
             } else {
                 if !ignore_null {
                     item_sql = format!(" {} NOT LIKE '%%' ", column_sql);
@@ -519,14 +562,22 @@ fn pg_build_filter_value_sql(value: &RdbcValueFilterItem) -> (String, HashMap<St
         }
         RdbcCompareType::NotLikeLeft => {
             if let Some(value) = column_value {
-                item_sql = format!(" {} NOT LIKE '${{{}}}%'", column_sql, column_key);
-                item_params.insert(column_key.clone(), value.clone());
+                item_sql = format!(" {} NOT  LIKE ${{{}}}", column_sql, column_key);
+                let val_str = value.get_string();
+                item_params.insert(
+                    column_key.clone(),
+                    RdbcValue::String(format!("{}%", val_str)),
+                );
             }
         }
         RdbcCompareType::NotLikeRight => {
             if let Some(value) = column_value {
-                item_sql = format!(" {} NOT LIKE '${{{}}}%'", column_sql, column_key);
-                item_params.insert(column_key.clone(), value.clone());
+                item_sql = format!(" {} NOT  LIKE ${{{}}}", column_sql, column_key);
+                let val_str = value.get_string();
+                item_params.insert(
+                    column_key.clone(),
+                    RdbcValue::String(format!("%{}", val_str)),
+                );
             }
         }
         RdbcCompareType::In => {
@@ -883,7 +934,7 @@ pub fn pg_build_update_script(update: &Update) -> (String, HashMap<String, RdbcV
             }
         }
         if !tmp_from.is_empty() {
-            sql = format!("{} FROM {} ", sql, tmp_join.join(","));
+            sql = format!("{} FROM {} ", sql, tmp_from.join(","));
         }
         if !tmp_join.is_empty() {
             sql = format!("{}  {} ", sql, tmp_join.join(" "));

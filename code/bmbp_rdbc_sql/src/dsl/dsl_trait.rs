@@ -409,11 +409,12 @@ pub trait RdbcFilter {
         self.get_filter_mut().like_left_col(column, value);
         self
     }
-    fn like_left_value<T, V>(&mut self, column: T, value: RdbcValue) -> &mut Self
+    fn like_left_value<RC, RV>(&mut self, column: RC, value: RV) -> &mut Self
     where
-        RdbcColumn: From<T>,
-        RdbcValue: From<V>,
+        RdbcColumn: From<RC>,
+        RdbcValue: From<RV>,
     {
+        self.get_filter_mut().like_left_value(column, value);
         self
     }
     fn like_left_raw<T, V>(&mut self, column: T, value: V) -> &mut Self
@@ -802,6 +803,7 @@ pub trait RdbcFilter {
 
 pub trait RdbcTable {
     fn get_table_mut(&mut self) -> &mut Vec<RdbcTableInner>;
+    fn get_join_mut(&mut self) -> &mut Vec<RdbcTableInner>;
     fn table<ST>(&mut self, table: ST) -> &mut Self
     where
         ST: ToString,
@@ -895,10 +897,8 @@ pub trait RdbcTable {
     {
         self
     }
-    fn join_rdbc_table<T>(&mut self, table: T) -> &mut Self
-    where
-        T: Into<RdbcTableInner>,
-    {
+    fn join_rdbc_table(&mut self, table: RdbcTableInner) -> &mut Self {
+        self.get_join_mut().push(table);
         self
     }
     fn left_join_table<T>(&mut self, table: T) -> &mut Self

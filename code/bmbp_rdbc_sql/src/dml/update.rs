@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 use std::sync::RwLock;
 
+use crate::build::{mysql_build_update_script, pg_build_update_script};
 use crate::{
     DatabaseType, RdbcColumn, RdbcConcatType, RdbcDmlValue, RdbcFilter, RdbcFilterInner, RdbcOrder,
     RdbcSQL, RdbcTable, RdbcTableInner, RdbcValue,
 };
-use crate::build::{mysql_build_update_script, pg_build_update_script};
 
 pub struct Update {
     driver_: RwLock<Option<DatabaseType>>,
@@ -85,6 +85,12 @@ impl Update {
 impl RdbcTable for Update {
     fn get_table_mut(&mut self) -> &mut Vec<RdbcTableInner> {
         self.table_.as_mut()
+    }
+    fn get_join_mut(&mut self) -> &mut Vec<RdbcTableInner> {
+        if self.join_.is_none() {
+            self.join_ = Some(vec![]);
+        }
+        self.join_.as_mut().unwrap()
     }
 }
 

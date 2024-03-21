@@ -244,6 +244,12 @@ impl RdbcTable for Query {
     fn get_table_mut(&mut self) -> &mut Vec<RdbcTableInner> {
         self.table_.as_mut()
     }
+    fn get_join_mut(&mut self) -> &mut Vec<RdbcTableInner> {
+        if self.join_.is_none() {
+            self.join_ = Some(vec![]);
+        }
+        self.join_.as_mut().unwrap()
+    }
 }
 
 impl RdbcFilter for Query {

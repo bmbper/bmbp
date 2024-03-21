@@ -10,6 +10,7 @@ use crate::{
 pub struct Insert {
     driver_: RwLock<Option<DatabaseType>>,
     table_: Vec<RdbcTableInner>,
+    join_: Option<Vec<RdbcTableInner>>,
     column_: Vec<RdbcTableColumn>,
     values_: Vec<RdbcDmlValue>,
     column_values: Vec<(RdbcTableColumn, RdbcDmlValue)>,
@@ -21,6 +22,7 @@ impl Insert {
         Insert {
             driver_: RwLock::new(None),
             table_: Vec::new(),
+            join_: None,
             column_: Vec::new(),
             values_: Vec::new(),
             column_values: Vec::new(),
@@ -83,6 +85,12 @@ impl Insert {
 impl RdbcTable for Insert {
     fn get_table_mut(&mut self) -> &mut Vec<RdbcTableInner> {
         self.table_.as_mut()
+    }
+    fn get_join_mut(&mut self) -> &mut Vec<RdbcTableInner> {
+        if self.join_.is_none() {
+            self.join_ = Some(vec![]);
+        }
+        self.join_.as_mut().unwrap()
     }
 }
 
