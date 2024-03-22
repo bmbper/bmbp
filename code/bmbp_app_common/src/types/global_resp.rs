@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use salvo::{writing::Json, Depot, Request, Response, Writer};
+use salvo::{Depot, Request, Response, Writer, writing::Json};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -15,7 +15,7 @@ where
     page_no: Option<usize>,
     page_size: Option<usize>,
     row_total: Option<usize>,
-    data: Option<Vec<T>>,
+    row_data: Option<Vec<T>>,
 }
 
 impl<T> PageVo<T>
@@ -36,7 +36,7 @@ where
             page_no: Some(page_no),
             page_size: Some(page_size),
             row_total: Some(row_total),
-            data,
+            row_data: data,
         }
     }
 
@@ -45,7 +45,7 @@ where
             page_no: Some(0),
             page_size: Some(0),
             row_total: Some(data.len()),
-            data: Some(data),
+            row_data: Some(data),
         }
     }
     pub fn set_page_no(&mut self, page_no: usize) -> &mut Self {
@@ -61,7 +61,7 @@ where
         self
     }
     pub fn set_data(&mut self, data: Vec<T>) -> &mut Self {
-        self.data = Some(data);
+        self.row_data = Some(data);
         self
     }
 
@@ -78,7 +78,7 @@ where
     }
 
     pub fn get_data(&self) -> Option<&Vec<T>> {
-        self.data.as_ref()
+        self.row_data.as_ref()
     }
 }
 
