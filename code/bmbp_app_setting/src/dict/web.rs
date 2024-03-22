@@ -1,11 +1,12 @@
 use salvo::{handler, Request, Response};
+use serde_json::{Map, Value};
 
 use bmbp_app_common::{
-    BmbpError, BmbpPageParam, HttpRespListVo, HttpRespPageVo, HttpRespVo, RespVo,
+    BmbpError, BmbpPageParam, BmbpResp, HttpRespListVo, HttpRespPageVo, HttpRespVo, RespVo,
 };
 use bmbp_app_utils::is_empty_string;
 
-use crate::dict::model::{BmbpSettingDictOrmModel, DictQueryParams};
+use crate::dict::model::{BmbpComboVo, BmbpSettingDictOrmModel, DictQueryParams};
 use crate::dict::service::BmbpRbacDictService;
 
 #[handler]
@@ -142,4 +143,85 @@ pub async fn save_dict_parent(req: &mut Request, _res: &mut Response) -> HttpRes
     Ok(RespVo::ok_data(
         BmbpRbacDictService::update_dict_parent(dict_id, parent_code).await?,
     ))
+}
+
+#[handler]
+pub async fn find_combo_by_alias(
+    req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespListVo<BmbpComboVo> {
+    Ok(RespVo::ok_option(None))
+}
+#[handler]
+pub async fn find_combo_by_code(
+    req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespListVo<BmbpComboVo> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_combo_by_id(
+    req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespListVo<BmbpComboVo> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_cascade_combo_by_alias(
+    req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespListVo<BmbpComboVo> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_cascade_combo_by_code(
+    req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespListVo<BmbpComboVo> {
+    Ok(RespVo::ok_option(None))
+}
+#[handler]
+pub async fn find_cascade_combo_by_id(
+    req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespListVo<BmbpComboVo> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_translate_by_alias(req: &mut Request, _res: &mut Response) -> HttpRespVo<Value> {
+    Ok(RespVo::ok_option(None))
+}
+#[handler]
+pub async fn find_translate_by_code(req: &mut Request, _res: &mut Response) -> HttpRespVo<Value> {
+    Ok(RespVo::ok_option(None))
+}
+#[handler]
+pub async fn find_translate_by_id(req: &mut Request, _res: &mut Response) -> HttpRespVo<Value> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_cascade_translate_by_alias(
+    req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<Value> {
+    Ok(RespVo::ok_option(None))
+}
+#[handler]
+pub async fn find_cascade_translate_by_code(
+    req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<Value> {
+    Ok(RespVo::ok_option(None))
+}
+#[handler]
+pub async fn find_cascade_translate_by_id(
+    req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<Value> {
+    Ok(RespVo::ok_option(None))
 }

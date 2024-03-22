@@ -20,6 +20,27 @@ pub fn build_dict_router() -> Router {
         .push(Router::with_path("/disable/<dataId>").post(disable_dict))
         .push(Router::with_path("/delete/<dataId>").post(delete_dict))
         .push(Router::with_path("/change/parent/tree/<dataId>").post(find_dict_tree_exclude_by_id))
-        .push(Router::with_path("/change/parent/save/<dataId>").post(save_dict_parent));
+        .push(Router::with_path("/change/parent/save/<dataId>").post(save_dict_parent))
+        .push(Router::with_path("/combo/alias/<alias>").post(find_combo_by_alias))
+        .push(Router::with_path("/combo/code/<code>").post(find_combo_by_code))
+        .push(Router::with_path("/combo/id/<dataId>").post(find_combo_by_id))
+        .push(Router::with_path("/cascade/combo/alias/<alias>").post(find_cascade_combo_by_alias))
+        .push(Router::with_path("/cascade/combo/code/<code>").post(find_cascade_combo_by_code))
+        .push(Router::with_path("/cascade/combo/id/<dataId>").post(find_cascade_combo_by_id))
+        .push(Router::with_path("/translate/alias/<alias>").post(find_translate_by_alias))
+        .push(Router::with_path("/translate/code/<code>").post(find_translate_by_code))
+        .push(Router::with_path("/translate/id/<dataId>").post(find_translate_by_id))
+        .push(
+            Router::with_path("/cascade/translate/alias/<alias>")
+                .post(find_cascade_translate_by_alias),
+        )
+        .push(
+            Router::with_path("/cascade/translate/code/<code>")
+                .post(find_cascade_translate_by_code),
+        )
+        .push(
+            Router::with_path("/cascade/translate/id/<dataId>").post(find_cascade_translate_by_id),
+        );
+
     dict_router
 }

@@ -164,3 +164,47 @@ impl RdbcModel for BmbpSettingDict {
 }
 
 pub type BmbpSettingDictOrmModel = BmbpOrmRdbcTree<BmbpSettingDict>;
+
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
+pub struct BmbpComboVo {
+    label: String,
+    value: String,
+    children: Vec<BmbpComboVo>,
+}
+
+impl BmbpComboVo {
+    pub fn new() -> Self {
+        BmbpComboVo {
+            label: "".to_string(),
+            value: "".to_string(),
+            children: vec![],
+        }
+    }
+    pub fn get_label(&self) -> &String {
+        &self.label
+    }
+    pub fn set_label(&mut self, label: String) -> &mut Self {
+        self.label = label;
+        self
+    }
+    pub fn get_value(&self) -> &String {
+        &self.value
+    }
+    pub fn set_value(&mut self, value: String) -> &mut Self {
+        self.value = value;
+        self
+    }
+    pub fn get_children(&self) -> &Vec<BmbpComboVo> {
+        &self.children
+    }
+    pub fn set_children(&mut self, children: Vec<BmbpComboVo>) -> &mut Self {
+        self.children = children;
+        self
+    }
+    pub fn add_child(&mut self, child: BmbpComboVo) -> &mut Self {
+        self.children.push(child);
+        self
+    }
+}
