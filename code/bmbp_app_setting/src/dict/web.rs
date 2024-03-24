@@ -152,6 +152,7 @@ pub async fn find_combo_by_alias(
 ) -> HttpRespListVo<BmbpComboVo> {
     Ok(RespVo::ok_option(None))
 }
+
 #[handler]
 pub async fn find_combo_by_code(
     req: &mut Request,
@@ -183,6 +184,7 @@ pub async fn find_cascade_combo_by_code(
 ) -> HttpRespListVo<BmbpComboVo> {
     Ok(RespVo::ok_option(None))
 }
+
 #[handler]
 pub async fn find_cascade_combo_by_id(
     req: &mut Request,
@@ -195,10 +197,12 @@ pub async fn find_cascade_combo_by_id(
 pub async fn find_translate_by_alias(req: &mut Request, _res: &mut Response) -> HttpRespVo<Value> {
     Ok(RespVo::ok_option(None))
 }
+
 #[handler]
 pub async fn find_translate_by_code(req: &mut Request, _res: &mut Response) -> HttpRespVo<Value> {
     Ok(RespVo::ok_option(None))
 }
+
 #[handler]
 pub async fn find_translate_by_id(req: &mut Request, _res: &mut Response) -> HttpRespVo<Value> {
     Ok(RespVo::ok_option(None))
@@ -206,11 +210,12 @@ pub async fn find_translate_by_id(req: &mut Request, _res: &mut Response) -> Htt
 
 #[handler]
 pub async fn find_cascade_translate_by_alias(
-    req: &mut Request,
+    _req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<Value> {
     Ok(RespVo::ok_option(None))
 }
+
 #[handler]
 pub async fn find_cascade_translate_by_code(
     req: &mut Request,
@@ -218,6 +223,7 @@ pub async fn find_cascade_translate_by_code(
 ) -> HttpRespVo<Value> {
     Ok(RespVo::ok_option(None))
 }
+
 #[handler]
 pub async fn find_cascade_translate_by_id(
     _req: &mut Request,

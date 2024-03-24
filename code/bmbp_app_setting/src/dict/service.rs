@@ -12,6 +12,7 @@ use bmbp_rdbc_orm::{
 use crate::dict::dao::BmbpRbacDictDao;
 use crate::dict::model::{BmbpDictType, BmbpSettingDict, BmbpSettingDictOrmModel, DictQueryParams};
 use crate::dict::scripts::BmbpRdbcDictScript;
+use crate::dict::web::find_dict_info;
 
 pub struct BmbpRbacDictService {}
 
@@ -339,18 +340,24 @@ impl BmbpRbacDictService {
         BmbpRbacDictDao::execute_update(&update).await
     }
     pub async fn disable_dict_status(dict_id: Option<String>) -> BmbpResp<usize> {
-        if is_empty_string(dict_id.as_ref()) {
-            return Err(BmbpError::service("请指定待停用的字典!"));
+        let mut dict = Self::query_dict_by_id(dict_id.as_ref()).await?;
+        if dict.is_none() {
+            return Err(BmbpError::service("待停用的字典不存在!"));
         }
-        let update = BmbpRdbcDictScript::build_update_status(dict_id, RDBC_DISABLE);
+        let dict_info = dict.unwrap();
+        let code_path = dict_info.get_code_path().unwrap();
+        let update = BmbpRdbcDictScript::build_update_status(code_path, RDBC_DISABLE);
         BmbpRbacDictDao::execute_update(&update).await
     }
 
     pub async fn enable_dict_status(dict_id: Option<String>) -> BmbpResp<usize> {
-        if is_empty_string(dict_id.as_ref()) {
-            return Err(BmbpError::service("请指定待启用的字典!"));
+        let dict = Self::query_dict_by_id(dict_id.as_ref()).await?;
+        if dict.is_none() {
+            return Err(BmbpError::service("待启用的字典不存在!"));
         }
-        let update = BmbpRdbcDictScript::build_update_status(dict_id, RDBC_ENABLE);
+        let dict_info = dict.unwrap();
+        let code_path = dict_info.get_code_path().unwrap();
+        let update = BmbpRdbcDictScript::build_update_status(code_path, RDBC_ENABLE);
         BmbpRbacDictDao::execute_update(&update).await
     }
 

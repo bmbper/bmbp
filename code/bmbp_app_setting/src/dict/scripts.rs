@@ -45,12 +45,12 @@ impl BmbpRdbcDictScript {
         update.eq_(RDBC_DATA_ID, dict.get_data_id().unwrap());
         update
     }
-    pub fn build_update_status(dict_id: Option<String>, status: &str) -> Update {
+    pub fn build_update_status(code_path:&String, status: &str) -> Update {
         let mut update = Update::new();
         update
             .table(BmbpSettingDict::get_table_name())
             .set(RDBC_DATA_STATUS, status)
-            .eq_(BmbpSettingDict::get_table_primary_key(), dict_id.unwrap());
+            .like_left_value("code_path", code_path);
         update
     }
     pub fn build_delete_script(dict_id: Option<String>) -> Delete {
