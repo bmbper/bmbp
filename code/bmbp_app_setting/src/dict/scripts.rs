@@ -45,7 +45,7 @@ impl BmbpRdbcDictScript {
         update.eq_(RDBC_DATA_ID, dict.get_data_id().unwrap());
         update
     }
-    pub fn build_update_status(dict_id: Option<String>, status: i8) -> Update {
+    pub fn build_update_status(dict_id: Option<String>, status: &str) -> Update {
         let mut update = Update::new();
         update
             .table(BmbpSettingDict::get_table_name())

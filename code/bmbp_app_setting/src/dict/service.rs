@@ -342,7 +342,7 @@ impl BmbpRbacDictService {
         if is_empty_string(dict_id.as_ref()) {
             return Err(BmbpError::service("请指定待停用的字典!"));
         }
-        let update = BmbpRdbcDictScript::build_update_status(dict_id, RDBC_ENABLE);
+        let update = BmbpRdbcDictScript::build_update_status(dict_id, RDBC_DISABLE);
         BmbpRbacDictDao::execute_update(&update).await
     }
 
@@ -350,7 +350,7 @@ impl BmbpRbacDictService {
         if is_empty_string(dict_id.as_ref()) {
             return Err(BmbpError::service("请指定待启用的字典!"));
         }
-        let update = BmbpRdbcDictScript::build_update_status(dict_id, RDBC_DISABLE);
+        let update = BmbpRdbcDictScript::build_update_status(dict_id, RDBC_ENABLE);
         BmbpRbacDictDao::execute_update(&update).await
     }
 
