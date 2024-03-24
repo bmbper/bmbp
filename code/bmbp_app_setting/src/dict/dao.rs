@@ -10,22 +10,18 @@ impl BmbpRbacDictDao {
         page_size: &usize,
         query: &Query,
     ) -> BmbpResp<PageVo<BmbpSettingDictOrmModel>> {
-        let mut page: RdbcPage<BmbpSettingDictOrmModel> = RdbcPage::new();
-        page.set_page_num(page_no.clone())
-            .set_page_size(page_size.clone());
         match RdbcORM
             .await
-            .select_page_by_query::<BmbpSettingDictOrmModel>(&mut page, &query)
+            .select_page_by_query::<BmbpSettingDictOrmModel>(page_no.clone(), page_size.clone(), &query)
             .await
         {
-            Ok(page_) => {
-                let rbac_page = PageVo::new_page(
-                    page_.page_num().clone(),
-                    page_.page_size().clone(),
-                    page_.total().clone(),
-                    page.data_take(),
-                );
-                Ok(rbac_page)
+            Ok(mut page) => {
+                let mut page_vo = PageVo::new();
+                page_vo.set_page_no(page.page_num().clone());
+                page_vo.set_page_size(page.page_size().clone());
+                page_vo.set_op_data(page.data_take());
+                page_vo.set_row_total(page.total().clone());
+                Ok(page_vo)
             }
             Err(e) => Err(BmbpError::service(e.get_msg().as_str())),
         }

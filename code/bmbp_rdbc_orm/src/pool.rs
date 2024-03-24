@@ -6,8 +6,10 @@ use std::time::{Duration, Instant};
 use async_trait::async_trait;
 use serde::Serialize;
 use tokio_postgres::types::IsNull::No;
+use tracing::info;
+use bmbp_app_common::BmbpError;
 
-use bmbp_rdbc_model::RdbcOrmRow;
+use bmbp_rdbc_model::{RdbcOrmRow, RdbcPage};
 use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcValue, Update};
 
 use crate::client;
@@ -18,8 +20,14 @@ use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 #[async_trait]
 pub trait RdbcConnInner {
     async fn valid(&self) -> bool;
+    async fn select_page_by_query(&self,_page_no:usize,_page_size:usize,_query:&Query)-> RdbcResult<(usize, Option<Vec<RdbcOrmRow>>)>{
+        Err(RdbcError::new(RdbcErrorType::SQLError,"接口未实现"))
+    }
     async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>>;
     async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>>;
+    async fn select_one_by_sql(&self, sql:&str, params:&[RdbcValue]) -> RdbcResult<Option<RdbcOrmRow>>{
+        Ok(None)
+    }
     async fn select_list_by_sql(
         &self,
         query: &str,
@@ -59,6 +67,17 @@ impl<'a> RdbcConn<'a> {
             return con.valid().await;
         } else {
             false
+        }
+    }
+
+    pub async fn select_page_by_query(&self, page_no: usize, page_size: usize, query: &Query) ->  RdbcResult<(usize, Option<Vec<RdbcOrmRow>>)> {
+        if let Some(con) = &self.inner {
+            con.select_page_by_query(page_no, page_size, query).await
+        } else {
+            Err(RdbcError::new(
+                RdbcErrorType::ConnectError,
+                "获取到有效的数据库连接",
+            ))
         }
     }
     pub async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {

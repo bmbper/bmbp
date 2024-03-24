@@ -6,7 +6,7 @@ use tokio_postgres::{Client, connect, NoTls};
 use tokio_postgres::types::ToSql;
 use tracing::info;
 
-use bmbp_rdbc_model::RdbcOrmRow;
+use bmbp_rdbc_model::{RdbcOrmRow, RdbcPage};
 use bmbp_rdbc_sql::{DatabaseType, Delete, Insert, Query, RdbcSQL, RdbcValue, Update};
 
 use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
@@ -17,6 +17,7 @@ pub struct PgDbClient {
     data_source: Arc<RdbcDataSource>,
     client: RwLock<Client>,
 }
+
 impl PgDbClient {
     pub(crate) async fn new(data_source: Arc<RdbcDataSource>) -> RdbcResult<Self> {
         let url = Self::build_url(data_source.clone())?;
@@ -91,13 +92,35 @@ impl RdbcConnInner for PgDbClient {
             .await
             .is_ok()
     }
+
+    async fn select_page_by_query(&self, page_no: usize, page_size: usize, query: &Query) -> RdbcResult<(usize, Option<Vec<RdbcOrmRow>>)> {
+        let (pg_sql, page_prams) = query.build_sql(DatabaseType::Postgres);
+        let count_sql = format!("SELECT COUNT(1) AS count FROM ({}) ", pg_sql);
+        let query_sql = format!("SELECT * FROM ({}) OFFSET {} LIMIT {} ", pg_sql, ((page_no - 1) * page_size), page_size);
+        let total_row = self.select_one_by_sql(count_sql.as_str(), page_prams.as_slice()).await?;
+        let row_data = self.select_list_by_sql(query_sql.as_str(), page_prams.as_slice()).await?;
+        let mut row_total = 0usize;
+        if let Some(total) = total_row {
+            if let Some(tv) = total.get_data().get("count") {
+                if let Some(row_count) = tv.get_usize() {
+                    row_total = row_count;
+                }
+            }
+        }
+        Ok((row_total, row_data))
+    }
+
     async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
         let (pg_sql, page_prams) = query.build_sql(DatabaseType::Postgres);
         self.select_list_by_sql(pg_sql.as_str(), page_prams.as_slice())
             .await
     }
+
     async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>> {
         let (sql, params) = query.build_sql(DatabaseType::Postgres);
+        self.select_one_by_sql(sql.as_str(), params.as_slice()).await
+    }
+    async fn select_one_by_sql(&self, sql: &str, params: &[RdbcValue]) -> RdbcResult<Option<RdbcOrmRow>> {
         info!("sql=>{}; \n params={:#?}", sql, params);
         let pg_prams = params
             .iter()
@@ -107,7 +130,7 @@ impl RdbcConnInner for PgDbClient {
             .client
             .read()
             .await
-            .query_opt(sql.as_str(), pg_prams.as_slice())
+            .query_opt(sql, pg_prams.as_slice())
             .await
         {
             Ok(row_op) => {

@@ -37,7 +37,19 @@ impl BmbpRbacDictService {
         params: BmbpPageParam<DictQueryParams>,
     ) -> BmbpResp<PageVo<BmbpSettingDictOrmModel>> {
         // 拼接查询条件
-        let query = BmbpRdbcDictScript::build_query_script();
+        let  mut query = BmbpRdbcDictScript::build_query_script();
+        if let Some(dict_params) = params.get_params(){
+            let parent_code = match dict_params.get_parent_code() {
+                None => {
+                    RDBC_TREE_ROOT_NODE.to_string()
+                }
+                Some(v) => {
+                    v.to_string()
+                }
+            };
+            query.eq_("parent_code",parent_code);
+        };
+
         BmbpRbacDictDao::select_page_by_query(params.get_page_no(), params.get_page_size(), &query)
             .await
     }

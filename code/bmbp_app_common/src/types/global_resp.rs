@@ -9,8 +9,8 @@ use crate::BmbpError;
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
 pub struct PageVo<T>
-where
-    T: Clone + Default + Serialize + Send + Sync,
+    where
+        T: Clone + Default + Serialize + Send + Sync,
 {
     page_no: Option<usize>,
     page_size: Option<usize>,
@@ -19,8 +19,8 @@ where
 }
 
 impl<T> PageVo<T>
-where
-    T: Clone + Default + Serialize + Send + Sync,
+    where
+        T: Clone + Default + Serialize + Send + Sync,
 {
     pub fn new() -> Self {
         PageVo::default()
@@ -64,7 +64,10 @@ where
         self.row_data = Some(data);
         self
     }
-
+    pub fn set_op_data(&mut self, data: Option<Vec<T>>) -> &mut Self {
+        self.row_data = data;
+        self
+    }
     pub fn get_page_no(&self) -> Option<&usize> {
         self.page_no.as_ref()
     }
@@ -99,8 +102,8 @@ impl Default for RespCode {
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
 pub struct RespVo<T>
-where
-    T: Clone + Default + Serialize + Send + Sync,
+    where
+        T: Clone + Default + Serialize + Send + Sync,
 {
     code: Option<RespCode>,
     msg: Option<String>,
@@ -108,8 +111,8 @@ where
 }
 
 impl<T> RespVo<T>
-where
-    T: Clone + Default + Serialize + Send + Sync,
+    where
+        T: Clone + Default + Serialize + Send + Sync,
 {
     pub fn get_code(&self) -> Option<&RespCode> {
         self.code.as_ref()
@@ -135,8 +138,8 @@ where
 }
 
 impl<T> RespVo<T>
-where
-    T: Clone + Default + Serialize + Send + Sync,
+    where
+        T: Clone + Default + Serialize + Send + Sync,
 {
     pub fn ok() -> Self {
         RespVo {
@@ -232,8 +235,8 @@ pub type BmbpResp<T> = Result<T, BmbpError>;
 
 #[async_trait]
 impl<T> Writer for RespVo<T>
-where
-    T: Clone + Default + Serialize + Send + Sync,
+    where
+        T: Clone + Default + Serialize + Send + Sync,
 {
     async fn write(self, _req: &mut Request, _depot: &mut Depot, res: &mut Response) {
         res.render(Json(self))
@@ -242,8 +245,8 @@ where
 
 #[async_trait]
 impl<T> Writer for PageVo<T>
-where
-    T: Clone + Default + Serialize + Send + Sync,
+    where
+        T: Clone + Default + Serialize + Send + Sync,
 {
     async fn write(self, _req: &mut Request, _depot: &mut Depot, res: &mut Response) {
         res.render(Json(self))

@@ -786,6 +786,8 @@ where
 /// 定义返回值类型
 /// RdbcOrmRow 数据库查询结果 实现各个数据库的FromRow
 /// RdbcPage 分页返回值
+
+#[derive(Debug)]
 pub struct RdbcOrmRow {
     columns: Vec<String>,
     data: HashMap<String, RdbcValue>,

@@ -220,7 +220,7 @@ pub async fn find_cascade_translate_by_code(
 }
 #[handler]
 pub async fn find_cascade_translate_by_id(
-    req: &mut Request,
+    _req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<Value> {
     Ok(RespVo::ok_option(None))
