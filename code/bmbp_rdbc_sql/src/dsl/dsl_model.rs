@@ -837,6 +837,15 @@ impl RdbcFilterInner {
             .push(RdbcFilterItem::like_left_value(column, value));
         self
     }
+    pub fn not_like_left_value<RC, RV>(&mut self, column: RC, value: RV) -> &mut Self
+        where
+            RdbcColumn: From<RC>,
+            RdbcValue: From<RV>,
+    {
+        self.item_
+            .push(RdbcFilterItem::not_like_left_value(column, value));
+        self
+    }
 }
 
 impl RdbcFilterInner {
@@ -916,6 +925,18 @@ impl RdbcFilterItem {
         RdbcFilterItem::Value(RdbcValueFilterItem {
             column_: RdbcColumn::from(column),
             compare_: RdbcCompareType::LikeLeft,
+            value: Some(RdbcValue::from(value)),
+            ignore_null: true,
+        })
+    }
+    pub fn not_like_left_value<RC, RV>(column: RC, value: RV) -> RdbcFilterItem
+        where
+            RdbcColumn: From<RC>,
+            RdbcValue: From<RV>,
+    {
+        RdbcFilterItem::Value(RdbcValueFilterItem {
+            column_: RdbcColumn::from(column),
+            compare_: RdbcCompareType::NotLikeLeft,
             value: Some(RdbcValue::from(value)),
             ignore_null: true,
         })

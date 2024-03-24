@@ -392,7 +392,7 @@ impl BmbpRbacDictService {
         }
         let code_path = dict_code_path.unwrap().clone();
         let mut query = BmbpRdbcDictScript::build_query_script();
-        query.not_like_left("code_path", code_path);
+        query.not_like_left_value("code_path", code_path);
         BmbpRbacDictDao::select_list_by_query(&query).await
     }
 
