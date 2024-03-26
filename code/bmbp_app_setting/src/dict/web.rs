@@ -1,8 +1,10 @@
+use std::collections::HashMap;
+
 use salvo::{handler, Request, Response};
 use serde_json::{Map, Value};
 
 use bmbp_app_common::{
-    BmbpError, BmbpPageParam, BmbpResp, HttpRespListVo, HttpRespPageVo, HttpRespVo, RespVo,
+    BmbpError, BmbpPageParam, HttpRespListVo, HttpRespPageVo, HttpRespVo, RespVo,
 };
 use bmbp_app_utils::is_empty_string;
 
@@ -16,7 +18,7 @@ pub async fn find_dict_tree(
 ) -> HttpRespListVo<BmbpSettingDictOrmModel> {
     let params = req.parse_json::<DictQueryParams>().await?;
     Ok(RespVo::ok_option(
-        BmbpRbacDictService::query_dict_tree(params).await?,
+        BmbpRbacDictService::find_dict_tree(params).await?,
     ))
 }
 
@@ -27,7 +29,7 @@ pub async fn find_dict_page(
 ) -> HttpRespPageVo<BmbpSettingDictOrmModel> {
     let params = req.parse_json::<BmbpPageParam<DictQueryParams>>().await?;
     Ok(RespVo::ok_data(
-        BmbpRbacDictService::query_dict_page(params).await?,
+        BmbpRbacDictService::find_dict_page(params).await?,
     ))
 }
 
@@ -38,7 +40,7 @@ pub async fn find_dict_list(
 ) -> HttpRespListVo<BmbpSettingDictOrmModel> {
     let params = req.parse_json::<DictQueryParams>().await?;
     Ok(RespVo::ok_option(
-        BmbpRbacDictService::query_dict_list(params).await?,
+        BmbpRbacDictService::find_dict_list(params).await?,
     ))
 }
 
@@ -49,7 +51,17 @@ pub async fn find_dict_info(
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
     let dict_id = req.param::<String>("dataId");
     Ok(RespVo::ok_option(
-        BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?,
+        BmbpRbacDictService::find_dict_by_id(dict_id.as_ref()).await?,
+    ))
+}
+#[handler]
+pub async fn find_dict_tree_exclude_by_id(
+    req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespListVo<BmbpSettingDictOrmModel> {
+    let dict_id = req.param::<String>("dataId");
+    Ok(RespVo::ok_option(
+        BmbpRbacDictService::query_dict_tree_exclude_by_id(dict_id).await?,
     ))
 }
 
@@ -60,13 +72,13 @@ pub async fn save_dict(
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
     let mut dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
     let dict_id = dict_params.get_data_id();
-    let mut dict_info = BmbpRbacDictService::query_dict_by_id(dict_id).await?;
+    let mut dict_info = BmbpRbacDictService::find_dict_by_id(dict_id).await?;
     if dict_info.is_none() {
-        BmbpRbacDictService::insert_dict_info(&mut dict_params).await?;
+        BmbpRbacDictService::insert_dict(&mut dict_params).await?;
     } else {
-        BmbpRbacDictService::update_dict_info(&mut dict_params).await?;
+        BmbpRbacDictService::update_dict(&mut dict_params).await?;
     }
-    dict_info = BmbpRbacDictService::query_dict_by_id(dict_params.get_data_id()).await?;
+    dict_info = BmbpRbacDictService::find_dict_by_id(dict_params.get_data_id()).await?;
     Ok(RespVo::ok_option(dict_info))
 }
 
@@ -77,8 +89,8 @@ pub async fn insert_dict(
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
     let mut dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
     let dict_id = dict_params.get_data_id().clone().cloned();
-    BmbpRbacDictService::insert_dict_info(&mut dict_params).await?;
-    let dict_info = BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?;
+    BmbpRbacDictService::insert_dict(&mut dict_params).await?;
+    let dict_info = BmbpRbacDictService::find_dict_by_id(dict_id.as_ref()).await?;
     Ok(RespVo::ok_option(dict_info))
 }
 
@@ -89,8 +101,8 @@ pub async fn update_dict(
 ) -> HttpRespVo<BmbpSettingDictOrmModel> {
     let mut dict_params = req.parse_json::<BmbpSettingDictOrmModel>().await?;
     let dict_id = dict_params.get_data_id().clone().cloned();
-    BmbpRbacDictService::update_dict_info(&mut dict_params).await?;
-    let dict_info = BmbpRbacDictService::query_dict_by_id(dict_id.as_ref()).await?;
+    BmbpRbacDictService::update_dict(&mut dict_params).await?;
+    let dict_info = BmbpRbacDictService::find_dict_by_id(dict_id.as_ref()).await?;
     Ok(RespVo::ok_option(dict_info))
 }
 
@@ -98,7 +110,7 @@ pub async fn update_dict(
 pub async fn disable_dict(req: &mut Request, _res: &mut Response) -> HttpRespVo<usize> {
     let dict_id = req.param::<String>("dataId");
     Ok(RespVo::ok_data(
-        BmbpRbacDictService::disable_dict_status(dict_id).await?,
+        BmbpRbacDictService::disable_dict(dict_id).await?,
     ))
 }
 
@@ -106,7 +118,7 @@ pub async fn disable_dict(req: &mut Request, _res: &mut Response) -> HttpRespVo<
 pub async fn enable_dict(req: &mut Request, _res: &mut Response) -> HttpRespVo<usize> {
     let dict_id = req.param::<String>("dataId");
     Ok(RespVo::ok_data(
-        BmbpRbacDictService::enable_dict_status(dict_id).await?,
+        BmbpRbacDictService::enable_dict(dict_id).await?,
     ))
 }
 
@@ -114,18 +126,7 @@ pub async fn enable_dict(req: &mut Request, _res: &mut Response) -> HttpRespVo<u
 pub async fn delete_dict(req: &mut Request, _res: &mut Response) -> HttpRespVo<usize> {
     let dict_id = req.param::<String>("dataId");
     Ok(RespVo::ok_data(
-        BmbpRbacDictService::delete_dict_info(dict_id).await?,
-    ))
-}
-
-#[handler]
-pub async fn find_dict_tree_exclude_by_id(
-    req: &mut Request,
-    _res: &mut Response,
-) -> HttpRespListVo<BmbpSettingDictOrmModel> {
-    let dict_id = req.param::<String>("dataId");
-    Ok(RespVo::ok_option(
-        BmbpRbacDictService::query_dict_tree_exclude_by_id(dict_id).await?,
+        BmbpRbacDictService::delete_dict_by_id(dict_id).await?,
     ))
 }
 
@@ -150,7 +151,10 @@ pub async fn find_combo_by_alias(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespListVo<BmbpComboVo> {
-    Ok(RespVo::ok_option(None))
+    let alias = req.param::<String>("alias");
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_combo_by_alias(alias.as_ref()).await?,
+    ))
 }
 
 #[handler]
@@ -158,7 +162,10 @@ pub async fn find_combo_by_code(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespListVo<BmbpComboVo> {
-    Ok(RespVo::ok_option(None))
+    let code = req.param::<String>("code");
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_combo_by_code(code.as_ref()).await?,
+    ))
 }
 
 #[handler]
@@ -166,7 +173,10 @@ pub async fn find_combo_by_id(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespListVo<BmbpComboVo> {
-    Ok(RespVo::ok_option(None))
+    let data_id = req.param::<String>("dataId");
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_combo_by_id(data_id.as_ref()).await?,
+    ))
 }
 
 #[handler]
@@ -174,7 +184,10 @@ pub async fn find_cascade_combo_by_alias(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespListVo<BmbpComboVo> {
-    Ok(RespVo::ok_option(None))
+    let alias = req.param::<String>("alias");
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_cascade_combo_by_alias(alias.as_ref()).await?,
+    ))
 }
 
 #[handler]
@@ -182,7 +195,10 @@ pub async fn find_cascade_combo_by_code(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespListVo<BmbpComboVo> {
-    Ok(RespVo::ok_option(None))
+    let code = req.param::<String>("code");
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_cascade_combo_by_code(code.as_ref()).await?,
+    ))
 }
 
 #[handler]
@@ -190,21 +206,24 @@ pub async fn find_cascade_combo_by_id(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespListVo<BmbpComboVo> {
+    let id = req.param::<String>("dataId");
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_cascade_combo_by_id(id.as_ref()).await?,
+    ))
+}
+
+#[handler]
+pub async fn find_translate_by_alias(_req: &mut Request, _res: &mut Response) -> HttpRespVo<Value> {
     Ok(RespVo::ok_option(None))
 }
 
 #[handler]
-pub async fn find_translate_by_alias(req: &mut Request, _res: &mut Response) -> HttpRespVo<Value> {
+pub async fn find_translate_by_code(_req: &mut Request, _res: &mut Response) -> HttpRespVo<Value> {
     Ok(RespVo::ok_option(None))
 }
 
 #[handler]
-pub async fn find_translate_by_code(req: &mut Request, _res: &mut Response) -> HttpRespVo<Value> {
-    Ok(RespVo::ok_option(None))
-}
-
-#[handler]
-pub async fn find_translate_by_id(req: &mut Request, _res: &mut Response) -> HttpRespVo<Value> {
+pub async fn find_translate_by_id(_req: &mut Request, _res: &mut Response) -> HttpRespVo<Value> {
     Ok(RespVo::ok_option(None))
 }
 
@@ -218,7 +237,7 @@ pub async fn find_cascade_translate_by_alias(
 
 #[handler]
 pub async fn find_cascade_translate_by_code(
-    req: &mut Request,
+    _req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<Value> {
     Ok(RespVo::ok_option(None))
@@ -229,5 +248,101 @@ pub async fn find_cascade_translate_by_id(
     _req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<Value> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_multi_combo_by_alias(
+    _req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<HashMap<String, Vec<BmbpComboVo>>> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_multi_combo_by_code(
+    _req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<HashMap<String, Vec<BmbpComboVo>>> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_multi_combo_by_id(
+    _req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<HashMap<String, Vec<BmbpComboVo>>> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_multi_cascade_combo_by_alias(
+    _req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<HashMap<String, Vec<BmbpComboVo>>> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_multi_cascade_combo_by_code(
+    _req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<HashMap<String, Vec<BmbpComboVo>>> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_multi_cascade_combo_by_id(
+    _req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<HashMap<String, Vec<BmbpComboVo>>> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_multi_translate_by_alias(
+    _req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<HashMap<String, HashMap<String, String>>> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_multi_translate_by_code(
+    req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<HashMap<String, HashMap<String, String>>> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_multi_translate_by_id(
+    _req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<HashMap<String, HashMap<String, String>>> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_multi_cascade_translate_by_alias(
+    _req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<Map<String, Value>> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_multi_cascade_translate_by_code(
+    _req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<Map<String, Value>> {
+    Ok(RespVo::ok_option(None))
+}
+
+#[handler]
+pub async fn find_multi_cascade_translate_by_id(
+    _req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<Map<String, Value>> {
     Ok(RespVo::ok_option(None))
 }

@@ -40,6 +40,29 @@ pub fn build_dict_router() -> Router {
         )
         .push(
             Router::with_path("/cascade/translate/id/<dataId>").post(find_cascade_translate_by_id),
+        )
+        .push(Router::with_path("/multi/combo/alias").post(find_multi_combo_by_alias))
+        .push(Router::with_path("/multi/combo/code").post(find_multi_combo_by_code))
+        .push(Router::with_path("/multi/combo/id").post(find_multi_combo_by_id))
+        .push(
+            Router::with_path("/multi/cascade/combo/alias").post(find_multi_cascade_combo_by_alias),
+        )
+        .push(Router::with_path("/multi/cascade/combo/code").post(find_multi_cascade_combo_by_code))
+        .push(Router::with_path("/multi/cascade/combo/id").post(find_multi_cascade_combo_by_id))
+        .push(Router::with_path("/multi/translate/alias").post(find_multi_translate_by_alias))
+        .push(Router::with_path("/multi/translate/code").post(find_multi_translate_by_code))
+        .push(Router::with_path("/multi/translate/id").post(find_multi_translate_by_id))
+        .push(
+            Router::with_path("/multi/cascade/translate/alias")
+                .post(find_multi_cascade_translate_by_alias),
+        )
+        .push(
+            Router::with_path("/multi/cascade/translate/code")
+                .post(find_multi_cascade_translate_by_code),
+        )
+        .push(
+            Router::with_path("/multi/cascade/translate/id")
+                .post(find_multi_cascade_translate_by_id),
         );
 
     dict_router

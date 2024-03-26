@@ -1,63 +1,64 @@
+use std::process::id;
+
 use tracing::info;
 
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
 use bmbp_app_utils::{is_empty_string, simple_uuid_upper};
 use bmbp_rdbc_orm::{
-    RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH,
-    RDBC_TREE_PARENT_CODE, RDBC_TREE_ROOT_NODE, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable,
-    RdbcTableInner, RdbcTree, RdbcTreeUtil, simple_column, Update,
-    value_column,
+    Query, RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME,
+    RDBC_TREE_NAME_PATH, RDBC_TREE_PARENT_CODE, RDBC_TREE_ROOT_NODE, RdbcColumn, RdbcFilter, RdbcModel,
+    RdbcTable, RdbcTableInner, RdbcTree, RdbcTreeUtil, simple_column,
+    Update, value_column,
 };
 
 use crate::dict::dao::BmbpRbacDictDao;
-use crate::dict::model::{BmbpDictType, BmbpSettingDict, BmbpSettingDictOrmModel, DictQueryParams};
+use crate::dict::model::{
+    BmbpComboVo, BmbpDictType, BmbpSettingDict, BmbpSettingDictOrmModel, DictQueryParams,
+};
 use crate::dict::scripts::BmbpRdbcDictScript;
 use crate::dict::web::find_dict_info;
 
 pub struct BmbpRbacDictService {}
 
 impl BmbpRbacDictService {
-    pub async fn query_dict_tree(
+    pub async fn find_dict_tree(
         params: DictQueryParams,
     ) -> BmbpResp<Option<Vec<BmbpSettingDictOrmModel>>> {
-        if let Some(dict_list) = Self::query_dict_list(params).await? {
+        if let Some(dict_list) = Self::find_dict_list(params).await? {
             let dict_tree = RdbcTreeUtil::build_tree(dict_list);
             return Ok(Some(dict_tree));
         }
         Ok(None)
     }
 
-    pub async fn query_dict_list(
-        _params: DictQueryParams,
+    pub async fn find_dict_list(
+        params: DictQueryParams,
     ) -> BmbpResp<Option<Vec<BmbpSettingDictOrmModel>>> {
-        let query = BmbpRdbcDictScript::build_query_script();
+        let mut query = BmbpRdbcDictScript::build_query_script();
+        if let Some(parent) = params.get_parent_code() {
+            query.eq_("parent_code", parent);
+        }
         BmbpRbacDictDao::select_list_by_query(&query).await
     }
 
-    pub async fn query_dict_page(
+    pub async fn find_dict_page(
         params: BmbpPageParam<DictQueryParams>,
     ) -> BmbpResp<PageVo<BmbpSettingDictOrmModel>> {
         // 拼接查询条件
-        let  mut query = BmbpRdbcDictScript::build_query_script();
-        if let Some(dict_params) = params.get_params(){
+        let mut query = BmbpRdbcDictScript::build_query_script();
+        if let Some(dict_params) = params.get_params() {
             let parent_code = match dict_params.get_parent_code() {
-                None => {
-                    RDBC_TREE_ROOT_NODE.to_string()
-                }
-                Some(v) => {
-                    v.to_string()
-                }
+                None => RDBC_TREE_ROOT_NODE.to_string(),
+                Some(v) => v.to_string(),
             };
-            query.eq_("parent_code",parent_code);
+            query.eq_("parent_code", parent_code);
         };
 
         BmbpRbacDictDao::select_page_by_query(params.get_page_no(), params.get_page_size(), &query)
             .await
     }
 
-    pub async fn query_dict_by_id(
-        id: Option<&String>,
-    ) -> BmbpResp<Option<BmbpSettingDictOrmModel>> {
+    pub async fn find_dict_by_id(id: Option<&String>) -> BmbpResp<Option<BmbpSettingDictOrmModel>> {
         if is_empty_string(id.as_ref()) {
             return Ok(None);
         }
@@ -69,8 +70,53 @@ impl BmbpRbacDictService {
         );
         BmbpRbacDictDao::select_one_by_query(&query).await
     }
+    async fn find_dict_by_code(code: &String) -> BmbpResp<Option<BmbpSettingDictOrmModel>> {
+        let mut query = BmbpRdbcDictScript::build_query_script();
+        query.eq_("code", code);
+        BmbpRbacDictDao::select_one_by_query(&query).await
+    }
+    pub async fn find_dict_by_alias(alias: &String) -> BmbpResp<Option<BmbpSettingDictOrmModel>> {
+        let mut query = BmbpRdbcDictScript::build_query_script();
+        query.eq_("dict_alias", alias);
+        BmbpRbacDictDao::select_one_by_query(&query).await
+    }
+    pub async fn query_dict_tree_exclude_by_id(
+        dict_id: Option<String>,
+    ) -> BmbpResp<Option<Vec<BmbpSettingDictOrmModel>>> {
+        if let Some(dict_list) = Self::query_dict_list_exclude_by_id(dict_id).await? {
+            let dict_tree = RdbcTreeUtil::build_tree(dict_list);
+            return Ok(Some(dict_tree));
+        }
+        Ok(None)
+    }
+    pub async fn query_dict_list_exclude_by_id(
+        dict_id: Option<String>,
+    ) -> BmbpResp<Option<Vec<BmbpSettingDictOrmModel>>> {
+        let dict_info = Self::find_dict_by_id(dict_id.as_ref()).await?;
+        if dict_info.is_none() {
+            return Err(BmbpError::service("指定的字典不存在!"));
+        }
+        let dict_info = dict_info.unwrap();
+        let dict_code_path = dict_info.get_code_path();
+        if dict_code_path.is_none() {
+            return Err(BmbpError::service("字典数据不准确，请联系管理员!"));
+        }
+        let code_path = dict_code_path.unwrap().clone();
+        let mut query = BmbpRdbcDictScript::build_query_script();
+        query.not_like_left("code_path", code_path);
+        BmbpRbacDictDao::select_list_by_query(&query).await
+    }
 
-    pub async fn insert_dict_info(dict: &mut BmbpSettingDictOrmModel) -> BmbpResp<usize> {
+    pub async fn find_children_by_code_path(
+        code_path: Option<&String>,
+    ) -> BmbpResp<Option<Vec<BmbpSettingDictOrmModel>>> {
+        let mut query = BmbpRdbcDictScript::build_query_script();
+        query.like_left_value(RDBC_TREE_CODE_PATH, code_path);
+        query.ne_(RDBC_TREE_CODE_PATH, code_path);
+        BmbpRbacDictDao::select_list_by_query(&query).await
+    }
+
+    pub async fn insert_dict(dict: &mut BmbpSettingDictOrmModel) -> BmbpResp<usize> {
         // 设置公共默认值
         dict.init_values();
         if is_empty_string(dict.get_name()) {
@@ -96,8 +142,7 @@ impl BmbpRbacDictService {
         }
         let mut parent_code_path = "".to_string();
         let mut parent_name_path = "".to_string();
-        if let Some(dict_parent) = Self::query_dict_by_code(dict.get_parent_code().unwrap()).await?
-        {
+        if let Some(dict_parent) = Self::find_dict_by_code(dict.get_parent_code().unwrap()).await? {
             if let Some(code_path_tmp) = dict_parent.get_code_path() {
                 parent_code_path = format!("{}", code_path_tmp);
             }
@@ -150,14 +195,8 @@ impl BmbpRbacDictService {
         BmbpRbacDictDao::execute_insert(&insert).await
     }
 
-    async fn query_dict_by_code(code: &String) -> BmbpResp<Option<BmbpSettingDictOrmModel>> {
-        let mut query = BmbpRdbcDictScript::build_query_script();
-        query.eq_("code", code);
-        BmbpRbacDictDao::select_one_by_query(&query).await
-    }
-
-    pub async fn update_dict_info(dict: &mut BmbpSettingDictOrmModel) -> BmbpResp<usize> {
-        let old_dict_op = Self::query_dict_by_id(dict.get_data_id()).await?;
+    pub async fn update_dict(dict: &mut BmbpSettingDictOrmModel) -> BmbpResp<usize> {
+        let old_dict_op = Self::find_dict_by_id(dict.get_data_id()).await?;
         if old_dict_op.is_none() {
             return Err(BmbpError::service("指定的字典不存在!"));
         }
@@ -218,7 +257,7 @@ impl BmbpRbacDictService {
         }
         let mut parent_code_path = "/".to_string();
         let mut parent_name_path = "/".to_string();
-        let parent_dict_op = Self::query_dict_by_code(parent_dict_code.unwrap()).await?;
+        let parent_dict_op = Self::find_dict_by_code(parent_dict_code.unwrap()).await?;
         if let Some(parent) = parent_dict_op {
             if let Some(code_path_tmp) = parent.get_code_path() {
                 parent_code_path = format!("{}", code_path_tmp);
@@ -290,117 +329,11 @@ impl BmbpRbacDictService {
             + Self::update_name_path_for_children(old_dict.get_name_path().unwrap()).await?;
         Ok(row_count)
     }
-
-    async fn update_name_path_for_children(parent_name_path: &str) -> BmbpResp<usize> {
-        // UPDATE damp_base_dict AS t1
-        // JOIN damp_base_dict AS t2 ON t2.CODE = t1.parent_code
-        // SET t1.NAME_PATH = CONCAT(t2.NAME_PATH, t1.name, '/')
-        // WHERE t1.CODE_PATH LIKE '/9bd807b3c9db4aa6891e2fa4b099094e/95164d9eed66476387a8417154843672/%';
-        let mut update = Update::new();
-        update.table_alias(BmbpSettingDict::get_table_name(), "t1".to_string());
-
-        let mut join_table =
-            RdbcTableInner::table_alias(BmbpSettingDict::get_table_name(), "t2".to_string());
-        join_table.on_eq_col(
-            RdbcColumn::table_column("t1", "parent_code"),
-            RdbcColumn::table_column("t2", "code"),
-        );
-        update.join_rdbc_table(join_table);
-
-        let concat_column = RdbcColumn::concat(vec![
-            simple_column("t2", "name_path"),
-            simple_column("t1", "name"),
-            value_column("/"),
-        ]);
-        update.set("name_path", concat_column);
-        update.like_left_value(simple_column("t1", "name_path"), parent_name_path);
-        BmbpRbacDictDao::execute_update(&update).await
-    }
-    async fn update_code_path_for_children(parent_code_path: &str) -> BmbpResp<usize> {
-        // UPDATE damp_base_dict AS t1
-        // JOIN damp_base_dict AS t2 ON t2.CODE = t1.parent_code
-        // SET t1.CODE_PATH = CONCAT(t2.CODE_PATH, t1.code, '/')
-        // WHERE t1.CODE_PATH LIKE '/9bd807b3c9db4aa6891e2fa4b099094e/95164d9eed66476387a8417154843672/%';
-        let mut update = Update::new();
-        update.table_alias(BmbpSettingDict::get_table_name(), "t1".to_string());
-        let concat_column = RdbcColumn::concat(vec![
-            simple_column("t2", "code_path"),
-            simple_column("t1", "code"),
-            value_column("/"),
-        ]);
-        update.set(simple_column("t1", "code_path"), concat_column);
-        let mut join_table =
-            RdbcTableInner::table_alias(BmbpSettingDict::get_table_name(), "t2".to_string());
-        join_table.on_eq_col(
-            RdbcColumn::table_column("t1", "parent_code"),
-            RdbcColumn::table_column("t2", "code"),
-        );
-        update.join_rdbc_table(join_table);
-        update.like_left_value(simple_column("t1", "code_path"), parent_code_path);
-        BmbpRbacDictDao::execute_update(&update).await
-    }
-    pub async fn disable_dict_status(dict_id: Option<String>) -> BmbpResp<usize> {
-        let mut dict = Self::query_dict_by_id(dict_id.as_ref()).await?;
-        if dict.is_none() {
-            return Err(BmbpError::service("待停用的字典不存在!"));
-        }
-        let dict_info = dict.unwrap();
-        let code_path = dict_info.get_code_path().unwrap();
-        let update = BmbpRdbcDictScript::build_update_status(code_path, RDBC_DISABLE);
-        BmbpRbacDictDao::execute_update(&update).await
-    }
-
-    pub async fn enable_dict_status(dict_id: Option<String>) -> BmbpResp<usize> {
-        let dict = Self::query_dict_by_id(dict_id.as_ref()).await?;
-        if dict.is_none() {
-            return Err(BmbpError::service("待启用的字典不存在!"));
-        }
-        let dict_info = dict.unwrap();
-        let code_path = dict_info.get_code_path().unwrap();
-        let update = BmbpRdbcDictScript::build_update_status(code_path, RDBC_ENABLE);
-        BmbpRbacDictDao::execute_update(&update).await
-    }
-
-    pub async fn delete_dict_info(dict_id: Option<String>) -> BmbpResp<usize> {
-        if is_empty_string(dict_id.as_ref()) {
-            return Err(BmbpError::service("请指定待删除的字典!"));
-        }
-        let delete_dict = BmbpRdbcDictScript::build_delete_script(dict_id);
-        BmbpRbacDictDao::execute_delete(&delete_dict).await
-    }
-
-    pub async fn query_dict_tree_exclude_by_id(
-        dict_id: Option<String>,
-    ) -> BmbpResp<Option<Vec<BmbpSettingDictOrmModel>>> {
-        if let Some(dict_list) = Self::query_dict_list_exclude_by_id(dict_id).await? {
-            let dict_tree = RdbcTreeUtil::build_tree(dict_list);
-            return Ok(Some(dict_tree));
-        }
-        Ok(None)
-    }
-    pub async fn query_dict_list_exclude_by_id(
-        dict_id: Option<String>,
-    ) -> BmbpResp<Option<Vec<BmbpSettingDictOrmModel>>> {
-        let dict_info = Self::query_dict_by_id(dict_id.as_ref()).await?;
-        if dict_info.is_none() {
-            return Err(BmbpError::service("指定的字典不存在!"));
-        }
-        let dict_info = dict_info.unwrap();
-        let dict_code_path = dict_info.get_code_path();
-        if dict_code_path.is_none() {
-            return Err(BmbpError::service("字典数据不准确，请联系管理员!"));
-        }
-        let code_path = dict_code_path.unwrap().clone();
-        let mut query = BmbpRdbcDictScript::build_query_script();
-        query.not_like_left("code_path", code_path);
-        BmbpRbacDictDao::select_list_by_query(&query).await
-    }
-
     pub async fn update_dict_parent(
         dict_id: Option<String>,
         parent_code: Option<String>,
     ) -> BmbpResp<usize> {
-        let dict_info = Self::query_dict_by_id(dict_id.as_ref()).await?;
+        let dict_info = Self::find_dict_by_id(dict_id.as_ref()).await?;
         if dict_info.is_none() {
             return Err(BmbpError::service("指定的字典不存在!"));
         }
@@ -417,7 +350,7 @@ impl BmbpRbacDictService {
             parent_code_path = "/".to_string();
             parent_name_path = "/".to_string();
         } else {
-            let parent_dict = Self::query_dict_by_code(&parent_code).await?;
+            let parent_dict = Self::find_dict_by_code(&parent_code).await?;
             if parent_dict.is_none() {
                 return Err(BmbpError::service("请指定变更的目标字典!"));
             }
@@ -475,6 +408,75 @@ impl BmbpRbacDictService {
         Ok(row_count)
     }
 
+    async fn update_name_path_for_children(parent_name_path: &str) -> BmbpResp<usize> {
+        let mut update = Update::new();
+        update.table_alias(BmbpSettingDict::get_table_name(), "t1".to_string());
+        let mut join_table =
+            RdbcTableInner::table_alias(BmbpSettingDict::get_table_name(), "t2".to_string());
+        join_table.on_eq_col(
+            RdbcColumn::table_column("t1", "parent_code"),
+            RdbcColumn::table_column("t2", "code"),
+        );
+        update.join_rdbc_table(join_table);
+
+        let concat_column = RdbcColumn::concat(vec![
+            simple_column("t2", "name_path"),
+            simple_column("t1", "name"),
+            value_column("/"),
+        ]);
+        update.set("name_path", concat_column);
+        update.like_left_value(simple_column("t1", "name_path"), parent_name_path);
+        BmbpRbacDictDao::execute_update(&update).await
+    }
+    async fn update_code_path_for_children(parent_code_path: &str) -> BmbpResp<usize> {
+        let mut update = Update::new();
+        update.table_alias(BmbpSettingDict::get_table_name(), "t1".to_string());
+        let concat_column = RdbcColumn::concat(vec![
+            simple_column("t2", "code_path"),
+            simple_column("t1", "code"),
+            value_column("/"),
+        ]);
+        update.set(simple_column("t1", "code_path"), concat_column);
+        let mut join_table =
+            RdbcTableInner::table_alias(BmbpSettingDict::get_table_name(), "t2".to_string());
+        join_table.on_eq_col(
+            RdbcColumn::table_column("t1", "parent_code"),
+            RdbcColumn::table_column("t2", "code"),
+        );
+        update.join_rdbc_table(join_table);
+        update.like_left_value(simple_column("t1", "code_path"), parent_code_path);
+        BmbpRbacDictDao::execute_update(&update).await
+    }
+    pub async fn disable_dict(dict_id: Option<String>) -> BmbpResp<usize> {
+        let mut dict = Self::find_dict_by_id(dict_id.as_ref()).await?;
+        if dict.is_none() {
+            return Err(BmbpError::service("待停用的字典不存在!"));
+        }
+        let dict_info = dict.unwrap();
+        let code_path = dict_info.get_code_path().unwrap();
+        let update = BmbpRdbcDictScript::build_update_status(code_path, RDBC_DISABLE);
+        BmbpRbacDictDao::execute_update(&update).await
+    }
+
+    pub async fn enable_dict(dict_id: Option<String>) -> BmbpResp<usize> {
+        let dict = Self::find_dict_by_id(dict_id.as_ref()).await?;
+        if dict.is_none() {
+            return Err(BmbpError::service("待启用的字典不存在!"));
+        }
+        let dict_info = dict.unwrap();
+        let code_path = dict_info.get_code_path().unwrap();
+        let update = BmbpRdbcDictScript::build_update_status(code_path, RDBC_ENABLE);
+        BmbpRbacDictDao::execute_update(&update).await
+    }
+
+    pub async fn delete_dict_by_id(dict_id: Option<String>) -> BmbpResp<usize> {
+        if is_empty_string(dict_id.as_ref()) {
+            return Err(BmbpError::service("请指定待删除的字典!"));
+        }
+        let delete_dict = BmbpRdbcDictScript::build_delete_script(dict_id);
+        BmbpRbacDictDao::execute_delete(&delete_dict).await
+    }
+
     pub async fn has_same_name(
         name: &String,
         parent_code: Option<&String>,
@@ -525,5 +527,89 @@ impl BmbpRbacDictService {
             Some(dict_vec) => Ok(!dict_vec.is_empty()),
             None => Ok(false),
         }
+    }
+
+    pub async fn find_combo_by_alias(alias: Option<&String>) -> BmbpResp<Vec<BmbpComboVo>> {
+        let mut combo = vec![];
+        if let Some(v) = alias {
+            if let Some(dict) = Self::find_dict_by_alias(&v).await? {
+                let code = dict.get_code();
+                combo = Self::find_combo_by_code(code).await?;
+            }
+        }
+        Ok(combo)
+    }
+
+    pub async fn find_combo_by_code(code: Option<&String>) -> BmbpResp<Vec<BmbpComboVo>> {
+        let mut combo = vec![];
+        if let Some(v) = code {
+            let mut query = BmbpRdbcDictScript::build_query_script();
+            query.eq_(RDBC_TREE_PARENT_CODE, v);
+            combo = Self::convert_find_dict_to_combo(query).await?;
+        }
+        Ok(combo)
+    }
+
+    pub async fn find_combo_by_id(id: Option<&String>) -> BmbpResp<Vec<BmbpComboVo>> {
+        let mut combo = vec![];
+        if let Some(dict) = Self::find_dict_by_id(id).await? {
+            let code = dict.get_code();
+            combo = Self::find_combo_by_code(code).await?;
+        }
+        Ok(combo)
+    }
+
+    pub async fn find_cascade_combo_by_alias(alias: Option<&String>) -> BmbpResp<Vec<BmbpComboVo>> {
+        let mut combo = vec![];
+        if let Some(v) = alias {
+            if let Some(dict) = Self::find_dict_by_alias(&v).await? {
+                let code_path = dict.get_code();
+                combo = Self::find_combo_by_code_path(code_path).await?;
+            }
+        }
+        Ok(combo)
+    }
+
+    pub async fn find_cascade_combo_by_code(code: Option<&String>) -> BmbpResp<Vec<BmbpComboVo>> {
+        let mut combo = vec![];
+        if let Some(v) = code {
+            if let Some(dict) = Self::find_dict_by_code(&v).await? {
+                let code_path = dict.get_code();
+                combo = Self::find_combo_by_code_path(code_path).await?;
+            }
+        }
+        Ok(combo)
+    }
+
+    pub async fn find_cascade_combo_by_id(id: Option<&String>) -> BmbpResp<Vec<BmbpComboVo>> {
+        let mut combo = vec![];
+        if let Some(dict) = Self::find_dict_by_id(id).await? {
+            let code_path = dict.get_code_path();
+            combo = Self::find_cascade_combo_by_code_path(code_path).await?;
+        }
+        Ok(combo)
+    }
+    pub async fn find_cascade_combo_by_code_path(
+        code_path: Option<&String>,
+    ) -> BmbpResp<Vec<BmbpComboVo>> {
+        let mut combo = vec![];
+        if let Some(dict) = Self::find_children_by_code_path(code_path).await? {
+            combo = Self::convert_dict_to_combo(dict).await?;
+        }
+        Ok(combo)
+    }
+
+    async fn convert_find_dict_to_combo(query: Query) -> BmbpResp<Vec<BmbpComboVo>> {
+        let mut combo = vec![];
+        if let Some(children) = BmbpRbacDictDao::select_list_by_query(&query).await? {
+            combo = Self::convert_dict_to_combo(children);
+        }
+        Ok(combo)
+    }
+
+    fn convert_dict_to_combo(children: Vec<BmbpSettingDictOrmModel>) -> Vec<BmbpComboVo> {
+        let combo = vec![];
+
+        combo
     }
 }

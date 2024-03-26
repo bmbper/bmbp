@@ -50,6 +50,15 @@ impl From<&String> for RdbcValue {
     }
 }
 
+impl From<Option<&String>> for RdbcValue {
+    fn from(s: Option<&String>) -> RdbcValue {
+        match s {
+            Some(s) => RdbcValue::String(s.to_string()),
+            None => RdbcValue::Null,
+        }
+    }
+}
+
 impl From<&str> for RdbcValue {
     fn from(s: &str) -> RdbcValue {
         RdbcValue::String(s.to_string())
