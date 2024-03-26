@@ -1,7 +1,8 @@
+use std::collections::HashMap;
 use tracing::info;
 
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
-use bmbp_app_utils::{is_empty_string, simple_uuid_upper};
+use bmbp_app_utils::{is_empty_string, simple_uuid_upper, TreeGenericBuilder};
 use bmbp_rdbc_orm::{
     RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH,
     RDBC_TREE_PARENT_CODE, RDBC_TREE_ROOT_NODE, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable,
@@ -10,7 +11,7 @@ use bmbp_rdbc_orm::{
 };
 
 use crate::dict::dao::BmbpRbacDictDao;
-use crate::dict::model::{BmbpDictType, BmbpSettingDict, BmbpSettingDictOrmModel, DictQueryParams};
+use crate::dict::model::{BmbpComboVo, BmbpDictType, BmbpSettingDict, BmbpSettingDictOrmModel, DictQueryParams};
 use crate::dict::scripts::BmbpRdbcDictScript;
 use crate::dict::web::find_dict_info;
 
@@ -38,8 +39,8 @@ impl BmbpRbacDictService {
         params: BmbpPageParam<DictQueryParams>,
     ) -> BmbpResp<PageVo<BmbpSettingDictOrmModel>> {
         // 拼接查询条件
-        let  mut query = BmbpRdbcDictScript::build_query_script();
-        if let Some(dict_params) = params.get_params(){
+        let mut query = BmbpRdbcDictScript::build_query_script();
+        if let Some(dict_params) = params.get_params() {
             let parent_code = match dict_params.get_parent_code() {
                 None => {
                     RDBC_TREE_ROOT_NODE.to_string()
@@ -48,7 +49,7 @@ impl BmbpRbacDictService {
                     v.to_string()
                 }
             };
-            query.eq_("parent_code",parent_code);
+            query.eq_("parent_code", parent_code);
         };
 
         BmbpRbacDictDao::select_page_by_query(params.get_page_no(), params.get_page_size(), &query)
@@ -125,7 +126,7 @@ impl BmbpRbacDictService {
             dict.get_parent_code(),
             dict.get_data_id(),
         )
-        .await?
+            .await?
         {
             return Err(BmbpError::service("字典名称已被占用，请修改后重试"));
         }
@@ -133,7 +134,7 @@ impl BmbpRbacDictService {
             dict.get_ext_props().get_dict_alias().unwrap(),
             dict.get_data_id(),
         )
-        .await?
+            .await?
         {
             return Err(BmbpError::service("字典别名已被占用，请修改后重试"));
         }
@@ -142,7 +143,7 @@ impl BmbpRbacDictService {
             dict.get_parent_code(),
             dict.get_data_id(),
         )
-        .await?
+            .await?
         {
             return Err(BmbpError::service("字典别名已被占用，请修改后重试"));
         }
@@ -261,7 +262,7 @@ impl BmbpRbacDictService {
             dict.get_parent_code(),
             dict.get_data_id(),
         )
-        .await?
+            .await?
         {
             return Err(BmbpError::service("字典名称已被占用，请修改后重试"));
         }
@@ -269,7 +270,7 @@ impl BmbpRbacDictService {
             dict.get_ext_props().get_dict_alias().unwrap(),
             dict.get_data_id(),
         )
-        .await?
+            .await?
         {
             return Err(BmbpError::service("字典别名已被占用，请修改后重试"));
         }
@@ -278,7 +279,7 @@ impl BmbpRbacDictService {
             dict.get_parent_code(),
             dict.get_data_id(),
         )
-        .await?
+            .await?
         {
             return Err(BmbpError::service("字典别名已被占用，请修改后重试"));
         }
@@ -433,7 +434,7 @@ impl BmbpRbacDictService {
             dict.get_parent_code(),
             dict.get_data_id(),
         )
-        .await?
+            .await?
         {
             return Err(BmbpError::service("目标字典下已存在相同名称字典，无法变更"));
         }
@@ -441,7 +442,7 @@ impl BmbpRbacDictService {
             dict.get_ext_props().get_dict_alias().unwrap(),
             dict.get_data_id(),
         )
-        .await?
+            .await?
         {
             return Err(BmbpError::service("目标字典下已存在相同别名字典，无法变更"));
         }
@@ -450,7 +451,7 @@ impl BmbpRbacDictService {
             dict.get_parent_code(),
             dict.get_data_id(),
         )
-        .await?
+            .await?
         {
             return Err(BmbpError::service(
                 "目标字典下已存在相同字典值的字典，无法变更",
@@ -525,5 +526,23 @@ impl BmbpRbacDictService {
             Some(dict_vec) => Ok(!dict_vec.is_empty()),
             None => Ok(false),
         }
+    }
+
+
+    fn convert_dict_list_to_combo(mut dicts: &Vec<BmbpSettingDictOrmModel>) -> Vec<BmbpComboVo> {
+        let mut como_vec = vec![];
+        for dict in dicts {
+            let mut vo = BmbpComboVo::new();
+            if let Some(value) = dict.get_ext_props().get_dict_value() {
+                vo.set_value(value.to_string());
+            }
+            if let Some(label) = dict.get_name() {
+                vo.set_label(label.to_string());
+            }
+            let children = Self::convert_dict_list_to_combo(dict.get_children());
+            vo.set_children(children);
+            como_vec.push(vo);
+        }
+        como_vec
     }
 }
