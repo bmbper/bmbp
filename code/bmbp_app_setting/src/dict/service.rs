@@ -561,4 +561,15 @@ impl BmbpRbacDictService {
         }
         mp
     }
+    fn convert_dict_list_to_translate_nest(mut dicts: &Vec<BmbpSettingDictOrmModel>) -> Map<String, Value> {
+        let mut mp = Map::new();
+        for dict in dicts {
+            let code = dict.get_ext_props().get_dict_value().unwrap();
+            let name = dict.get_name().unwrap();
+            mp.insert(code.to_string(), Value::String(name.to_string()));
+            let child_mp = Self::convert_dict_list_to_translate_nest(dict.get_children());
+            mp.insert("children".to_string(),Value::Object(child_mp));
+        }
+        mp
+    }
 }
