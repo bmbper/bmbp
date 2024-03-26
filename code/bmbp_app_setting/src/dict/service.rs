@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use serde_json::{Map, Value};
 use tracing::info;
 
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
@@ -544,5 +545,20 @@ impl BmbpRbacDictService {
             como_vec.push(vo);
         }
         como_vec
+    }
+    fn convert_dict_list_to_translate(mut dicts: &Vec<BmbpSettingDictOrmModel>) -> HashMap<String, String> {
+        let mut mp = HashMap::new();
+        for dict in dicts {
+            let code = dict.get_ext_props().get_dict_value().unwrap();
+            let name = dict.get_name().unwrap();
+            mp.insert(code.to_string(), name.to_string());
+            let child_mp = Self::convert_dict_list_to_translate(dict.get_children());
+            for (k, v) in child_mp {
+                let ck = format!("{}/{}", code, k);
+                let cv = format!("{}/{}", name, v);
+                mp.insert(ck, cv);
+            }
+        }
+        mp
     }
 }
