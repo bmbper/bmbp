@@ -280,58 +280,79 @@ pub async fn find_cascade_translate_by_id(
 
 #[handler]
 pub async fn find_multi_combo_by_alias(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<HashMap<String, Vec<BmbpComboVo>>> {
-    Ok(RespVo::ok_option(None))
+    let alias = req.parse_json::<Vec<String>>().await.unwrap();
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_multi_combo_by_alias(alias).await?,
+    ))
 }
 
 #[handler]
 pub async fn find_multi_combo_by_code(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<HashMap<String, Vec<BmbpComboVo>>> {
-    Ok(RespVo::ok_option(None))
+    let code = req.parse_json::<Vec<String>>().await.unwrap();
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_multi_combo_by_code(code).await?,
+    ))
 }
 
 #[handler]
 pub async fn find_multi_combo_by_id(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<HashMap<String, Vec<BmbpComboVo>>> {
-    Ok(RespVo::ok_option(None))
+    let id = req.parse_json::<Vec<String>>().await.unwrap();
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_multi_combo_by_id(id).await?,
+    ))
 }
 
 #[handler]
 pub async fn find_multi_cascade_combo_by_alias(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<HashMap<String, Vec<BmbpComboVo>>> {
-    Ok(RespVo::ok_option(None))
+    let alias = req.parse_json::<Vec<String>>().await.unwrap();
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_multi_cascade_combo_by_alias(alias).await?,
+    ))
 }
 
 #[handler]
 pub async fn find_multi_cascade_combo_by_code(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<HashMap<String, Vec<BmbpComboVo>>> {
-    Ok(RespVo::ok_option(None))
+    let code = req.parse_json::<Vec<String>>().await.unwrap();
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_multi_cascade_combo_by_code(code).await?,
+    ))
 }
 
 #[handler]
 pub async fn find_multi_cascade_combo_by_id(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<HashMap<String, Vec<BmbpComboVo>>> {
-    Ok(RespVo::ok_option(None))
+    let id = req.parse_json::<Vec<String>>().await.unwrap();
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_multi_cascade_combo_by_id(id).await?,
+    ))
 }
 
 #[handler]
 pub async fn find_multi_translate_by_alias(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<HashMap<String, HashMap<String, String>>> {
-    Ok(RespVo::ok_option(None))
+    let alias = req.parse_json::<Vec<String>>().await.unwrap();
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_multi_translate_by_alias(alias).await?,
+    ))
 }
 
 #[handler]
@@ -339,15 +360,21 @@ pub async fn find_multi_translate_by_code(
     req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<HashMap<String, HashMap<String, String>>> {
-    Ok(RespVo::ok_option(None))
+    let code = req.parse_json::<Vec<String>>().await.unwrap();
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_multi_translate_by_code(code).await?,
+    ))
 }
 
 #[handler]
 pub async fn find_multi_translate_by_id(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
 ) -> HttpRespVo<HashMap<String, HashMap<String, String>>> {
-    Ok(RespVo::ok_option(None))
+    let id = req.parse_json::<Vec<String>>().await.unwrap();
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_multi_translate_by_id(id).await?,
+    ))
 }
 
 #[handler]
