@@ -1,5 +1,7 @@
+use std::collections::HashMap;
 use std::process::id;
 
+use serde_json::{Map, Value};
 use tracing::info;
 
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
@@ -106,7 +108,13 @@ impl BmbpRbacDictService {
         query.not_like_left("code_path", code_path);
         BmbpRbacDictDao::select_list_by_query(&query).await
     }
-
+    pub async fn find_children_by_code(
+        code: Option<&String>,
+    ) -> BmbpResp<Option<Vec<BmbpSettingDictOrmModel>>> {
+        let mut query = BmbpRdbcDictScript::build_query_script();
+        query.eq_(RDBC_TREE_PARENT_CODE, code);
+        BmbpRbacDictDao::select_list_by_query(&query).await
+    }
     pub async fn find_children_by_code_path(
         code_path: Option<&String>,
     ) -> BmbpResp<Option<Vec<BmbpSettingDictOrmModel>>> {
@@ -543,9 +551,9 @@ impl BmbpRbacDictService {
     pub async fn find_combo_by_code(code: Option<&String>) -> BmbpResp<Vec<BmbpComboVo>> {
         let mut combo = vec![];
         if let Some(v) = code {
-            let mut query = BmbpRdbcDictScript::build_query_script();
-            query.eq_(RDBC_TREE_PARENT_CODE, v);
-            combo = Self::convert_find_dict_to_combo(query).await?;
+            if let Some(dict_vec) = Self::find_children_by_code(code).await? {
+                combo = Self::convert_dict_list_to_combo(&dict_vec);
+            }
         }
         Ok(combo)
     }
@@ -563,8 +571,8 @@ impl BmbpRbacDictService {
         let mut combo = vec![];
         if let Some(v) = alias {
             if let Some(dict) = Self::find_dict_by_alias(&v).await? {
-                let code_path = dict.get_code();
-                combo = Self::find_combo_by_code_path(code_path).await?;
+                let code_path = dict.get_code_path();
+                combo = Self::find_cascade_combo_by_code_path(code_path).await?;
             }
         }
         Ok(combo)
@@ -574,8 +582,8 @@ impl BmbpRbacDictService {
         let mut combo = vec![];
         if let Some(v) = code {
             if let Some(dict) = Self::find_dict_by_code(&v).await? {
-                let code_path = dict.get_code();
-                combo = Self::find_combo_by_code_path(code_path).await?;
+                let code_path = dict.get_code_path();
+                combo = Self::find_cascade_combo_by_code_path(code_path).await?;
             }
         }
         Ok(combo)
@@ -594,22 +602,131 @@ impl BmbpRbacDictService {
     ) -> BmbpResp<Vec<BmbpComboVo>> {
         let mut combo = vec![];
         if let Some(dict) = Self::find_children_by_code_path(code_path).await? {
-            combo = Self::convert_dict_to_combo(dict).await?;
+            combo = Self::convert_dict_list_to_combo(&RdbcTreeUtil::build_tree(dict));
         }
         Ok(combo)
     }
 
-    async fn convert_find_dict_to_combo(query: Query) -> BmbpResp<Vec<BmbpComboVo>> {
-        let mut combo = vec![];
-        if let Some(children) = BmbpRbacDictDao::select_list_by_query(&query).await? {
-            combo = Self::convert_dict_to_combo(children);
+    pub async fn find_translate_by_alias(
+        alias: Option<&String>,
+    ) -> BmbpResp<HashMap<String, String>> {
+        let mut translate = HashMap::new();
+        if let Some(v) = alias {
+            if let Some(dict) = Self::find_dict_by_alias(&v).await? {
+                let code = dict.get_code();
+                translate = Self::find_translate_by_code(code).await?;
+            }
         }
-        Ok(combo)
+        Ok(translate)
+    }
+    pub async fn find_translate_by_code(
+        code: Option<&String>,
+    ) -> BmbpResp<HashMap<String, String>> {
+        let mut translate = HashMap::new();
+        if let Some(v) = code {
+            if let Some(dict) = Self::find_children_by_code(code).await? {
+                translate = Self::convert_dict_list_to_translate(&dict);
+            }
+        }
+        Ok(translate)
+    }
+    pub async fn find_translate_by_id(id: Option<&String>) -> BmbpResp<HashMap<String, String>> {
+        let mut translate = HashMap::new();
+        if let Some(dict) = Self::find_dict_by_id(id).await? {
+            let code = dict.get_code();
+            translate = Self::find_translate_by_code(code).await?;
+        }
+        Ok(translate)
+    }
+    pub async fn find_cascade_translate_by_alias(
+        alias: Option<&String>,
+    ) -> BmbpResp<HashMap<String, String>> {
+        let mut translate = HashMap::new();
+        if let Some(v) = alias {
+            if let Some(dict) = Self::find_dict_by_alias(&v).await? {
+                let code_path = dict.get_code_path();
+                translate = Self::find_cascade_translate_by_code_path(code_path).await?;
+            }
+        }
+        Ok(translate)
+    }
+    pub async fn find_cascade_translate_by_code(
+        code: Option<&String>,
+    ) -> BmbpResp<HashMap<String, String>> {
+        let mut translate = HashMap::new();
+        if let Some(v) = code {
+            if let Some(dict) = Self::find_dict_by_code(&v).await? {
+                let code_path = dict.get_code_path();
+                translate = Self::find_cascade_translate_by_code_path(code_path).await?;
+            }
+        }
+        Ok(translate)
+    }
+    pub async fn find_cascade_translate_by_id(
+        id: Option<&String>,
+    ) -> BmbpResp<HashMap<String, String>> {
+        let mut translate = HashMap::new();
+        if let Some(dict) = Self::find_dict_by_id(id).await? {
+            let code = dict.get_code();
+            let code_path = dict.get_code_path();
+            translate = Self::find_cascade_translate_by_code_path(code_path).await?;
+        }
+        Ok(translate)
+    }
+    pub async fn find_cascade_translate_by_code_path(
+        code_path: Option<&String>,
+    ) -> BmbpResp<HashMap<String, String>> {
+        let mut translate = HashMap::new();
+        if let Some(dict) = Self::find_children_by_code_path(code_path).await? {
+            translate = Self::convert_dict_list_to_translate(&RdbcTreeUtil::build_tree(dict));
+        }
+        Ok(translate)
     }
 
-    fn convert_dict_to_combo(children: Vec<BmbpSettingDictOrmModel>) -> Vec<BmbpComboVo> {
-        let combo = vec![];
-
-        combo
+    fn convert_dict_list_to_combo(mut dicts: &Vec<BmbpSettingDictOrmModel>) -> Vec<BmbpComboVo> {
+        let mut como_vec = vec![];
+        for dict in dicts {
+            let mut vo = BmbpComboVo::new();
+            if let Some(value) = dict.get_ext_props().get_dict_value() {
+                vo.set_value(value.to_string());
+            }
+            if let Some(label) = dict.get_name() {
+                vo.set_label(label.to_string());
+            }
+            let children = Self::convert_dict_list_to_combo(dict.get_children());
+            vo.set_children(children);
+            como_vec.push(vo);
+        }
+        como_vec
+    }
+    fn convert_dict_list_to_translate(
+        mut dicts: &Vec<BmbpSettingDictOrmModel>,
+    ) -> HashMap<String, String> {
+        let mut mp = HashMap::new();
+        for dict in dicts {
+            let code = dict.get_ext_props().get_dict_value().unwrap();
+            let name = dict.get_name().unwrap();
+            mp.insert(code.to_string(), name.to_string());
+            let child_mp = Self::convert_dict_list_to_translate(dict.get_children());
+            for (k, v) in child_mp {
+                let ck = format!("{}/{}", code, k);
+                let cv = format!("{}/{}", name, v);
+                mp.insert(ck, cv);
+            }
+        }
+        mp
+    }
+    fn convert_dict_list_to_translate_nest(
+        mut dict_vec: &Vec<BmbpSettingDictOrmModel>,
+    ) -> Map<String, Value> {
+        let mut mp = Map::new();
+        for dict in dict_vec {
+            let code = dict.get_ext_props().get_dict_value().unwrap();
+            let name = dict.get_name().unwrap();
+            mp.insert(code.to_string(), Value::String(name.to_string()));
+            let child_mp = Self::convert_dict_list_to_translate_nest(dict.get_children());
+            mp.insert("children".to_string(), Value::Object(child_mp));
+        }
+        mp
     }
 }

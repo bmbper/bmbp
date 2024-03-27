@@ -1,11 +1,10 @@
 use std::collections::HashMap;
-use std::hash::Hash;
 
+use crate::build::{mysql_build_sql, pg_build_sql};
 use crate::{
     DatabaseType, Query, RdbcColumn, RdbcConcatType, RdbcDmlValue, RdbcFilterInner, RdbcTableInner,
     RdbcValue,
 };
-use crate::build::{mysql_build_sql, pg_build_sql};
 
 pub trait RdbcFilter {
     fn init_filter(&mut self) -> &mut Self;
@@ -566,11 +565,12 @@ pub trait RdbcFilter {
     {
         self
     }
-    fn not_like_left_value<T, V>(&mut self, column: T, value: RdbcValue) -> &mut Self
+    fn not_like_left_value<T, V>(&mut self, column: T, value: V) -> &mut Self
     where
         RdbcColumn: From<T>,
         RdbcValue: From<V>,
     {
+        self.get_filter_mut().not_like_left_value(column, value);
         self
     }
     fn not_like_left_raw<T, V>(&mut self, column: T, value: V) -> &mut Self

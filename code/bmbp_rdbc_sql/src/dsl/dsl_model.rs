@@ -837,6 +837,15 @@ impl RdbcFilterInner {
             .push(RdbcFilterItem::like_left_value(column, value));
         self
     }
+    pub fn not_like_left_value<RC, RV>(&mut self, column: RC, value: RV) -> &mut Self
+    where
+        RdbcColumn: From<RC>,
+        RdbcValue: From<RV>,
+    {
+        self.item_
+            .push(RdbcFilterItem::not_like_left_value(column, value));
+        self
+    }
 }
 
 impl RdbcFilterInner {
@@ -916,6 +925,18 @@ impl RdbcFilterItem {
         RdbcFilterItem::Value(RdbcValueFilterItem {
             column_: RdbcColumn::from(column),
             compare_: RdbcCompareType::LikeLeft,
+            value: Some(RdbcValue::from(value)),
+            ignore_null: true,
+        })
+    }
+    pub fn not_like_left_value<RC, RV>(column: RC, value: RV) -> RdbcFilterItem
+    where
+        RdbcColumn: From<RC>,
+        RdbcValue: From<RV>,
+    {
+        RdbcFilterItem::Value(RdbcValueFilterItem {
+            column_: RdbcColumn::from(column),
+            compare_: RdbcCompareType::NotLikeLeft,
             value: Some(RdbcValue::from(value)),
             ignore_null: true,
         })
@@ -1070,7 +1091,6 @@ impl From<RdbcColumn> for RdbcDmlValue {
         RdbcDmlValue::COLUMN(value)
     }
 }
-
 impl<T> From<T> for RdbcDmlValue
 where
     RdbcValue: From<T>,
@@ -1079,20 +1099,6 @@ where
         RdbcDmlValue::VALUE(RdbcValue::from(value))
     }
 }
-
-impl<T> From<Option<T>> for RdbcDmlValue
-where
-    RdbcValue: From<T>,
-{
-    fn from(value: Option<T>) -> Self {
-        if value.is_none() {
-            RdbcDmlValue::VALUE(RdbcValue::Null)
-        } else {
-            RdbcDmlValue::VALUE(RdbcValue::from(value.unwrap()))
-        }
-    }
-}
-
 pub fn table<T>(table: T) -> RdbcTableInner
 where
     T: ToString,

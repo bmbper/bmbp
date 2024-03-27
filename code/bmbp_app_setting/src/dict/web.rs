@@ -213,42 +213,69 @@ pub async fn find_cascade_combo_by_id(
 }
 
 #[handler]
-pub async fn find_translate_by_alias(_req: &mut Request, _res: &mut Response) -> HttpRespVo<Value> {
-    Ok(RespVo::ok_option(None))
+pub async fn find_translate_by_alias(
+    req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<HashMap<String, String>> {
+    let alias = req.param::<String>("alias");
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_translate_by_alias(alias.as_ref()).await?,
+    ))
 }
 
 #[handler]
-pub async fn find_translate_by_code(_req: &mut Request, _res: &mut Response) -> HttpRespVo<Value> {
-    Ok(RespVo::ok_option(None))
+pub async fn find_translate_by_code(
+    req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<HashMap<String, String>> {
+    let code = req.param::<String>("code");
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_translate_by_code(code.as_ref()).await?,
+    ))
 }
 
 #[handler]
-pub async fn find_translate_by_id(_req: &mut Request, _res: &mut Response) -> HttpRespVo<Value> {
-    Ok(RespVo::ok_option(None))
+pub async fn find_translate_by_id(
+    req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespVo<HashMap<String, String>> {
+    let id = req.param::<String>("dataId");
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_translate_by_id(id.as_ref()).await?,
+    ))
 }
 
 #[handler]
 pub async fn find_cascade_translate_by_alias(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
-) -> HttpRespVo<Value> {
-    Ok(RespVo::ok_option(None))
+) -> HttpRespVo<HashMap<String, String>> {
+    let alias = req.param::<String>("alias");
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_cascade_translate_by_alias(alias.as_ref()).await?,
+    ))
 }
 
 #[handler]
 pub async fn find_cascade_translate_by_code(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
-) -> HttpRespVo<Value> {
-    Ok(RespVo::ok_option(None))
+) -> HttpRespVo<HashMap<String, String>> {
+    let code = req.param::<String>("code");
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_cascade_translate_by_code(code.as_ref()).await?,
+    ))
 }
 
 #[handler]
 pub async fn find_cascade_translate_by_id(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
-) -> HttpRespVo<Value> {
-    Ok(RespVo::ok_option(None))
+) -> HttpRespVo<HashMap<String, String>> {
+    let code = req.param::<String>("code");
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_cascade_translate_by_id(code.as_ref()).await?,
+    ))
 }
 
 #[handler]
