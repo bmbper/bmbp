@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use salvo::{handler, Request, Response};
-use serde_json::{Map, Value};
 
 use bmbp_app_common::{
     BmbpError, BmbpPageParam, HttpRespListVo, HttpRespPageVo, HttpRespVo, RespVo,
@@ -379,24 +378,33 @@ pub async fn find_multi_translate_by_id(
 
 #[handler]
 pub async fn find_multi_cascade_translate_by_alias(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
-) -> HttpRespVo<Map<String, Value>> {
-    Ok(RespVo::ok_option(None))
+) -> HttpRespVo<HashMap<String, HashMap<String, String>>> {
+    let alias = req.parse_json::<Vec<String>>().await.unwrap();
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_multi_cascade_translate_by_alias(alias).await?,
+    ))
 }
 
 #[handler]
 pub async fn find_multi_cascade_translate_by_code(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
-) -> HttpRespVo<Map<String, Value>> {
-    Ok(RespVo::ok_option(None))
+) -> HttpRespVo<HashMap<String, HashMap<String, String>>> {
+    let code = req.parse_json::<Vec<String>>().await.unwrap();
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_multi_cascade_translate_by_code(code).await?,
+    ))
 }
 
 #[handler]
 pub async fn find_multi_cascade_translate_by_id(
-    _req: &mut Request,
+    req: &mut Request,
     _res: &mut Response,
-) -> HttpRespVo<Map<String, Value>> {
-    Ok(RespVo::ok_option(None))
+) -> HttpRespVo<HashMap<String, HashMap<String, String>>> {
+    let id = req.parse_json::<Vec<String>>().await.unwrap();
+    Ok(RespVo::ok_data(
+        BmbpRbacDictService::find_multi_cascade_translate_by_id(id).await?,
+    ))
 }

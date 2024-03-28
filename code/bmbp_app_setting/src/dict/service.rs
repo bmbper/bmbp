@@ -178,7 +178,7 @@ impl BmbpRbacDictService {
             dict.get_parent_code(),
             dict.get_data_id(),
         )
-            .await?
+        .await?
         {
             return Err(BmbpError::service("字典名称已被占用，请修改后重试"));
         }
@@ -186,7 +186,7 @@ impl BmbpRbacDictService {
             dict.get_ext_props().get_dict_alias().unwrap(),
             dict.get_data_id(),
         )
-            .await?
+        .await?
         {
             return Err(BmbpError::service("字典别名已被占用，请修改后重试"));
         }
@@ -195,7 +195,7 @@ impl BmbpRbacDictService {
             dict.get_parent_code(),
             dict.get_data_id(),
         )
-            .await?
+        .await?
         {
             return Err(BmbpError::service("字典别名已被占用，请修改后重试"));
         }
@@ -308,7 +308,7 @@ impl BmbpRbacDictService {
             dict.get_parent_code(),
             dict.get_data_id(),
         )
-            .await?
+        .await?
         {
             return Err(BmbpError::service("字典名称已被占用，请修改后重试"));
         }
@@ -316,7 +316,7 @@ impl BmbpRbacDictService {
             dict.get_ext_props().get_dict_alias().unwrap(),
             dict.get_data_id(),
         )
-            .await?
+        .await?
         {
             return Err(BmbpError::service("字典别名已被占用，请修改后重试"));
         }
@@ -325,7 +325,7 @@ impl BmbpRbacDictService {
             dict.get_parent_code(),
             dict.get_data_id(),
         )
-            .await?
+        .await?
         {
             return Err(BmbpError::service("字典别名已被占用，请修改后重试"));
         }
@@ -374,7 +374,7 @@ impl BmbpRbacDictService {
             dict.get_parent_code(),
             dict.get_data_id(),
         )
-            .await?
+        .await?
         {
             return Err(BmbpError::service("目标字典下已存在相同名称字典，无法变更"));
         }
@@ -382,7 +382,7 @@ impl BmbpRbacDictService {
             dict.get_ext_props().get_dict_alias().unwrap(),
             dict.get_data_id(),
         )
-            .await?
+        .await?
         {
             return Err(BmbpError::service("目标字典下已存在相同别名字典，无法变更"));
         }
@@ -391,7 +391,7 @@ impl BmbpRbacDictService {
             dict.get_parent_code(),
             dict.get_data_id(),
         )
-            .await?
+        .await?
         {
             return Err(BmbpError::service(
                 "目标字典下已存在相同字典值的字典，无法变更",
@@ -550,10 +550,9 @@ impl BmbpRbacDictService {
 
     pub async fn find_combo_by_code(code: Option<&String>) -> BmbpResp<Vec<BmbpComboVo>> {
         let mut combo = vec![];
-        if let Some(v) = code {
-            if let Some(dict_vec) = Self::find_children_by_code(code).await? {
-                combo = Self::convert_dict_list_to_combo(&dict_vec);
-            }
+
+        if let Some(dict_vec) = Self::find_children_by_code(code).await? {
+            combo = Self::convert_dict_list_to_combo(&dict_vec);
         }
         Ok(combo)
     }
@@ -567,7 +566,9 @@ impl BmbpRbacDictService {
         Ok(combo)
     }
 
-    pub async fn find_multi_combo_by_alias(alias: Vec<String>) -> BmbpResp<HashMap<String, Vec<BmbpComboVo>>> {
+    pub async fn find_multi_combo_by_alias(
+        alias: Vec<String>,
+    ) -> BmbpResp<HashMap<String, Vec<BmbpComboVo>>> {
         let mut mp = HashMap::new();
         for item in alias {
             let dict = Self::find_combo_by_alias(Some(&item)).await?;
@@ -576,7 +577,9 @@ impl BmbpRbacDictService {
         Ok(mp)
     }
 
-    pub async fn find_multi_combo_by_code(code: Vec<String>) -> BmbpResp<HashMap<String, Vec<BmbpComboVo>>> {
+    pub async fn find_multi_combo_by_code(
+        code: Vec<String>,
+    ) -> BmbpResp<HashMap<String, Vec<BmbpComboVo>>> {
         let mut mp = HashMap::new();
         for item in code {
             let dict = Self::find_combo_by_code(Some(&item)).await?;
@@ -584,7 +587,9 @@ impl BmbpRbacDictService {
         }
         Ok(mp)
     }
-    pub async fn find_multi_combo_by_id(id: Vec<String>) -> BmbpResp<HashMap<String, Vec<BmbpComboVo>>> {
+    pub async fn find_multi_combo_by_id(
+        id: Vec<String>,
+    ) -> BmbpResp<HashMap<String, Vec<BmbpComboVo>>> {
         let mut mp = HashMap::new();
         for item in id {
             let dict = Self::find_combo_by_id(Some(&item)).await?;
@@ -632,7 +637,9 @@ impl BmbpRbacDictService {
         }
         Ok(combo)
     }
-    pub async fn find_multi_cascade_combo_by_alias(alias: Vec<String>) -> BmbpResp<HashMap<String, Vec<BmbpComboVo>>> {
+    pub async fn find_multi_cascade_combo_by_alias(
+        alias: Vec<String>,
+    ) -> BmbpResp<HashMap<String, Vec<BmbpComboVo>>> {
         let mut mp = HashMap::new();
         for item in alias {
             let dict = Self::find_cascade_combo_by_alias(Some(&item)).await?;
@@ -640,7 +647,9 @@ impl BmbpRbacDictService {
         }
         Ok(mp)
     }
-    pub async fn find_multi_cascade_combo_by_code(code: Vec<String>) -> BmbpResp<HashMap<String, Vec<BmbpComboVo>>> {
+    pub async fn find_multi_cascade_combo_by_code(
+        code: Vec<String>,
+    ) -> BmbpResp<HashMap<String, Vec<BmbpComboVo>>> {
         let mut mp = HashMap::new();
         for item in code {
             let dict = Self::find_cascade_combo_by_code(Some(&item)).await?;
@@ -648,7 +657,9 @@ impl BmbpRbacDictService {
         }
         Ok(mp)
     }
-    pub async fn find_multi_cascade_combo_by_id(id: Vec<String>) -> BmbpResp<HashMap<String, Vec<BmbpComboVo>>> {
+    pub async fn find_multi_cascade_combo_by_id(
+        id: Vec<String>,
+    ) -> BmbpResp<HashMap<String, Vec<BmbpComboVo>>> {
         let mut mp = HashMap::new();
         for item in id {
             let dict = Self::find_cascade_combo_by_id(Some(&item)).await?;
@@ -673,11 +684,11 @@ impl BmbpRbacDictService {
         code: Option<&String>,
     ) -> BmbpResp<HashMap<String, String>> {
         let mut translate = HashMap::new();
-        if let Some(v) = code {
-            if let Some(dict) = Self::find_children_by_code(code).await? {
-                translate = Self::convert_dict_list_to_translate(&dict);
-            }
+
+        if let Some(dict) = Self::find_children_by_code(code).await? {
+            translate = Self::convert_dict_list_to_translate(&dict);
         }
+
         Ok(translate)
     }
     pub async fn find_translate_by_id(id: Option<&String>) -> BmbpResp<HashMap<String, String>> {
@@ -690,7 +701,7 @@ impl BmbpRbacDictService {
     }
     pub async fn find_multi_translate_by_alias(
         alias: Vec<String>,
-    ) -> BmbpResp<HashMap<String, HashMap<String,String>>> {
+    ) -> BmbpResp<HashMap<String, HashMap<String, String>>> {
         let mut translate = HashMap::new();
         for item in alias {
             let dict = Self::find_translate_by_alias(Some(&item)).await?;
@@ -700,7 +711,7 @@ impl BmbpRbacDictService {
     }
     pub async fn find_multi_translate_by_code(
         code: Vec<String>,
-    ) -> BmbpResp<HashMap<String, HashMap<String,String>>> {
+    ) -> BmbpResp<HashMap<String, HashMap<String, String>>> {
         let mut translate = HashMap::new();
         for item in code {
             let dict = Self::find_translate_by_code(Some(&item)).await?;
@@ -708,7 +719,9 @@ impl BmbpRbacDictService {
         }
         Ok(translate)
     }
-    pub async fn find_multi_translate_by_id(id: Vec<String>) -> BmbpResp<HashMap<String, HashMap<String,String>>> {
+    pub async fn find_multi_translate_by_id(
+        id: Vec<String>,
+    ) -> BmbpResp<HashMap<String, HashMap<String, String>>> {
         let mut translate = HashMap::new();
         for item in id {
             let dict = Self::find_translate_by_id(Some(&item)).await?;
@@ -745,7 +758,6 @@ impl BmbpRbacDictService {
     ) -> BmbpResp<HashMap<String, String>> {
         let mut translate = HashMap::new();
         if let Some(dict) = Self::find_dict_by_id(id).await? {
-            let code = dict.get_code();
             let code_path = dict.get_code_path();
             translate = Self::find_cascade_translate_by_code_path(code_path).await?;
         }
@@ -763,7 +775,7 @@ impl BmbpRbacDictService {
 
     pub async fn find_multi_cascade_translate_by_alias(
         alias: Vec<String>,
-    ) -> BmbpResp<HashMap<String, HashMap<String,String>>> {
+    ) -> BmbpResp<HashMap<String, HashMap<String, String>>> {
         let mut translate = HashMap::new();
         for item in alias {
             let dict = Self::find_cascade_translate_by_alias(Some(&item)).await?;
@@ -773,7 +785,7 @@ impl BmbpRbacDictService {
     }
     pub async fn find_multi_cascade_translate_by_code(
         code: Vec<String>,
-    ) -> BmbpResp<HashMap<String, HashMap<String,String>>> {
+    ) -> BmbpResp<HashMap<String, HashMap<String, String>>> {
         let mut translate = HashMap::new();
         for item in code {
             let dict = Self::find_cascade_translate_by_code(Some(&item)).await?;
@@ -781,7 +793,9 @@ impl BmbpRbacDictService {
         }
         Ok(translate)
     }
-    pub async fn find_multi_cascade_translate_by_id(id: Vec<String>) -> BmbpResp<HashMap<String, HashMap<String,String>>> {
+    pub async fn find_multi_cascade_translate_by_id(
+        id: Vec<String>,
+    ) -> BmbpResp<HashMap<String, HashMap<String, String>>> {
         let mut translate = HashMap::new();
         for item in id {
             let dict = Self::find_cascade_translate_by_id(Some(&item)).await?;
@@ -789,9 +803,9 @@ impl BmbpRbacDictService {
         }
         Ok(translate)
     }
-    fn convert_dict_list_to_combo(mut dicts: &Vec<BmbpSettingDictOrmModel>) -> Vec<BmbpComboVo> {
+    fn convert_dict_list_to_combo(mut dict_vec: &Vec<BmbpSettingDictOrmModel>) -> Vec<BmbpComboVo> {
         let mut como_vec = vec![];
-        for dict in dicts {
+        for dict in dict_vec {
             let mut vo = BmbpComboVo::new();
             if let Some(value) = dict.get_ext_props().get_dict_value() {
                 vo.set_value(value.to_string());
@@ -806,10 +820,10 @@ impl BmbpRbacDictService {
         como_vec
     }
     fn convert_dict_list_to_translate(
-        mut dicts: &Vec<BmbpSettingDictOrmModel>,
+        mut dict_vec: &Vec<BmbpSettingDictOrmModel>,
     ) -> HashMap<String, String> {
         let mut mp = HashMap::new();
-        for dict in dicts {
+        for dict in dict_vec {
             let code = dict.get_ext_props().get_dict_value().unwrap();
             let name = dict.get_name().unwrap();
             mp.insert(code.to_string(), name.to_string());
