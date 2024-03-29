@@ -13,16 +13,44 @@ pub enum RdbcValue {
     Bool(bool),
     Null,
 }
-
+impl From<i8> for RdbcValue {
+    fn from(i: i8) -> RdbcValue {
+        RdbcValue::Int(i as i16)
+    }
+}
+impl From<u8> for RdbcValue {
+    fn from(i: u8) -> RdbcValue {
+        RdbcValue::Int(i as i16)
+    }
+}
+impl From<i16> for RdbcValue {
+    fn from(i: i16) -> RdbcValue {
+        RdbcValue::Int(i)
+    }
+}
+impl From<u16> for RdbcValue {
+    fn from(i: u16) -> RdbcValue {
+        RdbcValue::Int(i as i16)
+    }
+}
+impl From<i32> for RdbcValue {
+    fn from(i: i32) -> RdbcValue {
+        RdbcValue::BigInt(i as i64)
+    }
+}
+impl From<u32> for RdbcValue {
+    fn from(i: u32) -> RdbcValue {
+        RdbcValue::BigInt(i as i64)
+    }
+}
 impl From<i64> for RdbcValue {
     fn from(i: i64) -> RdbcValue {
         RdbcValue::BigInt(i)
     }
 }
-
-impl From<i8> for RdbcValue {
-    fn from(i: i8) -> RdbcValue {
-        RdbcValue::Int(i as i16)
+impl From<u64> for RdbcValue {
+    fn from(i: u64) -> RdbcValue {
+        RdbcValue::BigInt(i as i64)
     }
 }
 

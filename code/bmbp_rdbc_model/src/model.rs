@@ -14,7 +14,7 @@ use crate::{
     RDBC_DATA_OWNER_ORG, RDBC_DATA_REMARK, RDBC_DATA_SIGN, RDBC_DATA_SORT, RDBC_DATA_STATUS,
     RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_ENABLE, RDBC_NEW_FLAG, RDBC_TREE_CODE,
     RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH, RDBC_TREE_NODE_LEAF,
-    RDBC_TREE_NODE_LEVEL, RDBC_TREE_NODE_TYPE, RDBC_TREE_PARENT_CODE,
+    RDBC_TREE_NODE_LEVEL, RDBC_TREE_PARENT_CODE,
 };
 
 /// RdbcModel 定义数据库表标记
@@ -297,8 +297,6 @@ where
     fn get_children(&self) -> &Vec<T>;
     fn get_children_mut(&mut self) -> &mut Vec<T>;
     fn set_children(&mut self, children: Vec<T>) -> &mut Self;
-    fn get_node_type(&self) -> Option<&String>;
-    fn set_node_type(&mut self, node_type: String) -> &mut Self;
     fn get_node_level(&self) -> Option<&usize>;
     fn set_node_level(&mut self, node_level: usize) -> &mut Self;
     fn get_node_leaf(&self) -> Option<&usize>;
@@ -325,8 +323,6 @@ where
     name_path: Option<String>,
     // 子节点
     children: Vec<BmbpRdbcTree<T>>,
-    // 节点类型
-    node_type: Option<String>,
     // 节点层级
     node_level: Option<usize>,
     // 是否叶子节点
@@ -382,13 +378,6 @@ where
     }
     fn set_children(&mut self, children: Vec<BmbpRdbcTree<T>>) -> &mut Self {
         self.children = children;
-        self
-    }
-    fn get_node_type(&self) -> Option<&String> {
-        self.node_type.as_ref()
-    }
-    fn set_node_type(&mut self, node_type: String) -> &mut Self {
-        self.node_type = Some(node_type);
         self
     }
     fn get_node_level(&self) -> Option<&usize> {
@@ -467,8 +456,6 @@ where
     name_path: Option<String>,
     // 子节点
     children: Vec<BmbpOrmRdbcTree<T>>,
-    // 节点类型
-    node_type: Option<String>,
     // 节点层级
     node_level: Option<usize>,
     // 是否叶子节点
@@ -504,7 +491,6 @@ where
             RDBC_TREE_PARENT_CODE.to_string(),
             RDBC_TREE_NAME.to_string(),
             RDBC_TREE_NAME_PATH.to_string(),
-            RDBC_TREE_NODE_TYPE.to_string(),
             RDBC_TREE_NODE_LEVEL.to_string(),
             RDBC_TREE_NODE_LEAF.to_string(),
         ];
@@ -565,13 +551,6 @@ where
     }
     fn set_children(&mut self, children: Vec<BmbpOrmRdbcTree<T>>) -> &mut Self {
         self.children = children;
-        self
-    }
-    fn get_node_type(&self) -> Option<&String> {
-        self.node_type.as_ref()
-    }
-    fn set_node_type(&mut self, node_type: String) -> &mut Self {
-        self.node_type = Some(node_type);
         self
     }
     fn get_node_level(&self) -> Option<&usize> {
@@ -714,7 +693,6 @@ where
         insert.insert_column_value(RDBC_TREE_PARENT_CODE, self.get_parent_code());
         insert.insert_column_value(RDBC_TREE_NAME, self.get_name());
         insert.insert_column_value(RDBC_TREE_NAME_PATH, self.get_name_path());
-        insert.insert_column_value(RDBC_TREE_NODE_TYPE, self.get_node_type());
         insert.insert_column_value(RDBC_TREE_NODE_LEVEL, self.get_node_level());
         insert.insert_column_value(RDBC_TREE_NODE_LEAF, self.get_node_leaf());
         insert
@@ -957,9 +935,7 @@ where
         if let Some(data) = row.data.get(RDBC_TREE_NAME_PATH) {
             model.set_name_path(data.get_string());
         }
-        if let Some(data) = row.data.get(RDBC_TREE_NODE_TYPE) {
-            model.set_node_type(data.get_string());
-        }
+
         if let Some(data) = row.data.get(RDBC_TREE_NODE_LEVEL) {
             if let Some(v) = data.get_usize() {
                 model.set_node_level(v);
@@ -1034,9 +1010,6 @@ where
         }
         if let Some(data) = row.data.get(RDBC_TREE_NAME_PATH) {
             model.set_name_path(data.get_string());
-        }
-        if let Some(data) = row.data.get(RDBC_TREE_NODE_TYPE) {
-            model.set_node_type(data.get_string());
         }
         if let Some(data) = row.data.get(RDBC_TREE_NODE_LEVEL) {
             if let Some(v) = data.get_usize() {
