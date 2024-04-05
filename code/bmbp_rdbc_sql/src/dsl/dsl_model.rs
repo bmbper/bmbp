@@ -1035,12 +1035,47 @@ pub enum RdbcOrder {
     Column(RdbcColumnOrder),
 }
 
+impl RdbcOrder {
+    pub fn asc_<RC>(column: RC) -> RdbcOrder
+    where
+        RdbcColumn: From<RC>,
+    {
+        RdbcOrder::Column(RdbcColumnOrder::asc_(column))
+    }
+
+    pub fn desc_<RC>(column: RC) -> RdbcOrder
+    where
+        RdbcColumn: From<RC>,
+    {
+        RdbcOrder::Column(RdbcColumnOrder::asc_(column))
+    }
+}
+
 pub struct RdbcColumnOrder {
     column: RdbcColumn,
     order: RdbcOrderType,
 }
 
 impl RdbcColumnOrder {
+    pub fn asc_<RC>(column: RC) -> RdbcColumnOrder
+    where
+        RdbcColumn: From<RC>,
+    {
+        RdbcColumnOrder {
+            column: RdbcColumn::from(column),
+            order: RdbcOrderType::Asc,
+        }
+    }
+    pub fn desc_<RC>(column: RC) -> RdbcColumnOrder
+    where
+        RdbcColumn: From<RC>,
+    {
+        RdbcColumnOrder {
+            column: RdbcColumn::from(column),
+            order: RdbcOrderType::Desc,
+        }
+    }
+
     pub fn get_column(&self) -> &RdbcColumn {
         &self.column
     }

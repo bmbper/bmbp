@@ -31,14 +31,8 @@ impl BmbpRbacOrganScript {
     pub fn build_update(organ: &mut BmbpRbacOrganTree) -> Update {
         let mut update = Update::new();
         update.table(BmbpRbacOrgan::get_table_name());
-        update.set("code", organ.get_code());
-        update.set("code_path", organ.get_code_path());
         update.set("name", organ.get_name());
         update.set("name_path", organ.get_name_path());
-        let organ_ext = organ.get_ext_props();
-        if let Some(organ_type) = organ_ext.get_organ_type() {
-            update.set("organ_type", organ_type.value());
-        }
         update.set("data_sort", organ.get_data_sort());
         update.eq_(RDBC_DATA_ID, organ.get_data_id().unwrap());
         update

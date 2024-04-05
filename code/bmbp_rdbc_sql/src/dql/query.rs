@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 use std::sync::RwLock;
 
-use crate::build::{mysql_build_query_script, pg_build_query_script};
 use crate::{
-    DatabaseType, RdbcColumn, RdbcConcatType, RdbcFilter, RdbcFilterInner, RdbcOrder, RdbcSQL,
-    RdbcTable, RdbcTableInner, RdbcValue, RdbcValueColumn,
+    DatabaseType, RdbcColumn, RdbcColumnOrder, RdbcConcatType, RdbcFilter, RdbcFilterInner,
+    RdbcOrder, RdbcSQL, RdbcTable, RdbcTableInner, RdbcValue, RdbcValueColumn,
 };
+use crate::build::{mysql_build_query_script, pg_build_query_script};
 
 pub struct Query {
     driver_: RwLock<Option<DatabaseType>>,
@@ -40,6 +40,12 @@ impl Query {
             union_only: None,
             params_: None,
         }
+    }
+    fn init_order(&mut self) -> &mut Self {
+        if self.order_.is_none() {
+            self.order_ = Some(vec![]);
+        }
+        self
     }
 }
 
@@ -171,20 +177,36 @@ impl Query {
 
     pub fn order_by<SC>(&mut self, column: SC, is_asc: bool) -> &mut Self
     where
-        SC: ToString,
+        RdbcColumn: From<SC>,
     {
+        self.init_order();
+        let order = match is_asc {
+            true => RdbcColumnOrder::asc_(column),
+            false => RdbcColumnOrder::desc_(column),
+        };
+        self.order_.as_mut().unwrap().push(RdbcOrder::Column(order));
         self
     }
     pub fn order_asc<SC>(&mut self, column: SC) -> &mut Self
     where
-        SC: ToString,
+        RdbcColumn: From<SC>,
     {
+        self.init_order();
+        self.order_
+            .as_mut()
+            .unwrap()
+            .push(RdbcOrder::Column(RdbcColumnOrder::asc_(column)));
         self
     }
     pub fn order_desc<SC>(&mut self, column: SC) -> &mut Self
     where
-        SC: ToString,
+        RdbcColumn: From<SC>,
     {
+        self.init_order();
+        self.order_
+            .as_mut()
+            .unwrap()
+            .push(RdbcOrder::Column(RdbcColumnOrder::desc_(column)));
         self
     }
     pub fn order_slice<SC>(&mut self, column: &[SC], is_asc: bool) -> &mut Self

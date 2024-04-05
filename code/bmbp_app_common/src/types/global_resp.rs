@@ -9,8 +9,8 @@ use crate::BmbpError;
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
 pub struct PageVo<T>
-    where
-        T: Clone + Default + Serialize + Send + Sync,
+where
+    T: Clone + Default + Serialize + Send + Sync,
 {
     page_no: Option<usize>,
     page_size: Option<usize>,
@@ -19,8 +19,8 @@ pub struct PageVo<T>
 }
 
 impl<T> PageVo<T>
-    where
-        T: Clone + Default + Serialize + Send + Sync,
+where
+    T: Clone + Default + Serialize + Send + Sync,
 {
     pub fn new() -> Self {
         PageVo::default()
@@ -102,8 +102,8 @@ impl Default for RespCode {
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
 pub struct RespVo<T>
-    where
-        T: Clone + Default + Serialize + Send + Sync,
+where
+    T: Clone + Default + Serialize + Send + Sync,
 {
     code: Option<RespCode>,
     msg: Option<String>,
@@ -111,8 +111,8 @@ pub struct RespVo<T>
 }
 
 impl<T> RespVo<T>
-    where
-        T: Clone + Default + Serialize + Send + Sync,
+where
+    T: Clone + Default + Serialize + Send + Sync,
 {
     pub fn get_code(&self) -> Option<&RespCode> {
         self.code.as_ref()
@@ -138,8 +138,8 @@ impl<T> RespVo<T>
 }
 
 impl<T> RespVo<T>
-    where
-        T: Clone + Default + Serialize + Send + Sync,
+where
+    T: Clone + Default + Serialize + Send + Sync,
 {
     pub fn ok() -> Self {
         RespVo {
@@ -170,11 +170,123 @@ impl<T> RespVo<T>
             data: Some(data),
         }
     }
+    pub fn ok_find_data(data: T) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("查询成功".to_string()),
+            data: Some(data),
+        }
+    }
+    pub fn ok_save_data(data: T) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("保存成功".to_string()),
+            data: Some(data),
+        }
+    }
+    pub fn ok_remove_data(data: T) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("删除成功".to_string()),
+            data: Some(data),
+        }
+    }
+    pub fn ok_enable_data(data: T) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("启用成功".to_string()),
+            data: Some(data),
+        }
+    }
 
+    pub fn ok_disable_data(data: T) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("停用成功".to_string()),
+            data: Some(data),
+        }
+    }
+    pub fn ok_publish_data(data: T) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("发布成功".to_string()),
+            data: Some(data),
+        }
+    }
+    pub fn ok_cancel_data(data: T) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("取消成功".to_string()),
+            data: Some(data),
+        }
+    }
     pub fn ok_option(data: Option<T>) -> Self {
         RespVo {
             code: Some(RespCode::SUCCESS),
             msg: Some("请求访问成功".to_string()),
+            data,
+        }
+    }
+    pub fn ok_save_option(data: Option<T>) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("保存成功".to_string()),
+            data,
+        }
+    }
+    pub fn ok_find_option(data: Option<T>) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("查询成功".to_string()),
+            data,
+        }
+    }
+    pub fn ok_update_option(data: Option<T>) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("更新成功".to_string()),
+            data,
+        }
+    }
+    pub fn ok_submit_option(data: Option<T>) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("提交成功".to_string()),
+            data,
+        }
+    }
+    pub fn ok_remove_option(data: Option<T>) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("删除成功".to_string()),
+            data,
+        }
+    }
+    pub fn ok_enable_option(data: Option<T>) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("启用成功".to_string()),
+            data,
+        }
+    }
+    pub fn ok_disable_option(data: Option<T>) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("停用成功".to_string()),
+            data,
+        }
+    }
+    pub fn ok_publish_option(data: Option<T>) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("发布成功".to_string()),
+            data,
+        }
+    }
+    pub fn ok_cancel_option(data: Option<T>) -> Self {
+        RespVo {
+            code: Some(RespCode::SUCCESS),
+            msg: Some("取消成功".to_string()),
             data,
         }
     }
@@ -235,8 +347,8 @@ pub type BmbpResp<T> = Result<T, BmbpError>;
 
 #[async_trait]
 impl<T> Writer for RespVo<T>
-    where
-        T: Clone + Default + Serialize + Send + Sync,
+where
+    T: Clone + Default + Serialize + Send + Sync,
 {
     async fn write(self, _req: &mut Request, _depot: &mut Depot, res: &mut Response) {
         res.render(Json(self))
@@ -245,8 +357,8 @@ impl<T> Writer for RespVo<T>
 
 #[async_trait]
 impl<T> Writer for PageVo<T>
-    where
-        T: Clone + Default + Serialize + Send + Sync,
+where
+    T: Clone + Default + Serialize + Send + Sync,
 {
     async fn write(self, _req: &mut Request, _depot: &mut Depot, res: &mut Response) {
         res.render(Json(self))

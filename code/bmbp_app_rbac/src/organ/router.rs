@@ -15,7 +15,7 @@ pub fn organ_router() -> Router {
         .push(Router::with_path("/info/id/<dataId>").post(find_organ_info))
         .push(Router::with_path("/enable/<dataId>").post(enable_organ))
         .push(Router::with_path("/disable/<dataId>").post(disable_organ))
-        .push(Router::with_path("/delete/<dataId>").post(delete_organ))
+        .push(Router::with_path("/remove/<dataId>").post(remove_organ))
         .push(Router::with_path("/change/parent/tree/<dataId>").post(find_organ_tree_exclude_by_id))
         .push(Router::with_path("/change/parent/save/<dataId>").post(save_organ_parent))
 }
