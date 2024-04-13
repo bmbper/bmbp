@@ -515,10 +515,7 @@ fn pg_build_filter_value_sql(value: &RdbcValueFilterItem) -> (String, HashMap<St
                 let val_str = value.get_string();
                 item_params.insert(
                     column_key.clone(),
-                    RdbcValue::String(format!(
-                        "%{}%                                                                   ",
-                        val_str
-                    )),
+                    RdbcValue::String(format!("%{}%", val_str)),
                 );
             } else {
                 if !ignore_null {

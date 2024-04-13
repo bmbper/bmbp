@@ -2,7 +2,6 @@ use std::fmt::Debug;
 use std::sync::Arc;
 
 use serde::Serialize;
-use tracing::info;
 
 use bmbp_rdbc_model::{RdbcModel, RdbcOrmRow, RdbcPage};
 use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
@@ -41,9 +40,11 @@ impl RdbcOrmInner {
         page_size: usize,
         query: &Query,
     ) -> RdbcResult<RdbcPage<T>>
-        where
-            T: Default + Debug + Clone + Serialize + From<RdbcOrmRow>,
+    where
+        T: Default + Debug + Clone + Serialize + From<RdbcOrmRow>,
     {
+        let page_no = if page_no < 1 { 1 } else { page_no };
+        let page_size = if page_size < 1 { 10 } else { page_size };
         let (row_count, row_ata) = self
             .pool
             .get_conn()
@@ -65,8 +66,8 @@ impl RdbcOrmInner {
         Ok(new_page)
     }
     pub async fn select_list_by_query<T>(&self, query: &Query) -> RdbcResult<Option<Vec<T>>>
-        where
-            T: Default + Debug + Clone + Serialize + From<RdbcOrmRow>,
+    where
+        T: Default + Debug + Clone + Serialize + From<RdbcOrmRow>,
     {
         let row_op = self
             .pool
@@ -87,8 +88,8 @@ impl RdbcOrmInner {
         }
     }
     pub async fn select_one_by_query<T>(&self, query: &Query) -> RdbcResult<Option<T>>
-        where
-            T: Default + Debug + Clone + Serialize + From<RdbcOrmRow>,
+    where
+        T: Default + Debug + Clone + Serialize + From<RdbcOrmRow>,
     {
         let row_op = self
             .pool
@@ -111,8 +112,8 @@ impl RdbcOrmInner {
         self.pool.get_conn().await?.execute_delete(delete).await
     }
     pub async fn delete_by_id<T>(&self, id: String) -> RdbcResult<u64>
-        where
-            T: RdbcModel,
+    where
+        T: RdbcModel,
     {
         if id.is_empty() {
             return Err(RdbcError::new(

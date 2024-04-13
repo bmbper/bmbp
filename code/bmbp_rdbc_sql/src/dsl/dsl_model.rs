@@ -819,6 +819,14 @@ impl RdbcFilterInner {
         self.item_.push(RdbcFilterItem::eq_column(column, value));
         self
     }
+    pub fn like_value<RC, RV>(&mut self, column: RC, value: RV) -> &mut Self
+    where
+        RdbcColumn: From<RC>,
+        RdbcValue: From<RV>,
+    {
+        self.item_.push(RdbcFilterItem::like_value(column, value));
+        self
+    }
     pub fn like_left_col<RC, RV>(&mut self, column: RC, value: RV) -> &mut Self
     where
         RdbcColumn: From<RC>,
@@ -915,6 +923,18 @@ impl RdbcFilterItem {
             column_: RdbcColumn::from(column),
             compare_: RdbcCompareType::LikeLeft,
             value: Some(RdbcColumn::from(value)),
+        })
+    }
+    pub fn like_value<RC, RV>(column: RC, value: RV) -> RdbcFilterItem
+    where
+        RdbcColumn: From<RC>,
+        RdbcValue: From<RV>,
+    {
+        RdbcFilterItem::Value(RdbcValueFilterItem {
+            column_: RdbcColumn::from(column),
+            compare_: RdbcCompareType::Like,
+            value: Some(RdbcValue::from(value)),
+            ignore_null: true,
         })
     }
     pub fn like_left_value<RC, RV>(column: RC, value: RV) -> RdbcFilterItem

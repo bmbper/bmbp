@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use crate::build::{mysql_build_sql, pg_build_sql};
 use crate::{
     DatabaseType, Query, RdbcColumn, RdbcConcatType, RdbcDmlValue, RdbcFilterInner, RdbcTableInner,
     RdbcValue,
 };
+use crate::build::{mysql_build_sql, pg_build_sql};
 
 pub trait RdbcFilter {
     fn init_filter(&mut self) -> &mut Self;
@@ -346,6 +346,7 @@ pub trait RdbcFilter {
         RdbcColumn: From<T>,
         RdbcValue: From<V>,
     {
+        self.get_filter_mut().like_value(column, value);
         self
     }
     fn like_col<T, V>(&mut self, column: T, value: V) -> &mut Self
