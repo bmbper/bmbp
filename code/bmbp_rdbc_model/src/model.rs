@@ -156,6 +156,9 @@ where
     pub fn get_ext_props(&self) -> &T {
         &self.ext_props
     }
+    pub fn get_mut_ext_props(&mut self) -> &mut T {
+        &mut self.ext_props
+    }
     pub fn set_ext_props(&mut self, ext_props: T) -> &mut Self {
         self.ext_props = ext_props;
         self

@@ -5,6 +5,25 @@ use bmbp_rdbc_orm::{BmbpRdbcModel, RdbcModel, RdbcOrmRow};
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
+pub struct RbacRoleQueryParams {
+    role_name: Option<String>,
+}
+impl RbacRoleQueryParams {
+    pub fn new() -> Self {
+        RbacRoleQueryParams { role_name: None }
+    }
+    pub fn get_role_name(&self) -> Option<&String> {
+        self.role_name.as_ref()
+    }
+    pub fn set_role_name(&mut self, role_name: String) -> &mut Self {
+        self.role_name = Some(role_name);
+        self
+    }
+}
+
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
 pub struct BmbpRbacRole {
     role_code: Option<String>,
     role_name: Option<String>,
@@ -71,4 +90,4 @@ impl From<RdbcOrmRow> for BmbpRbacRole {
     }
 }
 
-pub type BmbpRbacModel = BmbpRdbcModel<BmbpRbacRole>;
+pub type BmbpRbacRoleModel = BmbpRdbcModel<BmbpRbacRole>;
