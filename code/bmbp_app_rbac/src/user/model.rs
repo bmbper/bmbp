@@ -30,13 +30,21 @@ impl RdbcModel for BmbpRbacUser {
     }
 
     fn get_table_fields() -> Vec<String> {
-        vec![]
+        vec![
+            "org_id".to_string(),
+            "person_id".to_string(),
+            "user_name".to_string(),
+            "mobile".to_string(),
+            "email".to_string(),
+            "nick_name".to_string(),
+            "password".to_string(),
+        ]
     }
 }
 
 impl From<RdbcOrmRow> for BmbpRbacUser {
     fn from(row: RdbcOrmRow) -> Self {
-        BmbpRbacUser {
+        let user = BmbpRbacUser {
             org_id: None,
             person_id: None,
             user_name: None,
@@ -45,7 +53,8 @@ impl From<RdbcOrmRow> for BmbpRbacUser {
             nick_name: None,
             password: None,
             extends: None,
-        }
+        };
+        user
     }
 }
 
@@ -73,7 +82,14 @@ impl RdbcModel for BmbpRbacUserExtend {
     }
 
     fn get_table_fields() -> Vec<String> {
-        vec![]
+        vec![
+            "user_id".to_string(),
+            "password_status".to_string(),
+            "lock_status".to_string(),
+            "last_modify_password_time".to_string(),
+            "password_modify_count".to_string(),
+            "password_expire_time".to_string(),
+        ]
     }
 }
 

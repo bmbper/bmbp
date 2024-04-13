@@ -29,6 +29,16 @@ pub async fn find_organ_tree_by_code(
     ))
 }
 #[handler]
+pub async fn find_organ_tree_exclude_person(
+    req: &mut Request,
+    _res: &mut Response,
+) -> HttpRespListVo<BmbpRbacOrganTree> {
+    let params = req.parse_json::<OrganQueryParams>().await?;
+    Ok(RespVo::ok_find_option(
+        BmbpRbacOrganService::find_organ_tree_exclude_by_person(params).await?,
+    ))
+}
+#[handler]
 pub async fn find_organ_tree_by_id(
     req: &mut Request,
     _res: &mut Response,

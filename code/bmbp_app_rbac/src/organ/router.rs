@@ -7,6 +7,7 @@ pub fn organ_router() -> Router {
         .push(Router::with_path("/tree").post(find_organ_tree))
         .push(Router::with_path("/tree/id/<dataId>").post(find_organ_tree_by_id))
         .push(Router::with_path("/tree/code/<code>").post(find_organ_tree_by_code))
+        .push(Router::with_path("/tree/exclude/person").post(find_organ_tree_exclude_person))
         .push(Router::with_path("/page").post(find_organ_page))
         .push(Router::with_path("/list").post(find_organ_list))
         .push(Router::with_path("/save").post(save_organ))

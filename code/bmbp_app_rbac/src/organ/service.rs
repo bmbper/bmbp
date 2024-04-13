@@ -8,7 +8,7 @@ use bmbp_rdbc_orm::{
 };
 
 use crate::organ::dao::BmbpRbacOrganDao;
-use crate::organ::model::{BmbpRbacOrgan, BmbpRbacOrganTree, OrganQueryParams};
+use crate::organ::model::{BmbpRbacOrgan, BmbpRbacOrganTree, BmbpRdbcOrganType, OrganQueryParams};
 use crate::organ::script::BmbpRbacOrganScript;
 
 pub struct BmbpRbacOrganService;
@@ -45,6 +45,15 @@ impl BmbpRbacOrganService {
         }
         Ok(None)
     }
+    pub async fn find_organ_tree_exclude_by_person(
+        params: OrganQueryParams,
+    ) -> BmbpResp<Option<Vec<BmbpRbacOrganTree>>> {
+        if let Some(organ_list) = Self::find_organ_list_exclude_by_person(params).await? {
+            let organ_tree = RdbcTreeUtil::build_tree(organ_list);
+            return Ok(Some(organ_tree));
+        }
+        Ok(None)
+    }
 
     pub async fn find_organ_list(
         params: OrganQueryParams,
@@ -53,6 +62,14 @@ impl BmbpRbacOrganService {
         if let Some(parent) = params.get_parent_code() {
             query.eq_("parent_code", parent);
         }
+        BmbpRbacOrganDao::select_list_by_query(&query).await
+    }
+
+    pub async fn find_organ_list_exclude_by_person(
+        _params: OrganQueryParams,
+    ) -> BmbpResp<Option<Vec<BmbpRbacOrganTree>>> {
+        let mut query = BmbpRbacOrganScript::build_query_script();
+        query.ne_("organ_type", BmbpRdbcOrganType::PERSON.value());
         BmbpRbacOrganDao::select_list_by_query(&query).await
     }
 
