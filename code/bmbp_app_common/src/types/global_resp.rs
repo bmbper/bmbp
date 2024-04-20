@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use salvo::{Depot, Request, Response, Writer, writing::Json};
+use salvo::{Depot, Request, Response, Scribe, Writer, writing::Json};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -86,10 +86,11 @@ where
 }
 
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
-#[repr(i8)]
+#[repr(i16)]
 pub enum RespCode {
-    SUCCESS = 0i8,
-    ERROR = -1i8,
+    SUCCESS = 0i16,
+    ERROR = -1i16,
+    NotFound = 404i16,
 }
 
 impl Default for RespCode {

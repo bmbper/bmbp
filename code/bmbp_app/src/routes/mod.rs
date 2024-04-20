@@ -1,18 +1,19 @@
+use salvo::{FlowCtrl, handler, Response, Router, Service};
+use salvo::catcher::Catcher;
+use salvo::cors::{Cors, CorsHandler};
+use salvo::http::{Method, StatusCode};
+use salvo::logging::Logger;
+use salvo::prelude::Json;
+
 use bmbp_app_base::build_app_base_router;
+use bmbp_app_common::{RespCode, RespVo};
 use bmbp_app_file::build_file_router;
 use bmbp_app_portal::build_home_router;
 use bmbp_app_rbac::build_rbac_router;
 use bmbp_app_setting::build_setting_router;
-use salvo::{
-    cors::{Cors, CorsHandler},
-    handler,
-    hyper::Method,
-    logging::Logger,
-    Router,
-};
 
 /// init_webapp_router web应用的路由注册
-pub fn init_webapp_router() -> Router {
+pub fn init_webapp_router() -> Service {
     let mut router = Router::new();
     // 增加日志
     router = router.hoop(Logger::new());
@@ -37,7 +38,7 @@ pub fn init_webapp_router() -> Router {
     router = router.push(api_rbac_router);
     let cors_handler = build_router_cors();
     router = router.hoop(cors_handler).options(handler::empty());
-    router
+    Service::new(router).catcher(Catcher::default().hoop(err_handler))
 }
 
 fn build_router_cors() -> CorsHandler {
@@ -45,4 +46,15 @@ fn build_router_cors() -> CorsHandler {
         .allow_origin("*")
         .allow_methods(vec![Method::GET, Method::POST, Method::DELETE, Method::PUT])
         .into_handler()
+}
+
+#[handler]
+async fn err_handler(res: &mut Response, ctrl: &mut FlowCtrl) {
+    let mut resp: RespVo<std::string::String> = RespVo::fail();
+    if let Some(StatusCode::NOT_FOUND) = res.status_code {
+        resp.set_code(RespCode::NotFound);
+        resp.set_msg("404: 接口不存在");
+    }
+    res.render(Json(resp));
+    ctrl.skip_rest();
 }

@@ -1,7 +1,8 @@
+use salvo::prelude::*;
+
 use bmbp_app_common::map::{global_hash_map_vars, global_hash_map_vars_to_usize};
 use env::init_app_env;
 use routes::init_webapp_router;
-use salvo::prelude::*;
 
 mod data;
 mod env;
@@ -21,7 +22,7 @@ impl BmbpWebApp {
         init_app_env();
     }
 
-    fn init_router(&mut self) -> Router {
+    fn init_router(&mut self) -> Service {
         tracing::info!("初始化WebApp接口服务路由......");
         init_webapp_router()
     }
