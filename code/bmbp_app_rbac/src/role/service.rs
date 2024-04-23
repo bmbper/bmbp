@@ -18,6 +18,7 @@ impl BmbpRbacRoleService {
                 query.like("role_name", role_name);
             }
         };
+        query.order_by("data_update_time", false);
         BmbpRbacRoleDao::select_page_by_query(params.get_page_no(), params.get_page_size(), &query)
             .await
     }
@@ -42,6 +43,7 @@ impl BmbpRbacRoleService {
     pub async fn insert_role(role: &mut BmbpRbacRoleModel) -> BmbpResp<usize> {
         // 设置公共默认值
         role.init_values();
+        role.set_data_status("1".to_string());
         if is_empty_string(role.get_ext_props().get_role_name()) {
             return Err(BmbpError::service("角色名称不能为空"));
         }

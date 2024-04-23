@@ -73,7 +73,7 @@ pub async fn update_role(req: &mut Request, _res: &Response) -> HttpRespVo<BmbpR
 #[handler]
 pub async fn disable_role(req: &mut Request, _res: &mut Response) -> HttpRespVo<usize> {
     let role_id = req.param::<String>("dataId");
-    Ok(RespVo::ok_remove_data(
+    Ok(RespVo::ok_disable_data(
         BmbpRbacRoleService::disable_role(role_id).await?,
     ))
 }
