@@ -29,3 +29,5 @@ impl MetaToken {
         }
     }
 }
+
+pub(crate) const ATTRS_RDBC_SKIP: &str = "rdbc_skip";

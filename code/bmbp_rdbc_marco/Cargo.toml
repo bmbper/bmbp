@@ -16,3 +16,5 @@ case_style = { workspace = true }
 serde = { workspace = true }
 uuid = { workspace = true }
 bmbp_rdbc_model = { path = "../bmbp_rdbc_model" }
+bmbp_rdbc_sql = { path = "../bmbp_rdbc_sql" }
+log = "0.4.21"

@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
 
-use chrono::{Duration, Utc};
-use chrono::format::Fixed::{TimezoneOffset, TimezoneOffsetColonZ};
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use tokio_postgres::Row;
 use uuid::Uuid;

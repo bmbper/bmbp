@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use salvo::{Depot, Request, Response, Scribe, Writer, writing::Json};
+use salvo::{Depot, Request, Response, Writer, writing::Json};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 

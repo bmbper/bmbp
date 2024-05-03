@@ -1,5 +1,4 @@
 use std::{collections::HashMap, sync::RwLock};
-use std::fmt::Debug;
 
 use crate::{RDBC_TREE_ROOT_NODE, RdbcTree};
 
