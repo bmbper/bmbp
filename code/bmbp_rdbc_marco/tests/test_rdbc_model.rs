@@ -4,6 +4,12 @@ use bmbp_rdbc_marco::rdbc_model;
 fn test_rdbc_model_table() {
     use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
     use serde::{Deserialize, Serialize};
+    use bmbp_app_common::BmbpResp;
+    use bmbp_app_common::PageVo;
+    use bmbp_app_common::HttpRespListVo;
+    use bmbp_rdbc_orm::RdbcORM;
+    use bmbp_app_common::BmbpError;
+    use bmbp_rdbc_orm::RdbcOrmRow;
     #[rdbc_model(table = RDBC_MODEL_TEST)]
     pub struct RdbcModel {
         pub name: String,
@@ -18,6 +24,13 @@ fn test_rdbc_model_table() {
 fn test_rdbc_model_empty() {
     use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
     use serde::{Deserialize, Serialize};
+    use bmbp_app_common::BmbpResp;
+    use bmbp_app_common::PageVo;
+    use bmbp_app_common::HttpRespListVo;
+    use bmbp_rdbc_orm::RdbcORM;
+    use bmbp_app_common::BmbpError;
+    use bmbp_rdbc_orm::RdbcOrmRow;
+
     #[rdbc_model]
     pub struct RdbcModel {
         name: String,

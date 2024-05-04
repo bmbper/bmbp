@@ -33,24 +33,78 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
         struct_field_vec.as_slice(),
     );
     /// 构建结构体-增删 改查 脚本
-    let struct_sql_script_token =
-        build_struct_sql_script_token(&struct_ident, struct_field_vec.as_slice());
+    let model_impl_sql_token =
+        build_struct_impl_script_token(&struct_ident, struct_field_vec.as_slice());
 
-    let model_dao_token = build_dao_token(&model_input_token, &struct_table_name);
-    let model_service_token = build_service_token(&model_input_token, &struct_table_name);
-    let model_curd_token = build_curd_token(&model_input_token, &struct_table_name);
+    /// 构建结构体-RdbcOrmRow的转换
+    let model_from_rdbc_orm_row_token =
+        build_struct_from_rdbc_orm_row_token(struct_ident, struct_field_vec.as_slice());
+
+    /// 构建结构体-orm 操作数据库
+    let model_orm_token = build_struct_orm_token(&struct_ident);
+
+    /// 构建结构体-orm 增删改查方法
+    let model_curd_token = build_struct_curd_token(struct_ident, struct_field_vec.as_slice());
+
+    /// 构建结构体-orm 增删改查方法
+    let model_valid_token = build_struct_valid_token(struct_ident, struct_field_vec.as_slice());
+
     token_vec.push(model_struct_token);
     token_vec.push(model_impl_get_set_token);
     token_vec.push(model_impl_orm_table_token);
-    token_vec.push(struct_sql_script_token);
-    token_vec.push(model_dao_token);
-    token_vec.push(model_service_token);
+    token_vec.push(model_impl_sql_token);
+    token_vec.push(model_from_rdbc_orm_row_token);
+    token_vec.push(model_orm_token);
     token_vec.push(model_curd_token);
+    token_vec.push(model_valid_token);
     let final_token = quote! {
        #(#token_vec)*
     };
     println!("最终输出{}", final_token.to_string());
     final_token.into()
+}
+
+/// 构建结构体-数据校验方法
+fn build_struct_valid_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+    quote! {
+        impl #struct_ident {
+            pub fn valid(&self) -> BmbpResp<()> {
+                Ok(())
+            }
+        }
+    }
+}
+
+fn build_struct_from_rdbc_orm_row_token(
+    struct_ident: &Ident,
+    struct_fields: &[Field],
+) -> TokenStream2 {
+    let mut field_set_value_vec = vec![];
+    for field in struct_fields {
+        if has_rdbc_attr(field, ATTRS_RDBC_SKIP) {
+            continue;
+        }
+        let field_ident = field.ident.as_ref().unwrap();
+        let field_name = field_ident.to_string();
+        let field_method = format_ident!("set_{}", field_ident);
+        let t_ = quote! {
+          if let Some(data) = row.get_data().get(#field_name) {
+              model.#field_method(Some(data.into()));
+          }
+        };
+        field_set_value_vec.push(t_);
+    }
+
+    let final_token = quote! {
+        impl From<RdbcOrmRow> for #struct_ident {
+            fn from(row: RdbcOrmRow) -> Self {
+                let mut model = #struct_ident::new();
+                #(#field_set_value_vec)*
+                model
+            }
+        }
+    };
+    final_token
 }
 
 fn build_struct_field_vec(
@@ -195,7 +249,7 @@ fn build_struct_impl_orm_table_token(
     token
 }
 
-fn build_struct_sql_script_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+fn build_struct_impl_script_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
     let insert_sql_token = build_struct_sql_script_insert_token(struct_fields);
     let update_sql_token = build_struct_sql_script_update_token(struct_fields);
     let sql_token = quote! {
@@ -221,7 +275,7 @@ fn build_struct_sql_script_token(struct_ident: &Ident, struct_fields: &[Field]) 
                 delete.eq_(Self::get_table_primary_key(), data_id);
                 delete
             }
-            pub fn build_enalbe_sql(data_id:&Option<String>) -> Update {
+            pub fn build_enable_sql(data_id:&Option<String>) -> Update {
                 let mut update = Update::new();
                 update.table(Self::get_table_name());
                 update.set("data_status", "1");
@@ -309,34 +363,177 @@ fn build_struct_sql_script_insert_token(struct_fields: &[Field]) -> TokenStream2
     }
 }
 
-fn build_dao_token(input: &DeriveInput, p1: &String) -> TokenStream2 {
-    let ident = &input.ident;
-    let script_ident = format_ident!("{}Dao", ident);
+fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
+    let orm_ident = format_ident!("{}Orm", struct_ident);
     let token = quote! {
-        pub struct #script_ident;
-        impl #script_ident {
-
+        pub struct #orm_ident;
+        impl #orm_ident {
+            pub async fn select_page_by_query(
+                page_no: &usize,
+                page_size: &usize,
+                query: &Query,
+            ) -> BmbpResp<PageVo<#struct_ident>> {
+                match RdbcORM
+                    .await
+                    .select_page_by_query::<#struct_ident>(page_no.clone(), page_size.clone(), &query)
+                    .await
+                {
+                    Ok(mut page) => {
+                        let mut page_vo = PageVo::new();
+                        page_vo.set_page_no(page.page_num().clone());
+                        page_vo.set_page_size(page.page_size().clone());
+                        page_vo.set_op_data(page.data_take());
+                        page_vo.set_row_total(page.total().clone());
+                        Ok(page_vo)
+                    }
+                    Err(e) => Err(BmbpError::service(e.get_msg().as_str())),
+                }
+            }
+                pub async fn select_list_by_query(query: &Query) -> BmbpResp<Option<Vec<#struct_ident>>> {
+                    match RdbcORM
+                        .await
+                        .select_list_by_query::<#struct_ident>(&query)
+                        .await
+                    {
+                        Ok(data) => Ok(data),
+                        Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
+                    }
+                }
+                pub async fn select_one_by_query(query: &Query) -> BmbpResp<Option<#struct_ident>> {
+                    match RdbcORM
+                        .await
+                        .select_one_by_query::<#struct_ident>(&query)
+                        .await
+                    {
+                        Ok(data) => Ok(data),
+                        Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
+                    }
+                }
+                pub async fn execute_insert(insert: &Insert) -> BmbpResp<usize> {
+                    match RdbcORM.await.execute_insert(insert).await {
+                        Ok(data) => Ok(data as usize),
+                        Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
+                    }
+                }
+                pub async fn execute_update(update: &Update) -> BmbpResp<usize> {
+                    match RdbcORM.await.execute_update(update).await {
+                        Ok(data) => Ok(data as usize),
+                        Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
+                    }
+                }
+                pub async fn execute_delete(delete: &Delete) -> BmbpResp<usize> {
+                    match RdbcORM.await.execute_delete(delete).await {
+                        Ok(data) => Ok(data as usize),
+                        Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
+                    }
+                }
         }
     };
     token
 }
-fn build_service_token(input: &DeriveInput, table_name: &String) -> TokenStream2 {
-    let ident = &input.ident;
-    let script_ident = format_ident!("{}Service", ident);
-    let token = quote! {
-        pub struct #script_ident;
-        impl #script_ident {
 
-        }
-    };
-    token
-}
-fn build_curd_token(input: &DeriveInput, table_name: &String) -> TokenStream2 {
-    let ident = &input.ident;
-    let script_ident = format_ident!("{}Curd", ident);
+fn build_struct_curd_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
     let token = quote! {
-        pub struct #script_ident;
-        impl #script_ident {
+        impl #struct_ident {
+            pub async fn find_one(&self) -> BmbpResp<Option<Self>> {
+                Ok(Some(self.clone()))
+            }
+            pub async fn save(&self) -> BmbpResp<Option<Self>> {
+                let model = self.find_one().await?;
+                if model.is_some() {
+                    self.update().await?;
+                } else {
+                    self.insert().await?;
+                }
+                self.find_one().await
+            }
+            pub async fn insert(&self) -> BmbpResp<usize> {
+                let insert = self.build_insert_sql();
+                Ok(0)
+            }
+            pub async fn update(&self) -> BmbpResp<usize> {
+                let insert = self.build_update_sql();
+                Ok(0)
+            }
+            pub async fn remove(&self) -> BmbpResp<usize> {
+                Ok(0)
+            }
+            pub async fn remove_logic(&self) -> BmbpResp<usize> {
+                Ok(0)
+            }
+            pub async fn enable(&self) -> BmbpResp<usize> {
+                Ok(0)
+            }
+            pub async fn disable(&self) -> BmbpResp<usize> {
+                Ok(0)
+            }
+            pub async fn find_page(page_no: Option<&usize>, page_size: Option<&usize>) -> BmbpResp<PageVo<Self>> {
+                Ok(PageVo::new())
+            }
+            pub async fn find_page_by_query(page_no: Option<&usize>, page_size: Option<&usize>,query:Query) -> BmbpResp<PageVo<Self>> {
+                Ok(PageVo::new())
+            }
+            pub async fn find_list() -> BmbpResp<Option<Vec<Self>>> {
+                Ok(None)
+            }
+            pub async fn find_list_by_query(query:&Query)-> BmbpResp<Option<Vec<Self>>> {
+                Ok(None)
+            }
+            pub async fn find_removed_page(page_no: Option<&usize>, page_size: Option<&usize>) -> BmbpResp<PageVo<Self>> {
+                Ok(PageVo::new())
+            }
+            pub async fn find_removed_page_by_query(page_no: Option<&usize>, page_size: Option<&usize>) -> BmbpResp<PageVo<Self>> {
+                Ok(PageVo::new())
+            }
+            pub async fn find_removed_list() -> BmbpResp<Option<Vec<Self>>> {
+                Ok(None)
+            }
+            pub async fn find_removed_list_by_query(query:&Query)-> BmbpResp<Option<Vec<Self>>> {
+                Ok(None)
+            }
+            pub async fn find_all_page(page_no: Option<&usize>, page_size: Option<&usize>) -> BmbpResp<PageVo<Self>> {
+                Ok(PageVo::new())
+            }
+            pub async fn find_all_page_by_query(page_no: Option<&usize>, page_size: Option<&usize>,query:Query) -> BmbpResp<PageVo<Self>> {
+                Ok(PageVo::new())
+            }
+            pub async fn find_all_list() -> BmbpResp<Option<Vec<Self>>> {
+                Ok(None)
+            }
+            pub async fn find_all_list_by_query(query:&Query)-> BmbpResp<Option<Vec<Self>>> {
+                Ok(None)
+            }
+            pub async fn find_list_by_id_slice(id: Option<&[String]>) -> BmbpResp<Option<Vec<Self>>> {
+                Ok(None)
+            }
+            pub async fn find_by_id(id: Option<&String>) -> BmbpResp<Option<Self>> {
+                Ok(None)
+            }
+            pub async fn remove_by_id(id: Option<&String>) -> BmbpResp<usize> {
+                Ok(0)
+            }
+            pub async fn remove_by_id_slice(id: &[String]) -> BmbpResp<usize> {
+                Ok(0)
+            }
+             pub async fn remove_logic_by_id(id: Option<&String>) -> BmbpResp<usize> {
+                Ok(0)
+            }
+            pub async fn remove_logic_by_id_slice(id: &[String]) -> BmbpResp<usize> {
+                Ok(0)
+            }
+            pub async fn enable_by_id(id: Option<String>) -> BmbpResp<usize> {
+                Ok(0)
+            }
+            pub async fn enable_by_id_slice(id: &[String]) -> BmbpResp<usize> {
+                Ok(0)
+            }
+            pub async fn disable_by_id(id: Option<String>) -> BmbpResp<usize> {
+                Ok(0)
+            }
+            pub async fn disable_by_id_slice(id: &[String]) -> BmbpResp<usize> {
+                Ok(0)
+            }
+
         }
     };
     token

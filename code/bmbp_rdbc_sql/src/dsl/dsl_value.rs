@@ -129,7 +129,6 @@ impl From<&Option<&u32>> for RdbcValue {
     }
 }
 
-
 impl From<i64> for RdbcValue {
     fn from(i: i64) -> RdbcValue {
         RdbcValue::BigInt(i)
@@ -247,5 +246,386 @@ impl Display for RdbcValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = self.get_string();
         write!(f, "{}", str)
+    }
+}
+
+impl From<&RdbcValue> for String {
+    fn from(value: &RdbcValue) -> Self {
+        value.get_string()
+    }
+}
+
+impl From<&RdbcValue> for bool {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Bool(s) => s.clone(),
+            RdbcValue::Int(s) => s.clone() > 0,
+            RdbcValue::BigInt(s) => s.clone() > 0,
+            RdbcValue::Float(s) => s.clone() > 0.0,
+            RdbcValue::BigFloat(s) => s.clone() > 0.0,
+            RdbcValue::String(s) => s.clone() != "",
+            RdbcValue::DateTime(s) => false,
+            RdbcValue::Null => false,
+            _ => false,
+        }
+    }
+}
+
+impl From<&RdbcValue> for i8 {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => s.clone() as i8,
+            RdbcValue::BigInt(s) => s.clone() as i8,
+            RdbcValue::Float(s) => s.clone() as i8,
+            RdbcValue::BigFloat(s) => s.clone() as i8,
+            _ => 0,
+        }
+    }
+}
+
+impl From<&RdbcValue> for i16 {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => s.clone() as i16,
+            RdbcValue::BigInt(s) => s.clone() as i16,
+            RdbcValue::Float(s) => s.clone() as i16,
+            RdbcValue::BigFloat(s) => s.clone() as i16,
+            _ => 0,
+        }
+    }
+}
+
+impl From<&RdbcValue> for i32 {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => s.clone() as i32,
+            RdbcValue::BigInt(s) => s.clone() as i32,
+            RdbcValue::Float(s) => s.clone() as i32,
+            RdbcValue::BigFloat(s) => s.clone() as i32,
+            _ => 0,
+        }
+    }
+}
+
+impl From<&RdbcValue> for i64 {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => s.clone() as i64,
+            RdbcValue::BigInt(s) => s.clone() as i64,
+            RdbcValue::Float(s) => s.clone() as i64,
+            RdbcValue::BigFloat(s) => s.clone() as i64,
+            _ => 0,
+        }
+    }
+}
+
+impl From<&RdbcValue> for i128 {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => s.clone() as i128,
+            RdbcValue::BigInt(s) => s.clone() as i128,
+            RdbcValue::Float(s) => s.clone() as i128,
+            RdbcValue::BigFloat(s) => s.clone() as i128,
+            _ => 0,
+        }
+    }
+}
+
+impl From<&RdbcValue> for isize {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => s.clone() as isize,
+            RdbcValue::BigInt(s) => s.clone() as isize,
+            RdbcValue::Float(s) => s.clone() as isize,
+            RdbcValue::BigFloat(s) => s.clone() as isize,
+            _ => 0,
+        }
+    }
+}
+
+impl From<&RdbcValue> for u8 {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => s.clone() as u8,
+            RdbcValue::BigInt(s) => s.clone() as u8,
+            RdbcValue::Float(s) => s.clone() as u8,
+            RdbcValue::BigFloat(s) => s.clone() as u8,
+            _ => 0,
+        }
+    }
+}
+
+impl From<&RdbcValue> for u16 {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => s.clone() as u16,
+            RdbcValue::BigInt(s) => s.clone() as u16,
+            RdbcValue::Float(s) => s.clone() as u16,
+            RdbcValue::BigFloat(s) => s.clone() as u16,
+            _ => 0,
+        }
+    }
+}
+
+impl From<&RdbcValue> for u32 {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => s.clone() as u32,
+            RdbcValue::BigInt(s) => s.clone() as u32,
+            RdbcValue::Float(s) => s.clone() as u32,
+            RdbcValue::BigFloat(s) => s.clone() as u32,
+            _ => 0,
+        }
+    }
+}
+
+impl From<&RdbcValue> for u64 {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => s.clone() as u64,
+            RdbcValue::BigInt(s) => s.clone() as u64,
+            RdbcValue::Float(s) => s.clone() as u64,
+            RdbcValue::BigFloat(s) => s.clone() as u64,
+            _ => 0,
+        }
+    }
+}
+
+impl From<&RdbcValue> for u128 {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => s.clone() as u128,
+            RdbcValue::BigInt(s) => s.clone() as u128,
+            RdbcValue::Float(s) => s.clone() as u128,
+            RdbcValue::BigFloat(s) => s.clone() as u128,
+            _ => 0,
+        }
+    }
+}
+
+impl From<&RdbcValue> for usize {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => s.clone() as usize,
+            RdbcValue::BigInt(s) => s.clone() as usize,
+            RdbcValue::Float(s) => s.clone() as usize,
+            RdbcValue::BigFloat(s) => s.clone() as usize,
+            _ => 0,
+        }
+    }
+}
+
+impl From<&RdbcValue> for f32 {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => s.clone() as f32,
+            RdbcValue::BigInt(s) => s.clone() as f32,
+            RdbcValue::Float(s) => s.clone() as f32,
+            RdbcValue::BigFloat(s) => s.clone() as f32,
+            _ => 0.0,
+        }
+    }
+}
+
+impl From<&RdbcValue> for f64 {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => s.clone() as f64,
+            RdbcValue::BigInt(s) => s.clone() as f64,
+            RdbcValue::Float(s) => s.clone() as f64,
+            RdbcValue::BigFloat(s) => s.clone() as f64,
+            _ => 0.0,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<i8> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => Some(s.clone() as i8),
+            RdbcValue::BigInt(s) => Some(s.clone() as i8),
+            RdbcValue::Float(s) => Some(s.clone() as i8),
+            RdbcValue::BigFloat(s) => Some(s.clone() as i8),
+            _ => None,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<i16> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => Some(s.clone() as i16),
+            RdbcValue::BigInt(s) => Some(s.clone() as i16),
+            RdbcValue::Float(s) => Some(s.clone() as i16),
+            RdbcValue::BigFloat(s) => Some(s.clone() as i16),
+            _ => None,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<i32> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => Some(s.clone() as i32),
+            RdbcValue::BigInt(s) => Some(s.clone() as i32),
+            RdbcValue::Float(s) => Some(s.clone() as i32),
+            RdbcValue::BigFloat(s) => Some(s.clone() as i32),
+            _ => None,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<i64> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => Some(s.clone() as i64),
+            RdbcValue::BigInt(s) => Some(s.clone() as i64),
+            RdbcValue::Float(s) => Some(s.clone() as i64),
+            RdbcValue::BigFloat(s) => Some(s.clone() as i64),
+            _ => None,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<i128> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => Some(s.clone() as i128),
+            RdbcValue::BigInt(s) => Some(s.clone() as i128),
+            RdbcValue::Float(s) => Some(s.clone() as i128),
+            RdbcValue::BigFloat(s) => Some(s.clone() as i128),
+            _ => None,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<isize> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => Some(s.clone() as isize),
+            RdbcValue::BigInt(s) => Some(s.clone() as isize),
+            RdbcValue::Float(s) => Some(s.clone() as isize),
+            RdbcValue::BigFloat(s) => Some(s.clone() as isize),
+            _ => None,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<u8> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => Some(s.clone() as u8),
+            RdbcValue::BigInt(s) => Some(s.clone() as u8),
+            RdbcValue::Float(s) => Some(s.clone() as u8),
+            RdbcValue::BigFloat(s) => Some(s.clone() as u8),
+            _ => None,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<u16> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => Some(s.clone() as u16),
+            RdbcValue::BigInt(s) => Some(s.clone() as u16),
+            RdbcValue::Float(s) => Some(s.clone() as u16),
+            RdbcValue::BigFloat(s) => Some(s.clone() as u16),
+            _ => None,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<u32> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => Some(s.clone() as u32),
+            RdbcValue::BigInt(s) => Some(s.clone() as u32),
+            RdbcValue::Float(s) => Some(s.clone() as u32),
+            RdbcValue::BigFloat(s) => Some(s.clone() as u32),
+            _ => None,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<u64> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => Some(s.clone() as u64),
+            RdbcValue::BigInt(s) => Some(s.clone() as u64),
+            RdbcValue::Float(s) => Some(s.clone() as u64),
+            RdbcValue::BigFloat(s) => Some(s.clone() as u64),
+            _ => None,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<u128> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => Some(s.clone() as u128),
+            RdbcValue::BigInt(s) => Some(s.clone() as u128),
+            RdbcValue::Float(s) => Some(s.clone() as u128),
+            RdbcValue::BigFloat(s) => Some(s.clone() as u128),
+            _ => None,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<usize> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => Some(s.clone() as usize),
+            RdbcValue::BigInt(s) => Some(s.clone() as usize),
+            RdbcValue::Float(s) => Some(s.clone() as usize),
+            RdbcValue::BigFloat(s) => Some(s.clone() as usize),
+            _ => None,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<f32> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => Some(s.clone() as f32),
+            RdbcValue::BigInt(s) => Some(s.clone() as f32),
+            RdbcValue::Float(s) => Some(s.clone() as f32),
+            RdbcValue::BigFloat(s) => Some(s.clone() as f32),
+            _ => None,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<f64> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Int(s) => Some(s.clone() as f64),
+            RdbcValue::BigInt(s) => Some(s.clone() as f64),
+            RdbcValue::Float(s) => Some(s.clone() as f64),
+            RdbcValue::BigFloat(s) => Some(s.clone() as f64),
+            _ => None,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<bool> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::Bool(s) => Some(s.clone()),
+            RdbcValue::Int(s) => Some(s.clone() != 0),
+            RdbcValue::BigInt(s) => Some(s.clone() != 0),
+            RdbcValue::Float(s) => Some(s.clone() != 0.0),
+            RdbcValue::BigFloat(s) => Some(s.clone() != 0.0),
+            RdbcValue::String(s) => Some(!s.clone().is_empty()),
+            _ => None,
+        }
+    }
+}
+
+impl From<&RdbcValue> for Option<String> {
+    fn from(value: &RdbcValue) -> Self {
+        match value {
+            RdbcValue::String(s) => Some(s.clone()),
+            _ => None,
+        }
     }
 }
