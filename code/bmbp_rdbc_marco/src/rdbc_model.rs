@@ -2,7 +2,7 @@ use proc_macro::{TokenStream, TokenTree};
 
 use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::{format_ident, quote, ToTokens};
-use syn::{DeriveInput, Field, parse_macro_input};
+use syn::{parse_macro_input, DeriveInput, Field};
 
 use crate::types::ATTRS_RDBC_SKIP;
 use crate::utils::{
@@ -33,7 +33,8 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
         struct_field_vec.as_slice(),
     );
     /// 构建结构体-增删 改查 脚本
-    let struct_sql_script_token = build_struct_sql_script_token(&struct_ident);
+    let struct_sql_script_token =
+        build_struct_sql_script_token(&struct_ident, struct_field_vec.as_slice());
 
     let model_dao_token = build_dao_token(&model_input_token, &struct_table_name);
     let model_service_token = build_service_token(&model_input_token, &struct_table_name);
@@ -48,7 +49,7 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     let final_token = quote! {
        #(#token_vec)*
     };
-    println!("最终输出{:?}", final_token.to_string());
+    println!("最终输出{}", final_token.to_string());
     final_token.into()
 }
 
@@ -194,59 +195,120 @@ fn build_struct_impl_orm_table_token(
     token
 }
 
-fn build_struct_sql_script_token(struct_ident: &Ident) -> TokenStream2 {
-    let script_token = quote! {
+fn build_struct_sql_script_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+    let insert_sql_token = build_struct_sql_script_insert_token(struct_fields);
+    let update_sql_token = build_struct_sql_script_update_token(struct_fields);
+    let sql_token = quote! {
         impl #struct_ident {
             pub fn build_query_sql() -> Query {
                 let mut query = Query::new();
                 query.table(Self::get_table_name());
                 query.select_vec(Self::get_table_columns());
+                query.order_by("data_sort", true);
+                query.order_by("data_update_time", false);
                 query
             }
             pub fn build_info_sql(data_id:&Option<String>) -> Query {
                 let mut query = Query::new();
                 query.table(Self::get_table_name());
                 query.select_vec(Self::get_table_columns());
+                query.eq_(Self::get_table_primary_key(), data_id);
                 query
             }
             pub fn build_remove_sql(data_id:&Option<String>) -> Delete {
                 let mut delete = Delete::new();
                 delete.table(Self::get_table_name());
+                delete.eq_(Self::get_table_primary_key(), data_id);
                 delete
             }
             pub fn build_enalbe_sql(data_id:&Option<String>) -> Update {
                 let mut update = Update::new();
                 update.table(Self::get_table_name());
+                update.set("data_status", "1");
+                update.eq_(Self::get_table_primary_key(), data_id);
                 update
             }
             pub fn build_disable_sql(data_id:&Option<String>) -> Update {
                 let mut update = Update::new();
                 update.table(Self::get_table_name());
+                update.set("data_status", "0");
+                update.eq_(Self::get_table_primary_key(), data_id);
                 update
             }
-            pub fn build_update_status_sql(data_id:&Option<String>, status: i32 ) -> Update {
+            pub fn build_update_status_sql(data_id:&Option<String>, status: String ) -> Update {
                 let mut update = Update::new();
                 update.table(Self::get_table_name());
+                update.set("data_status", status);
+                update.eq_(Self::get_table_primary_key(), data_id);
                 update
             }
-            pub fn build_update_flag_sql(data_id:&Option<String>, status: i32) -> Update {
-               let mut update = Update::new();
-                update.table(Self::get_table_name());
-                update
-            }
-            pub fn build_insert_sql(&self) -> Insert {
-                let insert = Insert::new();
-                insert
-            }
-            pub fn build_update_sql(&self) -> Update {
+            pub fn build_update_flag_sql(data_id:&Option<String>, flag: String) -> Update {
                 let mut update = Update::new();
                 update.table(Self::get_table_name());
+                update.set("data_flag", flag);
+                update.eq_(Self::get_table_primary_key(), data_id);
                 update
             }
+            #insert_sql_token
+            #update_sql_token
         }
     };
-    script_token
+    sql_token
 }
+
+fn build_struct_sql_script_update_token(struct_fields: &[Field]) -> TokenStream2 {
+    let mut update_field_vec = vec![];
+    for field in struct_fields {
+        if has_rdbc_attr(field, ATTRS_RDBC_SKIP) {
+            continue;
+        }
+        let field_ident = field.ident.as_ref().unwrap();
+        let field_name = field_ident.to_string();
+        let field_method = format_ident!("get_{}", field_ident);
+        let insert_item = quote! {
+            if let Some(value) = self.#field_method() {
+                update.set(#field_name, value);
+            }
+        };
+        update_field_vec.push(insert_item);
+    }
+    quote! {
+        pub fn build_update_sql(&self) -> Update {
+                let mut update = Update::new();
+                update.table(Self::get_table_name());
+                #(#update_field_vec)*
+                update.eq_(Self::get_table_primary_key(),self.get_data_id());
+                update
+            }
+    }
+}
+
+fn build_struct_sql_script_insert_token(struct_fields: &[Field]) -> TokenStream2 {
+    let mut insert_field_vec = vec![];
+    for field in struct_fields {
+        if has_rdbc_attr(field, ATTRS_RDBC_SKIP) {
+            continue;
+        }
+        let field_ident = field.ident.as_ref().unwrap();
+        let field_name = field_ident.to_string();
+        let field_method = format_ident!("get_{}", field_ident);
+        let insert_item = quote! {
+            if let Some(value) = self.#field_method() {
+                insert.insert_column_value(#field_name, value);
+            }
+        };
+        insert_field_vec.push(insert_item);
+    }
+    quote! {
+        pub fn build_insert_sql(&self) -> Insert {
+                let mut insert = Insert::new();
+                insert.table(Self::get_table_name());
+                #(#insert_field_vec)*
+                insert
+            }
+    }
+}
+
 fn build_dao_token(input: &DeriveInput, p1: &String) -> TokenStream2 {
     let ident = &input.ident;
     let script_ident = format_ident!("{}Dao", ident);

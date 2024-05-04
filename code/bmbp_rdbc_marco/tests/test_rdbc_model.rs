@@ -1,15 +1,9 @@
 use bmbp_rdbc_marco::rdbc_model;
-use bmbp_rdbc_model::RdbcModel;
 
 #[test]
 fn test_rdbc_model_table() {
-    use bmbp_rdbc_sql::Delete;
-    use bmbp_rdbc_sql::Insert;
-    use bmbp_rdbc_sql::Query;
-    use bmbp_rdbc_sql::RdbcTable;
-    use bmbp_rdbc_sql::Update;
-    use serde::Deserialize;
-    use serde::Serialize;
+    use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
+    use serde::{Deserialize, Serialize};
     #[rdbc_model(table = RDBC_MODEL_TEST)]
     pub struct RdbcModel {
         pub name: String,
@@ -22,13 +16,8 @@ fn test_rdbc_model_table() {
 }
 #[test]
 fn test_rdbc_model_empty() {
-    use bmbp_rdbc_sql::Delete;
-    use bmbp_rdbc_sql::Insert;
-    use bmbp_rdbc_sql::Query;
-    use bmbp_rdbc_sql::RdbcTable;
-    use bmbp_rdbc_sql::Update;
-    use serde::Deserialize;
-    use serde::Serialize;
+    use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
+    use serde::{Deserialize, Serialize};
     #[rdbc_model]
     pub struct RdbcModel {
         name: String,

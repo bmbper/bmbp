@@ -38,11 +38,98 @@ impl From<i32> for RdbcValue {
         RdbcValue::BigInt(i as i64)
     }
 }
+
+impl From<&i32> for RdbcValue {
+    fn from(i: &i32) -> RdbcValue {
+        RdbcValue::BigInt(i.clone() as i64)
+    }
+}
+
+impl From<Option<i32>> for RdbcValue {
+    fn from(s: Option<i32>) -> RdbcValue {
+        match s {
+            Some(s) => RdbcValue::BigInt(s as i64),
+            None => RdbcValue::Null,
+        }
+    }
+}
+
+impl From<Option<&i32>> for RdbcValue {
+    fn from(i: Option<&i32>) -> RdbcValue {
+        match i {
+            Some(s) => RdbcValue::BigInt(s.clone() as i64),
+            None => RdbcValue::Null,
+        }
+    }
+}
+
+impl From<&Option<i32>> for RdbcValue {
+    fn from(i: &Option<i32>) -> RdbcValue {
+        match i {
+            Some(s) => RdbcValue::BigInt(s.clone() as i64),
+            None => RdbcValue::Null,
+        }
+    }
+}
+
+impl From<&Option<&i32>> for RdbcValue {
+    fn from(i: &Option<&i32>) -> RdbcValue {
+        match i {
+            Some(s) => RdbcValue::BigInt(*s.clone() as i64),
+            None => RdbcValue::Null,
+        }
+    }
+}
+
 impl From<u32> for RdbcValue {
     fn from(i: u32) -> RdbcValue {
         RdbcValue::BigInt(i as i64)
     }
 }
+
+impl From<Option<u32>> for RdbcValue {
+    fn from(s: Option<u32>) -> RdbcValue {
+        match s {
+            Some(s) => RdbcValue::BigInt(s as i64),
+            None => RdbcValue::Null,
+        }
+    }
+}
+
+impl From<&Option<u32>> for RdbcValue {
+    fn from(i: &Option<u32>) -> RdbcValue {
+        match i {
+            Some(s) => RdbcValue::BigInt(s.clone() as i64),
+            None => RdbcValue::Null,
+        }
+    }
+}
+
+impl From<&u32> for RdbcValue {
+    fn from(i: &u32) -> RdbcValue {
+        RdbcValue::BigInt(i.clone() as i64)
+    }
+}
+
+impl From<Option<&u32>> for RdbcValue {
+    fn from(i: Option<&u32>) -> RdbcValue {
+        match i {
+            Some(s) => RdbcValue::BigInt(s.clone() as i64),
+            None => RdbcValue::Null,
+        }
+    }
+}
+
+impl From<&Option<&u32>> for RdbcValue {
+    fn from(i: &Option<&u32>) -> RdbcValue {
+        match i {
+            Some(s) => RdbcValue::BigInt(*s.clone() as i64),
+            None => RdbcValue::Null,
+        }
+    }
+}
+
+
 impl From<i64> for RdbcValue {
     fn from(i: i64) -> RdbcValue {
         RdbcValue::BigInt(i)
@@ -109,6 +196,14 @@ impl From<Option<String>> for RdbcValue {
     }
 }
 
+impl From<&Option<String>> for RdbcValue {
+    fn from(s: &Option<String>) -> RdbcValue {
+        match s {
+            Some(s) => RdbcValue::String(s.to_string()),
+            None => RdbcValue::Null,
+        }
+    }
+}
 impl From<&str> for RdbcValue {
     fn from(s: &str) -> RdbcValue {
         RdbcValue::String(s.to_string())
