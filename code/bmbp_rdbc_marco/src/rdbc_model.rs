@@ -19,7 +19,7 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     let struct_table_name = build_struct_table_name(&meta_token, struct_ident);
     let struct_field_vec = build_struct_field_vec(&base_input_token, &model_input_token);
 
-    let mut token_vec: Vec<TokenStream2> = vec![];
+    let mut model_struct_macro_token: Vec<TokenStream2> = vec![];
 
     // 构建结构体-增加默认字段
     let model_struct_token = build_struct_model_token(struct_ident, struct_field_vec.as_slice());
@@ -49,16 +49,23 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     /// 构建结构体-orm 增删改查方法
     let model_valid_token = build_struct_valid_token(struct_ident, struct_field_vec.as_slice());
 
-    token_vec.push(model_struct_token);
-    token_vec.push(model_impl_get_set_token);
-    token_vec.push(model_impl_orm_table_token);
-    token_vec.push(model_impl_sql_token);
-    token_vec.push(model_from_rdbc_orm_row_token);
-    token_vec.push(model_orm_token);
-    token_vec.push(model_curd_token);
-    token_vec.push(model_valid_token);
+    /// 构建结构体-handler-web接口方法
+    let model_handler_token = build_struct_handler_token(struct_ident, struct_field_vec.as_slice());
+    /// 构建结构体-router-路由方法
+    let model_router_token = build_struct_router_token(struct_ident, struct_field_vec.as_slice());
+
+    model_struct_macro_token.push(model_struct_token);
+    model_struct_macro_token.push(model_impl_get_set_token);
+    model_struct_macro_token.push(model_impl_orm_table_token);
+    model_struct_macro_token.push(model_impl_sql_token);
+    model_struct_macro_token.push(model_from_rdbc_orm_row_token);
+    model_struct_macro_token.push(model_orm_token);
+    model_struct_macro_token.push(model_curd_token);
+    model_struct_macro_token.push(model_valid_token);
+    model_struct_macro_token.push(model_handler_token);
+    model_struct_macro_token.push(model_router_token);
     let final_token = quote! {
-       #(#token_vec)*
+       #(#model_struct_macro_token)*
     };
     println!("最终输出{}", final_token.to_string());
     final_token.into()
@@ -130,7 +137,7 @@ fn build_struct_table_name(meta_token: &TokenStream, struct_ident: &Ident) -> St
     if model_table_name.is_empty() {
         model_table_name = struct_ident.to_string();
     }
-    model_table_name = camel_to_snake(model_table_name);
+    model_table_name = camel_to_snake(model_table_name.to_lowercase());
     model_table_name
 }
 
@@ -602,4 +609,12 @@ fn get_table_name_by_meta(meta_token: &TokenStream) -> String {
         "#[rdbc_model(table = TABLE)]",
         "#[rdbc_model(table=\"TABLE\")]"
     );
+}
+
+fn build_struct_router_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+    quote! {}
+}
+
+fn build_struct_handler_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+    quote! {}
 }

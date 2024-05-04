@@ -1,10 +1,9 @@
+use bmbp_rdbc_marco::rdbc_model;
 use serde::{Deserialize, Serialize};
 
 use crate::app::model::types::RbacAppType;
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
+#[rdbc_model]
 pub struct BmbpRbacApp {
     // 应用编码
     app_code: Option<String>,
