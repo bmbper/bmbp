@@ -14,18 +14,28 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     let base_model_token_stream = build_base_struct_model();
     let base_input_token = parse_macro_input!(base_model_token_stream as DeriveInput);
     let model_input_token = parse_macro_input!(model_token as DeriveInput);
-    /// 表名称
+    // 表名称
     let struct_ident = &model_input_token.ident;
     let struct_table_name = build_struct_table_name(&meta_token, struct_ident);
     let struct_field_vec = build_struct_field_vec(&base_input_token, &model_input_token);
 
     let mut model_struct_macro_token: Vec<TokenStream2> = vec![];
 
+    //构建查询结构体
+    // 构建查询结构体-属性
+    let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
+    let model_struct_query_token =
+        build_struct_query_token(&struct_query_ident, struct_field_vec.as_slice());
+    model_struct_macro_token.push(model_struct_query_token);
+    let mode_struct_query_impl_token =
+        build_struct_query_impl_token(&struct_query_ident, struct_field_vec.as_slice());
+    model_struct_macro_token.push(mode_struct_query_impl_token);
     // 构建结构体-增加默认字段
     let model_struct_token = build_struct_model_token(struct_ident, struct_field_vec.as_slice());
     // 构建结构体-实现属性方法
     let model_impl_get_set_token =
         build_struct_impl_get_set_token(struct_ident, struct_field_vec.as_slice());
+
     // 构建结构体-获取表名称、获取字段的方法
     let model_impl_orm_table_token = build_struct_impl_orm_table_token(
         struct_ident,
@@ -69,6 +79,25 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     };
     println!("最终输出{}", final_token.to_string());
     final_token.into()
+}
+
+fn build_struct_query_token(struct_query_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+    quote! {
+        #[derive(Default, Debug, Clone, Serialize, Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        #[serde(default)]
+        pub struct #struct_query_ident {
+        }
+    }
+}
+fn build_struct_query_impl_token(
+    struct_query_ident: &Ident,
+    struct_fields: &[Field],
+) -> TokenStream2 {
+    quote! {
+         impl #struct_query_ident {
+        }
+    }
 }
 
 /// 构建结构体-数据校验方法
@@ -440,8 +469,46 @@ fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
 }
 
 fn build_struct_curd_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+    let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
     let token = quote! {
         impl #struct_ident {
+            pub async fn find_page(page_params: BmbpPageParam<#struct_query_ident>) -> BmbpResp<PageVo<Self>> {
+                let mut query = #struct_ident::build_query_sql();
+                query.eq_("data_flag","0");
+                info!("find_page:{:?}", page_params);
+                Ok(PageVo::new())
+            }
+            pub async fn find_all_page(page_params: BmbpPageParam<#struct_query_ident>) -> BmbpResp<PageVo<Self>> {
+                let mut query = #struct_ident::build_query_sql();
+                info!("find_page:{:?}", page_params);
+                Ok(PageVo::new())
+            }
+            pub async fn find_removed_page(page_params: BmbpPageParam<#struct_query_ident>) -> BmbpResp<PageVo<Self>> {
+                let mut query = #struct_ident::build_query_sql();
+                query.eq_("data_flag","-1");
+                info!("find_page:{:?}", page_params);
+                Ok(PageVo::new())
+            }
+            pub async fn find_page_by_query(page_no: Option<&usize>, page_size: Option<&usize>,query:Query) -> BmbpResp<PageVo<Self>> {
+                Ok(PageVo::new())
+            }
+
+            pub async fn find_list(query_vo: #struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
+                Ok(None)
+            }
+            pub async fn find_all_list(query_vo:#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
+                Ok(None)
+            }
+            pub async fn find_removed_list(query_vo:#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
+                Ok(None)
+            }
+            pub async fn find_list_by_query(query:&Query)-> BmbpResp<Option<Vec<Self>>> {
+                Ok(None)
+            }
+            pub async fn find_by_id(id: Option<&String>) -> BmbpResp<Option<Self>> {
+                Ok(None)
+            }
+
             pub async fn find_one(&self) -> BmbpResp<Option<Self>> {
                 Ok(Some(self.clone()))
             }
@@ -474,48 +541,8 @@ fn build_struct_curd_token(struct_ident: &Ident, struct_fields: &[Field]) -> Tok
             pub async fn disable(&self) -> BmbpResp<usize> {
                 Ok(0)
             }
-            pub async fn find_page(page_no: Option<&usize>, page_size: Option<&usize>) -> BmbpResp<PageVo<Self>> {
-                Ok(PageVo::new())
-            }
-            pub async fn find_page_by_query(page_no: Option<&usize>, page_size: Option<&usize>,query:Query) -> BmbpResp<PageVo<Self>> {
-                Ok(PageVo::new())
-            }
-            pub async fn find_list() -> BmbpResp<Option<Vec<Self>>> {
-                Ok(None)
-            }
-            pub async fn find_list_by_query(query:&Query)-> BmbpResp<Option<Vec<Self>>> {
-                Ok(None)
-            }
-            pub async fn find_removed_page(page_no: Option<&usize>, page_size: Option<&usize>) -> BmbpResp<PageVo<Self>> {
-                Ok(PageVo::new())
-            }
-            pub async fn find_removed_page_by_query(page_no: Option<&usize>, page_size: Option<&usize>) -> BmbpResp<PageVo<Self>> {
-                Ok(PageVo::new())
-            }
-            pub async fn find_removed_list() -> BmbpResp<Option<Vec<Self>>> {
-                Ok(None)
-            }
-            pub async fn find_removed_list_by_query(query:&Query)-> BmbpResp<Option<Vec<Self>>> {
-                Ok(None)
-            }
-            pub async fn find_all_page(page_no: Option<&usize>, page_size: Option<&usize>) -> BmbpResp<PageVo<Self>> {
-                Ok(PageVo::new())
-            }
-            pub async fn find_all_page_by_query(page_no: Option<&usize>, page_size: Option<&usize>,query:Query) -> BmbpResp<PageVo<Self>> {
-                Ok(PageVo::new())
-            }
-            pub async fn find_all_list() -> BmbpResp<Option<Vec<Self>>> {
-                Ok(None)
-            }
-            pub async fn find_all_list_by_query(query:&Query)-> BmbpResp<Option<Vec<Self>>> {
-                Ok(None)
-            }
-            pub async fn find_list_by_id_slice(id: Option<&[String]>) -> BmbpResp<Option<Vec<Self>>> {
-                Ok(None)
-            }
-            pub async fn find_by_id(id: Option<&String>) -> BmbpResp<Option<Self>> {
-                Ok(None)
-            }
+
+
             pub async fn remove_by_id(id: Option<&String>) -> BmbpResp<usize> {
                 Ok(0)
             }
@@ -611,10 +638,172 @@ fn get_table_name_by_meta(meta_token: &TokenStream) -> String {
     );
 }
 
-fn build_struct_router_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
-    quote! {}
+fn build_struct_handler_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+    let struct_name = camel_to_snake(struct_ident.to_string()).to_lowercase();
+    let find_all_page_name = format_ident!("{}_find_all_page", struct_name);
+    let find_removed_page_name = format_ident!("{}_find_removed_page", struct_name);
+    let find_page_name = format_ident!("{}_find_page", struct_name);
+    let find_all_list_name = format_ident!("{}_find_all_list", struct_name);
+    let find_removed_list_name = format_ident!("{}_find_removed_list", struct_name);
+    let find_list_name = format_ident!("{}_find_list", struct_name);
+    let find_info_name = format_ident!("{}_find_info", struct_name);
+    let save_name = format_ident!("{}_save", struct_name);
+    let save_batch_name = format_ident!("{}_save_batch", struct_name);
+    let insert_name = format_ident!("{}_insert", struct_name);
+    let insert_batch_name = format_ident!("{}_insert_batch", struct_name);
+    let update_name = format_ident!("{}_update", struct_name);
+    let update_batch_name = format_ident!("{}_update_batch", struct_name);
+    let remove_name = format_ident!("{}_remove", struct_name);
+    let remove_batch_name = format_ident!("{}_remove_batch", struct_name);
+    let remove_logic_name = format_ident!("{}_remove_logic", struct_name);
+    let remove_logic_batch_name = format_ident!("{}_remove_logic_batch", struct_name);
+    let enable_name = format_ident!("{}_enable", struct_name);
+    let disable_name = format_ident!("{}_disable", struct_name);
+
+    let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
+    quote! {
+        #[handler]
+        pub async fn #find_all_page_name(req: &mut Request, resp: &mut Response) -> HttpRespPageVo<#struct_ident> {
+            let mut page_query_params = req.parse_json::<BmbpPageParam<#struct_query_ident>>().await?;
+            let page_vo = #struct_ident::find_all_page(page_query_params).await?;
+            Ok(RespVo::ok_find_data(page_vo))
+        }
+
+        #[handler]
+        pub async fn #find_removed_page_name(req: &mut Request, resp: &mut Response) -> HttpRespPageVo<#struct_ident> {
+            let mut page_query_params = req.parse_json::<BmbpPageParam<#struct_query_ident>>().await?;
+            let page_vo = #struct_ident::find_removed_page(page_query_params).await?;
+            Ok(RespVo::ok_find_data(page_vo))
+        }
+
+        #[handler]
+        pub async fn #find_page_name(req: &mut Request, resp: &mut Response) -> HttpRespPageVo<#struct_ident> {
+            let mut page_query_params = req.parse_json::<BmbpPageParam<#struct_query_ident>>().await?;
+            let page_vo = #struct_ident::find_removed_page(page_query_params).await?;
+            Ok(RespVo::ok_find_data(page_vo))
+        }
+
+        #[handler]
+        pub async fn #find_all_list_name(req: &mut Request, resp: &mut Response, ) -> HttpRespListVo<#struct_ident> {
+            let mut query_params = req.parse_json::<#struct_query_ident>().await?;
+            let model_vo = #struct_ident::find_all_list(query_params).await?;
+            Ok(RespVo::ok_find_option(model_vo))
+        }
+
+        #[handler]
+        pub async fn #find_removed_list_name(req: &mut Request, resp: &mut Response, ) -> HttpRespListVo<#struct_ident> {
+            let mut query_params = req.parse_json::<#struct_query_ident>().await?;
+            let model_vo = #struct_ident::find_removed_list(query_params).await?;
+            Ok(RespVo::ok_find_option(model_vo))
+        }
+
+        #[handler]
+        pub async fn #find_list_name(req: &mut Request, resp: &mut Response, ) -> HttpRespListVo<#struct_ident> {
+             let mut query_params = req.parse_json::<#struct_query_ident>().await?;
+            let model_vo = #struct_ident::find_list(query_params).await?;
+            Ok(RespVo::ok_find_option(model_vo))
+        }
+
+        #[handler]
+        pub async fn #find_info_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<#struct_ident> {
+              Ok(RespVo::ok_find_option(None))
+        }
+        #[handler]
+        pub async fn #save_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<#struct_ident> {
+            Ok(RespVo::ok_save_option(None))
+        }
+        #[handler]
+        pub async fn #save_batch_name(req: &Request, resp: &mut Response, ) ->HttpRespListVo<#struct_ident>  {
+             Ok(RespVo::ok_save_option(None))
+        }
+        #[handler]
+        pub async fn #insert_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<#struct_ident> {
+            Ok(RespVo::ok_save_option(None))
+        }
+        #[handler]
+        pub async fn #insert_batch_name(req: &Request, resp: &mut Response, ) -> HttpRespListVo<#struct_ident> {
+             Ok(RespVo::ok_save_option(None))
+        }
+        #[handler]
+        pub async fn #update_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<#struct_ident> {
+             Ok(RespVo::ok_save_option(None))
+        }
+        #[handler]
+        pub async fn #update_batch_name(req: &Request, resp: &mut Response, ) -> HttpRespListVo<#struct_ident> {
+             Ok(RespVo::ok_save_option(None))
+        }
+        #[handler]
+        pub async fn #remove_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<usize> {
+             Ok(RespVo::ok_remove_option(None))
+        }
+        #[handler]
+        pub async fn #remove_batch_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<usize> {
+             Ok(RespVo::ok_remove_option(None))
+        }
+        #[handler]
+        pub async fn #remove_logic_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<usize> {
+             Ok(RespVo::ok_remove_option(None))
+        }
+        #[handler]
+        pub async fn #remove_logic_batch_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<usize> {
+              Ok(RespVo::ok_remove_option(None))
+        }
+        #[handler]
+        pub async fn #enable_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<usize> {
+              Ok(RespVo::ok_enable_option(None))
+        }
+        #[handler]
+        pub async fn #disable_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<usize> {
+             Ok(RespVo::ok_disable_option(None))
+        }
+    }
 }
 
-fn build_struct_handler_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
-    quote! {}
+fn build_struct_router_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+    let struct_name = camel_to_snake(struct_ident.to_string()).to_lowercase();
+    let find_all_page_name = format_ident!("{}_find_all_page", struct_name);
+    let find_removed_page_name = format_ident!("{}_find_removed_page", struct_name);
+    let find_page_name = format_ident!("{}_find_page", struct_name);
+    let find_all_list_name = format_ident!("{}_find_all_list", struct_name);
+    let find_removed_list_name = format_ident!("{}_find_removed_list", struct_name);
+    let find_list_name = format_ident!("{}_find_list", struct_name);
+    let find_info_name = format_ident!("{}_find_info", struct_name);
+    let save_name = format_ident!("{}_save", struct_name);
+    let save_batch_name = format_ident!("{}_save_batch", struct_name);
+    let insert_name = format_ident!("{}_insert", struct_name);
+    let insert_batch_name = format_ident!("{}_insert_batch", struct_name);
+    let update_name = format_ident!("{}_update", struct_name);
+    let update_batch_name = format_ident!("{}_update_batch", struct_name);
+    let remove_name = format_ident!("{}_remove", struct_name);
+    let remove_batch_name = format_ident!("{}_remove_batch", struct_name);
+    let remove_logic_name = format_ident!("{}_remove_logic", struct_name);
+    let remove_logic_batch_name = format_ident!("{}_remove_logic_batch", struct_name);
+    let enable_name = format_ident!("{}_enable", struct_name);
+    let disable_name = format_ident!("{}_disable", struct_name);
+    quote! {
+        impl #struct_ident {
+            pub fn build_router() -> Router {
+               Router::new()
+                .push(Router::with_path("/find/all/page").post(#find_all_page_name))
+                .push(Router::with_path("/find/removed/page").post(#find_removed_page_name))
+                .push(Router::with_path("/find/page").post(#find_page_name))
+                .push(Router::with_path("/find/all/list").post(#find_all_list_name))
+                .push(Router::with_path("/find/removed/list").post(#find_removed_list_name))
+                .push(Router::with_path("/find/list").post(#find_list_name))
+                .push(Router::with_path("/find/info/id/<dataId>").post(#find_info_name))
+                .push(Router::with_path("/save").post(#save_name))
+                .push(Router::with_path("/save/batch").post(#save_batch_name))
+                .push(Router::with_path("/insert").post(#insert_name))
+                .push(Router::with_path("/insert/batch").post(#insert_batch_name))
+                .push(Router::with_path("/update").post(#update_name))
+                .push(Router::with_path("/update/batch").post(#update_batch_name))
+                .push(Router::with_path("/remove/id/<dataId>").post(#remove_name))
+                .push(Router::with_path("/remove/batch/id").post(#remove_batch_name))
+                 .push(Router::with_path("/remove/logic/id/<dataId>").post(#remove_logic_name))
+                .push(Router::with_path("/remove/logic/batch/id").post(#remove_logic_batch_name))
+                .push(Router::with_path("/enable/id/<dataId>").post(#enable_name))
+                .push(Router::with_path("/disable/id/<dataId>").post(#disable_name))
+            }
+        }
+    }
 }

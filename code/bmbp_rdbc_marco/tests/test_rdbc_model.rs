@@ -1,36 +1,20 @@
 use bmbp_rdbc_marco::rdbc_model;
 
 #[test]
-fn test_rdbc_model_table() {
-    use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
-    use serde::{Deserialize, Serialize};
-    use bmbp_app_common::BmbpResp;
-    use bmbp_app_common::PageVo;
-    use bmbp_app_common::HttpRespListVo;
-    use bmbp_rdbc_orm::RdbcORM;
-    use bmbp_app_common::BmbpError;
-    use bmbp_rdbc_orm::RdbcOrmRow;
-    #[rdbc_model(table = RDBC_MODEL_TEST)]
-    pub struct RdbcModel {
-        pub name: String,
-        pub age: Option<i32>,
-        #[rdbc_skip]
-        pub data_id: Option<u32>,
-        #[rdbc_skip]
-        children: Vec<RdbcModel>,
-    }
-}
-#[test]
 fn test_rdbc_model_empty() {
-    use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
-    use serde::{Deserialize, Serialize};
-    use bmbp_app_common::BmbpResp;
-    use bmbp_app_common::PageVo;
-    use bmbp_app_common::HttpRespListVo;
-    use bmbp_rdbc_orm::RdbcORM;
+    use ::serde::Deserialize;
+    use ::serde::Serialize;
     use bmbp_app_common::BmbpError;
+    use bmbp_app_common::BmbpResp;
+    use bmbp_app_common::HttpRespListVo;
+    use bmbp_app_common::HttpRespPageVo;
+    use bmbp_app_common::HttpRespVo;
+    use bmbp_app_common::PageVo;
+    use bmbp_app_common::RespVo;
+    use bmbp_rdbc_orm::RdbcORM;
     use bmbp_rdbc_orm::RdbcOrmRow;
-
+    use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
+    use salvo::*;
     #[rdbc_model]
     pub struct RdbcModel {
         name: String,

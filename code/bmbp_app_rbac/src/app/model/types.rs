@@ -1,3 +1,4 @@
+use bmbp_rdbc_orm::RdbcValue;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -14,6 +15,33 @@ pub enum RbacAppType {
 }
 impl Default for RbacAppType {
     fn default() -> Self {
+        RbacAppType::META
+    }
+}
+
+impl From<&RbacAppType> for RdbcValue {
+    fn from(value: &RbacAppType) -> Self {
+        match value {
+            RbacAppType::META => RdbcValue::String("META".to_string()),
+            RbacAppType::MANAGED => RdbcValue::String("MANAGED".to_string()),
+            RbacAppType::SSO => RdbcValue::String("SSO".to_string()),
+            RbacAppType::LINK => RdbcValue::String("LINK".to_string()),
+        }
+    }
+}
+
+impl Into<RbacAppType> for &RdbcValue {
+    fn into(self) -> RbacAppType {
+        let meta = self.get_string();
+        if meta == "META" {
+            return RbacAppType::META;
+        } else if meta == "MANAGED" {
+            return RbacAppType::MANAGED;
+        } else if meta == "SSO" {
+            return RbacAppType::SSO;
+        } else if meta == "LINK" {
+            return RbacAppType::LINK;
+        }
         RbacAppType::META
     }
 }

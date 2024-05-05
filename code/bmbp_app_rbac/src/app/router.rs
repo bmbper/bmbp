@@ -1,13 +1,12 @@
-use crate::app::web::*;
+use crate::app::model::BmbpRbacApp;
 use salvo::Router;
-
+///
+///
+///
+/// /find/all/page
+/// /find/remove/page
+/// /find/all/page
 pub fn app_router() -> Router {
-    Router::new()
-        .push(Router::with_path("/page").post(find_app_page))
-        .push(Router::with_path("/list").post(find_app_list))
-        .push(Router::with_path("/save").post(save_app))
-        .push(Router::with_path("/info/id/<dataId>").post(find_app_info))
-        .push(Router::with_path("/enable/<dataId>").post(enable_app))
-        .push(Router::with_path("/disable/<dataId>").post(disable_app))
-        .push(Router::with_path("/remove/<dataId>").post(remove_app))
+    let mut router = BmbpRbacApp::build_router();
+    router
 }
