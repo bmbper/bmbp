@@ -1,10 +1,14 @@
 use proc_macro::TokenStream;
 use std::collections::HashMap;
 
-use quote::{format_ident, quote};
-use syn::{Attribute, DeriveInput, Field, Type, TypePath};
+use quote::{format_ident, quote, ToTokens};
+use syn::punctuated::Punctuated;
+use syn::Expr::Let;
+use syn::{Attribute, DeriveInput, Field, Fields, Meta, Token, Type, TypePath};
 
+use crate::types::ValidMeta;
 use uuid::Uuid;
+
 /// 构建基础模型
 pub(crate) fn build_base_struct_model() -> TokenStream {
     let base_model = quote! {
@@ -107,7 +111,7 @@ pub(crate) fn get_query_type(field: &Field) -> String {
     let mut field_type = "".to_string();
     for attr_item in field.attrs.iter() {
         if attr_item.path().is_ident("query") {
-            let field_type_rs = attr_item.parse_nested_meta(|meta| {
+            let _ = attr_item.parse_nested_meta(|meta| {
                 return if meta.path.is_ident("eq") {
                     field_type = "eq".to_string();
                     Ok(())
@@ -131,6 +135,29 @@ pub(crate) fn get_query_type(field: &Field) -> String {
     }
     field_type
 }
+
+pub(crate) fn get_valid_field(derive_input: &DeriveInput) -> (Vec<ValidMeta>, Vec<ValidMeta>) {
+    let mut insert_valid_field = vec![];
+    let mut update_valid_field = vec![];
+    match &derive_input.data {
+        syn::Data::Struct(data_struct) => match &data_struct.fields {
+            syn::Fields::Named(fields_named) => {
+                for field in fields_named.named.iter() {
+                    for attr_items in field.attrs.iter() {
+                        if attr_items.path().is_ident("valid") {
+                            println!("=====>解析TOKEN");
+                        }
+                    }
+                }
+            }
+            _ => {}
+        },
+        _ => {}
+    }
+
+    (insert_valid_field, update_valid_field)
+}
+
 /// 驼峰转下划线 大写
 pub(crate) fn camel_to_snake(camel_string: String) -> String {
     case_style::CaseStyle::from_camelcase(camel_string)

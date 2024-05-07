@@ -7,7 +7,8 @@ use syn::{parse_macro_input, DeriveInput, Field};
 use crate::types::{ATTRS_QUERY, ATTRS_RDBC_SKIP};
 use crate::utils::{
     build_base_struct_model, camel_to_snake, get_query_type, get_struct_field,
-    get_struct_field_by_attrs, get_struct_field_name_map, has_rdbc_attr, is_struct_option_field,
+    get_struct_field_by_attrs, get_struct_field_name_map, get_valid_field, has_rdbc_attr,
+    is_struct_option_field,
 };
 
 pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> TokenStream {
@@ -63,7 +64,7 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     );
 
     /// 构建结构体-orm 增删改查方法
-    let model_valid_token = build_struct_valid_token(struct_ident, struct_field_vec.as_slice());
+    let model_valid_token = build_struct_valid_token(struct_ident, &model_input_token);
 
     /// 构建结构体-handler-web接口方法
     let model_handler_token = build_struct_handler_token(struct_ident, struct_field_vec.as_slice());
@@ -88,10 +89,14 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
 }
 
 /// 构建结构体-数据校验方法
-fn build_struct_valid_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+fn build_struct_valid_token(struct_ident: &Ident, model_input_token: &DeriveInput) -> TokenStream2 {
+    let (insert_valid, update_valid) = get_valid_field(model_input_token);
     quote! {
         impl #struct_ident {
-            pub fn valid(&self) -> BmbpResp<()> {
+            pub fn insert_valid(&self) -> BmbpResp<()> {
+                Ok(())
+            }
+            pub fn update_valid(&self) -> BmbpResp<()> {
                 Ok(())
             }
         }
@@ -622,44 +627,44 @@ fn build_struct_query_filter_token(query_fields: &[Field]) -> Vec<TokenStream2> 
         let query_type: String = get_query_type(field);
         match query_type.as_str() {
             "eq" => {
-                let valid_token = quote! {
+                let query_token = quote! {
                     if let Some(value) = query_vo.#get_method_name() {
                         query.eq_(#field_name,value);
                     }
                 };
-                token_vec.push(valid_token);
+                token_vec.push(query_token);
             }
             "ne" => {
-                let valid_token = quote! {
+                let query_token = quote! {
                     if let Some(value) = self.#get_method_name() {
                         query.ne_(#field_name,value);
                     }
                 };
-                token_vec.push(valid_token);
+                token_vec.push(query_token);
             }
             "like" => {
-                let valid_token = quote! {
+                let query_token = quote! {
                     if let Some(value) = self.#get_method_name() {
                         query.like(#field_name,value);
                     }
                 };
-                token_vec.push(valid_token);
+                token_vec.push(query_token);
             }
-            "likeLeft" => {
-                let valid_token = quote! {
+            "like_left" => {
+                let query_token = quote! {
                     if let Some(value) = self.#get_method_name() {
                         query.like_left_value(#field_name,value);
                     }
                 };
-                token_vec.push(valid_token);
+                token_vec.push(query_token);
             }
-            "likeRight" => {
-                let valid_token = quote! {
+            "like_right" => {
+                let query_token = quote! {
                     if let Some(value) = self.#get_method_name() {
                         query.like_right_value(#field_name,value);
                     }
                 };
-                token_vec.push(valid_token);
+                token_vec.push(query_token);
             }
             _ => {}
         }

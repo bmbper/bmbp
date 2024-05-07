@@ -20,7 +20,11 @@ fn test_rdbc_model_empty() {
     #[rdbc_model]
     pub struct RdbcModel {
         #[query(eq)]
+        #[valid[(require,true,"msg")]]
         name: String,
+        #[valid[(require,true,"msg")]]
         age: Option<i32>,
+        #[valid[insert[(require,true,"msg")],update[(unique,true,"msg")]]]
+        age2: Option<i32>,
     }
 }
