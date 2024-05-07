@@ -5,6 +5,7 @@ fn test_rdbc_model_empty() {
     use ::serde::Deserialize;
     use ::serde::Serialize;
     use bmbp_app_common::BmbpError;
+    use bmbp_app_common::BmbpPageParam;
     use bmbp_app_common::BmbpResp;
     use bmbp_app_common::HttpRespListVo;
     use bmbp_app_common::HttpRespPageVo;
@@ -15,8 +16,10 @@ fn test_rdbc_model_empty() {
     use bmbp_rdbc_orm::RdbcOrmRow;
     use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
     use salvo::*;
+    use tracing::*;
     #[rdbc_model]
     pub struct RdbcModel {
+        #[query(eq)]
         name: String,
         age: Option<i32>,
     }

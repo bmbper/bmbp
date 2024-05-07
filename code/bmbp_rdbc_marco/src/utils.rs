@@ -2,10 +2,9 @@ use proc_macro::TokenStream;
 use std::collections::HashMap;
 
 use quote::{format_ident, quote};
-use syn::{DeriveInput, Field, Meta, Type, TypePath};
-use syn::Type::Path;
-use uuid::Uuid;
+use syn::{Attribute, DeriveInput, Field, Type, TypePath};
 
+use uuid::Uuid;
 /// 构建基础模型
 pub(crate) fn build_base_struct_model() -> TokenStream {
     let base_model = quote! {
@@ -48,6 +47,33 @@ pub(crate) fn get_struct_field(derive_input: &DeriveInput) -> Vec<Field> {
     }
     field_vec
 }
+/// 获取结构体字段
+pub(crate) fn get_struct_field_by_attrs(derive_input: &DeriveInput, attrs: &str) -> Vec<Field> {
+    let mut field_vec = vec![];
+    match &derive_input.data {
+        syn::Data::Struct(data_struct) => match &data_struct.fields {
+            syn::Fields::Named(fields_named) => {
+                for field in fields_named.named.iter() {
+                    if has_rdbc_attr(field, attrs) {
+                        field_vec.push(field.clone())
+                    }
+                }
+            }
+            syn::Fields::Unnamed(fields_unnamed) => {
+                for field in fields_unnamed.unnamed.iter() {
+                    let mut name_field = field.clone();
+                    name_field.ident = Some(format_ident!("field_{}", Uuid::new_v4().to_string()));
+                    if has_rdbc_attr(field, attrs) {
+                        field_vec.push(name_field)
+                    }
+                }
+            }
+            syn::Fields::Unit => {}
+        },
+        _ => {}
+    }
+    field_vec
+}
 
 /// 获取结构体字段
 pub(crate) fn get_struct_field_name_map(field: &[Field]) -> HashMap<String, String> {
@@ -60,7 +86,7 @@ pub(crate) fn get_struct_field_name_map(field: &[Field]) -> HashMap<String, Stri
 
 /// 判断是否是OptionField
 pub(crate) fn is_struct_option_field(field_type: &Type) -> bool {
-    if let Path(TypePath { path, .. }) = field_type {
+    if let Type::Path(TypePath { path, .. }) = field_type {
         if path.segments.len() == 1 {
             if path.segments[0].ident.to_string() == "Option" {
                 return true;
@@ -70,17 +96,44 @@ pub(crate) fn is_struct_option_field(field_type: &Type) -> bool {
     false
 }
 
-pub(crate) fn has_rdbc_attr(field: &Field, attr: &str) -> bool {
+pub(crate) fn has_rdbc_attr(field: &Field, const_attr: &str) -> bool {
     for attr_item in field.attrs.iter() {
-        if let Ok(Meta::Path(path)) = attr_item.parse_meta() {
-            if path.is_ident(attr) {
-                return true;
-            }
-        }
+        return attr_item.path().is_ident(const_attr);
     }
     false
 }
 
+pub(crate) fn get_query_type(field: &Field) -> String {
+    let mut field_type = "".to_string();
+    for attr_item in field.attrs.iter() {
+        if attr_item.path().is_ident("query") {
+            let field_type_rs = attr_item.parse_nested_meta(|meta| {
+                return if meta.path.is_ident("eq") {
+                    field_type = "eq".to_string();
+                    Ok(())
+                } else if meta.path.is_ident("ne") {
+                    field_type = "ne".to_string();
+                    Ok(())
+                } else if meta.path.is_ident("like") {
+                    field_type = "like".to_string();
+                    Ok(())
+                } else if meta.path.is_ident("like_left") {
+                    field_type = "like_left".to_string();
+                    Ok(())
+                } else if meta.path.is_ident("like_right") {
+                    field_type = "like_right".to_string();
+                    Ok(())
+                } else {
+                    Ok(())
+                };
+            });
+            if let Ok(field_type) = field_type_rs {
+                return field_type.to_string();
+            }
+        }
+    }
+    field_type
+}
 /// 驼峰转下划线 大写
 pub(crate) fn camel_to_snake(camel_string: String) -> String {
     case_style::CaseStyle::from_camelcase(camel_string)

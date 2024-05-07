@@ -4,10 +4,10 @@ use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::{format_ident, quote, ToTokens};
 use syn::{parse_macro_input, DeriveInput, Field};
 
-use crate::types::ATTRS_RDBC_SKIP;
+use crate::types::{ATTRS_QUERY, ATTRS_RDBC_SKIP};
 use crate::utils::{
-    build_base_struct_model, camel_to_snake, get_struct_field, get_struct_field_name_map,
-    has_rdbc_attr, is_struct_option_field,
+    build_base_struct_model, camel_to_snake, get_query_type, get_struct_field,
+    get_struct_field_by_attrs, get_struct_field_name_map, has_rdbc_attr, is_struct_option_field,
 };
 
 pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> TokenStream {
@@ -24,12 +24,14 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     //构建查询结构体
     // 构建查询结构体-属性
     let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
+    let struct_query_field_vec = get_struct_field_by_attrs(&model_input_token, ATTRS_QUERY);
     let model_struct_query_token =
-        build_struct_query_token(&struct_query_ident, struct_field_vec.as_slice());
+        build_struct_query_model_token(&struct_query_ident, struct_query_field_vec.as_slice());
     model_struct_macro_token.push(model_struct_query_token);
     let mode_struct_query_impl_token =
-        build_struct_query_impl_token(&struct_query_ident, struct_field_vec.as_slice());
+        build_struct_query_impl_token(&struct_query_ident, struct_query_field_vec.as_slice());
     model_struct_macro_token.push(mode_struct_query_impl_token);
+
     // 构建结构体-增加默认字段
     let model_struct_token = build_struct_model_token(struct_ident, struct_field_vec.as_slice());
     // 构建结构体-实现属性方法
@@ -54,7 +56,11 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     let model_orm_token = build_struct_orm_token(&struct_ident);
 
     /// 构建结构体-orm 增删改查方法
-    let model_curd_token = build_struct_curd_token(struct_ident, struct_field_vec.as_slice());
+    let model_curd_token = build_struct_curd_token(
+        struct_ident,
+        struct_field_vec.as_slice(),
+        struct_query_field_vec.as_slice(),
+    );
 
     /// 构建结构体-orm 增删改查方法
     let model_valid_token = build_struct_valid_token(struct_ident, struct_field_vec.as_slice());
@@ -79,25 +85,6 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     };
     println!("最终输出{}", final_token.to_string());
     final_token.into()
-}
-
-fn build_struct_query_token(struct_query_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
-    quote! {
-        #[derive(Default, Debug, Clone, Serialize, Deserialize)]
-        #[serde(rename_all = "camelCase")]
-        #[serde(default)]
-        pub struct #struct_query_ident {
-        }
-    }
-}
-fn build_struct_query_impl_token(
-    struct_query_ident: &Ident,
-    struct_fields: &[Field],
-) -> TokenStream2 {
-    quote! {
-         impl #struct_query_ident {
-        }
-    }
 }
 
 /// 构建结构体-数据校验方法
@@ -171,7 +158,7 @@ fn build_struct_table_name(meta_token: &TokenStream, struct_ident: &Ident) -> St
 }
 
 fn build_struct_model_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
-    let struct_model_fields = build_struct_field_token(&struct_fields);
+    let struct_model_fields = build_struct_field_token(struct_fields);
     let token = quote! {
         #[derive(Default, Debug, Clone, Serialize, Deserialize)]
         #[serde(rename_all = "camelCase")]
@@ -204,6 +191,36 @@ fn build_struct_impl_get_set_token(struct_ident: &Ident, struct_fields: &[Field]
     let struct_method_token = build_struct_impl_method_token_vec(struct_fields);
     let token = quote! {
         impl #struct_ident {
+            pub fn new() -> Self {
+                Self::default()
+            }
+            #(#struct_method_token)*
+        }
+    };
+    token
+}
+fn build_struct_query_model_token(
+    struct_query_ident: &Ident,
+    query_fields: &[Field],
+) -> TokenStream2 {
+    let struct_query_field = build_struct_field_token(query_fields);
+    quote! {
+        #[derive(Default, Debug, Clone, Serialize, Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        #[serde(default)]
+        pub struct #struct_query_ident {
+               #(#struct_query_field,)*
+        }
+    }
+}
+
+fn build_struct_query_impl_token(
+    struct_query_ident: &Ident,
+    struct_fields: &[Field],
+) -> TokenStream2 {
+    let struct_method_token = build_struct_impl_method_token_vec(struct_fields);
+    let token = quote! {
+        impl #struct_query_ident {
             pub fn new() -> Self {
                 Self::default()
             }
@@ -468,23 +485,32 @@ fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
     token
 }
 
-fn build_struct_curd_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+fn build_struct_curd_token(
+    struct_ident: &Ident,
+    struct_fields: &[Field],
+    struct_query_fields: &[Field],
+) -> TokenStream2 {
+    let struct_query_filter_sql_token = build_struct_query_filter_token(struct_query_fields);
+
     let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
     let token = quote! {
         impl #struct_ident {
             pub async fn find_page(page_params: BmbpPageParam<#struct_query_ident>) -> BmbpResp<PageVo<Self>> {
                 let mut query = #struct_ident::build_query_sql();
+                #(#struct_query_filter_sql_token)*
                 query.eq_("data_flag","0");
                 info!("find_page:{:?}", page_params);
                 Ok(PageVo::new())
             }
             pub async fn find_all_page(page_params: BmbpPageParam<#struct_query_ident>) -> BmbpResp<PageVo<Self>> {
                 let mut query = #struct_ident::build_query_sql();
+                #(#struct_query_filter_sql_token)*
                 info!("find_page:{:?}", page_params);
                 Ok(PageVo::new())
             }
             pub async fn find_removed_page(page_params: BmbpPageParam<#struct_query_ident>) -> BmbpResp<PageVo<Self>> {
                 let mut query = #struct_ident::build_query_sql();
+                #(#struct_query_filter_sql_token)*
                 query.eq_("data_flag","-1");
                 info!("find_page:{:?}", page_params);
                 Ok(PageVo::new())
@@ -494,18 +520,26 @@ fn build_struct_curd_token(struct_ident: &Ident, struct_fields: &[Field]) -> Tok
             }
 
             pub async fn find_list(query_vo: #struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
+                let mut query = #struct_ident::build_query_sql();
+                #(#struct_query_filter_sql_token)*
                 Ok(None)
             }
             pub async fn find_all_list(query_vo:#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
+                let mut query = #struct_ident::build_query_sql();
+                #(#struct_query_filter_sql_token)*
                 Ok(None)
             }
             pub async fn find_removed_list(query_vo:#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
+                let mut query = #struct_ident::build_query_sql();
+                #(#struct_query_filter_sql_token)*
                 Ok(None)
             }
             pub async fn find_list_by_query(query:&Query)-> BmbpResp<Option<Vec<Self>>> {
                 Ok(None)
             }
             pub async fn find_by_id(id: Option<&String>) -> BmbpResp<Option<Self>> {
+                let mut query = #struct_ident::build_query_sql();
+                 query.eq_(Self::get_table_primary_key(),id);
                 Ok(None)
             }
 
@@ -571,6 +605,60 @@ fn build_struct_curd_token(struct_ident: &Ident, struct_fields: &[Field]) -> Tok
         }
     };
     token
+}
+
+fn build_struct_query_filter_token(query_fields: &[Field]) -> Vec<TokenStream2> {
+    let mut token_vec = vec![];
+    for field in query_fields {
+        let field_ident = field.ident.as_ref().unwrap();
+        let field_name = field_ident.to_string();
+        let get_method_name = format_ident!("get_{}", field_ident);
+        let query_type: String = get_query_type(field);
+        match query_type.as_str() {
+            "eq" => {
+                let valid_token = quote! {
+                    if let Some(value) = query_vo.#get_method_name() {
+                        query.eq_(#field_name,value);
+                    }
+                };
+                token_vec.push(valid_token);
+            }
+            "ne" => {
+                let valid_token = quote! {
+                    if let Some(value) = self.#get_method_name() {
+                        query.ne_(#field_name,value);
+                    }
+                };
+                token_vec.push(valid_token);
+            }
+            "like" => {
+                let valid_token = quote! {
+                    if let Some(value) = self.#get_method_name() {
+                        query.like(#field_name,value);
+                    }
+                };
+                token_vec.push(valid_token);
+            }
+            "likeLeft" => {
+                let valid_token = quote! {
+                    if let Some(value) = self.#get_method_name() {
+                        query.like_left_value(#field_name,value);
+                    }
+                };
+                token_vec.push(valid_token);
+            }
+            "likeRight" => {
+                let valid_token = quote! {
+                    if let Some(value) = self.#get_method_name() {
+                        query.like_right_value(#field_name,value);
+                    }
+                };
+                token_vec.push(valid_token);
+            }
+            _ => {}
+        }
+    }
+    token_vec
 }
 
 /// #[rdbc_model(TABLE)]

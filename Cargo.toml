@@ -29,7 +29,7 @@ rust-embed = "*"
 async-once-cell = "*"
 async_static = "*"
 async-lock = "*"
-syn = { version = "*", features = ["full"] }
+syn = { version = "2.0.48", features = ["full"] }
 quote = "*"
 tokio-postgres = { version = "*", features = ["with-chrono-0_4"] }
 serde_yaml = "*"
