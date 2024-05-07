@@ -127,9 +127,6 @@ pub(crate) fn get_query_type(field: &Field) -> String {
                     Ok(())
                 };
             });
-            if let Ok(field_type) = field_type_rs {
-                return field_type.to_string();
-            }
         }
     }
     field_type

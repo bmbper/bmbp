@@ -1,6 +1,5 @@
 use proc_macro::TokenStream;
 
-mod demo;
 mod rdbc_model;
 mod rdbc_tree_model;
 mod types;

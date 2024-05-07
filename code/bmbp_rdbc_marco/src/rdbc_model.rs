@@ -497,20 +497,26 @@ fn build_struct_curd_token(
         impl #struct_ident {
             pub async fn find_page(page_params: BmbpPageParam<#struct_query_ident>) -> BmbpResp<PageVo<Self>> {
                 let mut query = #struct_ident::build_query_sql();
-                #(#struct_query_filter_sql_token)*
+                if let Some(query_vo) = page_params.get_params() {
+                    #(#struct_query_filter_sql_token)*
+                }
                 query.eq_("data_flag","0");
                 info!("find_page:{:?}", page_params);
                 Ok(PageVo::new())
             }
             pub async fn find_all_page(page_params: BmbpPageParam<#struct_query_ident>) -> BmbpResp<PageVo<Self>> {
                 let mut query = #struct_ident::build_query_sql();
-                #(#struct_query_filter_sql_token)*
+                if let Some(query_vo) = page_params.get_params() {
+                    #(#struct_query_filter_sql_token)*
+                }
                 info!("find_page:{:?}", page_params);
                 Ok(PageVo::new())
             }
             pub async fn find_removed_page(page_params: BmbpPageParam<#struct_query_ident>) -> BmbpResp<PageVo<Self>> {
                 let mut query = #struct_ident::build_query_sql();
-                #(#struct_query_filter_sql_token)*
+                if let Some(query_vo) = page_params.get_params() {
+                    #(#struct_query_filter_sql_token)*
+                }
                 query.eq_("data_flag","-1");
                 info!("find_page:{:?}", page_params);
                 Ok(PageVo::new())
