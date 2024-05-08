@@ -91,6 +91,8 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
 /// 构建结构体-数据校验方法
 fn build_struct_valid_token(struct_ident: &Ident, model_input_token: &DeriveInput) -> TokenStream2 {
     let (insert_valid, update_valid) = get_valid_field(model_input_token);
+    println!("===insert=======>{}", insert_valid.len());
+    println!("===update=======>{}", update_valid.len());
     quote! {
         impl #struct_ident {
             pub fn insert_valid(&self) -> BmbpResp<()> {

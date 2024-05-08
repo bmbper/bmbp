@@ -1,6 +1,5 @@
-use bmbp_app_common::ValidType;
 use proc_macro2::TokenTree;
-use salvo::extract::metadata::Field;
+use syn::Field;
 
 #[derive(Debug)]
 pub(crate) struct RdbcModelMeta {
@@ -35,9 +34,20 @@ impl MetaToken {
 pub(crate) const ATTRS_RDBC_SKIP: &str = "rdbc_skip";
 pub(crate) const ATTRS_QUERY: &str = "query";
 
-pub struct ValidMeta<'a> {
-    field: &'a Field,
-    valid: Vec<()>,
+pub struct ValidMeta {
+    field: Field,
+    valid: Vec<ValidRule>,
+}
+
+impl ValidMeta {
+    pub fn new(field: Field, rule: Vec<ValidRule>) -> Self {
+        ValidMeta { field, valid: rule }
+    }
+}
+pub enum ValidRuleMethod {
+    INSERT,
+    UPDATE,
+    INSERT_UPDATE,
 }
 #[derive(Debug, Default, Clone)]
 pub struct ValidRule {

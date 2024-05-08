@@ -1,12 +1,12 @@
+use case_style::Token;
 use proc_macro::TokenStream;
-use std::collections::HashMap;
-
 use quote::{format_ident, quote, ToTokens};
+use std::collections::HashMap;
+use syn::parse::Parse;
 use syn::punctuated::Punctuated;
-use syn::Expr::Let;
-use syn::{Attribute, DeriveInput, Field, Fields, Meta, Token, Type, TypePath};
+use syn::{DeriveInput, Field, Lit, LitStr, Meta, Token, Type, TypePath};
 
-use crate::types::ValidMeta;
+use crate::types::{ValidMeta, ValidRule, ValidRuleMethod};
 use uuid::Uuid;
 
 /// 构建基础模型
@@ -143,9 +143,21 @@ pub(crate) fn get_valid_field(derive_input: &DeriveInput) -> (Vec<ValidMeta>, Ve
         syn::Data::Struct(data_struct) => match &data_struct.fields {
             syn::Fields::Named(fields_named) => {
                 for field in fields_named.named.iter() {
+                    let field_name = field.ident.clone().unwrap().to_string();
                     for attr_items in field.attrs.iter() {
                         if attr_items.path().is_ident("valid") {
-                            println!("=====>解析TOKEN");
+                            let (insert_rule, update_rule) = parse_valid_item(
+                                attr_items.meta.clone(),
+                                &ValidRuleMethod::INSERT_UPDATE,
+                            );
+                            if !insert_rule.is_empty() {
+                                let insert_valid = ValidMeta::new(field.clone(), insert_rule);
+                                insert_valid_field.push(insert_valid);
+                            }
+                            if !update_rule.is_empty() {
+                                let update_valid = ValidMeta::new(field.clone(), update_rule);
+                                update_valid_field.push(update_valid);
+                            }
                         }
                     }
                 }
@@ -154,8 +166,71 @@ pub(crate) fn get_valid_field(derive_input: &DeriveInput) -> (Vec<ValidMeta>, Ve
         },
         _ => {}
     }
-
     (insert_valid_field, update_valid_field)
+}
+
+fn parse_valid_item(
+    attrs: Meta,
+    valid_rule_method: &ValidRuleMethod,
+) -> (Vec<ValidRule>, Vec<ValidRule>) {
+    let mut insert_rule_vec = vec![];
+    let mut update_rule_vec = vec![];
+    if let Meta::List(list) = attrs {
+        if let Ok(meta_list) = list.parse_args_with(Punctuated::<Meta, Token![,]>::parse_terminated)
+        {
+            for meta in meta_list.iter() {
+                if meta.path().is_ident("insert") {
+                    let (item_insert_vec, item_update_vec) =
+                        parse_valid_item(meta.clone(), &ValidRuleMethod::INSERT);
+                    insert_rule_vec.extend_from_slice(item_insert_vec.as_slice());
+                    update_rule_vec.extend_from_slice(item_update_vec.as_slice());
+                } else if meta.path().is_ident("update") {
+                    let (item_insert_vec, item_update_vec) =
+                        parse_valid_item(meta.clone(), &ValidRuleMethod::UPDATE);
+                    insert_rule_vec.extend_from_slice(item_insert_vec.as_slice());
+                    update_rule_vec.extend_from_slice(item_update_vec.as_slice());
+                } else {
+                    // 计算校验规则
+                    let valid_rule = ValidRule::default();
+                    if let Ok(require_list) = meta.require_list() {
+                        if let Ok(r_me) = require_list
+                            .parse_args_with(Punctuated::<Lit, Token![,]>::parse_terminated)
+                        {
+                            println!(
+                                "{}参数=======>{}",
+                                meta.path().get_ident().unwrap().to_string(),
+                                r_me.len()
+                            );
+                            for r_me_item in r_me.iter() {
+                                match r_me_item {
+                                    Lit::Str(lit_str) => {
+                                        println!("======item=>:{}", lit_str.value())
+                                    }
+                                    Lit::Int(lit_int) => {
+                                        println!("======item=>:{}", lit_int.to_string())
+                                    }
+                                    _ => {}
+                                }
+                            }
+                        }
+                    }
+                    match valid_rule_method {
+                        ValidRuleMethod::INSERT_UPDATE => {
+                            insert_rule_vec.push(valid_rule.clone());
+                            update_rule_vec.push(valid_rule.clone());
+                        }
+                        ValidRuleMethod::INSERT => {
+                            insert_rule_vec.push(valid_rule);
+                        }
+                        ValidRuleMethod::UPDATE => {
+                            update_rule_vec.push(valid_rule);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    (insert_rule_vec, update_rule_vec)
 }
 
 /// 驼峰转下划线 大写
