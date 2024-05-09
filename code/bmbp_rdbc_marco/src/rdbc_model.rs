@@ -500,6 +500,7 @@ fn build_struct_curd_token(
     let struct_query_filter_sql_token = build_struct_query_filter_token(struct_query_fields);
 
     let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
+    let orm_ident = format_ident!("{}Orm", struct_ident);
     let token = quote! {
         impl #struct_ident {
             pub async fn find_page(page_params: BmbpPageParam<#struct_query_ident>) -> BmbpResp<PageVo<Self>> {
@@ -550,16 +551,16 @@ fn build_struct_curd_token(
             pub async fn find_list_by_query(query:&Query)-> BmbpResp<Option<Vec<Self>>> {
                 Ok(None)
             }
-            pub async fn find_by_id(id: Option<&String>) -> BmbpResp<Option<Self>> {
+            pub async fn find_by_id(id: &Option<String>) -> BmbpResp<Option<Self>> {
                 let mut query = #struct_ident::build_query_sql();
                  query.eq_(Self::get_table_primary_key(),id);
                 Ok(None)
             }
 
             pub async fn find_one(&self) -> BmbpResp<Option<Self>> {
-                Ok(Some(self.clone()))
+                Self::find_by_id(&self.get_data_id()).await
             }
-            pub async fn save(&self) -> BmbpResp<Option<Self>> {
+            pub async fn save(&mut self) -> BmbpResp<Option<Self>> {
                 let model = self.find_one().await?;
                 if model.is_some() {
                     self.update().await?;
@@ -570,7 +571,7 @@ fn build_struct_curd_token(
             }
             pub async fn insert(&self) -> BmbpResp<usize> {
                 let insert = self.build_insert_sql();
-                Ok(0)
+                #orm_ident::execute_insert(&insert).await
             }
             pub async fn update(&self) -> BmbpResp<usize> {
                 let insert = self.build_update_sql();
@@ -638,7 +639,7 @@ fn build_struct_query_filter_token(query_fields: &[Field]) -> Vec<TokenStream2> 
             }
             "ne" => {
                 let query_token = quote! {
-                    if let Some(value) = self.#get_method_name() {
+                    if let Some(value) = query_vo.#get_method_name() {
                         query.ne_(#field_name,value);
                     }
                 };
@@ -646,7 +647,7 @@ fn build_struct_query_filter_token(query_fields: &[Field]) -> Vec<TokenStream2> 
             }
             "like" => {
                 let query_token = quote! {
-                    if let Some(value) = self.#get_method_name() {
+                    if let Some(value) = query_vo.#get_method_name() {
                         query.like(#field_name,value);
                     }
                 };
@@ -654,7 +655,7 @@ fn build_struct_query_filter_token(query_fields: &[Field]) -> Vec<TokenStream2> 
             }
             "like_left" => {
                 let query_token = quote! {
-                    if let Some(value) = self.#get_method_name() {
+                    if let Some(value) = query_vo.#get_method_name() {
                         query.like_left_value(#field_name,value);
                     }
                 };
@@ -662,7 +663,7 @@ fn build_struct_query_filter_token(query_fields: &[Field]) -> Vec<TokenStream2> 
             }
             "like_right" => {
                 let query_token = quote! {
-                    if let Some(value) = self.#get_method_name() {
+                    if let Some(value) = query_vo.#get_method_name() {
                         query.like_right_value(#field_name,value);
                     }
                 };
@@ -800,21 +801,22 @@ fn build_struct_handler_token(struct_ident: &Ident, struct_fields: &[Field]) -> 
 
         #[handler]
         pub async fn #find_list_name(req: &mut Request, resp: &mut Response, ) -> HttpRespListVo<#struct_ident> {
-             let mut query_params = req.parse_json::<#struct_query_ident>().await?;
+            let mut query_params = req.parse_json::<#struct_query_ident>().await?;
             let model_vo = #struct_ident::find_list(query_params).await?;
             Ok(RespVo::ok_find_option(model_vo))
         }
 
         #[handler]
-        pub async fn #find_info_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<#struct_ident> {
+        pub async fn #find_info_name(req: &mut Request, resp: &mut Response, ) -> HttpRespVo<#struct_ident> {
               Ok(RespVo::ok_find_option(None))
         }
         #[handler]
-        pub async fn #save_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<#struct_ident> {
-            Ok(RespVo::ok_save_option(None))
+        pub async fn #save_name(req: &mut Request, resp: &mut Response, ) -> HttpRespVo<#struct_ident> {
+            let mut save_vo = req.parse_json::<#struct_ident>().await?;
+            Ok(RespVo::ok_save_option(save_vo.save().await?))
         }
         #[handler]
-        pub async fn #save_batch_name(req: &Request, resp: &mut Response, ) ->HttpRespListVo<#struct_ident>  {
+        pub async fn #save_batch_name(req: &mut Request, resp: &mut Response, ) ->HttpRespListVo<#struct_ident>  {
              Ok(RespVo::ok_save_option(None))
         }
         #[handler]

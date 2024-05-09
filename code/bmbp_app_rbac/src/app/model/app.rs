@@ -12,7 +12,7 @@ pub struct BmbpRbacApp {
     app_code: Option<String>,
     // 应用名称
     #[query(like)]
-    #[valid[(require,true,"应用名称不能为空"),(unique,true,"应用名称不能不能重复"),(max_length,50,"应用名称不能超过50个字符"),(min_length,2,"应用名称不能少于2个字符")]]
+    #[valid[require("应用名称不能为空"),unique("应用名称不能不能重复"),max_length(50,"应用名称不能超过50个字符"),min_length(2,"应用名称不能少于2个字符")]]
     app_name: Option<String>,
     // 应用简称
     #[query(like)]
