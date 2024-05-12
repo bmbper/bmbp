@@ -408,6 +408,7 @@ fn build_struct_sql_script_insert_token(struct_fields: &[Field]) -> TokenStream2
         let field_method = format_ident!("get_{}", field_ident);
         let insert_item = quote! {
             if let Some(value) = self.#field_method() {
+                println!("insert_column_value=>{}:{:#?}",#field_name,value);
                 insert.insert_column_value(#field_name, value);
             }
         };
@@ -561,6 +562,7 @@ fn build_struct_curd_token(
                 Self::find_by_id(&self.get_data_id()).await
             }
             pub async fn save(&mut self) -> BmbpResp<Option<Self>> {
+                 println!("model:{:#?}",self);
                 let model = self.find_one().await?;
                 if model.is_some() {
                     self.update().await?;

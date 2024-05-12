@@ -2,7 +2,6 @@ use bmbp_rdbc_orm::RdbcValue;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
 pub enum RbacAppType {
     // 内置应用、配置应用
     META,
