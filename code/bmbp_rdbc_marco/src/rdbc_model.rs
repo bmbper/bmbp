@@ -509,29 +509,25 @@ fn build_struct_curd_token(
                 if let Some(query_vo) = page_params.get_params() {
                     #(#struct_query_filter_sql_token)*
                 }
-                query.eq_("data_flag","0");
-                info!("find_page:{:?}", page_params);
-                Ok(PageVo::new())
+                Self::find_page_by_query(page_params.get_page_no(), page_params.get_page_size(), &query).await
             }
             pub async fn find_all_page(page_params: BmbpPageParam<#struct_query_ident>) -> BmbpResp<PageVo<Self>> {
                 let mut query = #struct_ident::build_query_sql();
                 if let Some(query_vo) = page_params.get_params() {
                     #(#struct_query_filter_sql_token)*
                 }
-                info!("find_page:{:?}", page_params);
-                Ok(PageVo::new())
+                Self::find_page_by_query(page_params.get_page_no(), page_params.get_page_size(), &query).await
             }
             pub async fn find_removed_page(page_params: BmbpPageParam<#struct_query_ident>) -> BmbpResp<PageVo<Self>> {
                 let mut query = #struct_ident::build_query_sql();
                 if let Some(query_vo) = page_params.get_params() {
                     #(#struct_query_filter_sql_token)*
                 }
-                query.eq_("data_flag","-1");
-                info!("find_page:{:?}", page_params);
-                Ok(PageVo::new())
+                Self::find_page_by_query(page_params.get_page_no(), page_params.get_page_size(), &query).await
             }
-            pub async fn find_page_by_query(page_no: Option<&usize>, page_size: Option<&usize>,query:Query) -> BmbpResp<PageVo<Self>> {
-                Ok(PageVo::new())
+            pub async fn find_page_by_query(page_no: &usize, page_size: &usize,query:&Query) -> BmbpResp<PageVo<Self>> {
+                #orm_ident::select_page_by_query(page_no, page_size, &query)
+            .await
             }
 
             pub async fn find_list(query_vo: #struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
