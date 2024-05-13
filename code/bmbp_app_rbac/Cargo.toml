@@ -20,3 +20,5 @@ serde_repr = { workspace = true }
 async-trait = { workspace = true }
 tokio = { workspace = true }
 salvo = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
