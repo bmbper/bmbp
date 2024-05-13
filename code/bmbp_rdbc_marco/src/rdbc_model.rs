@@ -959,7 +959,9 @@ fn build_struct_handler_token(struct_ident: &Ident, struct_fields: &[Field]) -> 
 
         #[handler]
         pub async fn #find_info_name(req: &mut Request, resp: &mut Response, ) -> HttpRespVo<#struct_ident> {
-              Ok(RespVo::ok_find_option(None))
+            let data_id = req.param::<String>("dataId");
+            let model_vo = #struct_ident::find_by_id(&data_id).await?;
+            Ok(RespVo::ok_find_option(model_vo))
         }
         #[handler]
         pub async fn #save_name(req: &mut Request, resp: &mut Response, ) -> HttpRespVo<#struct_ident> {
@@ -988,7 +990,9 @@ fn build_struct_handler_token(struct_ident: &Ident, struct_fields: &[Field]) -> 
         }
         #[handler]
         pub async fn #remove_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<usize> {
-             Ok(RespVo::ok_remove_option(None))
+             let data_id = req.param::<String>("dataId");
+             let row_count = #struct_ident::remove_by_id(&data_id).await?;
+             Ok(RespVo::ok_remove_data(row_count))
         }
         #[handler]
         pub async fn #remove_batch_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<usize> {
@@ -996,7 +1000,9 @@ fn build_struct_handler_token(struct_ident: &Ident, struct_fields: &[Field]) -> 
         }
         #[handler]
         pub async fn #remove_logic_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<usize> {
-             Ok(RespVo::ok_remove_option(None))
+             let data_id = req.param::<String>("dataId");
+             let row_count = #struct_ident::remove_by_id(&data_id).await?;
+             Ok(RespVo::ok_remove_data(row_count))
         }
         #[handler]
         pub async fn #remove_logic_batch_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<usize> {
@@ -1004,11 +1010,15 @@ fn build_struct_handler_token(struct_ident: &Ident, struct_fields: &[Field]) -> 
         }
         #[handler]
         pub async fn #enable_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<usize> {
-              Ok(RespVo::ok_enable_option(None))
+             let data_id = req.param::<String>("dataId");
+             let row_count = #struct_ident::enable_by_id(&data_id).await?;
+              Ok(RespVo::ok_enable_data(row_count))
         }
         #[handler]
         pub async fn #disable_name(req: &Request, resp: &mut Response, ) -> HttpRespVo<usize> {
-             Ok(RespVo::ok_disable_option(None))
+              let data_id = req.param::<String>("dataId");
+             let row_count = #struct_ident::disable_by_id(&data_id).await?;
+              Ok(RespVo::ok_disable_data(row_count))
         }
     }
 }
