@@ -4,6 +4,7 @@ use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::{format_ident, quote, ToTokens};
 use syn::{parse_macro_input, DeriveInput, Field};
 
+use crate::consts::*;
 use crate::types::{ATTRS_QUERY, ATTRS_RDBC_SKIP};
 use crate::utils::{
     build_base_struct_model, camel_to_snake, get_query_type, get_struct_field,
@@ -196,16 +197,19 @@ fn build_struct_field_token(struct_fields: &[Field]) -> Vec<TokenStream2> {
 
 fn build_struct_impl_get_set_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
     let struct_method_token = build_struct_impl_method_token_vec(struct_fields);
+    let struct_init_data_token = build_struct_impl_init_data_method_token_vec(struct_fields);
     let token = quote! {
         impl #struct_ident {
             pub fn new() -> Self {
                 Self::default()
             }
             #(#struct_method_token)*
+            #(#struct_init_data_token)*
         }
     };
     token
 }
+
 fn build_struct_query_model_token(
     struct_query_ident: &Ident,
     query_fields: &[Field],
@@ -276,7 +280,122 @@ fn build_struct_impl_method_token_vec(struct_fields: &[Field]) -> Vec<TokenStrea
     }
     method_vec
 }
+fn build_struct_impl_init_data_method_token_vec(struct_fields: &[Field]) -> Vec<TokenStream2> {
+    let mut method_vec = vec![];
+    let mut insert_data_value = vec![];
+    let mut update_data_value = vec![];
+    for item in struct_fields {
+        let field_name = item.ident.as_ref().unwrap();
+        let field_name_string = field_name.to_string();
+        match field_name_string.as_str() {
+            RDBC_DATA_ID => {
+                let token = quote! {
+                    if self.#field_name.is_none() {
+                        self.#field_name = Some(uuid::Uuid::new_v4().to_string());
+                    }
+                };
+                insert_data_value.push(token);
+            }
+            RDBC_DATA_LEVEL => {
+                let token = quote! {
+                    if self.#field_name.is_none() {
+                        self.#field_name = Some("0".to_string());
+                    }
+                };
+                insert_data_value.push(token);
+            }
+            RDBC_DATA_FLAG => {
+                let token = quote! {
+                    if self.#field_name.is_none() {
+                        self.#field_name = Some("0".to_string());
+                    }
+                };
+                insert_data_value.push(token);
+            }
 
+            RDBC_DATA_STATUS => {
+                let token = quote! {
+                    if self.#field_name.is_none() {
+                        self.#field_name = Some("0".to_string());
+                    }
+                };
+                insert_data_value.push(token);
+            }
+            RDBC_DATA_SORT => {
+                let token = quote! {
+                    if self.#field_name.is_none() {
+                        self.#field_name = Some(0);
+                    }
+                };
+                insert_data_value.push(token);
+            }
+            RDBC_DATA_CREATE_TIME => {
+                let token = quote! {
+                    if self.#field_name.is_none() {
+                        self.#field_name = Some(Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
+                    }
+                };
+                insert_data_value.push(token);
+            }
+            RDBC_DATA_CREATE_USER => {
+                let token = quote! {
+                    if self.#field_name.is_none() {
+                        self.#field_name = Some("".to_string());
+                    }
+                };
+                insert_data_value.push(token);
+            }
+            RDBC_DATA_UPDATE_TIME => {
+                let token = quote! {
+                    if self.#field_name.is_none() {
+                        self.#field_name = Some(Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
+                    }
+                };
+                insert_data_value.push(token.clone());
+                update_data_value.push(token);
+            }
+            RDBC_DATA_UPDATE_USER => {
+                let token = quote! {
+                    if self.#field_name.is_none() {
+                        self.#field_name = Some("".to_string());
+                    }
+                };
+                insert_data_value.push(token.clone());
+                update_data_value.push(token);
+            }
+            RDBC_DATA_OWNER_ORG => {
+                let token = quote! {
+                    if self.#field_name.is_none() {
+                        self.#field_name = Some("".to_string());
+                    }
+                };
+                insert_data_value.push(token.clone());
+            }
+            RDBC_DATA_SIGN => {
+                let token = quote! {
+                    if self.#field_name.is_none() {
+                        self.#field_name = Some("".to_string());
+                    }
+                };
+                insert_data_value.push(token.clone());
+            }
+            &_ => {}
+        }
+    }
+    method_vec.push(quote! {
+        pub fn init_insert_data(&mut self)->&mut Self{
+            #(#insert_data_value)*
+            self
+        }
+    });
+    method_vec.push(quote! {
+        pub fn init_update_data(&mut self)->&mut Self{
+            #(#update_data_value)*
+            self
+        }
+    });
+    method_vec
+}
 fn build_struct_impl_orm_table_token(
     struct_ident: &Ident,
     struct_table_name: &String,
@@ -304,7 +423,6 @@ fn build_struct_impl_orm_table_token(
                 ];
             }
         }
-
     };
     token
 }
@@ -408,7 +526,6 @@ fn build_struct_sql_script_insert_token(struct_fields: &[Field]) -> TokenStream2
         let field_method = format_ident!("get_{}", field_ident);
         let insert_item = quote! {
             if let Some(value) = self.#field_method() {
-                println!("insert_column_value=>{}:{:#?}",#field_name,value);
                 insert.insert_column_value(#field_name, value);
             }
         };
@@ -436,7 +553,7 @@ fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
             ) -> BmbpResp<PageVo<#struct_ident>> {
                 match RdbcORM
                     .await
-                    .select_page_by_query::<#struct_ident>(page_no.clone(), page_size.clone(), &query)
+                    .select_page_by_query::<#struct_ident>(page_no.clone(), page_size.clone(), query)
                     .await
                 {
                     Ok(mut page) => {
@@ -453,7 +570,7 @@ fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
                 pub async fn select_list_by_query(query: &Query) -> BmbpResp<Option<Vec<#struct_ident>>> {
                     match RdbcORM
                         .await
-                        .select_list_by_query::<#struct_ident>(&query)
+                        .select_list_by_query::<#struct_ident>(query)
                         .await
                     {
                         Ok(data) => Ok(data),
@@ -463,7 +580,7 @@ fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
                 pub async fn select_one_by_query(query: &Query) -> BmbpResp<Option<#struct_ident>> {
                     match RdbcORM
                         .await
-                        .select_one_by_query::<#struct_ident>(&query)
+                        .select_one_by_query::<#struct_ident>(query)
                         .await
                     {
                         Ok(data) => Ok(data),
@@ -509,6 +626,7 @@ fn build_struct_curd_token(
                 if let Some(query_vo) = page_params.get_params() {
                     #(#struct_query_filter_sql_token)*
                 }
+                query.eq_("data_flag","0");
                 Self::find_page_by_query(page_params.get_page_no(), page_params.get_page_size(), &query).await
             }
             pub async fn find_all_page(page_params: BmbpPageParam<#struct_query_ident>) -> BmbpResp<PageVo<Self>> {
@@ -523,42 +641,43 @@ fn build_struct_curd_token(
                 if let Some(query_vo) = page_params.get_params() {
                     #(#struct_query_filter_sql_token)*
                 }
+                query.eq_("data_flag","-1");
                 Self::find_page_by_query(page_params.get_page_no(), page_params.get_page_size(), &query).await
             }
             pub async fn find_page_by_query(page_no: &usize, page_size: &usize,query:&Query) -> BmbpResp<PageVo<Self>> {
-                #orm_ident::select_page_by_query(page_no, page_size, &query)
-            .await
+                #orm_ident::select_page_by_query(page_no, page_size, &query).await
             }
 
             pub async fn find_list(query_vo: #struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
                 let mut query = #struct_ident::build_query_sql();
                 #(#struct_query_filter_sql_token)*
-                Ok(None)
+                query.eq_("data_flag","0");
+                Self::find_list_by_query(&query).await
             }
             pub async fn find_all_list(query_vo:#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
                 let mut query = #struct_ident::build_query_sql();
                 #(#struct_query_filter_sql_token)*
-                Ok(None)
+               Self::find_list_by_query(&query).await
             }
             pub async fn find_removed_list(query_vo:#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
                 let mut query = #struct_ident::build_query_sql();
                 #(#struct_query_filter_sql_token)*
-                Ok(None)
+                query.eq_("data_flag","-1");
+                Self::find_list_by_query(&query).await
             }
             pub async fn find_list_by_query(query:&Query)-> BmbpResp<Option<Vec<Self>>> {
-                Ok(None)
+                #orm_ident::select_list_by_query(query).await
             }
             pub async fn find_by_id(id: &Option<String>) -> BmbpResp<Option<Self>> {
                 let mut query = #struct_ident::build_query_sql();
-                 query.eq_(Self::get_table_primary_key(),id);
-                Ok(None)
+                query.eq_(Self::get_table_primary_key(),id);
+                #orm_ident::select_one_by_query(&query).await
             }
 
             pub async fn find_one(&self) -> BmbpResp<Option<Self>> {
                 Self::find_by_id(&self.get_data_id()).await
             }
             pub async fn save(&mut self) -> BmbpResp<Option<Self>> {
-                 println!("model:{:#?}",self);
                 let model = self.find_one().await?;
                 if model.is_some() {
                     self.update().await?;
@@ -567,53 +686,87 @@ fn build_struct_curd_token(
                 }
                 self.find_one().await
             }
-            pub async fn insert(&self) -> BmbpResp<usize> {
+            pub async fn insert(&mut self) -> BmbpResp<usize> {
+                // 初始化数据
+                self.init_insert_data();
                 let insert = self.build_insert_sql();
                 #orm_ident::execute_insert(&insert).await
             }
-            pub async fn update(&self) -> BmbpResp<usize> {
-                let insert = self.build_update_sql();
-                Ok(0)
+            pub async fn update(&mut self) -> BmbpResp<usize> {
+                self.init_update_data();
+                let update = self.build_update_sql();
+                #orm_ident::execute_update(&update).await
             }
             pub async fn remove(&self) -> BmbpResp<usize> {
-                Ok(0)
+                if self.get_data_id().is_none() {
+                    return Err(BmbpError::service("请指定要删除的记录"));
+                }
+                let remove = Self::build_remove_sql(self.get_data_id());
+                #orm_ident::execute_delete(&remove).await
             }
             pub async fn remove_logic(&self) -> BmbpResp<usize> {
-                Ok(0)
+                if self.get_data_id().is_none() {
+                    return Err(BmbpError::service("请指定要删除的记录"));
+                }
+                let update = Self::build_update_flag_sql(self.get_data_id(),"-1".to_string());
+                #orm_ident::execute_update(&update).await
             }
             pub async fn enable(&self) -> BmbpResp<usize> {
-                Ok(0)
+                if self.get_data_id().is_none() {
+                    return Err(BmbpError::service("请指定要启用的记录"));
+                }
+                let update = Self::build_enable_sql(self.get_data_id());
+                #orm_ident::execute_update(&update).await
             }
             pub async fn disable(&self) -> BmbpResp<usize> {
-                Ok(0)
+                if self.get_data_id().is_none() {
+                    return Err(BmbpError::service("请指定要停用的记录"));
+                }
+                let update = Self::build_disable_sql(self.get_data_id());
+                #orm_ident::execute_update(&update).await
             }
 
 
-            pub async fn remove_by_id(id: Option<&String>) -> BmbpResp<usize> {
-                Ok(0)
+            pub async fn remove_by_id(id: &Option<String>) -> BmbpResp<usize> {
+                if id.is_none() {
+                    return Err(BmbpError::service("请指定要删除的记录"));
+                }
+                let update = Self::build_disable_sql(id);
+                #orm_ident::execute_update(&update).await
             }
             pub async fn remove_by_id_slice(id: &[String]) -> BmbpResp<usize> {
                 Ok(0)
             }
-             pub async fn remove_logic_by_id(id: Option<&String>) -> BmbpResp<usize> {
-                Ok(0)
+             pub async fn remove_logic_by_id(id: &Option<String>) -> BmbpResp<usize> {
+                if id.is_none() {
+                    return Err(BmbpError::service("请指定要删除的记录"));
+                }
+                let update = Self::build_update_flag_sql(id,"-1".to_string());
+                #orm_ident::execute_update(&update).await
             }
             pub async fn remove_logic_by_id_slice(id: &[String]) -> BmbpResp<usize> {
                 Ok(0)
             }
-            pub async fn enable_by_id(id: Option<String>) -> BmbpResp<usize> {
-                Ok(0)
+            pub async fn enable_by_id(id: &Option<String>) -> BmbpResp<usize> {
+                if id.is_none() {
+                    return Err(BmbpError::service("请指定要启用的记录"));
+                }
+                let update = Self::build_enable_sql(id);
+                #orm_ident::execute_update(&update).await
             }
             pub async fn enable_by_id_slice(id: &[String]) -> BmbpResp<usize> {
                 Ok(0)
             }
-            pub async fn disable_by_id(id: Option<String>) -> BmbpResp<usize> {
-                Ok(0)
+            pub async fn disable_by_id(id: &Option<String>) -> BmbpResp<usize> {
+                 if id.is_none() {
+                    return Err(BmbpError::service("请指定要停用的记录"));
+                }
+                let update = Self::build_disable_sql(id);
+                #orm_ident::execute_update(&update).await
             }
             pub async fn disable_by_id_slice(id: &[String]) -> BmbpResp<usize> {
                 Ok(0)
             }
-
         }
     };
     token

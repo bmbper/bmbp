@@ -14,9 +14,11 @@ syn = { workspace = true }
 proc-macro2 = "*"
 case_style = { workspace = true }
 serde = { workspace = true }
-uuid = { workspace = true }
+
 bmbp_rdbc_orm = { path = "../bmbp_rdbc_orm" }
 bmbp_app_common = { path = "../bmbp_app_common" }
 salvo = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }

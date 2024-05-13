@@ -1,10 +1,9 @@
-use case_style::Token;
 use proc_macro::TokenStream;
-use quote::{format_ident, quote, ToTokens};
+use quote::{format_ident, quote};
 use std::collections::HashMap;
 use syn::parse::Parse;
 use syn::punctuated::Punctuated;
-use syn::{DeriveInput, Field, Lit, LitStr, Meta, Token, Type, TypePath};
+use syn::{DeriveInput, Field, Lit, Meta, Token, Type, TypePath};
 
 use crate::types::{ValidMeta, ValidRule, ValidRuleMethod};
 use uuid::Uuid;
