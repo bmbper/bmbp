@@ -2,44 +2,55 @@ use proc_macro::{TokenStream, TokenTree};
 
 use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::{format_ident, quote, ToTokens};
-use syn::{parse_macro_input, DeriveInput, Field};
+use syn::{parse_macro_input, parse_quote, DeriveInput, Field};
 
 use crate::consts::*;
 use crate::types::{ATTRS_QUERY, ATTRS_RDBC_SKIP};
 use crate::utils::{
-    build_base_struct_model, camel_to_snake, get_query_type, get_struct_field,
+    camel_to_snake, get_base_model, get_base_tree_model, get_query_type, get_struct_field,
     get_struct_field_by_attrs, get_struct_field_name_map, get_valid_field, has_rdbc_attr,
     is_struct_option_field,
 };
 
 pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> TokenStream {
-    let base_model_token_stream = build_base_struct_model();
-    let base_input_token = parse_macro_input!(base_model_token_stream as DeriveInput);
+    // 基础模型
+    let base_model_token = get_base_model();
+    let base_input = parse_macro_input!(base_model_token as DeriveInput);
+    let base_tree_model_token = get_base_tree_model();
+    let base_tree_input = parse_macro_input!(base_tree_model_token as DeriveInput);
     let model_input_token = parse_macro_input!(model_token as DeriveInput);
-    // 表名称
+
+    // 结构体名称
     let struct_ident = &model_input_token.ident;
+    // 表名
     let struct_table_name = build_struct_table_name(&meta_token, struct_ident);
-    let struct_field_vec = build_struct_field_vec(&base_input_token, &model_input_token);
+    // 树名称
+    let struct_tree_prefix = build_struct_tree_prefix(&meta_token, struct_ident);
+    let struct_field_vec = build_struct_field_vec(
+        &base_input,
+        &model_input_token,
+        &base_tree_input,
+        struct_tree_prefix,
+    );
 
     let mut model_struct_macro_token: Vec<TokenStream2> = vec![];
-
     //构建查询结构体
     // 构建查询结构体-属性
     let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
-    let struct_query_field_vec = get_struct_field_by_attrs(&model_input_token, ATTRS_QUERY);
+    let struct_query_field_vec = get_field_by_attrs(struct_field_vec.as_slice(), ATTRS_QUERY);
+    /// 查询结构体
     let model_struct_query_token =
         build_struct_query_model_token(&struct_query_ident, struct_query_field_vec.as_slice());
-    model_struct_macro_token.push(model_struct_query_token);
+
+    /// 查询结构体方法
     let mode_struct_query_impl_token =
         build_struct_query_impl_token(&struct_query_ident, struct_query_field_vec.as_slice());
-    model_struct_macro_token.push(mode_struct_query_impl_token);
 
     // 构建结构体-增加默认字段
     let model_struct_token = build_struct_model_token(struct_ident, struct_field_vec.as_slice());
     // 构建结构体-实现属性方法
     let model_impl_get_set_token =
         build_struct_impl_get_set_token(struct_ident, struct_field_vec.as_slice());
-
     // 构建结构体-获取表名称、获取字段的方法
     let model_impl_orm_table_token = build_struct_impl_orm_table_token(
         struct_ident,
@@ -65,13 +76,14 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     );
 
     /// 构建结构体-orm 增删改查方法
-    let model_valid_token = build_struct_valid_token(struct_ident, &model_input_token);
+    let model_valid_token = build_struct_valid_token(struct_ident, struct_field_vec.as_slice());
 
     /// 构建结构体-handler-web接口方法
     let model_handler_token = build_struct_handler_token(struct_ident, struct_field_vec.as_slice());
     /// 构建结构体-router-路由方法
     let model_router_token = build_struct_router_token(struct_ident, struct_field_vec.as_slice());
-
+    model_struct_macro_token.push(model_struct_query_token);
+    model_struct_macro_token.push(mode_struct_query_impl_token);
     model_struct_macro_token.push(model_struct_token);
     model_struct_macro_token.push(model_impl_get_set_token);
     model_struct_macro_token.push(model_impl_orm_table_token);
@@ -89,9 +101,23 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     final_token.into()
 }
 
+fn get_field_by_attrs(field_slice: &[Field], attrs: &str) -> Vec<Field> {
+    let mut field_vec = vec![];
+    for field in field_slice {
+        if has_rdbc_attr(field, attrs) {
+            field_vec.push(field.clone());
+        }
+    }
+    field_vec
+}
+
+fn build_struct_tree_prefix(meta: &TokenStream, struct_ident: &Ident) -> Option<String> {
+    None
+}
+
 /// 构建结构体-数据校验方法
-fn build_struct_valid_token(struct_ident: &Ident, model_input_token: &DeriveInput) -> TokenStream2 {
-    let (insert_valid, update_valid) = get_valid_field(model_input_token);
+fn build_struct_valid_token(struct_ident: &Ident, struct_field_slice: &[Field]) -> TokenStream2 {
+    let (insert_valid, update_valid) = get_valid_field(struct_field_slice);
     println!("===insert=======>{}", insert_valid.len());
     println!("===update=======>{}", update_valid.len());
     quote! {
@@ -138,17 +164,40 @@ fn build_struct_from_rdbc_orm_row_token(
     final_token
 }
 
+/// build_struct_field_vec 构建字段集合
 fn build_struct_field_vec(
     base_struct_input: &DeriveInput,
-    struct_input: &DeriveInput,
+    model_struct_input: &DeriveInput,
+    tree_input: &DeriveInput,
+    struct_tree_prefix: Option<String>,
 ) -> Vec<Field> {
-    let base_field = get_struct_field(base_struct_input);
-    let mut model_field = get_struct_field(struct_input);
+    let struct_ident = &model_struct_input.ident;
+    // 结构体字段
+    let mut model_field = get_struct_field(model_struct_input);
     let model_field_map = get_struct_field_name_map(&model_field);
+    // 公共字段
+    let base_field = get_struct_field(base_struct_input);
     for mut field in base_field {
         let field_name = field.ident.as_mut().unwrap().to_string();
         if !model_field_map.contains_key(field_name.as_str()) {
             model_field.push(field);
+        }
+    }
+    // 公共树字段
+    if let Some(tree_prefix) = struct_tree_prefix {
+        let tree_field = get_struct_field(tree_input);
+        for mut field in tree_field {
+            let mut field_name = field.ident.as_mut().unwrap().to_string();
+            if field_name.eq("children") {
+                field.ty = parse_quote! { Option<Vec<#struct_ident>> };
+            } else {
+                let field_ident = format_ident!("{}_{}", tree_prefix, field_name);
+                field.ident = Some(field_ident);
+                let field_name = field.ident.as_mut().unwrap().to_string();
+                if !model_field_map.contains_key(field_name.as_str()) {
+                    model_field.push(field);
+                }
+            }
         }
     }
     model_field
@@ -912,7 +961,6 @@ fn build_struct_handler_token(struct_ident: &Ident, struct_fields: &[Field]) -> 
     let remove_logic_batch_name = format_ident!("{}_remove_logic_batch", struct_name);
     let enable_name = format_ident!("{}_enable", struct_name);
     let disable_name = format_ident!("{}_disable", struct_name);
-
     let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
     quote! {
         #[handler]

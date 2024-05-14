@@ -15,6 +15,7 @@ fn test_rdbc_model_empty() {
     use bmbp_rdbc_orm::RdbcORM;
     use bmbp_rdbc_orm::RdbcOrmRow;
     use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
+    use chrono::Utc;
     use salvo::*;
     use tracing::*;
     #[rdbc_model]

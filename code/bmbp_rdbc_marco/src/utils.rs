@@ -8,18 +8,26 @@ use syn::{DeriveInput, Field, Lit, Meta, Token, Type, TypePath};
 use crate::types::{ValidMeta, ValidRule, ValidRuleMethod};
 use uuid::Uuid;
 
-/// 构建基础模型
-pub(crate) fn build_base_struct_model() -> TokenStream {
+/// 获取基础模型
+pub(crate) fn get_base_model() -> TokenStream {
     let base_model = quote! {
          pub struct BmbpOrmBaseModel {
+             #[query(eq)]
              data_id: Option<String>,
+             #[query(eq)]
              data_level: Option<String>,
+             #[query(eq)]
              data_flag: Option<String>,
+             #[query(eq)]
              data_status: Option<String>,
              data_sort: Option<i32>,
+             #[query(bet)]
              data_create_time: Option<String>,
+             #[query(eq)]
              data_create_user: Option<String>,
+             #[query(bet)]
              data_update_time: Option<String>,
+             #[query(eq)]
              data_update_user: Option<String>,
              data_owner_org: Option<String>,
              data_sign: Option<String>,
@@ -27,6 +35,35 @@ pub(crate) fn build_base_struct_model() -> TokenStream {
     };
     base_model.into()
 }
+/// 获取基础树型模型
+pub(crate) fn get_base_tree_model() -> TokenStream {
+    let base_tree_model = quote! {
+         pub struct BmbpOrmTreeModel {
+             // 编码
+             #[query(eq)]
+             code: Option<String>,
+             // 上级编码
+             #[query(eq)]
+             parent_code: Option<String>,
+             // 编码路径
+             #[query(like)]
+             code_path: Option<String>,
+             // 名称
+             #[query(like)]
+             name: Option<String>,
+             // 名称路径
+             #[query(like)]
+             name_path: Option<String>,
+             // 层级
+             #[query(eq)]
+             grade: Option<i32>,
+             #[rdbc_skip]
+             children: Option<Vec<BmbpOrmBaseModel>>,
+         }
+    };
+    base_tree_model.into()
+}
+
 /// 获取结构体字段
 pub(crate) fn get_struct_field(derive_input: &DeriveInput) -> Vec<Field> {
     let mut field_vec = vec![];
@@ -135,35 +172,24 @@ pub(crate) fn get_query_type(field: &Field) -> String {
     field_type
 }
 
-pub(crate) fn get_valid_field(derive_input: &DeriveInput) -> (Vec<ValidMeta>, Vec<ValidMeta>) {
+pub(crate) fn get_valid_field(struct_fields: &[Field]) -> (Vec<ValidMeta>, Vec<ValidMeta>) {
     let mut insert_valid_field = vec![];
     let mut update_valid_field = vec![];
-    match &derive_input.data {
-        syn::Data::Struct(data_struct) => match &data_struct.fields {
-            syn::Fields::Named(fields_named) => {
-                for field in fields_named.named.iter() {
-                    let field_name = field.ident.clone().unwrap().to_string();
-                    for attr_items in field.attrs.iter() {
-                        if attr_items.path().is_ident("valid") {
-                            let (insert_rule, update_rule) = parse_valid_item(
-                                attr_items.meta.clone(),
-                                &ValidRuleMethod::INSERT_UPDATE,
-                            );
-                            if !insert_rule.is_empty() {
-                                let insert_valid = ValidMeta::new(field.clone(), insert_rule);
-                                insert_valid_field.push(insert_valid);
-                            }
-                            if !update_rule.is_empty() {
-                                let update_valid = ValidMeta::new(field.clone(), update_rule);
-                                update_valid_field.push(update_valid);
-                            }
-                        }
-                    }
+    for field in struct_fields {
+        for attr_items in field.attrs.iter() {
+            if attr_items.path().is_ident("valid") {
+                let (insert_rule, update_rule) =
+                    parse_valid_item(attr_items.meta.clone(), &ValidRuleMethod::INSERT_UPDATE);
+                if !insert_rule.is_empty() {
+                    let insert_valid = ValidMeta::new(field.clone(), insert_rule);
+                    insert_valid_field.push(insert_valid);
+                }
+                if !update_rule.is_empty() {
+                    let update_valid = ValidMeta::new(field.clone(), update_rule);
+                    update_valid_field.push(update_valid);
                 }
             }
-            _ => {}
-        },
-        _ => {}
+        }
     }
     (insert_valid_field, update_valid_field)
 }
