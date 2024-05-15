@@ -3,6 +3,7 @@ use crate::organ::organ_router;
 use crate::role::role_router;
 use crate::user::user_router;
 use salvo::Router;
+
 pub fn build_rbac_router() -> Router {
     Router::with_path("/rbac/v1")
         .push(Router::with_path("/app").push(app_router()))
