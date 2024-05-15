@@ -1,110 +1,116 @@
-use proc_macro::{TokenStream, TokenTree};
+use proc_macro::TokenStream;
 
 use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::{format_ident, quote, ToTokens};
-use salvo::Router;
 use syn::parse::Parser;
-use syn::{meta, parse, parse_macro_input, parse_quote, Attribute, DeriveInput, Field};
+use syn::{parse_macro_input, parse_quote, DeriveInput, Field};
 
 use crate::consts::*;
-use crate::types::{RdbcModelMeta, ATTRS_QUERY, ATTRS_RDBC_SKIP};
+use crate::types::RdbcMeta;
 use crate::utils::{
-    camel_to_snake, get_base_model, get_base_tree_model, get_query_type, get_struct_field,
-    get_struct_field_by_attrs, get_struct_field_name_map, get_valid_field, has_rdbc_attr,
-    is_struct_option_field,
+    build_base_struct_token, build_base_tree_struct_token, build_struct_field_cache,
+    camel_to_snake, field_has_attribute_args, field_has_option_type, filter_field_by_marco_attrs,
+    parse_field_slice_valid_meta, parse_filed_from_struct, parse_query_meta,
 };
 
 pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> TokenStream {
-    // 基础模型
-    let base_model_token = get_base_model();
-    let base_input = parse_macro_input!(base_model_token as DeriveInput);
-    let base_tree_model_token = get_base_tree_model();
-    let base_tree_input = parse_macro_input!(base_tree_model_token as DeriveInput);
-    let model_input_token = parse_macro_input!(model_token as DeriveInput);
-
-    // 结构体名称
-    let struct_ident = &model_input_token.ident;
-
-    // 表名
-    let mut mode_meta: RdbcModelMeta = parse_macro_input!(meta_token as RdbcModelMeta);
+    // 获取结构体名称
+    let struct_input_token = parse_macro_input!(model_token as DeriveInput);
+    let struct_ident = &struct_input_token.ident;
+    // 获取RDBC_MODEL宏参数
+    let mut mode_meta: RdbcMeta = parse_macro_input!(meta_token as RdbcMeta);
     if mode_meta.get_table_name().is_none() || mode_meta.get_table_name().unwrap().is_empty() {
         mode_meta.set_table_name(camel_to_snake(struct_ident.to_string()));
-    } else {
-        mode_meta.set_table_name(camel_to_snake(mode_meta.get_table_name().unwrap()));
     }
-    // 树名称
-    let struct_tree_prefix = mode_meta.get_tree_prefix();
+    // 表名称
     let struct_table_name = mode_meta.get_table_name().unwrap();
+    // 树前缀
+    let struct_tree_prefix = mode_meta.get_tree_prefix();
 
-    let struct_field_vec = build_struct_field_vec(
-        &base_input,
-        &model_input_token,
-        &base_tree_input,
-        &struct_tree_prefix,
-    );
+    // 提取结构体字段
+    let mut struct_field_vec = parse_filed_from_struct(&struct_input_token);
+    let struct_field_cache = build_struct_field_cache(&struct_field_vec);
+    // 树型结构 增加树型字段
+    if let Some(ref tree_prefix) = struct_tree_prefix {
+        let base_tree_struct_token = build_base_tree_struct_token();
+        let base_tree_struct_input = parse_macro_input!(base_tree_struct_token as DeriveInput);
+        let base_tree_struct_field_vec = parse_filed_from_struct(&base_tree_struct_input);
+        for mut field in base_tree_struct_field_vec {
+            let mut field_name = field.ident.as_mut().unwrap().to_string();
+            if field_name.eq("children") {
+                field.ty = parse_quote! { Option<Vec<#struct_ident>> };
+            } else {
+                let field_ident = format_ident!("{}_{}", tree_prefix, field_name);
+                field.ident = Some(field_ident);
+                let field_name = field.ident.as_mut().unwrap().to_string();
+                if !struct_field_cache.contains_key(field_name.as_str()) {
+                    struct_field_vec.push(field);
+                }
+            }
+        }
+    }
+    // 追加公共字段
+    let base_struct_token = build_base_struct_token();
+    let base_struct_input = parse_macro_input!(base_struct_token as DeriveInput);
+    let base_struct_field_vec = parse_filed_from_struct(&base_struct_input);
+    for mut field in base_struct_field_vec {
+        let field_name = field.ident.as_mut().unwrap().to_string();
+        if !struct_field_cache.contains_key(field_name.as_str()) {
+            struct_field_vec.push(field);
+        }
+    }
 
+    // 构建语法树
     let mut model_struct_macro_token: Vec<TokenStream2> = vec![];
-    //构建查询结构体
-    // 构建查询结构体-属性
-    let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
-    let struct_query_field_vec = get_field_by_attrs(struct_field_vec.as_slice(), ATTRS_QUERY);
-    /// 查询结构体
-    let model_struct_query_token =
-        build_struct_query_model_token(&struct_query_ident, struct_query_field_vec.as_slice());
 
-    /// 查询结构体方法
-    let mode_struct_query_impl_token =
-        build_struct_query_impl_token(&struct_query_ident, struct_query_field_vec.as_slice());
+    // 查询结构
+    let query_struct = build_query_struct_token(struct_ident, struct_field_vec.as_slice());
+    model_struct_macro_token.push(query_struct);
+    // 模型结构
+    let model_struct_token = build_struct_token(struct_ident, struct_field_vec.as_slice());
+    model_struct_macro_token.push(model_struct_token);
+    // 构建初始化数据的方法
+    let model_data_init_token =
+        build_struct_init_data_token(struct_ident, struct_field_vec.as_slice());
+    model_struct_macro_token.push(model_data_init_token);
 
-    // 构建结构体-增加默认字段
-    let model_struct_token = build_struct_model_token(struct_ident, struct_field_vec.as_slice());
-    // 构建结构体-实现属性方法
-    let model_impl_get_set_token =
-        build_struct_impl_get_set_token(struct_ident, struct_field_vec.as_slice());
     // 构建结构体-获取表名称、获取字段的方法
-    let model_impl_orm_table_token = build_struct_impl_orm_table_token(
+    let struct_table_method_token = build_struct_table_method_token(
         struct_ident,
         &struct_table_name,
-        struct_field_vec.as_slice(),
+        filter_field_by_marco_attrs(&struct_field_vec, ATTRS_RDBC_SKIP, true).as_slice(),
     );
-    /// 构建结构体-增删 改查 脚本
-    let model_impl_sql_token =
-        build_struct_impl_script_token(&struct_ident, struct_field_vec.as_slice());
-
-    /// 构建结构体-RdbcOrmRow的转换
-    let model_from_rdbc_orm_row_token =
-        build_struct_from_rdbc_orm_row_token(struct_ident, struct_field_vec.as_slice());
-
-    /// 构建结构体-orm 操作数据库
-    let model_orm_token = build_struct_orm_token(&struct_ident);
-
-    /// 构建结构体-orm 增删改查方法
-    let model_curd_token = build_struct_curd_token(
+    model_struct_macro_token.push(struct_table_method_token);
+    // 增删改查方法
+    let struct_curd_method_token = build_struct_curd_method_token(
         struct_ident,
         struct_field_vec.as_slice(),
-        struct_query_field_vec.as_slice(),
         struct_tree_prefix.is_some(),
     );
+    model_struct_macro_token.push(struct_curd_method_token);
+    // 校验方法
+    let struct_valid_method_token =
+        build_struct_valid_method_token(struct_ident, struct_field_vec.as_slice());
+    model_struct_macro_token.push(struct_valid_method_token);
 
-    /// 构建结构体-orm 增删改查方法
-    let model_valid_token = build_struct_valid_token(struct_ident, struct_field_vec.as_slice());
+    // SQL
+    let struct_sql_method_token =
+        build_struct_sql_method_token(&struct_ident, struct_field_vec.as_slice());
+    model_struct_macro_token.push(struct_sql_method_token);
+    let struct_orm_token = build_struct_orm_token(&struct_ident);
+    model_struct_macro_token.push(struct_orm_token);
+
+    // 构建结构体-RdbcOrmRow的转换
+    let struct_impl_for_from_trait_for_rdbc_orm_row_token =
+        build_struct_impl_for_from_rdbc_orm_row_token(struct_ident, struct_field_vec.as_slice());
+    model_struct_macro_token.push(struct_impl_for_from_trait_for_rdbc_orm_row_token);
 
     /// 构建结构体-handler-web接口方法
-    let model_handler_token =
-        build_struct_handler_token(struct_ident, struct_tree_prefix.is_some());
+    let struct_web_handler_token =
+        build_struct_web_handler_token(struct_ident, struct_tree_prefix.is_some());
+    model_struct_macro_token.push(struct_web_handler_token);
     /// 构建结构体-router-路由方法
     let model_router_token = build_struct_router_token(struct_ident, struct_tree_prefix.is_some());
-    model_struct_macro_token.push(model_struct_query_token);
-    model_struct_macro_token.push(mode_struct_query_impl_token);
-    model_struct_macro_token.push(model_struct_token);
-    model_struct_macro_token.push(model_impl_get_set_token);
-    model_struct_macro_token.push(model_impl_orm_table_token);
-    model_struct_macro_token.push(model_impl_sql_token);
-    model_struct_macro_token.push(model_from_rdbc_orm_row_token);
-    model_struct_macro_token.push(model_orm_token);
-    model_struct_macro_token.push(model_curd_token);
-    model_struct_macro_token.push(model_valid_token);
-    model_struct_macro_token.push(model_handler_token);
     model_struct_macro_token.push(model_router_token);
     let final_token = quote! {
        #(#model_struct_macro_token)*
@@ -112,66 +118,13 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     println!("最终输出{}", final_token.to_string());
     final_token.into()
 }
-
-fn get_field_by_attrs(field_slice: &[Field], attrs: &str) -> Vec<Field> {
-    let mut field_vec = vec![];
-    for field in field_slice {
-        if has_rdbc_attr(field, attrs) {
-            field_vec.push(field.clone());
-        }
-    }
-    field_vec
+fn build_query_struct_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+    // 构建查询结构体
+    let query_struct_ident = format_ident!("{}QueryVo", struct_ident);
+    // 查询结构字段
+    let query_struct_field_vec = filter_field_by_marco_attrs(struct_fields, ATTRS_QUERY, false);
+    build_struct_token(&query_struct_ident, query_struct_field_vec.as_slice())
 }
-
-/// 构建结构体-数据校验方法
-fn build_struct_valid_token(struct_ident: &Ident, struct_field_slice: &[Field]) -> TokenStream2 {
-    let (insert_valid, update_valid) = get_valid_field(struct_field_slice);
-    println!("===insert=======>{}", insert_valid.len());
-    println!("===update=======>{}", update_valid.len());
-    quote! {
-        impl #struct_ident {
-            pub fn insert_valid(&self) -> BmbpResp<()> {
-                Ok(())
-            }
-            pub fn update_valid(&self) -> BmbpResp<()> {
-                Ok(())
-            }
-        }
-    }
-}
-
-fn build_struct_from_rdbc_orm_row_token(
-    struct_ident: &Ident,
-    struct_fields: &[Field],
-) -> TokenStream2 {
-    let mut field_set_value_vec = vec![];
-    for field in struct_fields {
-        if has_rdbc_attr(field, ATTRS_RDBC_SKIP) {
-            continue;
-        }
-        let field_ident = field.ident.as_ref().unwrap();
-        let field_name = field_ident.to_string();
-        let field_method = format_ident!("set_{}", field_ident);
-        let t_ = quote! {
-          if let Some(data) = row.get_data().get(#field_name) {
-              model.#field_method(Some(data.into()));
-          }
-        };
-        field_set_value_vec.push(t_);
-    }
-
-    let final_token = quote! {
-        impl From<RdbcOrmRow> for #struct_ident {
-            fn from(row: RdbcOrmRow) -> Self {
-                let mut model = #struct_ident::new();
-                #(#field_set_value_vec)*
-                model
-            }
-        }
-    };
-    final_token
-}
-
 /// build_struct_field_vec 构建字段集合
 fn build_struct_field_vec(
     base_struct_input: &DeriveInput,
@@ -181,10 +134,10 @@ fn build_struct_field_vec(
 ) -> Vec<Field> {
     let struct_ident = &model_struct_input.ident;
     // 结构体字段
-    let mut model_field = get_struct_field(model_struct_input);
-    let model_field_map = get_struct_field_name_map(&model_field);
+    let mut model_field = parse_filed_from_struct(model_struct_input);
+    let model_field_map = build_struct_field_cache(&model_field);
     // 公共字段
-    let base_field = get_struct_field(base_struct_input);
+    let base_field = parse_filed_from_struct(base_struct_input);
     for mut field in base_field {
         let field_name = field.ident.as_mut().unwrap().to_string();
         if !model_field_map.contains_key(field_name.as_str()) {
@@ -193,7 +146,7 @@ fn build_struct_field_vec(
     }
     // 公共树字段
     if let Some(tree_prefix) = struct_tree_prefix {
-        let tree_field = get_struct_field(tree_input);
+        let tree_field = parse_filed_from_struct(tree_input);
         for mut field in tree_field {
             let mut field_name = field.ident.as_mut().unwrap().to_string();
             if field_name.eq("children") {
@@ -210,25 +163,31 @@ fn build_struct_field_vec(
     }
     model_field
 }
-
-fn build_struct_model_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
-    let struct_model_fields = build_struct_field_token(struct_fields);
-    let token = quote! {
+fn build_struct_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+    let struct_opt_field_vec = build_struct_field_token(struct_fields);
+    let struct_method_token = build_struct_field_method_set_get_token(struct_fields);
+    quote! {
         #[derive(Default, Debug, Clone, Serialize, Deserialize)]
         #[serde(rename_all = "camelCase")]
         #[serde(default)]
         pub struct #struct_ident {
-            #(#struct_model_fields,)*
+               #(#struct_opt_field_vec,)*
         }
-    };
-    token
+
+        impl #struct_ident {
+            pub fn new() -> Self {
+                Self::default()
+            }
+            #(#struct_method_token)*
+        }
+    }
 }
 fn build_struct_field_token(struct_fields: &[Field]) -> Vec<TokenStream2> {
     let mut field_vec = vec![];
     for field in struct_fields {
         let field_ident = field.ident.as_ref().unwrap();
         let field_type = &field.ty;
-        if is_struct_option_field(field_type) {
+        if field_has_option_type(field_type) {
             field_vec.push(quote! {
                  #field_ident: #field_type
             });
@@ -241,53 +200,20 @@ fn build_struct_field_token(struct_fields: &[Field]) -> Vec<TokenStream2> {
     field_vec
 }
 
-fn build_struct_impl_get_set_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
-    let struct_method_token = build_struct_impl_method_token_vec(struct_fields);
-    let struct_init_data_token = build_struct_impl_init_data_method_token_vec(struct_fields);
+fn build_struct_field_method_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+    let struct_method_token = build_struct_field_method_set_get_token(struct_fields);
     let token = quote! {
         impl #struct_ident {
             pub fn new() -> Self {
                 Self::default()
             }
             #(#struct_method_token)*
-            #(#struct_init_data_token)*
         }
     };
     token
 }
 
-fn build_struct_query_model_token(
-    struct_query_ident: &Ident,
-    query_fields: &[Field],
-) -> TokenStream2 {
-    let struct_query_field = build_struct_field_token(query_fields);
-    quote! {
-        #[derive(Default, Debug, Clone, Serialize, Deserialize)]
-        #[serde(rename_all = "camelCase")]
-        #[serde(default)]
-        pub struct #struct_query_ident {
-               #(#struct_query_field,)*
-        }
-    }
-}
-
-fn build_struct_query_impl_token(
-    struct_query_ident: &Ident,
-    struct_fields: &[Field],
-) -> TokenStream2 {
-    let struct_method_token = build_struct_impl_method_token_vec(struct_fields);
-    let token = quote! {
-        impl #struct_query_ident {
-            pub fn new() -> Self {
-                Self::default()
-            }
-            #(#struct_method_token)*
-        }
-    };
-    token
-}
-
-fn build_struct_impl_method_token_vec(struct_fields: &[Field]) -> Vec<TokenStream2> {
+fn build_struct_field_method_set_get_token(struct_fields: &[Field]) -> Vec<TokenStream2> {
     let mut method_vec = vec![];
     for item in struct_fields {
         let field_name = item.ident.as_ref().unwrap();
@@ -295,7 +221,7 @@ fn build_struct_impl_method_token_vec(struct_fields: &[Field]) -> Vec<TokenStrea
         let get_method_name = format_ident!("get_{}", field_name);
         let get_mut_method_name = format_ident!("get_mut_{}", field_name);
         let field_type = &item.ty;
-        let method_token = if is_struct_option_field(field_type) {
+        let method_token = if field_has_option_type(field_type) {
             quote! {
                 pub fn #set_method_name(&mut self, value: #field_type) -> &mut Self {
                     self.#field_name = value;
@@ -326,7 +252,15 @@ fn build_struct_impl_method_token_vec(struct_fields: &[Field]) -> Vec<TokenStrea
     }
     method_vec
 }
-fn build_struct_impl_init_data_method_token_vec(struct_fields: &[Field]) -> Vec<TokenStream2> {
+fn build_struct_init_data_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+    let init_data_method_token = build_struct_init_data_method_token(struct_fields);
+    quote! {
+        impl #struct_ident {
+            #(#init_data_method_token)*
+        }
+    }
+}
+fn build_struct_init_data_method_token(struct_fields: &[Field]) -> Vec<TokenStream2> {
     let mut method_vec = vec![];
     let mut insert_data_value = vec![];
     let mut update_data_value = vec![];
@@ -442,40 +376,10 @@ fn build_struct_impl_init_data_method_token_vec(struct_fields: &[Field]) -> Vec<
     });
     method_vec
 }
-fn build_struct_impl_orm_table_token(
-    struct_ident: &Ident,
-    struct_table_name: &String,
-    struct_fields: &[Field],
-) -> TokenStream2 {
-    let mut struct_columns = vec![];
-    for field in struct_fields {
-        if has_rdbc_attr(field, ATTRS_RDBC_SKIP) {
-            continue;
-        }
-        let field_name = field.ident.as_ref().unwrap();
-        struct_columns.push(field_name.to_string());
-    }
-    let token = quote! {
-        impl #struct_ident {
-            pub fn get_table_name() -> String {
-                return #struct_table_name.to_string();
-            }
-            pub fn get_table_primary_key() -> String {
-                return "data_id".to_string();
-            }
-            pub fn get_table_columns() -> Vec<String> {
-                return vec![
-                    #(#struct_columns.to_string(),)*
-                ];
-            }
-        }
-    };
-    token
-}
 
-fn build_struct_impl_script_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
-    let insert_sql_token = build_struct_sql_script_insert_token(struct_fields);
-    let update_sql_token = build_struct_sql_script_update_token(struct_fields);
+fn build_struct_sql_method_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+    let insert_sql_token = build_struct_sql_method_insert_token(struct_fields);
+    let update_sql_token = build_struct_sql_method_update_token(struct_fields);
     let sql_token = quote! {
         impl #struct_ident {
             pub fn build_query_sql() -> Query {
@@ -533,11 +437,35 @@ fn build_struct_impl_script_token(struct_ident: &Ident, struct_fields: &[Field])
     };
     sql_token
 }
-
-fn build_struct_sql_script_update_token(struct_fields: &[Field]) -> TokenStream2 {
+fn build_struct_sql_method_insert_token(struct_fields: &[Field]) -> TokenStream2 {
+    let mut insert_field_vec = vec![];
+    for field in struct_fields {
+        if field_has_attribute_args(field, ATTRS_RDBC_SKIP) {
+            continue;
+        }
+        let field_ident = field.ident.as_ref().unwrap();
+        let field_name = field_ident.to_string();
+        let field_method = format_ident!("get_{}", field_ident);
+        let insert_item = quote! {
+            if let Some(value) = self.#field_method() {
+                insert.insert_column_value(#field_name, value);
+            }
+        };
+        insert_field_vec.push(insert_item);
+    }
+    quote! {
+        pub fn build_insert_sql(&self) -> Insert {
+                let mut insert = Insert::new();
+                insert.table(Self::get_table_name());
+                #(#insert_field_vec)*
+                insert
+            }
+    }
+}
+fn build_struct_sql_method_update_token(struct_fields: &[Field]) -> TokenStream2 {
     let mut update_field_vec = vec![];
     for field in struct_fields {
-        if has_rdbc_attr(field, ATTRS_RDBC_SKIP) {
+        if field_has_attribute_args(field, ATTRS_RDBC_SKIP) {
             continue;
         }
         let field_ident = field.ident.as_ref().unwrap();
@@ -561,108 +489,39 @@ fn build_struct_sql_script_update_token(struct_fields: &[Field]) -> TokenStream2
     }
 }
 
-fn build_struct_sql_script_insert_token(struct_fields: &[Field]) -> TokenStream2 {
-    let mut insert_field_vec = vec![];
+fn build_struct_table_method_token(
+    struct_ident: &Ident,
+    struct_table_name: &String,
+    struct_fields: &[Field],
+) -> TokenStream2 {
+    let mut struct_columns = vec![];
     for field in struct_fields {
-        if has_rdbc_attr(field, ATTRS_RDBC_SKIP) {
-            continue;
-        }
-        let field_ident = field.ident.as_ref().unwrap();
-        let field_name = field_ident.to_string();
-        let field_method = format_ident!("get_{}", field_ident);
-        let insert_item = quote! {
-            if let Some(value) = self.#field_method() {
-                insert.insert_column_value(#field_name, value);
-            }
-        };
-        insert_field_vec.push(insert_item);
+        let field_name = field.ident.as_ref().unwrap();
+        struct_columns.push(field_name.to_string());
     }
-    quote! {
-        pub fn build_insert_sql(&self) -> Insert {
-                let mut insert = Insert::new();
-                insert.table(Self::get_table_name());
-                #(#insert_field_vec)*
-                insert
-            }
-    }
-}
-
-fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
-    let orm_ident = format_ident!("{}Orm", struct_ident);
     let token = quote! {
-        pub struct #orm_ident;
-        impl #orm_ident {
-            pub async fn select_page_by_query(
-                page_no: &usize,
-                page_size: &usize,
-                query: &Query,
-            ) -> BmbpResp<PageVo<#struct_ident>> {
-                match RdbcORM
-                    .await
-                    .select_page_by_query::<#struct_ident>(page_no.clone(), page_size.clone(), query)
-                    .await
-                {
-                    Ok(mut page) => {
-                        let mut page_vo = PageVo::new();
-                        page_vo.set_page_no(page.page_num().clone());
-                        page_vo.set_page_size(page.page_size().clone());
-                        page_vo.set_op_data(page.data_take());
-                        page_vo.set_row_total(page.total().clone());
-                        Ok(page_vo)
-                    }
-                    Err(e) => Err(BmbpError::service(e.get_msg().as_str())),
-                }
+        impl #struct_ident {
+            pub fn get_table_name() -> String {
+                return #struct_table_name.to_string();
             }
-                pub async fn select_list_by_query(query: &Query) -> BmbpResp<Option<Vec<#struct_ident>>> {
-                    match RdbcORM
-                        .await
-                        .select_list_by_query::<#struct_ident>(query)
-                        .await
-                    {
-                        Ok(data) => Ok(data),
-                        Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
-                    }
-                }
-                pub async fn select_one_by_query(query: &Query) -> BmbpResp<Option<#struct_ident>> {
-                    match RdbcORM
-                        .await
-                        .select_one_by_query::<#struct_ident>(query)
-                        .await
-                    {
-                        Ok(data) => Ok(data),
-                        Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
-                    }
-                }
-                pub async fn execute_insert(insert: &Insert) -> BmbpResp<usize> {
-                    match RdbcORM.await.execute_insert(insert).await {
-                        Ok(data) => Ok(data as usize),
-                        Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
-                    }
-                }
-                pub async fn execute_update(update: &Update) -> BmbpResp<usize> {
-                    match RdbcORM.await.execute_update(update).await {
-                        Ok(data) => Ok(data as usize),
-                        Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
-                    }
-                }
-                pub async fn execute_delete(delete: &Delete) -> BmbpResp<usize> {
-                    match RdbcORM.await.execute_delete(delete).await {
-                        Ok(data) => Ok(data as usize),
-                        Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
-                    }
-                }
+            pub fn get_table_primary_key() -> String {
+                return "data_id".to_string();
+            }
+            pub fn get_table_columns() -> Vec<String> {
+                return vec![
+                    #(#struct_columns.to_string(),)*
+                ];
+            }
         }
     };
     token
 }
-
-fn build_struct_curd_token(
+fn build_struct_curd_method_token(
     struct_ident: &Ident,
     struct_fields: &[Field],
-    struct_query_fields: &[Field],
     is_tree: bool,
 ) -> TokenStream2 {
-    let struct_query_filter_sql_token = build_struct_query_filter_token(struct_query_fields);
+    let struct_query_filter_sql_token = build_struct_curd_method_filter_token(struct_fields);
     let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
     let orm_ident = format_ident!("{}Orm", struct_ident);
 
@@ -885,14 +744,13 @@ fn build_struct_curd_token(
     };
     token
 }
-
-fn build_struct_query_filter_token(query_fields: &[Field]) -> Vec<TokenStream2> {
+fn build_struct_curd_method_filter_token(query_fields: &[Field]) -> Vec<TokenStream2> {
     let mut token_vec = vec![];
     for field in query_fields {
         let field_ident = field.ident.as_ref().unwrap();
         let field_name = field_ident.to_string();
         let get_method_name = format_ident!("get_{}", field_ident);
-        let query_type: String = get_query_type(field);
+        let query_type: String = parse_query_meta(field);
         match query_type.as_str() {
             "eq" => {
                 let query_token = quote! {
@@ -940,7 +798,125 @@ fn build_struct_query_filter_token(query_fields: &[Field]) -> Vec<TokenStream2> 
     token_vec
 }
 
-fn build_struct_handler_token(struct_ident: &Ident, is_tree: bool) -> TokenStream2 {
+/// 构建结构体-数据校验方法
+fn build_struct_valid_method_token(
+    struct_ident: &Ident,
+    struct_field_slice: &[Field],
+) -> TokenStream2 {
+    let (insert_valid, update_valid) = parse_field_slice_valid_meta(struct_field_slice);
+    println!("===insert=======>{}", insert_valid.len());
+    println!("===update=======>{}", update_valid.len());
+    quote! {
+        impl #struct_ident {
+            pub fn insert_valid(&self) -> BmbpResp<()> {
+                Ok(())
+            }
+            pub fn update_valid(&self) -> BmbpResp<()> {
+                Ok(())
+            }
+        }
+    }
+}
+fn build_struct_impl_for_from_rdbc_orm_row_token(
+    struct_ident: &Ident,
+    struct_fields: &[Field],
+) -> TokenStream2 {
+    let mut field_set_value_vec = vec![];
+    for field in struct_fields {
+        if field_has_attribute_args(field, ATTRS_RDBC_SKIP) {
+            continue;
+        }
+        let field_ident = field.ident.as_ref().unwrap();
+        let field_name = field_ident.to_string();
+        let field_method = format_ident!("set_{}", field_ident);
+        let t_ = quote! {
+          if let Some(data) = row.get_data().get(#field_name) {
+              model.#field_method(Some(data.into()));
+          }
+        };
+        field_set_value_vec.push(t_);
+    }
+
+    let final_token = quote! {
+        impl From<RdbcOrmRow> for #struct_ident {
+            fn from(row: RdbcOrmRow) -> Self {
+                let mut model = #struct_ident::new();
+                #(#field_set_value_vec)*
+                model
+            }
+        }
+    };
+    final_token
+}
+fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
+    let orm_ident = format_ident!("{}Orm", struct_ident);
+    let token = quote! {
+        pub struct #orm_ident;
+        impl #orm_ident {
+            pub async fn select_page_by_query(
+                page_no: &usize,
+                page_size: &usize,
+                query: &Query,
+            ) -> BmbpResp<PageVo<#struct_ident>> {
+                match RdbcORM
+                    .await
+                    .select_page_by_query::<#struct_ident>(page_no.clone(), page_size.clone(), query)
+                    .await
+                {
+                    Ok(mut page) => {
+                        let mut page_vo = PageVo::new();
+                        page_vo.set_page_no(page.page_num().clone());
+                        page_vo.set_page_size(page.page_size().clone());
+                        page_vo.set_op_data(page.data_take());
+                        page_vo.set_row_total(page.total().clone());
+                        Ok(page_vo)
+                    }
+                    Err(e) => Err(BmbpError::service(e.get_msg().as_str())),
+                }
+            }
+                pub async fn select_list_by_query(query: &Query) -> BmbpResp<Option<Vec<#struct_ident>>> {
+                    match RdbcORM
+                        .await
+                        .select_list_by_query::<#struct_ident>(query)
+                        .await
+                    {
+                        Ok(data) => Ok(data),
+                        Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
+                    }
+                }
+                pub async fn select_one_by_query(query: &Query) -> BmbpResp<Option<#struct_ident>> {
+                    match RdbcORM
+                        .await
+                        .select_one_by_query::<#struct_ident>(query)
+                        .await
+                    {
+                        Ok(data) => Ok(data),
+                        Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
+                    }
+                }
+                pub async fn execute_insert(insert: &Insert) -> BmbpResp<usize> {
+                    match RdbcORM.await.execute_insert(insert).await {
+                        Ok(data) => Ok(data as usize),
+                        Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
+                    }
+                }
+                pub async fn execute_update(update: &Update) -> BmbpResp<usize> {
+                    match RdbcORM.await.execute_update(update).await {
+                        Ok(data) => Ok(data as usize),
+                        Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
+                    }
+                }
+                pub async fn execute_delete(delete: &Delete) -> BmbpResp<usize> {
+                    match RdbcORM.await.execute_delete(delete).await {
+                        Ok(data) => Ok(data as usize),
+                        Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
+                    }
+                }
+        }
+    };
+    token
+}
+fn build_struct_web_handler_token(struct_ident: &Ident, is_tree: bool) -> TokenStream2 {
     let struct_name = camel_to_snake(struct_ident.to_string()).to_lowercase();
     let find_all_page_name = format_ident!("{}_find_all_page", struct_name);
     let find_removed_page_name = format_ident!("{}_find_removed_page", struct_name);

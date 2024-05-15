@@ -1,60 +1,16 @@
-use proc_macro2::TokenTree;
-use quote::ToTokens;
+use crate::utils::camel_to_snake;
 use syn::parse::Parse;
-use syn::{Expr, Field, Meta, Token};
+use syn::{Expr, Field, Lit, Meta, MetaNameValue, Token};
 
 #[derive(Debug, Default, Clone)]
-pub(crate) struct RdbcModelMeta {
+pub(crate) struct RdbcMeta {
     table_name: Option<String>,
     tree_prefix: Option<String>,
 }
 
-impl Parse for RdbcModelMeta {
-    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
-        let mut table_name = None;
-        let mut tree_prefix = None;
-        if input.is_empty() {
-            return Ok(RdbcModelMeta {
-                table_name,
-                tree_prefix,
-            });
-        }
-        while !input.is_empty() {
-            if let Ok(meta) = input.parse::<Meta>() {
-                match meta {
-                    Meta::NameValue(name_value) => {
-                        if name_value.path.is_ident("table") {
-                            table_name = Some(name_value.value.to_token_stream().to_string());
-                        } else if name_value.path.is_ident("tree") {
-                            tree_prefix = Some(name_value.value.to_token_stream().to_string());
-                        }
-                    }
-                    Meta::Path(path) => {
-                        let path_name = path.get_ident().unwrap().to_string();
-                        if table_name.is_none() {
-                            table_name = Some(path_name);
-                        } else {
-                            tree_prefix = Some(path_name)
-                        }
-                    }
-                    Meta::List(_list) => {}
-                }
-            }
-            if !input.is_empty() {
-                input.parse::<Token![,]>()?;
-            }
-        }
-
-        Ok(RdbcModelMeta {
-            table_name,
-            tree_prefix,
-        })
-    }
-}
-
-impl RdbcModelMeta {
+impl RdbcMeta {
     pub fn new(table_name: String, tree_prefix: String) -> Self {
-        RdbcModelMeta {
+        RdbcMeta {
             table_name: Some(table_name),
             tree_prefix: Some(tree_prefix),
         }
@@ -72,25 +28,76 @@ impl RdbcModelMeta {
         self.tree_prefix = Some(tree_prefix);
     }
 }
+impl Parse for RdbcMeta {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        // NameValue的赋值函数
+        let set_token_value = |token: &mut Option<String>, value: MetaNameValue| {
+            if let Expr::Lit(lit) = value.value {
+                if let Lit::Str(lit_str) = lit.lit {
+                    *token = Some(lit_str.value());
+                }
+            } else {
+                if let Expr::Path(path) = value.value {
+                    if let Some(ident) = path.path.get_ident() {
+                        *token = Some(ident.to_string());
+                    }
+                }
+            }
+        };
 
-#[derive(Debug)]
-pub(crate) struct MetaToken {
-    pub(crate) props_token: Option<TokenTree>,
-    pub(crate) punct_token: Option<TokenTree>,
-    pub(crate) value_token: Option<TokenTree>,
-}
-impl MetaToken {
-    pub fn new() -> Self {
-        MetaToken {
-            props_token: None,
-            punct_token: None,
-            value_token: None,
+        // 表名称
+        let mut table_name = None;
+        // 树名称
+        let mut tree_prefix = None;
+        // 其它名称
+        let mut others = Vec::new();
+
+        if input.is_empty() {
+            return Ok(RdbcMeta {
+                table_name,
+                tree_prefix,
+            });
         }
+        while !input.is_empty() {
+            if let Ok(meta) = input.parse::<Meta>() {
+                match meta {
+                    Meta::NameValue(name_value) => {
+                        if name_value.path.is_ident("table") {
+                            set_token_value(&mut table_name, name_value)
+                        } else if name_value.path.is_ident("tree") {
+                            set_token_value(&mut tree_prefix, name_value)
+                        }
+                    }
+                    Meta::Path(path) => {
+                        if let Some(ident) = path.get_ident() {
+                            others.push(ident.to_string());
+                        }
+                    }
+                    Meta::List(_) => {}
+                }
+            }
+            if !input.is_empty() {
+                input.parse::<Token![,]>()?;
+            }
+        }
+
+        for item in others {
+            if table_name.is_none() {
+                table_name = Some(item);
+            } else if tree_prefix.is_none() {
+                tree_prefix = Some(item);
+            }
+        }
+        if let Some(table) = table_name {
+            let snake_table = camel_to_snake(table.to_lowercase());
+            table_name = Some(snake_table);
+        }
+        Ok(RdbcMeta {
+            table_name,
+            tree_prefix,
+        })
     }
 }
-
-pub(crate) const ATTRS_RDBC_SKIP: &str = "rdbc_skip";
-pub(crate) const ATTRS_QUERY: &str = "query";
 
 pub struct ValidMeta {
     field: Field,

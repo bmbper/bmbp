@@ -1,3 +1,5 @@
+pub(crate) const ATTRS_RDBC_SKIP: &str = "rdbc_skip";
+pub(crate) const ATTRS_QUERY: &str = "query";
 pub const RDBC_DATA_ID: &str = "data_id";
 pub const RDBC_DATA_LEVEL: &str = "data_level";
 pub const RDBC_DATA_STATUS: &str = "data_status";

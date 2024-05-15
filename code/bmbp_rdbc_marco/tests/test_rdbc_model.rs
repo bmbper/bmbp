@@ -1,4 +1,5 @@
 use bmbp_rdbc_marco::rdbc_model;
+use bmbp_rdbc_orm::table;
 
 #[test]
 fn test_rdbc_model_empty() {
@@ -17,11 +18,7 @@ fn test_rdbc_model_empty() {
     use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
     use chrono::Utc;
     use salvo::*;
-    // #[rdbc_model(BMBP_RDBC_APP)]
-    // #[rdbc_model(BMBP_RDBC_APP, menu)]
-    // #[rdbc_model(table=BMBP_RDBC_APP, menu)]
-    // #[rdbc_model(table=BMBP_RDBC_APP, tree=menu)]
-    #[rdbc_model(table=RBCD)]
+    #[rdbc_model]
     pub struct RdbcModel {
         #[query(eq)]
         #[valid[require("必填1"),unique("unique"),maxLength(33,"xxx")]]
