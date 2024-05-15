@@ -241,8 +241,6 @@ pub(crate) fn filter_field_by_marco_attrs(
     for field in field_slice {
         if ignore {
             if !field_has_attribute_args(field, attrs) {
-                continue;
-            } else {
                 field_vec.push(field.clone());
             }
         } else {

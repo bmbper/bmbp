@@ -494,6 +494,7 @@ fn build_struct_table_method_token(
     struct_table_name: &String,
     struct_fields: &[Field],
 ) -> TokenStream2 {
+    println!("========>field:{}", struct_fields.len());
     let mut struct_columns = vec![];
     for field in struct_fields {
         let field_name = field.ident.as_ref().unwrap();
@@ -698,14 +699,12 @@ fn build_struct_curd_method_token(
                 let update = Self::build_disable_sql(self.get_data_id());
                 #orm_ident::execute_update(&update).await
             }
-
-
             pub async fn remove_by_id(id: &Option<String>) -> BmbpResp<usize> {
                 if id.is_none() {
                     return Err(BmbpError::service("请指定要删除的记录"));
                 }
-                let update = Self::build_disable_sql(id);
-                #orm_ident::execute_update(&update).await
+                let delete = Self::build_remove_sql(id);
+                #orm_ident::execute_delete(&delete).await
             }
             pub async fn remove_by_id_slice(id: &[String]) -> BmbpResp<usize> {
                 Ok(0)
@@ -1053,7 +1052,7 @@ fn build_struct_web_handler_token(struct_ident: &Ident, is_tree: bool) -> TokenS
         #[handler]
         pub async fn #find_page_name(req: &mut Request, resp: &mut Response) -> HttpRespPageVo<#struct_ident> {
             let mut page_query_params = req.parse_json::<BmbpPageParam<#struct_query_ident>>().await?;
-            let page_vo = #struct_ident::find_removed_page(page_query_params).await?;
+            let page_vo = #struct_ident::find_page(page_query_params).await?;
             Ok(RespVo::ok_find_data(page_vo))
         }
 
