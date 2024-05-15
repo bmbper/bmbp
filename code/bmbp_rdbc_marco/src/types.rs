@@ -1,17 +1,75 @@
 use proc_macro2::TokenTree;
-use syn::Field;
+use quote::ToTokens;
+use syn::parse::Parse;
+use syn::{Expr, Field, Meta, Token};
 
-#[derive(Debug)]
+#[derive(Debug, Default, Clone)]
 pub(crate) struct RdbcModelMeta {
-    table_name: String,
-    tree_prefix: String,
+    table_name: Option<String>,
+    tree_prefix: Option<String>,
 }
+
+impl Parse for RdbcModelMeta {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let mut table_name = None;
+        let mut tree_prefix = None;
+        if input.is_empty() {
+            return Ok(RdbcModelMeta {
+                table_name,
+                tree_prefix,
+            });
+        }
+        while !input.is_empty() {
+            if let Ok(meta) = input.parse::<Meta>() {
+                match meta {
+                    Meta::NameValue(name_value) => {
+                        if name_value.path.is_ident("table") {
+                            table_name = Some(name_value.value.to_token_stream().to_string());
+                        } else if name_value.path.is_ident("tree") {
+                            tree_prefix = Some(name_value.value.to_token_stream().to_string());
+                        }
+                    }
+                    Meta::Path(path) => {
+                        let path_name = path.get_ident().unwrap().to_string();
+                        if table_name.is_none() {
+                            table_name = Some(path_name);
+                        } else {
+                            tree_prefix = Some(path_name)
+                        }
+                    }
+                    Meta::List(_list) => {}
+                }
+            }
+            if !input.is_empty() {
+                input.parse::<Token![,]>()?;
+            }
+        }
+
+        Ok(RdbcModelMeta {
+            table_name,
+            tree_prefix,
+        })
+    }
+}
+
 impl RdbcModelMeta {
     pub fn new(table_name: String, tree_prefix: String) -> Self {
         RdbcModelMeta {
-            table_name,
-            tree_prefix,
+            table_name: Some(table_name),
+            tree_prefix: Some(tree_prefix),
         }
+    }
+    pub fn get_table_name(&self) -> Option<String> {
+        self.table_name.clone()
+    }
+    pub fn get_tree_prefix(&self) -> Option<String> {
+        self.tree_prefix.clone()
+    }
+    pub fn set_table_name(&mut self, table_name: String) {
+        self.table_name = Some(table_name);
+    }
+    pub fn set_tree_prefix(&mut self, tree_prefix: String) {
+        self.tree_prefix = Some(tree_prefix);
     }
 }
 

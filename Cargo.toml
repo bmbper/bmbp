@@ -29,8 +29,7 @@ rust-embed = "*"
 async-once-cell = "*"
 async_static = "*"
 async-lock = "*"
-syn = { version = "2.0.61", features = ["full", "parsing", "printing", "proc-macro", "clone-impls"] }
-quote = "*"
+
 tokio-postgres = { version = "*", features = ["with-chrono-0_4"] }
 serde_yaml = "*"
 async-recursion = "*"
@@ -44,3 +43,5 @@ md5 = "*"
 rs_sha256 = "*"
 libsm = "*"
 base64 = "*"
+syn = { version = "2.0.63", features = ["full", "parsing", "printing", "proc-macro", "clone-impls"] }
+quote = "*"

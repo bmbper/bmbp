@@ -2,10 +2,12 @@ use proc_macro::{TokenStream, TokenTree};
 
 use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::{format_ident, quote, ToTokens};
-use syn::{parse_macro_input, parse_quote, DeriveInput, Field};
+use salvo::Router;
+use syn::parse::Parser;
+use syn::{meta, parse, parse_macro_input, parse_quote, Attribute, DeriveInput, Field};
 
 use crate::consts::*;
-use crate::types::{ATTRS_QUERY, ATTRS_RDBC_SKIP};
+use crate::types::{RdbcModelMeta, ATTRS_QUERY, ATTRS_RDBC_SKIP};
 use crate::utils::{
     camel_to_snake, get_base_model, get_base_tree_model, get_query_type, get_struct_field,
     get_struct_field_by_attrs, get_struct_field_name_map, get_valid_field, has_rdbc_attr,
@@ -22,15 +24,23 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
 
     // 结构体名称
     let struct_ident = &model_input_token.ident;
+
     // 表名
-    let struct_table_name = build_struct_table_name(&meta_token, struct_ident);
+    let mut mode_meta: RdbcModelMeta = parse_macro_input!(meta_token as RdbcModelMeta);
+    if mode_meta.get_table_name().is_none() || mode_meta.get_table_name().unwrap().is_empty() {
+        mode_meta.set_table_name(camel_to_snake(struct_ident.to_string()));
+    } else {
+        mode_meta.set_table_name(camel_to_snake(mode_meta.get_table_name().unwrap()));
+    }
     // 树名称
-    let struct_tree_prefix = build_struct_tree_prefix(&meta_token, struct_ident);
+    let struct_tree_prefix = mode_meta.get_tree_prefix();
+    let struct_table_name = mode_meta.get_table_name().unwrap();
+
     let struct_field_vec = build_struct_field_vec(
         &base_input,
         &model_input_token,
         &base_tree_input,
-        struct_tree_prefix,
+        &struct_tree_prefix,
     );
 
     let mut model_struct_macro_token: Vec<TokenStream2> = vec![];
@@ -73,15 +83,17 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
         struct_ident,
         struct_field_vec.as_slice(),
         struct_query_field_vec.as_slice(),
+        struct_tree_prefix.is_some(),
     );
 
     /// 构建结构体-orm 增删改查方法
     let model_valid_token = build_struct_valid_token(struct_ident, struct_field_vec.as_slice());
 
     /// 构建结构体-handler-web接口方法
-    let model_handler_token = build_struct_handler_token(struct_ident, struct_field_vec.as_slice());
+    let model_handler_token =
+        build_struct_handler_token(struct_ident, struct_tree_prefix.is_some());
     /// 构建结构体-router-路由方法
-    let model_router_token = build_struct_router_token(struct_ident, struct_field_vec.as_slice());
+    let model_router_token = build_struct_router_token(struct_ident, struct_tree_prefix.is_some());
     model_struct_macro_token.push(model_struct_query_token);
     model_struct_macro_token.push(mode_struct_query_impl_token);
     model_struct_macro_token.push(model_struct_token);
@@ -109,10 +121,6 @@ fn get_field_by_attrs(field_slice: &[Field], attrs: &str) -> Vec<Field> {
         }
     }
     field_vec
-}
-
-fn build_struct_tree_prefix(meta: &TokenStream, struct_ident: &Ident) -> Option<String> {
-    None
 }
 
 /// 构建结构体-数据校验方法
@@ -169,7 +177,7 @@ fn build_struct_field_vec(
     base_struct_input: &DeriveInput,
     model_struct_input: &DeriveInput,
     tree_input: &DeriveInput,
-    struct_tree_prefix: Option<String>,
+    struct_tree_prefix: &Option<String>,
 ) -> Vec<Field> {
     let struct_ident = &model_struct_input.ident;
     // 结构体字段
@@ -201,17 +209,6 @@ fn build_struct_field_vec(
         }
     }
     model_field
-}
-
-/// 获取表名
-fn build_struct_table_name(meta_token: &TokenStream, struct_ident: &Ident) -> String {
-    // 获取表名
-    let mut model_table_name = get_table_name_by_meta(&meta_token);
-    if model_table_name.is_empty() {
-        model_table_name = struct_ident.to_string();
-    }
-    model_table_name = camel_to_snake(model_table_name.to_lowercase());
-    model_table_name
 }
 
 fn build_struct_model_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
@@ -663,13 +660,81 @@ fn build_struct_curd_token(
     struct_ident: &Ident,
     struct_fields: &[Field],
     struct_query_fields: &[Field],
+    is_tree: bool,
 ) -> TokenStream2 {
     let struct_query_filter_sql_token = build_struct_query_filter_token(struct_query_fields);
-
     let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
     let orm_ident = format_ident!("{}Orm", struct_ident);
+
+    let mut tree_method_vec = vec![];
+    if is_tree {
+        tree_method_vec = vec![
+            quote! {
+                pub async fn find_tree(query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+                   Ok(vec![])
+                }
+            },
+            quote! {
+                pub async fn find_tree_by_id(data_id: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+                   Ok(vec![])
+                }
+            },
+            quote! {
+                pub async fn find_tree_by_code(code: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+                   Ok(vec![])
+                }
+            },
+            quote! {
+                pub async fn find_tree_by_parent_id(data_id: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+                   Ok(vec![])
+                }
+            },
+            quote! {
+                pub async fn find_tree_by_parent_code(query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+                   Ok(vec![])
+                }
+            },
+            quote! {
+                 pub async fn find_tree_by_code_path(code_path: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+                   Ok(vec![])
+                }
+            },
+            quote! {
+                pub async fn find_tree_exclude(query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+                   Ok(vec![])
+                }
+            },
+            quote! {
+                pub async fn find_tree_by_exclude_id(data_id: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+                   Ok(vec![])
+                }
+            },
+            quote! {
+                pub async fn find_tree_exclude_by_code(code: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+                   Ok(vec![])
+                }
+            },
+            quote! {
+                pub async fn find_tree_exclude_by_parent_id(data_id: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+                   Ok(vec![])
+                }
+            },
+            quote! {
+                pub async fn find_tree_exclude_by_parent_code(query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+                   Ok(vec![])
+                }
+            },
+            quote! {
+                 pub async fn find_tree_exclude_by_code_path(code_path: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+                   Ok(vec![])
+                }
+            },
+        ]
+    }
+
     let token = quote! {
         impl #struct_ident {
+            #(#tree_method_vec)*
             pub async fn find_page(page_params: BmbpPageParam<#struct_query_ident>) -> BmbpResp<PageVo<Self>> {
                 let mut query = #struct_ident::build_query_sql();
                 if let Some(query_vo) = page_params.get_params() {
@@ -875,72 +940,7 @@ fn build_struct_query_filter_token(query_fields: &[Field]) -> Vec<TokenStream2> 
     token_vec
 }
 
-/// #[rdbc_model(TABLE)]
-/// #[rdbc_model("TABLE")]
-/// #[rdbc_model(table = TABLE)]
-/// #[rdbc_model(table="TABLE")]
-fn get_table_name_by_meta(meta_token: &TokenStream) -> String {
-    let mut token_vec = vec![];
-    for item in meta_token.clone().into_iter() {
-        token_vec.push(item);
-    }
-    if token_vec.len() == 0 {
-        return "".to_string();
-    }
-    if token_vec.len() == 1 {
-        let item_slice = token_vec.get(0).unwrap();
-        match item_slice {
-            TokenTree::Ident(ident) => {
-                return ident.to_string();
-            }
-            TokenTree::Literal(literal) => {
-                return literal.to_string().replace("\"", "");
-            }
-            _ => {
-                panic!(
-                    "rdbc_model宏支持格式如下：{}\n,{}\n{}\n{}",
-                    "#[rdbc_model(TABLE)]",
-                    "#[rdbc_model(\"TABLE\")]",
-                    "#[rdbc_model(table = TABLE)]",
-                    "#[rdbc_model(table=\"TABLE\")]"
-                );
-            }
-        }
-    }
-    if token_vec.len() == 2 {
-        panic!(
-            "rdbc_model宏支持格式如下：{}\n,{}\n{}\n{}",
-            "#[rdbc_model(TABLE)]",
-            "#[rdbc_model(\"TABLE\")]",
-            "#[rdbc_model(table = TABLE)]",
-            "#[rdbc_model(table=\"TABLE\")]"
-        );
-    }
-    if token_vec.len() == 3 {
-        let props = token_vec.get(0).unwrap();
-        let punct = token_vec.get(1).unwrap();
-        let value = token_vec.get(2).unwrap();
-        if props.to_string() != "table" || punct.to_string() != "=" {
-            panic!(
-                "rdbc_model宏支持格式如下：{}\n,{}\n{}\n{}",
-                "#[rdbc_model(TABLE)]",
-                "#[rdbc_model(\"TABLE\")]",
-                "#[rdbc_model(table = TABLE)]",
-                "#[rdbc_model(table=\"TABLE\")]"
-            );
-        }
-        return value.to_string().replace("\"", "");
-    }
-    panic!(
-        "rdbc_model宏支持格式如下：{}\n,{}\n{}\n{}",
-        "#[rdbc_model(TABLE)]",
-        "#[rdbc_model(\"TABLE\")]",
-        "#[rdbc_model(table = TABLE)]",
-        "#[rdbc_model(table=\"TABLE\")]"
-    );
-}
-
-fn build_struct_handler_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+fn build_struct_handler_token(struct_ident: &Ident, is_tree: bool) -> TokenStream2 {
     let struct_name = camel_to_snake(struct_ident.to_string()).to_lowercase();
     let find_all_page_name = format_ident!("{}_find_all_page", struct_name);
     let find_removed_page_name = format_ident!("{}_find_removed_page", struct_name);
@@ -961,8 +961,105 @@ fn build_struct_handler_token(struct_ident: &Ident, struct_fields: &[Field]) -> 
     let remove_logic_batch_name = format_ident!("{}_remove_logic_batch", struct_name);
     let enable_name = format_ident!("{}_enable", struct_name);
     let disable_name = format_ident!("{}_disable", struct_name);
+
     let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
+
+    let mut tree_handler = vec![];
+    if (is_tree) {
+        let find_tree_name = format_ident!("{}_find_tree", struct_name);
+        let find_tree_by_id_name = format_ident!("{}_find_tree_by_id", struct_name);
+        let find_tree_by_code = format_ident!("{}_find_tree_by_code", struct_name);
+        let find_tree_by_parent_code = format_ident!("{}_find_tree_by_parent_code", struct_name);
+        let find_tree_by_parent_id = format_ident!("{}_find_tree_by_parent_id", struct_name);
+        let find_tree_by_code_path = format_ident!("{}_find_tree_by_code_path", struct_name);
+
+        let find_tree_exclude_name = format_ident!("{}_find_tree_exclude", struct_name);
+        let find_tree_exclude_by_id_name = format_ident!("{}_find_tree_exclude_by_id", struct_name);
+        let find_tree_exclude_by_code = format_ident!("{}_find_tree_exclude_by_code", struct_name);
+        let find_tree_exclude_by_parent_code =
+            format_ident!("{}_find_tree_exclude_by_parent_code", struct_name);
+        let find_tree_exclude_by_parent_id =
+            format_ident!("{}_find_exclude_tree_by_parent_id", struct_name);
+        let find_tree_exclude_by_code_path =
+            format_ident!("{}_find_exclude_tree_by_code_path", struct_name);
+        tree_handler = vec![
+            quote! {
+                #[handler]
+                pub async fn #find_tree_name(req: &mut Request, resp: &mut Response) -> HttpRespListVo<#struct_ident> {
+                    Ok(RespVo::ok_find_option(None))
+                }
+            },
+            quote! {
+                #[handler]
+                pub async fn #find_tree_by_id_name(req: &mut Request, resp: &mut Response) -> HttpRespListVo<#struct_ident> {
+                    Ok(RespVo::ok_find_option(None))
+                }
+            },
+            quote! {
+                #[handler]
+                pub async fn #find_tree_by_code(req: &mut Request, resp: &mut Response) -> HttpRespListVo<#struct_ident> {
+                    Ok(RespVo::ok_find_option(None))
+                }
+            },
+            quote! {
+                #[handler]
+                pub async fn #find_tree_by_parent_code(req: &mut Request, resp: &mut Response) -> HttpRespListVo<#struct_ident> {
+                    Ok(RespVo::ok_find_option(None))
+                }
+            },
+            quote! {
+                #[handler]
+                pub async fn #find_tree_by_parent_id(req: &mut Request, resp: &mut Response) -> HttpRespListVo<#struct_ident> {
+                    Ok(RespVo::ok_find_option(None))
+                }
+            },
+            quote! {
+                #[handler]
+                pub async fn #find_tree_by_code_path(req: &mut Request, resp: &mut Response) -> HttpRespListVo<#struct_ident> {
+                    Ok(RespVo::ok_find_option(None))
+                }
+            },
+            quote! {
+                #[handler]
+                pub async fn #find_tree_exclude_name(req: &mut Request, resp: &mut Response) -> HttpRespListVo<#struct_ident> {
+                    Ok(RespVo::ok_find_option(None))
+                }
+            },
+            quote! {
+                #[handler]
+                pub async fn #find_tree_exclude_by_id_name(req: &mut Request, resp: &mut Response) -> HttpRespListVo<#struct_ident> {
+                    Ok(RespVo::ok_find_option(None))
+                }
+            },
+            quote! {
+                #[handler]
+                pub async fn #find_tree_exclude_by_code(req: &mut Request, resp: &mut Response) -> HttpRespListVo<#struct_ident> {
+                    Ok(RespVo::ok_find_option(None))
+                }
+            },
+            quote! {
+                #[handler]
+                pub async fn #find_tree_exclude_by_parent_code(req: &mut Request, resp: &mut Response) -> HttpRespListVo<#struct_ident> {
+                    Ok(RespVo::ok_find_option(None))
+                }
+            },
+            quote! {
+                #[handler]
+                pub async fn #find_tree_exclude_by_parent_id(req: &mut Request, resp: &mut Response) -> HttpRespListVo<#struct_ident> {
+                    Ok(RespVo::ok_find_option(None))
+                }
+            },
+            quote! {
+                #[handler]
+                pub async fn #find_tree_exclude_by_code_path(req: &mut Request, resp: &mut Response) -> HttpRespListVo<#struct_ident> {
+                    Ok(RespVo::ok_find_option(None))
+                }
+            },
+        ]
+    }
     quote! {
+        #(#tree_handler)*
+
         #[handler]
         pub async fn #find_all_page_name(req: &mut Request, resp: &mut Response) -> HttpRespPageVo<#struct_ident> {
             let mut page_query_params = req.parse_json::<BmbpPageParam<#struct_query_ident>>().await?;
@@ -1071,7 +1168,7 @@ fn build_struct_handler_token(struct_ident: &Ident, struct_fields: &[Field]) -> 
     }
 }
 
-fn build_struct_router_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
+fn build_struct_router_token(struct_ident: &Ident, is_tree: bool) -> TokenStream2 {
     let struct_name = camel_to_snake(struct_ident.to_string()).to_lowercase();
     let find_all_page_name = format_ident!("{}_find_all_page", struct_name);
     let find_removed_page_name = format_ident!("{}_find_removed_page", struct_name);
@@ -1092,6 +1189,41 @@ fn build_struct_router_token(struct_ident: &Ident, struct_fields: &[Field]) -> T
     let remove_logic_batch_name = format_ident!("{}_remove_logic_batch", struct_name);
     let enable_name = format_ident!("{}_enable", struct_name);
     let disable_name = format_ident!("{}_disable", struct_name);
+    let mut tree_router = vec![];
+    if (is_tree) {
+        let find_tree_name = format_ident!("{}_find_tree", struct_name);
+        let find_tree_by_id_name = format_ident!("{}_find_tree_by_id", struct_name);
+        let find_tree_by_code = format_ident!("{}_find_tree_by_code", struct_name);
+        let find_tree_by_parent_code = format_ident!("{}_find_tree_by_parent_code", struct_name);
+        let find_tree_by_parent_id = format_ident!("{}_find_tree_by_parent_id", struct_name);
+        let find_tree_by_code_path = format_ident!("{}_find_tree_by_code_path", struct_name);
+
+        let find_tree_exclude_name = format_ident!("{}_find_tree_exclude", struct_name);
+        let find_tree_exclude_by_id_name = format_ident!("{}_find_tree_exclude_by_id", struct_name);
+        let find_tree_exclude_by_code = format_ident!("{}_find_tree_exclude_by_code", struct_name);
+        let find_tree_exclude_by_parent_code =
+            format_ident!("{}_find_tree_exclude_by_parent_code", struct_name);
+        let find_tree_exclude_by_parent_id =
+            format_ident!("{}_find_exclude_tree_by_parent_id", struct_name);
+        let find_tree_exclude_by_code_path =
+            format_ident!("{}_find_exclude_tree_by_code_path", struct_name);
+
+        tree_router.push(quote! {
+             .push(Router::with_path("/find/tree").post(#find_tree_name))
+             .push(Router::with_path("/find/tree/id/<dataId>").post(#find_tree_by_id_name))
+             .push(Router::with_path("/find/tree/code/<code>").post(#find_tree_by_code))
+             .push(Router::with_path("/find/tree/parent/id/<dataId>").post(#find_tree_by_parent_id))
+             .push(Router::with_path("/find/tree/parent/code/<code>").post(#find_tree_by_parent_code))
+             .push(Router::with_path("/find/tree/path/<codePath>").post(#find_tree_by_code_path))
+             .push(Router::with_path("/find/tree/exclude").post(#find_tree_exclude_name))
+             .push(Router::with_path("/find/tree/exclude/id/<dataId>").post(#find_tree_exclude_by_id_name))
+             .push(Router::with_path("/find/tree/exclude/code/<code>").post(#find_tree_exclude_by_code))
+             .push(Router::with_path("/find/tree/exclude/parent/id/<dataId>").post(#find_tree_exclude_by_parent_id))
+             .push(Router::with_path("/find/tree/exclude/parent/code/<code>").post(#find_tree_exclude_by_parent_code))
+             .push(Router::with_path("/find/tree/exclude/path/<codePath>").post(#find_tree_exclude_by_code_path))
+        });
+    }
+
     quote! {
         impl #struct_ident {
             pub fn build_router() -> Router {
@@ -1115,6 +1247,7 @@ fn build_struct_router_token(struct_ident: &Ident, struct_fields: &[Field]) -> T
                 .push(Router::with_path("/remove/logic/batch/id").post(#remove_logic_batch_name))
                 .push(Router::with_path("/enable/id/<dataId>").post(#enable_name))
                 .push(Router::with_path("/disable/id/<dataId>").post(#disable_name))
+                #(#tree_router)*
             }
         }
     }

@@ -75,7 +75,7 @@ impl From<&Option<i32>> for RdbcValue {
 impl From<&Option<&i32>> for RdbcValue {
     fn from(i: &Option<&i32>) -> RdbcValue {
         match i {
-            Some(s) => RdbcValue::BigInt(*s.clone() as i64),
+            Some(s) => RdbcValue::BigInt((*s).clone() as i64),
             None => RdbcValue::Null,
         }
     }
@@ -123,7 +123,7 @@ impl From<Option<&u32>> for RdbcValue {
 impl From<&Option<&u32>> for RdbcValue {
     fn from(i: &Option<&u32>) -> RdbcValue {
         match i {
-            Some(s) => RdbcValue::BigInt(*s.clone() as i64),
+            Some(s) => RdbcValue::BigInt((*s).clone() as i64),
             None => RdbcValue::Null,
         }
     }
@@ -264,9 +264,8 @@ impl From<&RdbcValue> for bool {
             RdbcValue::Float(s) => s.clone() > 0.0,
             RdbcValue::BigFloat(s) => s.clone() > 0.0,
             RdbcValue::String(s) => s.clone() != "",
-            RdbcValue::DateTime(s) => false,
+            RdbcValue::DateTime(_) => false,
             RdbcValue::Null => false,
-            _ => false,
         }
     }
 }
