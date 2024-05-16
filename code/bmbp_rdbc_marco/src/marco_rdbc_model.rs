@@ -1,5 +1,6 @@
 use proc_macro::TokenStream;
 
+use bmbp_app_common::{BmbpError, BmbpResp};
 use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::{format_ident, quote, ToTokens};
 use syn::parse::Parser;
@@ -525,8 +526,8 @@ fn build_struct_curd_method_token(
     let struct_query_filter_sql_token = build_struct_curd_method_filter_token(struct_fields);
     let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
     let orm_ident = format_ident!("{}Orm", struct_ident);
-
     let mut tree_method_vec = vec![];
+    let mut insert_update_vec = vec![];
     if is_tree {
         tree_method_vec = vec![
             quote! {
@@ -589,7 +590,42 @@ fn build_struct_curd_method_token(
                    Ok(vec![])
                 }
             },
-        ]
+        ];
+        insert_update_vec = vec![
+            quote! {
+                pub async fn insert(&mut self) -> BmbpResp<usize> {
+                    // 初始化数据
+                    self.init_insert_data();
+                    let insert = self.build_insert_sql();
+                    #orm_ident::execute_insert(&insert).await
+                }
+            },
+            quote! {
+                pub async fn update(&mut self) -> BmbpResp<usize> {
+                    self.init_update_data();
+                    let update = self.build_update_sql();
+                    #orm_ident::execute_update(&update).await
+                }
+            },
+        ];
+    } else {
+        insert_update_vec = vec![
+            quote! {
+                pub async fn insert(&mut self) -> BmbpResp<usize> {
+                    // 初始化数据
+                    self.init_insert_data();
+                    let insert = self.build_insert_sql();
+                    #orm_ident::execute_insert(&insert).await
+                }
+            },
+            quote! {
+                pub async fn update(&mut self) -> BmbpResp<usize> {
+                    self.init_update_data();
+                    let update = self.build_update_sql();
+                    #orm_ident::execute_update(&update).await
+                }
+            },
+        ];
     }
 
     let token = quote! {
@@ -660,17 +696,7 @@ fn build_struct_curd_method_token(
                 }
                 self.find_one().await
             }
-            pub async fn insert(&mut self) -> BmbpResp<usize> {
-                // 初始化数据
-                self.init_insert_data();
-                let insert = self.build_insert_sql();
-                #orm_ident::execute_insert(&insert).await
-            }
-            pub async fn update(&mut self) -> BmbpResp<usize> {
-                self.init_update_data();
-                let update = self.build_update_sql();
-                #orm_ident::execute_update(&update).await
-            }
+            #(#insert_update_vec)*
             pub async fn remove(&self) -> BmbpResp<usize> {
                 if self.get_data_id().is_none() {
                     return Err(BmbpError::service("请指定要删除的记录"));

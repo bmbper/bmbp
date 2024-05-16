@@ -1,4 +1,5 @@
 use crate::utils::camel_to_snake;
+use bmbp_rdbc_orm::table;
 use syn::parse::Parse;
 use syn::{Expr, Field, Lit, Meta, MetaNameValue, Token};
 
@@ -91,6 +92,9 @@ impl Parse for RdbcMeta {
         if let Some(table) = table_name {
             let snake_table = camel_to_snake(table.to_lowercase());
             table_name = Some(snake_table);
+        }
+        if let Some(tree) = tree_prefix {
+            tree_prefix = Some(tree.to_lowercase());
         }
         Ok(RdbcMeta {
             table_name,
