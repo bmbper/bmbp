@@ -46,7 +46,6 @@ impl Into<RbacAppType> for &RdbcValue {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
 pub enum RbacAppMenuType {
     // 配置页面
     META,
@@ -60,9 +59,30 @@ impl Default for RbacAppMenuType {
         RbacAppMenuType::META
     }
 }
+impl From<&RbacAppMenuType> for RdbcValue {
+    fn from(value: &RbacAppMenuType) -> Self {
+        match value {
+            RbacAppMenuType::META => RdbcValue::String("META".to_string()),
+            RbacAppMenuType::ROUTE => RdbcValue::String("ROUTE".to_string()),
+            RbacAppMenuType::LINK => RdbcValue::String("LINK".to_string()),
+        }
+    }
+}
 
+impl Into<RbacAppMenuType> for &RdbcValue {
+    fn into(self) -> RbacAppMenuType {
+        let meta = self.get_string();
+        if meta == "META" {
+            return RbacAppMenuType::META;
+        } else if meta == "ROUTE" {
+            return RbacAppMenuType::ROUTE;
+        } else if meta == "LINK" {
+            return RbacAppMenuType::LINK;
+        }
+        RbacAppMenuType::META
+    }
+}
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
 pub enum RbacAppMenuOpenType {
     // 应用内部打开
     ROUTE,
@@ -73,6 +93,29 @@ pub enum RbacAppMenuOpenType {
 }
 impl Default for RbacAppMenuOpenType {
     fn default() -> Self {
+        RbacAppMenuOpenType::ROUTE
+    }
+}
+impl From<&RbacAppMenuOpenType> for RdbcValue {
+    fn from(value: &RbacAppMenuOpenType) -> Self {
+        match value {
+            RbacAppMenuOpenType::ROUTE => RdbcValue::String("ROUTE".to_string()),
+            RbacAppMenuOpenType::WINDOW => RdbcValue::String("WINDOW".to_string()),
+            RbacAppMenuOpenType::LINK => RdbcValue::String("LINK".to_string()),
+        }
+    }
+}
+
+impl Into<RbacAppMenuOpenType> for &RdbcValue {
+    fn into(self) -> RbacAppMenuOpenType {
+        let meta = self.get_string();
+        if meta == "ROUTE" {
+            return RbacAppMenuOpenType::ROUTE;
+        } else if meta == "WINDOW" {
+            return RbacAppMenuOpenType::WINDOW;
+        } else if meta == "LINK" {
+            return RbacAppMenuOpenType::LINK;
+        }
         RbacAppMenuOpenType::ROUTE
     }
 }

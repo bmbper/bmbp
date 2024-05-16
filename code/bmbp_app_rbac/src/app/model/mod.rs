@@ -10,3 +10,4 @@ mod data_scope;
 mod types;
 
 pub use app::*;
+pub use app_menu::*;

@@ -1,15 +1,17 @@
-use serde::{Deserialize, Serialize};
-
 use crate::app::model::types::{RbacAppMenuOpenType, RbacAppMenuType};
+use ::serde::Deserialize;
+use ::serde::Serialize;
+use bmbp_app_common::*;
+use bmbp_rdbc_marco::rdbc_model;
+use bmbp_rdbc_orm::*;
+use chrono::Utc;
+use salvo::*;
+use tracing::*;
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
+#[rdbc_model(BMBP_RBAC_APP_MENU, MENU)]
 pub struct BmbpRbacAppMenu {
     // 应用ID
     app_id: Option<String>,
-    // 应用编码
-    app_code: Option<String>,
     // 菜单类型
     menu_type: Option<RbacAppMenuType>,
     // 打开类型
@@ -18,4 +20,6 @@ pub struct BmbpRbacAppMenu {
     menu_icon: Option<String>,
     // 菜单地址
     menu_url: Option<String>,
+    // 菜单说明
+    menu_desc: Option<String>,
 }

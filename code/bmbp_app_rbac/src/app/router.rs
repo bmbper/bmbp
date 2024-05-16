@@ -1,12 +1,7 @@
-use crate::app::model::BmbpRbacApp;
+use crate::app::model::{BmbpRbacApp, BmbpRbacAppMenu};
 use salvo::Router;
-///
-///
-///
-/// /find/all/page
-/// /find/remove/page
-/// /find/all/page
 pub fn app_router() -> Router {
-    let mut router = BmbpRbacApp::build_router();
+    let mut router = BmbpRbacApp::build_router()
+        .push(Router::with_path("/menu").push(BmbpRbacAppMenu::build_router()));
     router
 }
