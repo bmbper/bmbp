@@ -14,6 +14,8 @@ fn test_rdbc_model_empty() {
     use bmbp_app_common::PageVo;
     use bmbp_app_common::RespVo;
     use bmbp_rdbc_orm::RdbcMacroTree;
+    use bmbp_rdbc_orm::RdbcMarcoTreeUtil;
+
     use bmbp_rdbc_orm::RdbcORM;
     use bmbp_rdbc_orm::RdbcOrmRow;
     use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};

@@ -502,8 +502,12 @@ fn build_struct_curd_method_token(
     if is_tree {
         tree_method_vec = vec![
             quote! {
-                pub async fn find_tree(query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
-                   Ok(vec![])
+                pub async fn find_tree(query_vo: &#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
+                      if let Some(row_list) = Self::find_all_list(query_vo).await? {
+                        let tree_list = RdbcMarcoTreeUtil::build_tree::<#struct_ident>(row_list);
+                        return Ok(Some(tree_list));
+                    }
+                    Ok(None)
                 }
             },
             quote! {
@@ -629,18 +633,18 @@ fn build_struct_curd_method_token(
                 #orm_ident::select_page_by_query(page_no, page_size, &query).await
             }
 
-            pub async fn find_list(query_vo: #struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
+            pub async fn find_list(query_vo: &#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
                 let mut query = #struct_ident::build_query_sql();
                 #(#struct_query_filter_sql_token)*
                 query.eq_("data_flag","0");
                 Self::find_list_by_query(&query).await
             }
-            pub async fn find_all_list(query_vo:#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
+            pub async fn find_all_list(query_vo:&#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
                 let mut query = #struct_ident::build_query_sql();
                 #(#struct_query_filter_sql_token)*
                Self::find_list_by_query(&query).await
             }
-            pub async fn find_removed_list(query_vo:#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
+            pub async fn find_removed_list(query_vo:&#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
                 let mut query = #struct_ident::build_query_sql();
                 #(#struct_query_filter_sql_token)*
                 query.eq_("data_flag","-1");
@@ -1024,7 +1028,7 @@ fn build_struct_web_handler_token(struct_ident: &Ident, is_tree: bool) -> TokenS
                 pub async fn #find_tree_name(req: &mut Request, resp: &mut Response) -> HttpRespListVo<#struct_ident> {
                     let mut query_params = req.parse_json::<#struct_query_ident>().await?;
                     let model_vo = #struct_ident::find_tree(&query_params).await?;
-                    Ok(RespVo::ok_find_data(model_vo))
+                    Ok(RespVo::ok_find_option(model_vo))
                 }
             },
             quote! {
@@ -1122,21 +1126,21 @@ fn build_struct_web_handler_token(struct_ident: &Ident, is_tree: bool) -> TokenS
         #[handler]
         pub async fn #find_all_list_name(req: &mut Request, resp: &mut Response, ) -> HttpRespListVo<#struct_ident> {
             let mut query_params = req.parse_json::<#struct_query_ident>().await?;
-            let model_vo = #struct_ident::find_all_list(query_params).await?;
+            let model_vo = #struct_ident::find_all_list(&query_params).await?;
             Ok(RespVo::ok_find_option(model_vo))
         }
 
         #[handler]
         pub async fn #find_removed_list_name(req: &mut Request, resp: &mut Response, ) -> HttpRespListVo<#struct_ident> {
             let mut query_params = req.parse_json::<#struct_query_ident>().await?;
-            let model_vo = #struct_ident::find_removed_list(query_params).await?;
+            let model_vo = #struct_ident::find_removed_list(&query_params).await?;
             Ok(RespVo::ok_find_option(model_vo))
         }
 
         #[handler]
         pub async fn #find_list_name(req: &mut Request, resp: &mut Response, ) -> HttpRespListVo<#struct_ident> {
             let mut query_params = req.parse_json::<#struct_query_ident>().await?;
-            let model_vo = #struct_ident::find_list(query_params).await?;
+            let model_vo = #struct_ident::find_list(&query_params).await?;
             Ok(RespVo::ok_find_option(model_vo))
         }
 
