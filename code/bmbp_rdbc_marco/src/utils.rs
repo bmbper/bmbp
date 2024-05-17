@@ -58,16 +58,16 @@ pub(crate) fn build_base_tree_struct_token() -> TokenStream {
              #[query(eq)]
              grade: Option<i32>,
              #[rdbc_skip]
-             children: Option<Vec<BmbpOrmBaseModel>>,
+             children: Option<Vec<BmbpOrmTreeModel>>,
          }
     };
     base_tree_model.into()
 }
 /// 获取结构体字段
-pub(crate) fn build_struct_field_cache(field: &[Field]) -> HashMap<String, String> {
+pub(crate) fn build_struct_field_cache(field: &[Field]) -> HashMap<String, Field> {
     let mut map = HashMap::new();
     for item in field {
-        map.insert(item.ident.clone().unwrap().to_string(), "".to_string());
+        map.insert(item.ident.clone().unwrap().to_string(), item.clone());
     }
     map
 }

@@ -1104,3 +1104,17 @@ impl From<Row> for RdbcOrmRow {
         orm_row
     }
 }
+
+/// RdbcTree 定义树型抽象
+pub trait RdbcMacroTree<T>
+where
+    T: RdbcMacroTree<T>,
+{
+    fn get_code(&self) -> &Option<String>;
+    fn set_code(&mut self, code: Option<String>) -> &mut Self;
+    fn get_parent_code(&self) -> &Option<String>;
+    fn set_parent_code(&mut self, parent_code: Option<String>) -> &mut Self;
+    fn get_children(&self) -> &Option<Vec<T>>;
+    fn get_children_mut(&mut self) -> &mut Option<Vec<T>>;
+    fn set_children(&mut self, children: Option<Vec<T>>) -> &mut Self;
+}

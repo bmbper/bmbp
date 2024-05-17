@@ -16,7 +16,7 @@ pub const RDBC_DATA_SIGN: &str = "data_sign";
 pub const RDBC_TREE_CODE: &str = "code";
 pub const RDBC_TREE_CODE_PATH: &str = "code_path";
 pub const RDBC_TREE_PARENT_CODE: &str = "parent_code";
-
+pub const RDBC_TREE_CHILDREN: &str = "children";
 pub const RDBC_TREE_NAME: &str = "name";
 pub const RDBC_TREE_NAME_PATH: &str = "name_path";
 pub const RDBC_TREE_NODE_TYPE: &str = "node_type";

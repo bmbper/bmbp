@@ -27,7 +27,6 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     let struct_table_name = mode_meta.get_table_name().unwrap();
     // 树前缀
     let struct_tree_prefix = mode_meta.get_tree_prefix();
-
     // 提取结构体字段
     let mut struct_field_vec = parse_filed_from_struct(&struct_input_token);
     let struct_field_cache = build_struct_field_cache(&struct_field_vec);
@@ -37,16 +36,16 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
         let base_tree_struct_input = parse_macro_input!(base_tree_struct_token as DeriveInput);
         let base_tree_struct_field_vec = parse_filed_from_struct(&base_tree_struct_input);
         for mut field in base_tree_struct_field_vec {
-            let mut field_name = field.ident.as_mut().unwrap().to_string();
-            if field_name.eq("children") {
+            let mut field_ident = field.ident.unwrap();
+            let mut field_name = field_ident.to_string();
+            if field_name.eq(RDBC_TREE_CHILDREN) {
                 field.ty = parse_quote! { Option<Vec<#struct_ident>> };
-            } else {
-                let field_ident = format_ident!("{}_{}", tree_prefix, field_name);
-                field.ident = Some(field_ident);
-                let field_name = field.ident.as_mut().unwrap().to_string();
-                if !struct_field_cache.contains_key(field_name.as_str()) {
-                    struct_field_vec.push(field);
-                }
+            }
+            field_ident = format_ident!("{}_{}", tree_prefix, field_name);
+            field.ident = Some(field_ident);
+            let field_name = field.ident.as_mut().unwrap().to_string();
+            if !struct_field_cache.contains_key(field_name.as_str()) {
+                struct_field_vec.push(field);
             }
         }
     }
@@ -106,6 +105,15 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
         build_struct_impl_for_from_rdbc_orm_row_token(struct_ident, struct_field_vec.as_slice());
     model_struct_macro_token.push(struct_impl_for_from_trait_for_rdbc_orm_row_token);
 
+    if let Some(ref tree_prefix) = struct_tree_prefix {
+        let struct_impl_rdbc_tree_trait_token = build_impl_for_rdbc_tree_trait_token(
+            struct_ident,
+            struct_tree_prefix.as_ref().unwrap(),
+            struct_field_vec.as_slice(),
+        );
+        model_struct_macro_token.push(struct_impl_rdbc_tree_trait_token);
+    }
+
     /// 构建结构体-handler-web接口方法
     let struct_web_handler_token =
         build_struct_web_handler_token(struct_ident, struct_tree_prefix.is_some());
@@ -119,50 +127,13 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     println!("最终输出{}", final_token.to_string());
     final_token.into()
 }
+
 fn build_query_struct_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
     // 构建查询结构体
     let query_struct_ident = format_ident!("{}QueryVo", struct_ident);
     // 查询结构字段
     let query_struct_field_vec = filter_field_by_marco_attrs(struct_fields, ATTRS_QUERY, false);
     build_struct_token(&query_struct_ident, query_struct_field_vec.as_slice())
-}
-/// build_struct_field_vec 构建字段集合
-fn build_struct_field_vec(
-    base_struct_input: &DeriveInput,
-    model_struct_input: &DeriveInput,
-    tree_input: &DeriveInput,
-    struct_tree_prefix: &Option<String>,
-) -> Vec<Field> {
-    let struct_ident = &model_struct_input.ident;
-    // 结构体字段
-    let mut model_field = parse_filed_from_struct(model_struct_input);
-    let model_field_map = build_struct_field_cache(&model_field);
-    // 公共字段
-    let base_field = parse_filed_from_struct(base_struct_input);
-    for mut field in base_field {
-        let field_name = field.ident.as_mut().unwrap().to_string();
-        if !model_field_map.contains_key(field_name.as_str()) {
-            model_field.push(field);
-        }
-    }
-    // 公共树字段
-    if let Some(tree_prefix) = struct_tree_prefix {
-        let tree_field = parse_filed_from_struct(tree_input);
-        for mut field in tree_field {
-            let mut field_name = field.ident.as_mut().unwrap().to_string();
-            if field_name.eq("children") {
-                field.ty = parse_quote! { Option<Vec<#struct_ident>> };
-            } else {
-                let field_ident = format_ident!("{}_{}", tree_prefix, field_name);
-                field.ident = Some(field_ident);
-                let field_name = field.ident.as_mut().unwrap().to_string();
-                if !model_field_map.contains_key(field_name.as_str()) {
-                    model_field.push(field);
-                }
-            }
-        }
-    }
-    model_field
 }
 fn build_struct_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
     let struct_opt_field_vec = build_struct_field_token(struct_fields);
@@ -873,6 +844,70 @@ fn build_struct_impl_for_from_rdbc_orm_row_token(
     };
     final_token
 }
+fn build_impl_for_rdbc_tree_trait_token(
+    struct_ident: &Ident,
+    tree_prefix: &String,
+    field: &[Field],
+) -> TokenStream2 {
+    let field_cache = build_struct_field_cache(field);
+    let get_field = |field_name: &str| {
+        let new_field_name = format!("{}_{}", tree_prefix, field_name.to_string().to_lowercase());
+        field_cache.get(&new_field_name)
+    };
+    let get_field_type = |field: &Field| field.ty.clone();
+    let mut method_token_vec = vec![];
+
+    if let Some(field) = get_field(RDBC_TREE_CODE) {
+        let field_type = get_field_type(field);
+        let field_ident = field.ident.as_ref().unwrap();
+        let method_token = quote! {
+            fn get_code(&self) -> &#field_type{
+                &self.#field_ident
+            }
+            fn set_code(&mut self, code: #field_type) -> &mut Self{
+                self.#field_ident =  code;
+                self
+            }
+        };
+        method_token_vec.push(method_token);
+    }
+    if let Some(field) = get_field(RDBC_TREE_PARENT_CODE) {
+        let field_type = get_field_type(field);
+        let field_ident = field.ident.as_ref().unwrap();
+        let method_token = quote! {
+            fn get_parent_code(&self) -> &#field_type{
+                &self.#field_ident
+            }
+            fn set_parent_code(&mut self, code: #field_type) -> &mut Self{
+                self.#field_ident =  code;
+                self
+            }
+        };
+        method_token_vec.push(method_token);
+    }
+    if let Some(field) = get_field(RDBC_TREE_CHILDREN) {
+        let field_type = get_field_type(field);
+        let field_ident = field.ident.as_ref().unwrap();
+        let method_token = quote! {
+            fn get_children(&self) -> &#field_type{
+                &self.#field_ident
+            }
+            fn get_children_mut(&mut self) -> &mut #field_type{
+                &mut self.#field_ident
+            }
+            fn set_children(&mut self, children: #field_type) -> &mut Self{
+                self.#field_ident =  children;
+                self
+            }
+        };
+        method_token_vec.push(method_token);
+    }
+    quote! {
+        impl RdbcMacroTree<#struct_ident> for #struct_ident {
+            #(#method_token_vec)*
+        }
+    }
+}
 fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
     let orm_ident = format_ident!("{}Orm", struct_ident);
     let token = quote! {
@@ -987,7 +1022,9 @@ fn build_struct_web_handler_token(struct_ident: &Ident, is_tree: bool) -> TokenS
             quote! {
                 #[handler]
                 pub async fn #find_tree_name(req: &mut Request, resp: &mut Response) -> HttpRespListVo<#struct_ident> {
-                    Ok(RespVo::ok_find_option(None))
+                    let mut query_params = req.parse_json::<#struct_query_ident>().await?;
+                    let model_vo = #struct_ident::find_tree(&query_params).await?;
+                    Ok(RespVo::ok_find_data(model_vo))
                 }
             },
             quote! {
