@@ -9,7 +9,7 @@ pub fn uuid_upper() -> String {
 }
 
 pub fn simple_uuid() -> String {
-    let uid = Uuid::new_v4().to_string();
+    let uid = Uuid::new_v4().to_string().to_uppercase().replace("-", "");
     uid.replace("-", "")
 }
 

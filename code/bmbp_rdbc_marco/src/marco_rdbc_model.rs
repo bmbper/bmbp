@@ -85,7 +85,7 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     let struct_curd_method_token = build_struct_curd_method_token(
         struct_ident,
         struct_field_vec.as_slice(),
-        struct_tree_prefix.is_some(),
+        &struct_tree_prefix,
     );
     model_struct_macro_token.push(struct_curd_method_token);
     // 校验方法
@@ -492,14 +492,16 @@ fn build_struct_table_method_token(
 fn build_struct_curd_method_token(
     struct_ident: &Ident,
     struct_fields: &[Field],
-    is_tree: bool,
+    tree_prefix: &Option<String>,
 ) -> TokenStream2 {
     let struct_query_filter_sql_token = build_struct_curd_method_filter_token(struct_fields);
     let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
     let orm_ident = format_ident!("{}Orm", struct_ident);
     let mut tree_method_vec = vec![];
     let mut insert_update_vec = vec![];
-    if is_tree {
+    if tree_prefix.is_some() {
+        let tree_data_for_insert: Vec<TokenStream2> =
+            build_struct_curd_tree_insert_default_data_token(tree_prefix.clone().unwrap().clone());
         tree_method_vec = vec![
             quote! {
                 pub async fn find_tree(query_vo: &#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
@@ -565,12 +567,24 @@ fn build_struct_curd_method_token(
                    Ok(vec![])
                 }
             },
+            quote! {
+                pub async fn find_one_by_id(data_id: &Option<String>) -> BmbpResp<Option<Self>> {
+                   Ok(None)
+                }
+            },
+            quote! {
+                pub async fn find_one_by_code(data_id: &Option<String>) -> BmbpResp<Option<Self>> {
+                   Ok(None)
+                }
+            },
         ];
         insert_update_vec = vec![
             quote! {
                 pub async fn insert(&mut self) -> BmbpResp<usize> {
                     // 初始化数据
                     self.init_insert_data();
+                    #(#tree_data_for_insert)*
+                    let _ = self.insert_valid()?;
                     let insert = self.build_insert_sql();
                     #orm_ident::execute_insert(&insert).await
                 }
@@ -578,6 +592,7 @@ fn build_struct_curd_method_token(
             quote! {
                 pub async fn update(&mut self) -> BmbpResp<usize> {
                     self.init_update_data();
+                    let _ = self.insert_valid()?;
                     let update = self.build_update_sql();
                     #orm_ident::execute_update(&update).await
                 }
@@ -589,7 +604,7 @@ fn build_struct_curd_method_token(
                 pub async fn insert(&mut self) -> BmbpResp<usize> {
                     // 初始化数据
                     self.init_insert_data();
-                    // todo valid insert_data
+                    let _ = self.insert_valid()?;
                     let insert = self.build_insert_sql();
                     #orm_ident::execute_insert(&insert).await
                 }
@@ -597,7 +612,7 @@ fn build_struct_curd_method_token(
             quote! {
                 pub async fn update(&mut self) -> BmbpResp<usize> {
                     self.init_update_data();
-                     // todo valid update_data
+                    let _ = self.update_valid()?;
                     let update = self.build_update_sql();
                     #orm_ident::execute_update(&update).await
                 }
@@ -746,6 +761,68 @@ fn build_struct_curd_method_token(
     };
     token
 }
+
+fn build_struct_curd_tree_insert_default_data_token(tree_prefix: String) -> Vec<TokenStream2> {
+    let mut set_token_vec = vec![];
+    let code = format!("{}_{}", tree_prefix, RDBC_TREE_CODE);
+    let code_path = format!("{}_{}", tree_prefix, RDBC_TREE_CODE_PATH);
+    let parent_code = format!("{}_{}", tree_prefix, RDBC_TREE_PARENT_CODE);
+    let name = format!("{}_{}", tree_prefix, RDBC_TREE_NAME);
+    let name_path = format!("{}_{}", tree_prefix, RDBC_TREE_NAME_PATH);
+    let tree_grade = format!("{}_{}", tree_prefix, RDBC_TREE_NODE_GRADE);
+    let code_token = quote! {
+        if self.#code.is_none() {
+            self.#code = Some(Uuid::new_v4().to_string().to_uppercase().replace("-",""));
+        }
+    };
+    set_token_vec.push(code_token);
+    // parent_code
+    let parent_token = quote! {
+        let mut parent_code_path = "".to_string();
+        let mut parent_name_path = "".to_string();
+        if let Some(p_code) = self.#parent_code{
+            if p_code.is_empty(){
+                self.#parent_code = Some(RDBC_TREE_ROOT_NODE.to_string());
+                parent_code_path = "/".to_string();
+                parent_name_path = "/".to_string();
+            }else{
+                //TODO 加载上级节点
+                let mut node = self::find_one_by_code(Some(p_code)).await?;
+                if let Some(v) = node {
+                    if let Some(p_code_path) = v.get_code_path(){
+                        if let Some(code_path_tmp) = v.get_code_path() {
+                            parent_code_path = format!("{}", code_path_tmp);
+                        }
+                        if let Some(name_path_tmp) = v.get_name_path() {
+                            parent_name_path = format!("{}", name_path_tmp);
+                        }
+                    }
+                }else{
+                    if p_code != RDBC_TREE_ROOT_NODE{
+                        return Err(BmbpError::service("上级节点不存在"));
+                    }
+                    self.#parent_code = Some(RDBC_TREE_ROOT_NODE.to_string());
+                    parent_code_path = "/".to_string();
+                    parent_name_path = "/".to_string();
+                }
+            }
+        }else{
+            self.#parent_code = Some(RDBC_TREE_ROOT_NODE.to_string());
+            parent_code_path = "/".to_string();
+            parent_name_path = "/".to_string();
+        }
+        let code_path = format!("{}{}/", parent_code_path, organ.get_code().unwrap());
+        let name_path = format!("{}{}/", parent_name_path, organ.get_name().unwrap());
+        self.#code_path = Some(code_path);
+        self.#name_path = Some(name_path);
+        let tree_grade = code_path.split("/").count() - 2;
+        self.tree_grade = Some(tree_grade);
+    };
+    set_token_vec.push(parent_token);
+    // 设置
+    set_token_vec
+}
+
 fn build_struct_curd_method_filter_token(query_fields: &[Field]) -> Vec<TokenStream2> {
     let mut token_vec = vec![];
     for field in query_fields {
@@ -1022,6 +1099,10 @@ fn build_struct_web_handler_token(struct_ident: &Ident, is_tree: bool) -> TokenS
             format_ident!("{}_find_exclude_tree_by_parent_id", struct_name);
         let find_tree_exclude_by_code_path =
             format_ident!("{}_find_exclude_tree_by_code_path", struct_name);
+
+        let find_tree_node_by_id = format_ident!("{}_find_one_by_id", struct_name);
+        let find_tree_node_by_code = format_ident!("{}_find_one_by_code", struct_name);
+
         tree_handler = vec![
             quote! {
                 #[handler]
@@ -1094,6 +1175,18 @@ fn build_struct_web_handler_token(struct_ident: &Ident, is_tree: bool) -> TokenS
             quote! {
                 #[handler]
                 pub async fn #find_tree_exclude_by_code_path(req: &mut Request, resp: &mut Response) -> HttpRespListVo<#struct_ident> {
+                    Ok(RespVo::ok_find_option(None))
+                }
+            },
+            quote! {
+                #[handler]
+                pub async fn #find_tree_node_by_id(req: &mut Request, resp: &mut Response) -> HttpRespVo<#struct_ident> {
+                    Ok(RespVo::ok_find_option(None))
+                }
+            },
+            quote! {
+                 #[handler]
+                pub async fn #find_tree_node_by_code(req: &mut Request, resp: &mut Response) -> HttpRespVo<#struct_ident> {
                     Ok(RespVo::ok_find_option(None))
                 }
             },

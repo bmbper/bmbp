@@ -21,6 +21,8 @@ pub const RDBC_TREE_NAME: &str = "name";
 pub const RDBC_TREE_NAME_PATH: &str = "name_path";
 pub const RDBC_TREE_NODE_TYPE: &str = "node_type";
 pub const RDBC_TREE_NODE_LEVEL: &str = "node_level";
+pub const RDBC_TREE_NODE_GRADE: &str = "grade";
+
 pub const RDBC_TREE_NODE_LEAF: &str = "node_leaf";
 
 pub const RDBC_DATA_TABLE_PRIMARY_KEY: &str = bmbp_rdbc_orm::RDBC_DATA_ID;

@@ -1,10 +1,10 @@
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
 use bmbp_app_utils::{is_empty_string, simple_uuid_upper};
 use bmbp_rdbc_orm::{
-    RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH,
-    RDBC_TREE_PARENT_CODE, RDBC_TREE_ROOT_NODE, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable,
-    RdbcTableInner, RdbcTree, RdbcTreeUtil, simple_column, Update,
-    value_column,
+    simple_column, value_column, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable, RdbcTableInner,
+    RdbcTree, RdbcTreeUtil, Update, RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_DISABLE,
+    RDBC_ENABLE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH, RDBC_TREE_PARENT_CODE,
+    RDBC_TREE_ROOT_NODE,
 };
 
 use crate::organ::dao::BmbpRbacOrganDao;
@@ -138,6 +138,7 @@ impl BmbpRbacOrganService {
         // 设置组织机构编码默认值
         organ.set_data_id(simple_uuid_upper());
         organ.set_code(simple_uuid_upper());
+
         // 根据上级节点设置本级的编码路径、本级的名称路径
         // 当上级节点编码为空时，赋值为根节点
         // 根据上级编码去查询节点信息，查询不到节点时，

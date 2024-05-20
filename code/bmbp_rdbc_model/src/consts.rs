@@ -28,4 +28,4 @@ pub const RDBC_DISABLE: &str = "0";
 pub const RDBC_DELETE_FLAG: &str = "-1";
 pub const RDBC_NEW_FLAG: &str = "0";
 
-pub const RDBC_TREE_ROOT_NODE: &str = "0";
+pub const RDBC_TREE_ROOT_NODE: &str = "#";
