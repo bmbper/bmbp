@@ -21,11 +21,20 @@ fn test_rdbc_model_empty() {
     use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
     use chrono::Utc;
     use salvo::*;
-    #[rdbc_model(table = BMBP_RBAC_ROLE,tree=role)]
-    pub struct BmbpRbacRole {
-        role_code: Option<String>,
-        #[query(like)]
-        role_name: Option<String>,
-        role_desc: Option<String>,
+    #[rdbc_model]
+    pub struct RdbcModel {
+        #[query(eq)]
+        #[valid(name(姓名),save[require(msg=""),unique(p_code),maxLength(33)])]
+        name: String,
+        #[valid(name("年龄"),save[require(""),uniquemaxValue(88),minValue(44),limitValue["1","3","5"]])]
+        age: Option<i32>,
+        #[valid(name="类型",save[require(""),limitValue["1","3","5"]])]
+        grade: Option<i32>,
+        #[valid(name="类型",update[require(""),unique])]
+        code: Option<String>,
+        #[valid(name="类型",insert[require(""),unique])]
+        p_code: Option<String>,
+        #[valid(name="类型",insert[require(""),unique],update[require])]
+        p_code_c: Option<String>,
     }
 }

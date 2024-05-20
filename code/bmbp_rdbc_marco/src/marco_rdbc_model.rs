@@ -589,6 +589,7 @@ fn build_struct_curd_method_token(
                 pub async fn insert(&mut self) -> BmbpResp<usize> {
                     // 初始化数据
                     self.init_insert_data();
+                    // todo valid insert_data
                     let insert = self.build_insert_sql();
                     #orm_ident::execute_insert(&insert).await
                 }
@@ -596,6 +597,7 @@ fn build_struct_curd_method_token(
             quote! {
                 pub async fn update(&mut self) -> BmbpResp<usize> {
                     self.init_update_data();
+                     // todo valid update_data
                     let update = self.build_update_sql();
                     #orm_ident::execute_update(&update).await
                 }
@@ -804,8 +806,6 @@ fn build_struct_valid_method_token(
     struct_field_slice: &[Field],
 ) -> TokenStream2 {
     let (insert_valid, update_valid) = parse_field_slice_valid_meta(struct_field_slice);
-    println!("===insert=======>{}", insert_valid.len());
-    println!("===update=======>{}", update_valid.len());
     quote! {
         impl #struct_ident {
             pub fn insert_valid(&self) -> BmbpResp<()> {

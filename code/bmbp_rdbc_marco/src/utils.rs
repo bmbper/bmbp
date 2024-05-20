@@ -1,11 +1,11 @@
+use crate::types::{ValidMeta, ValidRule, ValidRuleMethod};
+use bmbp_rdbc_orm::RdbcValidMeta;
 use proc_macro::TokenStream;
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, ToTokens};
 use std::collections::HashMap;
 use syn::parse::Parse;
 use syn::punctuated::Punctuated;
-use syn::{DeriveInput, Field, Lit, Meta, Token, Type, TypePath};
-
-use crate::types::{ValidMeta, ValidRule, ValidRuleMethod};
+use syn::{DeriveInput, Expr, Field, Lit, Meta, Token, Type, TypePath};
 use uuid::Uuid;
 
 /// 获取基础模型
@@ -172,63 +172,131 @@ fn parse_field_item_valid_meta(
     attrs: Meta,
     valid_rule_method: &ValidRuleMethod,
 ) -> (Vec<ValidRule>, Vec<ValidRule>) {
+    println!(
+        "=====> 字段的校验规则:{}",
+        attrs.to_token_stream().to_string()
+    );
+
+    // 定义validMeta
+    let mut valid_meta = RdbcValidMeta::default();
+
     let mut insert_rule_vec = vec![];
     let mut update_rule_vec = vec![];
-    if let Meta::List(list) = attrs {
-        if let Ok(meta_list) = list.parse_args_with(Punctuated::<Meta, Token![,]>::parse_terminated)
+    if let Meta::List(meta_list) = attrs {
+        if let Ok(meta_list) =
+            meta_list.parse_args_with(Punctuated::<Meta, Token![,]>::parse_terminated)
         {
-            for meta in meta_list.iter() {
-                if meta.path().is_ident("insert") {
-                    let (item_insert_vec, item_update_vec) =
-                        parse_field_item_valid_meta(meta.clone(), &ValidRuleMethod::INSERT);
-                    insert_rule_vec.extend_from_slice(item_insert_vec.as_slice());
-                    update_rule_vec.extend_from_slice(item_update_vec.as_slice());
-                } else if meta.path().is_ident("update") {
-                    let (item_insert_vec, item_update_vec) =
-                        parse_field_item_valid_meta(meta.clone(), &ValidRuleMethod::UPDATE);
-                    insert_rule_vec.extend_from_slice(item_insert_vec.as_slice());
-                    update_rule_vec.extend_from_slice(item_update_vec.as_slice());
-                } else {
-                    // 计算校验规则
-                    let valid_rule = ValidRule::default();
-                    if let Ok(require_list) = meta.require_list() {
-                        if let Ok(r_me) = require_list
-                            .parse_args_with(Punctuated::<Lit, Token![,]>::parse_terminated)
-                        {
-                            println!(
-                                "{}参数=======>{}",
-                                meta.path().get_ident().unwrap().to_string(),
-                                r_me.len()
-                            );
-                            for r_me_item in r_me.iter() {
-                                match r_me_item {
-                                    Lit::Str(lit_str) => {
-                                        println!("======item=>:{}", lit_str.value())
+            for meta_item in meta_list.iter() {
+                if meta_item.path().is_ident("name") {
+                    match meta_item {
+                        Meta::List(child_item_list) => {
+                            if let Ok(item_name_list) = child_item_list
+                                .parse_args_with(Punctuated::<Expr, Token![,]>::parse_terminated)
+                            {
+                                for name_expr in item_name_list.iter() {
+                                    if let Expr::Lit(name_expr_lit) = name_expr.clone() {
+                                        if let Lit::Str(name_value_str_lit) = name_expr_lit.lit {
+                                            valid_meta.name = Some(name_value_str_lit.value());
+                                        }
                                     }
-                                    Lit::Int(lit_int) => {
-                                        println!("======item=>:{}", lit_int.to_string())
+                                }
+                            }
+                            if let Ok(item_name_list) = child_item_list
+                                .parse_args_with(Punctuated::<Meta, Token![,]>::parse_terminated)
+                            {
+                                for name_item_meta in item_name_list.iter() {
+                                    match name_item_meta {
+                                        Meta::Path(name_item_meta_path) => {
+                                            valid_meta.name = Some(
+                                                name_item_meta_path
+                                                    .get_ident()
+                                                    .unwrap()
+                                                    .to_string(),
+                                            );
+                                        }
+                                        Meta::List(_) => {
+                                            println!("========11>");
+                                        }
+                                        Meta::NameValue(_) => {
+                                            println!("========12>");
+                                        }
                                     }
-                                    _ => {}
                                 }
                             }
                         }
+                        Meta::NameValue(name_meta) => {
+                            if let Expr::Lit(name_expr_lit) = name_meta.value.clone() {
+                                if let Lit::Str(name_value_str_lit) = name_expr_lit.lit {
+                                    valid_meta.name = Some(name_value_str_lit.value());
+                                }
+                            }
+                        }
+
+                        Meta::Path(_) => {
+                            println!("errror===>");
+                        }
                     }
-                    match valid_rule_method {
-                        ValidRuleMethod::INSERT_UPDATE => {
-                            insert_rule_vec.push(valid_rule.clone());
-                            update_rule_vec.push(valid_rule.clone());
+                } else if meta_item.path().is_ident("save") {
+                    match meta_item {
+                        Meta::List(child_item_list) => {
+                            if let Ok(item_name_list) = child_item_list
+                                .parse_args_with(Punctuated::<Meta, Token![,]>::parse_terminated)
+                            {
+                                for name_item_meta in item_name_list.iter() {
+                                    let ident =
+                                        name_item_meta.path().get_ident().unwrap().to_string();
+                                    println!("===save_item:{}", ident);
+
+                                    match name_item_meta {
+                                        Meta::List(save_item_list) => {
+                                            if let Ok(item_name_list) = save_item_list
+                                                .parse_args_with(
+                                                    Punctuated::<Meta, Token![,]>::parse_terminated,
+                                                )
+                                            {
+                                                for ii in item_name_list.iter() {
+                                                    println!(
+                                                        "====save11==>01:{}",
+                                                        ii.to_token_stream().to_string()
+                                                    );
+                                                }
+                                            }
+                                            if let Ok(item_name_list) = save_item_list
+                                                .parse_args_with(
+                                                    Punctuated::<Expr, Token![,]>::parse_terminated,
+                                                )
+                                            {
+                                                for ii in item_name_list.iter() {
+                                                    println!(
+                                                        "====save11=expr=>01:{}",
+                                                        ii.to_token_stream().to_string()
+                                                    );
+                                                }
+                                            }
+                                        }
+                                        Meta::Path(name_item_meta_path) => {
+                                            println!("======>save10")
+                                        }
+                                        Meta::NameValue(_) => {
+                                            println!("======>save12")
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        ValidRuleMethod::INSERT => {
-                            insert_rule_vec.push(valid_rule);
-                        }
-                        ValidRuleMethod::UPDATE => {
-                            update_rule_vec.push(valid_rule);
-                        }
+                        Meta::Path(_) => {}
+                        Meta::NameValue(_) => {}
                     }
+                    println!("save===>{}", meta_item.to_token_stream().to_string());
+                } else if meta_item.path().is_ident("insert") {
+                    println!("insert===>{}", meta_item.to_token_stream().to_string());
+                } else if meta_item.path().is_ident("update") {
+                    println!("update===>{}", meta_item.to_token_stream().to_string());
                 }
             }
         }
     }
+    println!("valid==>{:#?}", valid_meta);
     (insert_rule_vec, update_rule_vec)
 }
 
