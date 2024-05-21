@@ -658,6 +658,7 @@ fn build_struct_curd_save_method_token(
     quote! {
         impl #struct_ident {
             pub async fn insert(&mut self) -> BmbpResp<usize> {
+                println!("insert data:{:?}",self);
                 // 初始化数据
                 self.init_insert_data();
                 let _ = self.insert_valid()?;
@@ -803,12 +804,30 @@ fn build_struct_tree_curd_method_token(
         },
         quote! {
             pub async fn find_one_by_id(data_id: &Option<String>) -> BmbpResp<Option<Self>> {
-               Ok(None)
+                if let Some(v) = data_id {
+                    if v.is_empty(){
+                        return Ok(None);
+                    }
+                    let mut query = #struct_ident::build_query_sql();
+                    query.eq_(RDBC_DATA_ID, v);
+                    #orm_ident::select_one_by_query(&query).await
+                }else{
+                    Ok(None)
+                }
             }
         },
         quote! {
-            pub async fn find_one_by_code(data_id: &Option<String>) -> BmbpResp<Option<Self>> {
-               Ok(None)
+            pub async fn find_one_by_code(code: &Option<String>) -> BmbpResp<Option<Self>> {
+                if let Some(v) = code {
+                    if v.is_empty(){
+                        return Ok(None);
+                    }
+                    let mut query = #struct_ident::build_query_sql();
+                    query.eq_(#tree_code, code);
+                    #orm_ident::select_one_by_query(&query).await
+                }else{
+                    Ok(None)
+                }
             }
         },
     ];
@@ -903,6 +922,7 @@ fn build_struct_tree_curd_save_insert_token(
     set_token_vec.push(parent_token);
     quote! {
         pub async fn insert(&mut self) -> BmbpResp<usize> {
+                info!("insert tree data...");
                 // 初始化数据
                 self.init_insert_data();
                 #(#set_token_vec)*

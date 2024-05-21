@@ -7,7 +7,7 @@ use bmbp_rdbc_orm::RdbcMacroTree;
 use bmbp_rdbc_orm::*;
 use chrono::Utc;
 use salvo::*;
-use tracing::*;
+use tracing::info;
 use uuid::Uuid;
 #[rdbc_model(BMBP_RBAC_APP_MENU, MENU)]
 pub struct BmbpRbacAppMenu {
