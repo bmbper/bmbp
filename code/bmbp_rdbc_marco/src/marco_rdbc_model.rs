@@ -657,23 +657,19 @@ fn build_struct_curd_save_method_token(
     let orm_ident = format_ident!("{}Orm", struct_ident);
     quote! {
         impl #struct_ident {
-            quote! {
-                pub async fn insert(&mut self) -> BmbpResp<usize> {
-                    // 初始化数据
-                    self.init_insert_data();
-                    let _ = self.insert_valid()?;
-                    let insert = self.build_insert_sql();
-                    #orm_ident::execute_insert(&insert).await
-                }
-            },
-            quote! {
-                pub async fn update(&mut self) -> BmbpResp<usize> {
-                    self.init_update_data();
-                    let _ = self.update_valid()?;
-                    let update = self.build_update_sql();
-                    #orm_ident::execute_update(&update).await
-                }
-            },
+            pub async fn insert(&mut self) -> BmbpResp<usize> {
+                // 初始化数据
+                self.init_insert_data();
+                let _ = self.insert_valid()?;
+                let insert = self.build_insert_sql();
+                #orm_ident::execute_insert(&insert).await
+            }
+            pub async fn update(&mut self) -> BmbpResp<usize> {
+                self.init_update_data();
+                let _ = self.update_valid()?;
+                let update = self.build_update_sql();
+                #orm_ident::execute_update(&update).await
+            }
         }
     }
 }

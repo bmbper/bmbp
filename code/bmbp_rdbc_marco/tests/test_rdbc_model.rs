@@ -26,8 +26,8 @@ fn test_rdbc_model_empty() {
     use chrono::Utc;
     use salvo::*;
     use uuid::Uuid;
-    #[rdbc_model(tree=ROLE)]
-    pub struct RdbcModel {
+    #[rdbc_model()]
+    pub struct RdbcModel1 {
         #[query(eq)]
         #[valid(name(姓名),save[require(msg=""),unique(p_code),maxLength(33)])]
         name: String,

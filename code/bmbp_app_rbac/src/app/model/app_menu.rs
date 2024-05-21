@@ -8,7 +8,7 @@ use bmbp_rdbc_orm::*;
 use chrono::Utc;
 use salvo::*;
 use tracing::*;
-
+use uuid::Uuid;
 #[rdbc_model(BMBP_RBAC_APP_MENU, MENU)]
 pub struct BmbpRbacAppMenu {
     // 应用ID
