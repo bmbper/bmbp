@@ -81,13 +81,31 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
         filter_field_by_marco_attrs(&struct_field_vec, ATTRS_RDBC_SKIP, true).as_slice(),
     );
     model_struct_macro_token.push(struct_table_method_token);
+
+    if let Some(ref tree_prefix) = struct_tree_prefix {
+        let struct_tree_curd_method_token = build_struct_tree_curd_method_token(
+            struct_ident,
+            struct_field_vec.as_slice(),
+            tree_prefix,
+        );
+        model_struct_macro_token.extend_from_slice(struct_tree_curd_method_token.as_slice());
+
+        let struct_tree_curd_save_method_token = build_struct_tree_curd_save_method_token(
+            struct_ident,
+            struct_field_vec.as_slice(),
+            tree_prefix,
+        );
+        model_struct_macro_token.push(struct_tree_curd_save_method_token);
+    } else {
+        let struct_curd_save_method_token =
+            build_struct_curd_save_method_token(struct_ident, struct_field_vec.as_slice());
+        model_struct_macro_token.push(struct_curd_save_method_token);
+    }
     // 增删改查方法
-    let struct_curd_method_token = build_struct_curd_method_token(
-        struct_ident,
-        struct_field_vec.as_slice(),
-        &struct_tree_prefix,
-    );
+    let struct_curd_method_token =
+        build_struct_curd_method_token(struct_ident, struct_field_vec.as_slice());
     model_struct_macro_token.push(struct_curd_method_token);
+
     // 校验方法
     let struct_valid_method_token =
         build_struct_valid_method_token(struct_ident, struct_field_vec.as_slice());
@@ -489,140 +507,12 @@ fn build_struct_table_method_token(
     };
     token
 }
-fn build_struct_curd_method_token(
-    struct_ident: &Ident,
-    struct_fields: &[Field],
-    tree_prefix: &Option<String>,
-) -> TokenStream2 {
+fn build_struct_curd_method_token(struct_ident: &Ident, struct_fields: &[Field]) -> TokenStream2 {
     let struct_query_filter_sql_token = build_struct_curd_method_filter_token(struct_fields);
     let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
     let orm_ident = format_ident!("{}Orm", struct_ident);
-    let mut tree_method_vec = vec![];
-    let mut insert_update_vec = vec![];
-    if tree_prefix.is_some() {
-        let tree_data_for_insert: Vec<TokenStream2> =
-            build_struct_curd_tree_insert_default_data_token(tree_prefix.clone().unwrap().clone());
-        tree_method_vec = vec![
-            quote! {
-                pub async fn find_tree(query_vo: &#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
-                      if let Some(row_list) = Self::find_all_list(query_vo).await? {
-                        let tree_list = RdbcMarcoTreeUtil::build_tree::<#struct_ident>(row_list);
-                        return Ok(Some(tree_list));
-                    }
-                    Ok(None)
-                }
-            },
-            quote! {
-                pub async fn find_tree_by_id(data_id: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
-                   Ok(vec![])
-                }
-            },
-            quote! {
-                pub async fn find_tree_by_code(code: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
-                   Ok(vec![])
-                }
-            },
-            quote! {
-                pub async fn find_tree_by_parent_id(data_id: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
-                   Ok(vec![])
-                }
-            },
-            quote! {
-                pub async fn find_tree_by_parent_code(query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
-                   Ok(vec![])
-                }
-            },
-            quote! {
-                 pub async fn find_tree_by_code_path(code_path: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
-                   Ok(vec![])
-                }
-            },
-            quote! {
-                pub async fn find_tree_exclude(query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
-                   Ok(vec![])
-                }
-            },
-            quote! {
-                pub async fn find_tree_by_exclude_id(data_id: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
-                   Ok(vec![])
-                }
-            },
-            quote! {
-                pub async fn find_tree_exclude_by_code(code: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
-                   Ok(vec![])
-                }
-            },
-            quote! {
-                pub async fn find_tree_exclude_by_parent_id(data_id: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
-                   Ok(vec![])
-                }
-            },
-            quote! {
-                pub async fn find_tree_exclude_by_parent_code(query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
-                   Ok(vec![])
-                }
-            },
-            quote! {
-                 pub async fn find_tree_exclude_by_code_path(code_path: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
-                   Ok(vec![])
-                }
-            },
-            quote! {
-                pub async fn find_one_by_id(data_id: &Option<String>) -> BmbpResp<Option<Self>> {
-                   Ok(None)
-                }
-            },
-            quote! {
-                pub async fn find_one_by_code(data_id: &Option<String>) -> BmbpResp<Option<Self>> {
-                   Ok(None)
-                }
-            },
-        ];
-        insert_update_vec = vec![
-            quote! {
-                pub async fn insert(&mut self) -> BmbpResp<usize> {
-                    // 初始化数据
-                    self.init_insert_data();
-                    #(#tree_data_for_insert)*
-                    let _ = self.insert_valid()?;
-                    let insert = self.build_insert_sql();
-                    #orm_ident::execute_insert(&insert).await
-                }
-            },
-            quote! {
-                pub async fn update(&mut self) -> BmbpResp<usize> {
-                    self.init_update_data();
-                    let _ = self.insert_valid()?;
-                    let update = self.build_update_sql();
-                    #orm_ident::execute_update(&update).await
-                }
-            },
-        ];
-    } else {
-        insert_update_vec = vec![
-            quote! {
-                pub async fn insert(&mut self) -> BmbpResp<usize> {
-                    // 初始化数据
-                    self.init_insert_data();
-                    let _ = self.insert_valid()?;
-                    let insert = self.build_insert_sql();
-                    #orm_ident::execute_insert(&insert).await
-                }
-            },
-            quote! {
-                pub async fn update(&mut self) -> BmbpResp<usize> {
-                    self.init_update_data();
-                    let _ = self.update_valid()?;
-                    let update = self.build_update_sql();
-                    #orm_ident::execute_update(&update).await
-                }
-            },
-        ];
-    }
-
     let token = quote! {
         impl #struct_ident {
-            #(#tree_method_vec)*
             pub async fn find_page(page_params: BmbpPageParam<#struct_query_ident>) -> BmbpResp<PageVo<Self>> {
                 let mut query = #struct_ident::build_query_sql();
                 if let Some(query_vo) = page_params.get_params() {
@@ -688,7 +578,6 @@ fn build_struct_curd_method_token(
                 }
                 self.find_one().await
             }
-            #(#insert_update_vec)*
             pub async fn remove(&self) -> BmbpResp<usize> {
                 if self.get_data_id().is_none() {
                     return Err(BmbpError::service("请指定要删除的记录"));
@@ -761,15 +650,212 @@ fn build_struct_curd_method_token(
     };
     token
 }
+fn build_struct_curd_save_method_token(
+    struct_ident: &Ident,
+    struct_fields: &[Field],
+) -> TokenStream2 {
+    let orm_ident = format_ident!("{}Orm", struct_ident);
+    quote! {
+        impl #struct_ident {
+            quote! {
+                pub async fn insert(&mut self) -> BmbpResp<usize> {
+                    // 初始化数据
+                    self.init_insert_data();
+                    let _ = self.insert_valid()?;
+                    let insert = self.build_insert_sql();
+                    #orm_ident::execute_insert(&insert).await
+                }
+            },
+            quote! {
+                pub async fn update(&mut self) -> BmbpResp<usize> {
+                    self.init_update_data();
+                    let _ = self.update_valid()?;
+                    let update = self.build_update_sql();
+                    #orm_ident::execute_update(&update).await
+                }
+            },
+        }
+    }
+}
+fn build_struct_tree_curd_method_token(
+    struct_ident: &Ident,
+    struct_fields: &[Field],
+    tree_prefix: &String,
+) -> Vec<TokenStream2> {
+    let mut tree_token = vec![];
+    let struct_query_ident = format_ident!("{}QueryVo", struct_ident);
+    let orm_ident = format_ident!("{}Orm", struct_ident);
+    let tree_prefix_string = tree_prefix.clone();
+    let tree_code = format!("{}_code", tree_prefix_string);
+    let tree_parent_code = format!("{}_parent_code", tree_prefix_string);
+    let tree_code_path = format!("{}_code_path", tree_prefix_string);
+    let tree_name = format!("{}_name", tree_prefix_string);
+    let tree_name_path = format!("{}_name_path", tree_prefix_string);
+    let tree_method_token = vec![
+        quote! {
+            pub async fn update_parent(data_id: &Option<String>,parent_code: Option<String>,) -> BmbpResp<usize> {
+                Ok(0)
+            }
+        },
+        quote! {
+            pub async fn update_name_path_for_children(parent_name_path: &str) -> BmbpResp<usize> {
+                let mut update = Update::new();
+                update.table_alias(Self::get_table_name(), "t1".to_string());
+                let mut join_table =
+                    RdbcTableInner::table_alias(Self::get_table_name(), "t2".to_string());
+                join_table.on_eq_col(
+                    RdbcColumn::table_column("t1", #tree_parent_code),
+                    RdbcColumn::table_column("t2", #tree_code),
+                );
+                update.join_rdbc_table(join_table);
 
-fn build_struct_curd_tree_insert_default_data_token(tree_prefix: String) -> Vec<TokenStream2> {
+                let concat_column = RdbcColumn::concat(vec![
+                    simple_column("t2", #tree_name_path),
+                    simple_column("t1", #tree_name),
+                    value_column("/"),
+                ]);
+                update.set(#tree_name_path, concat_column);
+                update.like_left_value(simple_column("t1", #tree_name_path), parent_name_path);
+                #orm_ident::execute_update(&update).await
+            }
+
+        },
+        quote! {
+           pub async fn update_code_path_for_children(parent_code_path: &str) -> BmbpResp<usize> {
+                let mut update = Update::new();
+                update.table_alias(Self::get_table_name(), "t1".to_string());
+                let concat_column = RdbcColumn::concat(vec![
+                    simple_column("t2", #tree_code_path),
+                    simple_column("t1", #tree_code),
+                    value_column("/"),
+                ]);
+                update.set(simple_column("t1", #tree_code_path), concat_column);
+                let mut join_table =
+                    RdbcTableInner::table_alias(Self::get_table_name(), "t2".to_string());
+                join_table.on_eq_col(
+                    RdbcColumn::table_column("t1", #tree_parent_code),
+                    RdbcColumn::table_column("t2", #tree_code),
+                );
+                update.join_rdbc_table(join_table);
+                update.like_left_value(simple_column("t1", #tree_code_path), parent_code_path);
+                #orm_ident::execute_update(&update).await
+            }
+        },
+        quote! {
+            pub async fn find_tree(query_vo: &#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
+                  if let Some(row_list) = Self::find_all_list(query_vo).await? {
+                    let tree_list = RdbcMarcoTreeUtil::build_tree::<#struct_ident>(row_list);
+                    return Ok(Some(tree_list));
+                }
+                Ok(None)
+            }
+        },
+        quote! {
+            pub async fn find_tree_by_id(data_id: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+               Ok(vec![])
+            }
+        },
+        quote! {
+            pub async fn find_tree_by_code(code: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+               Ok(vec![])
+            }
+        },
+        quote! {
+            pub async fn find_tree_by_parent_id(data_id: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+               Ok(vec![])
+            }
+        },
+        quote! {
+            pub async fn find_tree_by_parent_code(query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+               Ok(vec![])
+            }
+        },
+        quote! {
+             pub async fn find_tree_by_code_path(code_path: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+               Ok(vec![])
+            }
+        },
+        quote! {
+            pub async fn find_tree_exclude(query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+               Ok(vec![])
+            }
+        },
+        quote! {
+            pub async fn find_tree_by_exclude_id(data_id: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+               Ok(vec![])
+            }
+        },
+        quote! {
+            pub async fn find_tree_exclude_by_code(code: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+               Ok(vec![])
+            }
+        },
+        quote! {
+            pub async fn find_tree_exclude_by_parent_id(data_id: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+               Ok(vec![])
+            }
+        },
+        quote! {
+            pub async fn find_tree_exclude_by_parent_code(query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+               Ok(vec![])
+            }
+        },
+        quote! {
+             pub async fn find_tree_exclude_by_code_path(code_path: &Option<String>,query_vo: &#struct_query_ident) -> BmbpResp<Vec<Self>> {
+               Ok(vec![])
+            }
+        },
+        quote! {
+            pub async fn find_one_by_id(data_id: &Option<String>) -> BmbpResp<Option<Self>> {
+               Ok(None)
+            }
+        },
+        quote! {
+            pub async fn find_one_by_code(data_id: &Option<String>) -> BmbpResp<Option<Self>> {
+               Ok(None)
+            }
+        },
+    ];
+    tree_token.push(quote! {
+        impl #struct_ident {
+            #(#tree_method_token)*
+        }
+    });
+    tree_token
+}
+fn build_struct_tree_curd_save_method_token(
+    struct_ident: &Ident,
+    struct_fields: &[Field],
+    tree_prefix: &String,
+) -> TokenStream2 {
+    let orm_ident = format_ident!("{}Orm", struct_ident);
+    let tree_data_for_insert = build_struct_tree_curd_save_insert_token(&orm_ident, tree_prefix);
+
+    quote! {
+        impl #struct_ident {
+            #tree_data_for_insert
+            pub async fn update(&mut self) -> BmbpResp<usize> {
+                    self.init_update_data();
+                    let _ = self.insert_valid()?;
+                    let update = self.build_update_sql();
+                    #orm_ident::execute_update(&update).await
+            }
+        }
+
+    }
+}
+
+fn build_struct_tree_curd_save_insert_token(
+    orm_ident: &Ident,
+    tree_prefix: &String,
+) -> TokenStream2 {
     let mut set_token_vec = vec![];
-    let code = format!("{}_{}", tree_prefix, RDBC_TREE_CODE);
-    let code_path = format!("{}_{}", tree_prefix, RDBC_TREE_CODE_PATH);
-    let parent_code = format!("{}_{}", tree_prefix, RDBC_TREE_PARENT_CODE);
-    let name = format!("{}_{}", tree_prefix, RDBC_TREE_NAME);
-    let name_path = format!("{}_{}", tree_prefix, RDBC_TREE_NAME_PATH);
-    let tree_grade = format!("{}_{}", tree_prefix, RDBC_TREE_NODE_GRADE);
+    let code = format_ident!("{}_{}", tree_prefix, RDBC_TREE_CODE);
+    let code_path = format_ident!("{}_{}", tree_prefix, RDBC_TREE_CODE_PATH);
+    let parent_code = format_ident!("{}_{}", tree_prefix, RDBC_TREE_PARENT_CODE);
+    let name = format_ident!("{}_{}", tree_prefix, RDBC_TREE_NAME);
+    let name_path = format_ident!("{}_{}", tree_prefix, RDBC_TREE_NAME_PATH);
+    let tree_grade = format_ident!("{}_{}", tree_prefix, RDBC_TREE_NODE_GRADE);
     let code_token = quote! {
         if self.#code.is_none() {
             self.#code = Some(Uuid::new_v4().to_string().to_uppercase().replace("-",""));
@@ -780,20 +866,20 @@ fn build_struct_curd_tree_insert_default_data_token(tree_prefix: String) -> Vec<
     let parent_token = quote! {
         let mut parent_code_path = "".to_string();
         let mut parent_name_path = "".to_string();
-        if let Some(p_code) = self.#parent_code{
+        if let Some(p_code) = self.#parent_code.as_ref(){
             if p_code.is_empty(){
                 self.#parent_code = Some(RDBC_TREE_ROOT_NODE.to_string());
                 parent_code_path = "/".to_string();
                 parent_name_path = "/".to_string();
             }else{
                 //TODO 加载上级节点
-                let mut node = self::find_one_by_code(Some(p_code)).await?;
+                let mut node = Self::find_one_by_code(&Some(p_code.to_string())).await?;
                 if let Some(v) = node {
-                    if let Some(p_code_path) = v.get_code_path(){
-                        if let Some(code_path_tmp) = v.get_code_path() {
+                    if let Some(p_code_path) = v.#code_path.clone(){
+                        if let Some(code_path_tmp) = v.#code_path.clone() {
                             parent_code_path = format!("{}", code_path_tmp);
                         }
-                        if let Some(name_path_tmp) = v.get_name_path() {
+                        if let Some(name_path_tmp) = v.#name_path.clone() {
                             parent_name_path = format!("{}", name_path_tmp);
                         }
                     }
@@ -811,16 +897,24 @@ fn build_struct_curd_tree_insert_default_data_token(tree_prefix: String) -> Vec<
             parent_code_path = "/".to_string();
             parent_name_path = "/".to_string();
         }
-        let code_path = format!("{}{}/", parent_code_path, organ.get_code().unwrap());
-        let name_path = format!("{}{}/", parent_name_path, organ.get_name().unwrap());
-        self.#code_path = Some(code_path);
+        let code_path = format!("{}{}/", parent_code_path, self.#code.as_ref().unwrap());
+        let name_path = format!("{}{}/", parent_name_path, self.#name.as_ref().unwrap());
+        self.#code_path = Some(code_path.clone());
         self.#name_path = Some(name_path);
         let tree_grade = code_path.split("/").count() - 2;
-        self.tree_grade = Some(tree_grade);
+        self.#tree_grade = Some(tree_grade as i32);
     };
     set_token_vec.push(parent_token);
-    // 设置
-    set_token_vec
+    quote! {
+        pub async fn insert(&mut self) -> BmbpResp<usize> {
+                // 初始化数据
+                self.init_insert_data();
+                #(#set_token_vec)*
+                let _ = self.insert_valid()?;
+                let insert = self.build_insert_sql();
+                #orm_ident::execute_insert(&insert).await
+        }
+    }
 }
 
 fn build_struct_curd_method_filter_token(query_fields: &[Field]) -> Vec<TokenStream2> {
