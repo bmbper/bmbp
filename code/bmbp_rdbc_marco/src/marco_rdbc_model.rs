@@ -1,6 +1,4 @@
 use proc_macro::TokenStream;
-
-use bmbp_app_common::{BmbpError, BmbpResp};
 use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::{format_ident, quote, ToTokens};
 use syn::parse::Parser;
@@ -690,11 +688,6 @@ fn build_struct_tree_curd_method_token(
     let tree_name_path = format!("{}_name_path", tree_prefix_string);
     let tree_method_token = vec![
         quote! {
-            pub async fn update_parent(data_id: &Option<String>,parent_code: Option<String>,) -> BmbpResp<usize> {
-                Ok(0)
-            }
-        },
-        quote! {
             pub async fn update_name_path_for_children(parent_name_path: &str) -> BmbpResp<usize> {
                 let mut update = Update::new();
                 update.table_alias(Self::get_table_name(), "t1".to_string());
@@ -845,16 +838,12 @@ fn build_struct_tree_curd_save_method_token(
 ) -> TokenStream2 {
     let orm_ident = format_ident!("{}Orm", struct_ident);
     let tree_data_for_insert = build_struct_tree_curd_save_insert_token(&orm_ident, tree_prefix);
+    let tree_data_for_update = build_struct_tree_curd_save_update_token(&orm_ident, tree_prefix);
 
     quote! {
         impl #struct_ident {
             #tree_data_for_insert
-            pub async fn update(&mut self) -> BmbpResp<usize> {
-                    self.init_update_data();
-                    let _ = self.insert_valid()?;
-                    let update = self.build_update_sql();
-                    #orm_ident::execute_update(&update).await
-            }
+            #tree_data_for_update
         }
 
     }
@@ -932,7 +921,75 @@ fn build_struct_tree_curd_save_insert_token(
         }
     }
 }
+fn build_struct_tree_curd_save_update_token(
+    orm_ident: &Ident,
+    tree_prefix: &String,
+) -> TokenStream2 {
+    let parent_code = format_ident!("{}_{}", tree_prefix, RDBC_TREE_PARENT_CODE);
+    let code = format_ident!("{}_{}", tree_prefix, RDBC_TREE_CODE);
+    quote! {
+        pub async fn update(&mut self) -> BmbpResp<usize> {
+            let old_node_op = Self::find_one_by_id(&self.data_id).await?;
+            if old_node_op.is_none() {
+                return Err(BmbpError::service("指定的记录不存在!"));
+            }
+            // 树型结构不能修改节点编码
+            self.#code = old_node.#code.clone();
+            self.init_update_data();
+            let _ = self.update_valid()?;
+            // 上级编码
+            let old_node = old_node_op.unwrap();
+            if let Some(parent_code) = self.#parent_code.clone() {
+                if parent_code != RDBC_TREE_ROOT_NODE {
+                    let parent_node = Self::find_one_by_code(&Some(parent_code.clone())).await?;
+                    if parent_node.is_none() {
+                         return Err(BmbpError::service("指定的上级记录不存在!"));
+                    }
+                }
+            }else{
+                self.#parent_code = old_node.#parent_code;
+            }
+            let update = self.build_update_sql();
+            let mut row_count = #orm_ident::execute_update(&update).await?
+            row_count += self.change_node_path().await?;
+            Ok(row_count)
+        }
 
+        pub async fn update_parent(data_id: &Option<String>,parent_code: &Option<String>,) -> BmbpResp<usize> {
+            if parent_code.is_none(){
+                return Err(BmbpError::service("请指定上级记录!"));
+            }
+            if data_id.is_none()  || data_id.unwrap().is_empty(){
+                return Err(BmbpError::service("请指定记录!"));
+            }
+            let mut node_op = Self::find_one_by_id(data_id).await?;
+            if node_op.is_none() {
+                return Err(BmbpError::service("指定的记录不存在!"));
+            }
+            let parent_op = Self::find_one_by_code(parent_code).await?;
+            if parent_op.is_none() && parent_code.unwrap() != RDBC_TREE_ROOT_NODE{
+                return Err(BmbpError::service("指定的上级记录不存在!"));
+            }
+            node.#parent_code = parent_code;
+            node.change_node_path().await
+        }
+        pub async fn change_node_path(&mut self) -> BmbpResp<usize> {
+            let parent_code = self.#parent_code.clone().unwrap();
+            let code = self.#code.clone().unwrap();
+            if parent_code != RDBC_TREE_ROOT_NODE {
+                self.change_node_path_to_root().await?
+            }else{
+                self.change_parent_to_node().await?
+            }
+        }
+        pub async fn change_node_path_to_root(&mut self) -> BmbpResp<usize> {
+            Ok(0)
+        }
+        pub async fn change_parent_to_node(&mut self) -> BmbpResp<usize> {
+            Ok(0)
+        }
+    }
+}
 fn build_struct_curd_method_filter_token(query_fields: &[Field]) -> Vec<TokenStream2> {
     let mut token_vec = vec![];
     for field in query_fields {
