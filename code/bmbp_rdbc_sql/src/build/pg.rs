@@ -1080,5 +1080,13 @@ fn pg_build_func_replace_sql(
     with_alias: bool,
 ) -> (String, HashMap<String, RdbcValue>) {
     let (mut func_sql, mut func_params) = ("".to_string(), HashMap::new());
+    let (column_sql, _) = pg_build_select_table_column_sql(func.get_column(), with_alias);
+    func_sql = format!(
+        "REPLACE({},'{}','{}')",
+        column_sql,
+        func.get_old_value(),
+        func.get_new_value()
+    );
+
     (func_sql, func_params)
 }

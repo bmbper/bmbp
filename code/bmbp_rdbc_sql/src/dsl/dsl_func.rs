@@ -53,6 +53,18 @@ pub struct RdbcReplaceFunc {
 }
 
 impl RdbcReplaceFunc {
+    pub fn get_column(&self) -> &RdbcTableColumn {
+        &self.column
+    }
+    pub fn get_old_value(&self) -> &String {
+        &self.old_value
+    }
+    pub fn get_new_value(&self) -> &String {
+        &self.new_value
+    }
+}
+
+impl RdbcReplaceFunc {
     pub fn replace(
         column: RdbcTableColumn,
         old_value: String,
