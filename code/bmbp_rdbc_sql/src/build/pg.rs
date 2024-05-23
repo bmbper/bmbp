@@ -2,15 +2,15 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
+use crate::build::base::base_build_sql;
+use crate::build::vars::PG_PARAMS_TAG;
 use crate::{
     DatabaseType, Delete, Insert, Query, RdbcColumn, RdbcColumnFilterItem, RdbcCompareType,
     RdbcConcatFunc, RdbcConcatType, RdbcDmlValue, RdbcFilterInner, RdbcFilterItem, RdbcFunc,
-    RdbcFuncColumn, RdbcOrder, RdbcOrderType, RdbcQueryColumn, RdbcQueryTable, RdbcSchemaTable,
-    RdbcSQL, RdbcTableColumn, RdbcTableInner, RdbcTableJoinType, RdbcValue,
+    RdbcFuncColumn, RdbcOrder, RdbcOrderType, RdbcQueryColumn, RdbcQueryTable, RdbcReplaceFunc,
+    RdbcSQL, RdbcSchemaTable, RdbcTableColumn, RdbcTableInner, RdbcTableJoinType, RdbcValue,
     RdbcValueColumn, RdbcValueFilterItem, Update,
 };
-use crate::build::base::base_build_sql;
-use crate::build::vars::PG_PARAMS_TAG;
 
 pub fn pg_build_sql(sql: String, params: HashMap<String, RdbcValue>) -> (String, Vec<RdbcValue>) {
     base_build_sql(PG_PARAMS_TAG, sql, params)
@@ -719,6 +719,11 @@ fn pg_build_select_func_column_sql(
             sql = func_sql;
             params.extend(func_params.into_iter())
         }
+        RdbcFunc::REPLACE(replace) => {
+            let (func_sql, func_params) = pg_build_func_replace_sql(replace, with_alias);
+            sql = func_sql;
+            params.extend(func_params.into_iter())
+        }
     };
 
     if with_alias {
@@ -1068,5 +1073,12 @@ fn pg_build_func_concat_sql(
     } else {
         func_sql = format!("CONCAT({})", column_vec.join(","));
     }
+    (func_sql, func_params)
+}
+fn pg_build_func_replace_sql(
+    func: &RdbcReplaceFunc,
+    with_alias: bool,
+) -> (String, HashMap<String, RdbcValue>) {
+    let (mut func_sql, mut func_params) = ("".to_string(), HashMap::new());
     (func_sql, func_params)
 }

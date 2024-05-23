@@ -21,13 +21,15 @@ fn test_rdbc_model_empty() {
     use bmbp_rdbc_orm::RdbcORM;
     use bmbp_rdbc_orm::RdbcOrmRow;
     use bmbp_rdbc_orm::RdbcTableInner;
+    use bmbp_rdbc_orm::RDBC_DATA_ID;
     use bmbp_rdbc_orm::RDBC_TREE_ROOT_NODE;
     use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
     use chrono::Utc;
     use salvo::*;
+    use tracing::info;
     use uuid::Uuid;
-    #[rdbc_model()]
-    pub struct RdbcModel1 {
+    #[rdbc_model(tree=role)]
+    pub struct RdbcModel {
         #[query(eq)]
         #[valid(name(姓名),save[require(msg=""),unique(p_code),maxLength(33)])]
         name: String,

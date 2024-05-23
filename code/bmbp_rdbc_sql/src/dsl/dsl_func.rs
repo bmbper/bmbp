@@ -1,7 +1,8 @@
-use crate::RdbcColumn;
+use crate::{RdbcColumn, RdbcFuncColumn, RdbcTableColumn, RdbcValue};
 
 pub enum RdbcFunc {
     CONCAT(RdbcConcatFunc),
+    REPLACE(RdbcReplaceFunc),
 }
 
 impl RdbcFunc {
@@ -10,6 +11,9 @@ impl RdbcFunc {
     }
     pub fn concat(columns: Vec<RdbcColumn>) -> RdbcFunc {
         RdbcFunc::CONCAT(RdbcConcatFunc::concat(columns))
+    }
+    pub fn replace(column: RdbcTableColumn, old_value: String, new_value: String) -> RdbcFunc {
+        RdbcFunc::REPLACE(RdbcReplaceFunc::replace(column, old_value, new_value))
     }
 }
 
@@ -38,6 +42,26 @@ impl RdbcConcatFunc {
         RdbcConcatFunc {
             liter_: None,
             columns_: columns,
+        }
+    }
+}
+
+pub struct RdbcReplaceFunc {
+    column: RdbcTableColumn,
+    old_value: String,
+    new_value: String,
+}
+
+impl RdbcReplaceFunc {
+    pub fn replace(
+        column: RdbcTableColumn,
+        old_value: String,
+        new_value: String,
+    ) -> RdbcReplaceFunc {
+        RdbcReplaceFunc {
+            column,
+            old_value,
+            new_value,
         }
     }
 }

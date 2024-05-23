@@ -682,55 +682,7 @@ fn build_struct_tree_curd_method_token(
     let orm_ident = format_ident!("{}Orm", struct_ident);
     let tree_prefix_string = tree_prefix.clone();
     let tree_code = format!("{}_code", tree_prefix_string);
-    let tree_parent_code = format!("{}_parent_code", tree_prefix_string);
-    let tree_code_path = format!("{}_code_path", tree_prefix_string);
-    let tree_name = format!("{}_name", tree_prefix_string);
-    let tree_name_path = format!("{}_name_path", tree_prefix_string);
     let tree_method_token = vec![
-        quote! {
-            pub async fn update_name_path_for_children(parent_name_path: &str) -> BmbpResp<usize> {
-                let mut update = Update::new();
-                update.table_alias(Self::get_table_name(), "t1".to_string());
-                let mut join_table =
-                    RdbcTableInner::table_alias(Self::get_table_name(), "t2".to_string());
-                join_table.on_eq_col(
-                    RdbcColumn::table_column("t1", #tree_parent_code),
-                    RdbcColumn::table_column("t2", #tree_code),
-                );
-                update.join_rdbc_table(join_table);
-
-                let concat_column = RdbcColumn::concat(vec![
-                    simple_column("t2", #tree_name_path),
-                    simple_column("t1", #tree_name),
-                    value_column("/"),
-                ]);
-                update.set(#tree_name_path, concat_column);
-                update.like_left_value(simple_column("t1", #tree_name_path), parent_name_path);
-                #orm_ident::execute_update(&update).await
-            }
-
-        },
-        quote! {
-           pub async fn update_code_path_for_children(parent_code_path: &str) -> BmbpResp<usize> {
-                let mut update = Update::new();
-                update.table_alias(Self::get_table_name(), "t1".to_string());
-                let concat_column = RdbcColumn::concat(vec![
-                    simple_column("t2", #tree_code_path),
-                    simple_column("t1", #tree_code),
-                    value_column("/"),
-                ]);
-                update.set(simple_column("t1", #tree_code_path), concat_column);
-                let mut join_table =
-                    RdbcTableInner::table_alias(Self::get_table_name(), "t2".to_string());
-                join_table.on_eq_col(
-                    RdbcColumn::table_column("t1", #tree_parent_code),
-                    RdbcColumn::table_column("t2", #tree_code),
-                );
-                update.join_rdbc_table(join_table);
-                update.like_left_value(simple_column("t1", #tree_code_path), parent_code_path);
-                #orm_ident::execute_update(&update).await
-            }
-        },
         quote! {
             pub async fn find_tree(query_vo: &#struct_query_ident) -> BmbpResp<Option<Vec<Self>>> {
                   if let Some(row_list) = Self::find_all_list(query_vo).await? {
@@ -838,7 +790,7 @@ fn build_struct_tree_curd_save_method_token(
 ) -> TokenStream2 {
     let orm_ident = format_ident!("{}Orm", struct_ident);
     let tree_data_for_insert = build_struct_tree_curd_save_insert_token(&orm_ident, tree_prefix);
-    let tree_data_for_update = build_struct_tree_curd_save_update_token(&orm_ident, tree_prefix);
+    let tree_data_for_update = build_struct_tree_curd_save_update_token(&struct_ident, tree_prefix);
 
     quote! {
         impl #struct_ident {
@@ -922,71 +874,85 @@ fn build_struct_tree_curd_save_insert_token(
     }
 }
 fn build_struct_tree_curd_save_update_token(
-    orm_ident: &Ident,
+    struct_ident: &Ident,
     tree_prefix: &String,
 ) -> TokenStream2 {
+    let orm_ident = format_ident!("{}Orm", struct_ident);
     let parent_code = format_ident!("{}_{}", tree_prefix, RDBC_TREE_PARENT_CODE);
     let code = format_ident!("{}_{}", tree_prefix, RDBC_TREE_CODE);
+    let name = format_ident!("{}_{}", tree_prefix, RDBC_TREE_NAME);
+    let name_path = format_ident!("{}_{}", tree_prefix, RDBC_TREE_NAME_PATH);
+    let code_path = format_ident!("{}_{}", tree_prefix, RDBC_TREE_CODE_PATH);
+    let code_path_column = format!("{}_{}", tree_prefix, RDBC_TREE_CODE_PATH);
+    let name_path_column = format!("{}_{}", tree_prefix, RDBC_TREE_NAME_PATH);
     quote! {
         pub async fn update(&mut self) -> BmbpResp<usize> {
             let old_node_op = Self::find_one_by_id(&self.data_id).await?;
             if old_node_op.is_none() {
                 return Err(BmbpError::service("指定的记录不存在!"));
             }
+            let old_node = old_node_op.unwrap();
             // 树型结构不能修改节点编码
-            self.#code = old_node.#code.clone();
+            self.#code = None;
             self.init_update_data();
             let _ = self.update_valid()?;
+
+            let mut old_title_path = old_node.#name_path.unwrap().clone();
+            let mut old_code_path = old_node.#code_path.unwrap().clone();
+            let mut new_title_path = "".to_string();
+            let mut new_code_path = "".to_string();
+
+            let mut node_name = old_node.#name.clone().unwrap();
+            if let Some(name) = self.#name.clone() {
+                node_name = name;
+            }
+
+            let mut parent_code = "".to_string();
             // 上级编码
-            let old_node = old_node_op.unwrap();
-            if let Some(parent_code) = self.#parent_code.clone() {
-                if parent_code != RDBC_TREE_ROOT_NODE {
-                    let parent_node = Self::find_one_by_code(&Some(parent_code.clone())).await?;
-                    if parent_node.is_none() {
-                         return Err(BmbpError::service("指定的上级记录不存在!"));
-                    }
-                }
+            if let Some(code) = self.#parent_code.clone() {
+                parent_code = code;
             }else{
-                self.#parent_code = old_node.#parent_code;
+                if let Some(code) = old_node.#parent_code.clone() {
+                    parent_code = code;
+                }
+            }
+            if parent_code.is_empty(){
+                return Err(BmbpError::service("上级节点不存在"));
+            }
+            if parent_code.as_str() == RDBC_TREE_ROOT_NODE{
+                new_title_path = format!("/{}/", node_name.clone());
+                new_code_path = format!("/{}/", old_node.#code.clone().unwrap());
+            }else{
+                 if let Some(parent_node) = Self::find_one_by_code(&Some(parent_code)).await?{
+                    new_title_path = format!("{}{}/",parent_node.#name_path.clone().unwrap(),node_name.clone());
+                    new_code_path = format!("{}{}/", parent_node.#code_path.clone().unwrap(),old_node.#code.clone().unwrap());
+                }else{
+                    return Err(BmbpError::service("指定的上级记录不存在!"));
+                }
             }
             let update = self.build_update_sql();
-            let mut row_count = #orm_ident::execute_update(&update).await?
-            row_count += self.change_node_path().await?;
+            let mut row_count = #orm_ident::execute_update(&update).await?;
+            row_count = row_count + Self::change_node_path(old_title_path,new_title_path,old_code_path,new_code_path).await?;
             Ok(row_count)
         }
 
-        pub async fn update_parent(data_id: &Option<String>,parent_code: &Option<String>,) -> BmbpResp<usize> {
-            if parent_code.is_none(){
-                return Err(BmbpError::service("请指定上级记录!"));
+        pub async fn update_parent(data_id: &Option<String>,parent_code: &Option<String>) -> BmbpResp<usize> {
+            let mut node = #struct_ident::default();
+            if let Some(id) = data_id.clone() {
+                node.data_id = Some(id);
             }
-            if data_id.is_none()  || data_id.unwrap().is_empty(){
-                return Err(BmbpError::service("请指定记录!"));
+            if let Some(p_code) = parent_code.clone() {
+                node.#parent_code = Some(p_code);
             }
-            let mut node_op = Self::find_one_by_id(data_id).await?;
-            if node_op.is_none() {
-                return Err(BmbpError::service("指定的记录不存在!"));
-            }
-            let parent_op = Self::find_one_by_code(parent_code).await?;
-            if parent_op.is_none() && parent_code.unwrap() != RDBC_TREE_ROOT_NODE{
-                return Err(BmbpError::service("指定的上级记录不存在!"));
-            }
-            node.#parent_code = parent_code;
-            node.change_node_path().await
+            node.update().await
         }
-        pub async fn change_node_path(&mut self) -> BmbpResp<usize> {
-            let parent_code = self.#parent_code.clone().unwrap();
-            let code = self.#code.clone().unwrap();
-            if parent_code != RDBC_TREE_ROOT_NODE {
-                self.change_node_path_to_root().await?
-            }else{
-                self.change_parent_to_node().await?
-            }
-        }
-        pub async fn change_node_path_to_root(&mut self) -> BmbpResp<usize> {
-            Ok(0)
-        }
-        pub async fn change_parent_to_node(&mut self) -> BmbpResp<usize> {
-            Ok(0)
+        pub async fn change_node_path(old_title_path:String,new_title_path:String,old_code_path:String,new_code_path:String) -> BmbpResp<usize> {
+            let mut update = Update::new();
+            update.table(Self::get_table_name())
+            .set(#name_path_column,RdbcColumn::replace(#name_path_column,&old_title_path,&new_title_path))
+            .set(#code_path_column,RdbcColumn::replace(#code_path_column,&old_code_path,&new_code_path));
+            update.like_left_value(#code_path_column, &old_code_path);
+            #orm_ident::execute_update(&update).await
         }
     }
 }

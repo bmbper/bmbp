@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{Query, RdbcFunc, RdbcValue};
+use crate::{Query, RdbcFunc, RdbcReplaceFunc, RdbcValue};
 
 /// RdbcColumn SELECT 返回列
 
@@ -184,6 +184,18 @@ impl RdbcColumn {
     }
     pub fn concat(columns: Vec<RdbcColumn>) -> RdbcColumn {
         RdbcColumn::Func(RdbcFuncColumn::concat(columns))
+    }
+    pub fn replace<C, OV, NV>(column: C, old_value: OV, new_value: NV) -> RdbcColumn
+    where
+        RdbcTableColumn: From<C>,
+        OV: ToString,
+        NV: ToString,
+    {
+        RdbcColumn::Func(RdbcFuncColumn::replace(
+            RdbcTableColumn::from(column),
+            old_value.to_string(),
+            new_value.to_string(),
+        ))
     }
 }
 
@@ -392,6 +404,12 @@ impl RdbcFuncColumn {
     fn concat(columns: Vec<RdbcColumn>) -> RdbcFuncColumn {
         RdbcFuncColumn {
             columns_: RdbcFunc::concat(columns),
+            alias_: None,
+        }
+    }
+    fn replace(column: RdbcTableColumn, old_value: String, new_value: String) -> RdbcFuncColumn {
+        RdbcFuncColumn {
+            columns_: RdbcFunc::replace(column, old_value, new_value),
             alias_: None,
         }
     }
