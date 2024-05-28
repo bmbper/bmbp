@@ -8,6 +8,8 @@ edition = "2021"
 description = """
     A power full MIS template
 """
+[workspace.build]
+openssl = "/opt/homebrew/Cellar/openssl@3/3.3.0"
 [workspace.dependencies]
 salvo = { version = "*", features = ["default", "serve-static", "cors", "size-limiter", "logging"] }
 serde = { version = "*", features = ["derive"] }
@@ -45,3 +47,5 @@ libsm = "*"
 base64 = "*"
 syn = { version = "2.0.63", features = ["full", "parsing", "printing", "proc-macro", "clone-impls"] }
 quote = "*"
+openssl = { version = "0.10.64", features = ["vendored"] }
+openssl-sys = "0.9.102"

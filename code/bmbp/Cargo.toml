@@ -8,3 +8,5 @@ edition = "2021"
 # 全局参数存放
 bmbp_app = { path = "../bmbp_app" }
 tokio = { workspace = true }
+openssl = { workspace = true }
+openssl-sys = { workspace = true }

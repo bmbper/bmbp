@@ -4,9 +4,3 @@
 //      DML包括数据库表数据插入、数据库表数据更新、数据库表数据删除等
 //      DQL包括数据库表数据查询、数据库表数据统计等
 // 本模块采用JSON schema 规范进行描述，仅作定义
-
-mod ddl;
-mod dmql;
-
-pub use ddl::*;
-pub use dmql::*;

@@ -12,9 +12,12 @@ use uuid::Uuid;
 #[rdbc_model(BMBP_RBAC_APP_MENU, MENU)]
 pub struct BmbpRbacAppMenu {
     // 应用ID
+    #[query(eq)]
     app_id: Option<String>,
     // 菜单类型
     menu_type: Option<RbacAppMenuType>,
+    // 菜单配置类型
+    menu_meta_type: Option<String>,
     // 打开类型
     open_type: Option<RbacAppMenuOpenType>,
     // 菜单图标
