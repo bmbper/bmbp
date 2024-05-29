@@ -1,14 +1,16 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
-
+mod bean;
+mod dml;
+mod dql;
+pub use bean::*;
+pub use dml::*;
+pub use dql::*;
 #[cfg(test)]
-mod tests {
-    use super::*;
+mod test {
+    use crate::bean::RdbcColumnVo;
 
     #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    pub fn test_bean() {
+        let column = RdbcColumnVo::default();
+        println!("{:?}", column);
     }
 }
