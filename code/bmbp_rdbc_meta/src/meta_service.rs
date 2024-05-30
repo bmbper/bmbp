@@ -1,5 +1,11 @@
-use crate::bean::{RdbcColumnVo, RdbcSchemaVo, RdbcTableVo};
-use serde::de::Unexpected::Option;
+use crate::{DataBaseType, RdbcColumnVo, RdbcSchemaVo, RdbcTableVo};
+
+pub fn build_create_table_sql(
+    db_type: &DataBaseType,
+    table: &RdbcTableVo,
+) -> Result<String, String> {
+    Ok("".to_string())
+}
 
 pub fn find_schemas() -> Option<Vec<RdbcSchemaVo>> {
     None
