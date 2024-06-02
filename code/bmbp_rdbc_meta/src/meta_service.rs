@@ -1,10 +1,11 @@
+use crate::meta::DdlClient;
 use crate::{DataBaseType, RdbcColumnVo, RdbcSchemaVo, RdbcTableVo};
 
 pub fn build_create_table_sql(
     db_type: &DataBaseType,
     table: &RdbcTableVo,
 ) -> Result<String, String> {
-    Ok("".to_string())
+    DdlClient::build_create_table_sql(db_type, table)
 }
 
 pub fn find_schemas() -> Option<Vec<RdbcSchemaVo>> {
