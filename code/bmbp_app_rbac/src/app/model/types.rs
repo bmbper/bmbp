@@ -89,7 +89,7 @@ pub enum RbacAppMenuOpenType {
     // 弹出窗口打开
     WINDOW,
     // 外部选项卡打开
-    LINK,
+    TAB,
 }
 impl Default for RbacAppMenuOpenType {
     fn default() -> Self {
@@ -101,7 +101,7 @@ impl From<&RbacAppMenuOpenType> for RdbcValue {
         match value {
             RbacAppMenuOpenType::ROUTE => RdbcValue::String("ROUTE".to_string()),
             RbacAppMenuOpenType::WINDOW => RdbcValue::String("WINDOW".to_string()),
-            RbacAppMenuOpenType::LINK => RdbcValue::String("LINK".to_string()),
+            RbacAppMenuOpenType::TAB => RdbcValue::String("TAB".to_string()),
         }
     }
 }
@@ -113,8 +113,8 @@ impl Into<RbacAppMenuOpenType> for &RdbcValue {
             return RbacAppMenuOpenType::ROUTE;
         } else if meta == "WINDOW" {
             return RbacAppMenuOpenType::WINDOW;
-        } else if meta == "LINK" {
-            return RbacAppMenuOpenType::LINK;
+        } else if meta == "TAB" {
+            return RbacAppMenuOpenType::TAB;
         }
         RbacAppMenuOpenType::ROUTE
     }
