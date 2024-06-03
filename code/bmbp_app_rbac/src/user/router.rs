@@ -1,5 +1,6 @@
+use crate::user::model::BmbpRbacUser;
 use salvo::Router;
 
 pub fn user_router() -> Router {
-    Router::new()
+    BmbpRbacUser::build_router()
 }
