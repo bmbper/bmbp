@@ -1,5 +1,4 @@
 use crate::utils::camel_to_snake;
-use bmbp_rdbc_orm::table;
 use syn::parse::Parse;
 use syn::{Expr, Field, Lit, Meta, MetaNameValue, Token};
 

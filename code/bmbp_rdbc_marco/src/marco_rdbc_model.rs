@@ -1330,6 +1330,7 @@ fn build_struct_web_handler_token(struct_ident: &Ident, is_tree: bool) -> TokenS
 
         #[handler]
         pub async fn #find_all_page_name(req: &mut Request, resp: &mut Response) -> HttpRespPageVo<#struct_ident> {
+            info!("find_all_page");
             let mut page_query_params = req.parse_json::<BmbpPageParam<#struct_query_ident>>().await?;
             let page_vo = #struct_ident::find_all_page(page_query_params).await?;
             Ok(RespVo::ok_find_data(page_vo))
