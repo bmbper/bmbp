@@ -9,8 +9,11 @@ use tracing::*;
 #[rdbc_model(BMBP_RBAC_USER)]
 pub struct BmbpRbacUser {
     // 组织ID
-    #[query(like)]
+    #[query(eq)]
     org_id: Option<String>,
+    // 组织ID
+    #[query(like)]
+    org_id_path: Option<String>,
     // 人员ID
     #[query(eq)]
     person_id: Option<String>,
