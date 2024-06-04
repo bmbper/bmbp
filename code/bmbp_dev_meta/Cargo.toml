@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_dev_dsl"
+name = "bmbp_dev_meta"
 version = "0.1.0"
 edition = "2021"
 
