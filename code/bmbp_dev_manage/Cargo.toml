@@ -1,0 +1,7 @@
+[package]
+name = "bmbp_dev_manage"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+description = "管理开发平台的元数据存储信息"
+[dependencies]

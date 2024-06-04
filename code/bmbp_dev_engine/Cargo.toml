@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 
-bmbp_dev_dsl = { path = "../bmbp_dev_dsl" }
+bmbp_dev_meta = { path = "../bmbp_dev_meta" }
 # 序列化
 serde = { workspace = true }
 serde_json = { workspace = true }
