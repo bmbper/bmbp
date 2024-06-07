@@ -1,9 +1,9 @@
-use salvo::{FlowCtrl, handler, Response, Router, Service};
 use salvo::catcher::Catcher;
 use salvo::cors::{Cors, CorsHandler};
 use salvo::http::{Method, StatusCode};
 use salvo::logging::Logger;
 use salvo::prelude::Json;
+use salvo::{handler, FlowCtrl, Response, Router, Service};
 
 use bmbp_app_base::build_app_base_router;
 use bmbp_app_common::{RespCode, RespVo};
@@ -36,6 +36,11 @@ pub fn init_webapp_router() -> Service {
     // 引入权限管理模块路由
     let api_rbac_router = build_rbac_router();
     router = router.push(api_rbac_router);
+
+    // 引用低代码路由
+    let runtime_router = bmbp_dev::builder_dev_router();
+    router = router.push(runtime_router);
+
     let cors_handler = build_router_cors();
     router = router.hoop(cors_handler).options(handler::empty());
     Service::new(router).catcher(Catcher::default().hoop(err_handler))
