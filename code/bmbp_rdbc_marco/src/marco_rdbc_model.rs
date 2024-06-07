@@ -372,49 +372,49 @@ fn build_struct_sql_method_token(struct_ident: &Ident, struct_fields: &[Field]) 
         impl #struct_ident {
             pub fn build_query_sql() -> Query {
                 let mut query = Query::new();
-                query.table(Self::get_table_name());
-                query.select_vec(Self::get_table_columns());
+                query.table(Self::get_rdbc_table_name());
+                query.select_vec(Self::get_rdbc_table_columns());
                 query.order_by("data_sort", true);
                 query.order_by("data_update_time", false);
                 query
             }
             pub fn build_info_sql(data_id:&Option<String>) -> Query {
                 let mut query = Query::new();
-                query.table(Self::get_table_name());
-                query.select_vec(Self::get_table_columns());
+                query.table(Self::get_rdbc_table_name());
+                query.select_vec(Self::get_rdbc_table_columns());
                 query.eq_(Self::get_table_primary_key(), data_id);
                 query
             }
             pub fn build_remove_sql(data_id:&Option<String>) -> Delete {
                 let mut delete = Delete::new();
-                delete.table(Self::get_table_name());
+                delete.table(Self::get_rdbc_table_name());
                 delete.eq_(Self::get_table_primary_key(), data_id);
                 delete
             }
             pub fn build_enable_sql(data_id:&Option<String>) -> Update {
                 let mut update = Update::new();
-                update.table(Self::get_table_name());
+                update.table(Self::get_rdbc_table_name());
                 update.set("data_status", "1");
                 update.eq_(Self::get_table_primary_key(), data_id);
                 update
             }
             pub fn build_disable_sql(data_id:&Option<String>) -> Update {
                 let mut update = Update::new();
-                update.table(Self::get_table_name());
+                update.table(Self::get_rdbc_table_name());
                 update.set("data_status", "0");
                 update.eq_(Self::get_table_primary_key(), data_id);
                 update
             }
             pub fn build_update_status_sql(data_id:&Option<String>, status: String ) -> Update {
                 let mut update = Update::new();
-                update.table(Self::get_table_name());
+                update.table(Self::get_rdbc_table_name());
                 update.set("data_status", status);
                 update.eq_(Self::get_table_primary_key(), data_id);
                 update
             }
             pub fn build_update_flag_sql(data_id:&Option<String>, flag: String) -> Update {
                 let mut update = Update::new();
-                update.table(Self::get_table_name());
+                update.table(Self::get_rdbc_table_name());
                 update.set("data_flag", flag);
                 update.eq_(Self::get_table_primary_key(), data_id);
                 update
@@ -444,7 +444,7 @@ fn build_struct_sql_method_insert_token(struct_fields: &[Field]) -> TokenStream2
     quote! {
         pub fn build_insert_sql(&self) -> Insert {
                 let mut insert = Insert::new();
-                insert.table(Self::get_table_name());
+                insert.table(Self::get_rdbc_table_name());
                 #(#insert_field_vec)*
                 insert
             }
@@ -469,7 +469,7 @@ fn build_struct_sql_method_update_token(struct_fields: &[Field]) -> TokenStream2
     quote! {
         pub fn build_update_sql(&self) -> Update {
                 let mut update = Update::new();
-                update.table(Self::get_table_name());
+                update.table(Self::get_rdbc_table_name());
                 #(#update_field_vec)*
                 update.eq_(Self::get_table_primary_key(),self.get_data_id());
                 update
@@ -490,13 +490,13 @@ fn build_struct_table_method_token(
     }
     let token = quote! {
         impl #struct_ident {
-            pub fn get_table_name() -> String {
+            pub fn get_rdbc_table_name() -> String {
                 return #struct_table_name.to_string();
             }
             pub fn get_table_primary_key() -> String {
                 return "data_id".to_string();
             }
-            pub fn get_table_columns() -> Vec<String> {
+            pub fn get_rdbc_table_columns() -> Vec<String> {
                 return vec![
                     #(#struct_columns.to_string(),)*
                 ];
@@ -948,7 +948,7 @@ fn build_struct_tree_curd_save_update_token(
         }
         pub async fn change_node_path(old_title_path:String,new_title_path:String,old_code_path:String,new_code_path:String) -> BmbpResp<usize> {
             let mut update = Update::new();
-            update.table(Self::get_table_name())
+            update.table(Self::get_rdbc_table_name())
             .set(#name_path_column,RdbcColumn::replace(#name_path_column,&old_title_path,&new_title_path))
             .set(#code_path_column,RdbcColumn::replace(#code_path_column,&old_code_path,&new_code_path));
             update.like_left_value(#code_path_column, &old_code_path);

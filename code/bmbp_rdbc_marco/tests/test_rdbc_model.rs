@@ -1,5 +1,4 @@
 use bmbp_rdbc_marco::rdbc_model;
-use bmbp_rdbc_orm::table;
 
 #[test]
 fn test_rdbc_model_empty() {
@@ -13,14 +12,11 @@ fn test_rdbc_model_empty() {
     use bmbp_app_common::HttpRespVo;
     use bmbp_app_common::PageVo;
     use bmbp_app_common::RespVo;
-    use bmbp_rdbc_orm::simple_column;
-    use bmbp_rdbc_orm::value_column;
     use bmbp_rdbc_orm::RdbcColumn;
     use bmbp_rdbc_orm::RdbcMacroTree;
     use bmbp_rdbc_orm::RdbcMarcoTreeUtil;
     use bmbp_rdbc_orm::RdbcORM;
     use bmbp_rdbc_orm::RdbcOrmRow;
-    use bmbp_rdbc_orm::RdbcTableInner;
     use bmbp_rdbc_orm::RDBC_DATA_ID;
     use bmbp_rdbc_orm::RDBC_TREE_ROOT_NODE;
     use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
