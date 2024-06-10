@@ -1,11 +1,11 @@
 use crate::meta::ddl::factory::DdlBuilderFactory;
-use crate::{DataBaseType, RdbcTableVo};
+use crate::{BmbpDBType, BmbpRdbcTable};
 
 pub struct DdlClient;
 impl DdlClient {
     pub fn build_create_table_sql(
-        db_type: &DataBaseType,
-        table: &RdbcTableVo,
+        db_type: &BmbpDBType,
+        table: &BmbpRdbcTable,
     ) -> Result<String, String> {
         let builder = DdlBuilderFactory::get_ddl_builder(db_type);
         if builder.is_none() {

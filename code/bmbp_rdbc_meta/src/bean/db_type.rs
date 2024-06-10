@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
-pub enum DataBaseType {
+pub enum BmbpDBType {
     #[default]
     POSTGRESQL,
     MYSQL,
@@ -14,7 +14,7 @@ pub enum DataBaseType {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Default)]
-pub enum ColumnDataType {
+pub enum BmbpColumnDataType {
     CHAR,
     #[default]
     STRING,
@@ -31,7 +31,7 @@ pub enum ColumnDataType {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub enum DefaultValue {
+pub enum BmbpColumnDefaultValue {
     VALUE(String),
     FUNCTION(String),
 }

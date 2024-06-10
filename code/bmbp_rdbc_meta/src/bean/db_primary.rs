@@ -1,8 +1,12 @@
+use bmbp_marco_bean::bean;
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Debug, Deserialize, Serialize)]
-pub struct RdbcTablePrimaryKeyVo {
-    name: String,
-    comment: Option<String>,
-    columns: Vec<String>,
+#[bean]
+pub struct BmbpRdbcTablePrimaryKey {
+    owner_user: Option<String>,
+    owner_schema: Option<String>,
+    owner_table: Option<String>,
+    primary_name: String,
+    primary_comment: Option<String>,
+    primary_columns: Vec<String>,
 }

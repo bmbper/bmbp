@@ -1,11 +1,12 @@
-use crate::RdbcTableVo;
+use crate::BmbpRdbcTable;
+use bmbp_marco_bean::bean;
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Debug, Deserialize, Serialize)]
-pub struct RdbcSchemaVo {
-    name: String,
-    comment: Option<String>,
-    owner: Option<String>,
-    charset: Option<String>,
-    tables: Vec<RdbcTableVo>,
+#[bean]
+pub struct BmbpRdbcSchema {
+    schema_name: Option<String>,
+    schema_comment: Option<String>,
+    schema_owner: Option<String>,
+    schema_charset: Option<String>,
+    schema_tables: Option<Vec<BmbpRdbcTable>>,
 }

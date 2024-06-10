@@ -1,16 +1,16 @@
 use crate::meta::ddl::factory::DdlBuilder;
-use crate::{RdbcColumnVo, RdbcTableVo};
+use crate::{BmbpRdbcColumn, BmbpRdbcTable};
 pub struct PgDdlClient {}
 
 impl PgDdlClient {
-    pub(crate) fn build_create_table(&self, table: &RdbcTableVo) -> String {
+    pub(crate) fn build_create_table(&self, table: &BmbpRdbcTable) -> String {
         if let Some(schema) = table.schema() {
             format!("{}.{}", schema, table.name())
         } else {
             format!("{}", table.name())
         }
     }
-    pub(crate) fn build_create_columns(&self, table: &RdbcTableVo) -> Vec<String> {
+    pub(crate) fn build_create_columns(&self, table: &BmbpRdbcTable) -> Vec<String> {
         let mut column_sql = vec![];
         let columns = table.columns();
         for item in columns {
@@ -19,25 +19,25 @@ impl PgDdlClient {
         }
         column_sql
     }
-    pub(crate) fn build_create_column(&self, column: &RdbcColumnVo) -> String {
+    pub(crate) fn build_create_column(&self, column: &BmbpRdbcColumn) -> String {
         "".to_string()
     }
-    pub(crate) fn build_create_primary_key(&self, table: &RdbcTableVo) -> Option<String> {
+    pub(crate) fn build_create_primary_key(&self, table: &BmbpRdbcTable) -> Option<String> {
         None
     }
-    pub(crate) fn build_create_table_index(&self, table: &RdbcTableVo) -> Vec<String> {
+    pub(crate) fn build_create_table_index(&self, table: &BmbpRdbcTable) -> Vec<String> {
         vec![]
     }
-    pub(crate) fn build_create_table_comment(&self, table: &RdbcTableVo) -> Vec<String> {
+    pub(crate) fn build_create_table_comment(&self, table: &BmbpRdbcTable) -> Vec<String> {
         vec![]
     }
-    pub(crate) fn build_create_table_foreign_key(&self, table: &RdbcTableVo) -> Vec<String> {
+    pub(crate) fn build_create_table_foreign_key(&self, table: &BmbpRdbcTable) -> Vec<String> {
         vec![]
     }
 }
 
 impl DdlBuilder for PgDdlClient {
-    fn build_create_table_sql(&self, table: &RdbcTableVo) -> Result<String, String> {
+    fn build_create_table_sql(&self, table: &BmbpRdbcTable) -> Result<String, String> {
         let table_name = self.build_create_table(table);
         let columns = self.build_create_columns(table);
         let primary_key = self.build_create_primary_key(table);

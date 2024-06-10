@@ -1,9 +1,9 @@
-use bmbp_rdbc_meta::{build_create_table_sql, DataBaseType, RdbcTableVo};
+use bmbp_rdbc_meta::{build_create_table_sql, BmbpDBType, BmbpRdbcTable};
 
 #[test]
 fn test_create_table_sql() {
     let table = build_table_vo();
-    let build_rs = build_create_table_sql(&DataBaseType::POSTGRESQL, &table);
+    let build_rs = build_create_table_sql(&BmbpDBType::POSTGRESQL, &table);
     if build_rs.is_ok() {
         let build_sql = build_rs.unwrap();
         let table_sql = get_table_sql();
@@ -14,8 +14,8 @@ fn test_create_table_sql() {
     }
 }
 
-fn build_table_vo() -> RdbcTableVo {
-    RdbcTableVo::default()
+fn build_table_vo() -> BmbpRdbcTable {
+    BmbpRdbcTable::default()
 }
 fn get_table_sql() -> String {
     r#"create table "#.to_string()
