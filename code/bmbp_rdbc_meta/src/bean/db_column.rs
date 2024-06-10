@@ -1,4 +1,5 @@
-use crate::bean::db_type::{BmbpColumnDefaultValue, ColumnDataType};
+use crate::bean::db_type::BmbpColumnDefaultValue;
+use crate::BmbpColumnDataType;
 use bmbp_marco_bean::bean;
 use serde::{Deserialize, Serialize};
 
@@ -9,7 +10,7 @@ pub struct BmbpRdbcColumn {
     owner_table: Option<String>,
     column_name: Option<String>,
     column_comment: Option<String>,
-    column_data_type: Option<ColumnDataType>,
+    column_data_type: Option<BmbpColumnDataType>,
     column_length: Option<i32>,
     column_scale: Option<i32>,
     column_default_value: Option<BmbpColumnDefaultValue>,

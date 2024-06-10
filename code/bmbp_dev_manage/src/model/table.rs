@@ -11,10 +11,10 @@ use bmbp_rdbc_orm::*;
 /// BmbpDevTable 存储表结构描述
 #[rdbc_model(BMBP_DEV_TABLE)]
 pub struct BmbpDevTable {
-    // 关联资源- 所属应用、所属模块、所属功能
-    res_id: Option<String>,
     // 数据源ID
     datasource_id: Option<String>,
+    // 关联资源- 所属应用、所属模块、所属功能
+    res_id: Option<String>,
     // 数据表名称
     table_name: Option<String>,
     // 数据表注释
