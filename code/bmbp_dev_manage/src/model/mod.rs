@@ -3,8 +3,8 @@ pub use form::BmbpDevForm;
 pub use http::BmbpDevHttp;
 pub use report::BmbpDevReport;
 pub use screen::BmbpDevScreen;
+pub use table::BmbpDevDatasource;
 pub use table::BmbpDevTable;
-
 mod bpmn;
 mod form;
 mod http;
