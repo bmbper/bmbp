@@ -92,9 +92,10 @@ pub mod tests {
     #[tokio::test]
     async fn test_rom() {
         let ds = build_datasource();
-        let orm = RdbcOrmInner::new(ds).await;
-        if let Ok(conn) = orm.get_conn().await {
-            assert!(conn.valid().await);
-        };
+        if let Ok(orm) = RdbcOrmInner::new(ds).await {
+            if let Ok(conn) = orm.get_conn().await {
+                assert!(conn.valid().await);
+            };
+        }
     }
 }

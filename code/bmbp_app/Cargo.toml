@@ -17,7 +17,7 @@ bmbp_app_init = { path = "../bmbp_app_init" }
 bmbp_app_upgrade = { path = "../bmbp_app_upgrade" }
 bmbp_app_file = { path = "../bmbp_app_file" }
 bmbp_dev = { path = "../bmbp_dev" }
-
+bmbp_file = { path = "../bmbp_file" }
 
 # web
 uuid = { workspace = true }

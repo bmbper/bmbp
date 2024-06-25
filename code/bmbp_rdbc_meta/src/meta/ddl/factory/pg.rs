@@ -4,15 +4,15 @@ pub struct PgDdlClient {}
 
 impl PgDdlClient {
     pub(crate) fn build_create_table(&self, table: &BmbpRdbcTable) -> String {
-        if let Some(schema) = table.schema() {
-            format!("{}.{}", schema, table.name())
+        if let Some(schema) = table.get_owner_schema().as_ref() {
+            format!("{}.{}", schema, table.get_table_name().as_ref().unwrap())
         } else {
-            format!("{}", table.name())
+            format!("{}", table.get_table_name().as_ref().unwrap())
         }
     }
     pub(crate) fn build_create_columns(&self, table: &BmbpRdbcTable) -> Vec<String> {
         let mut column_sql = vec![];
-        let columns = table.columns();
+        let columns = table.get_table_columns().as_ref().unwrap();
         for item in columns {
             let column_name = self.build_create_column(item);
             column_sql.push(column_name);

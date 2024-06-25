@@ -1,5 +1,5 @@
 use crate::meta::DdlClient;
-use crate::{BmbpDBType, BmbpRdbcColumn, BmbpRdbcTable, RdbcSchemaVo};
+use crate::{BmbpDBType, BmbpRdbcColumn, BmbpRdbcSchema, BmbpRdbcTable};
 
 pub fn build_create_table_sql(
     db_type: &BmbpDBType,
@@ -8,32 +8,32 @@ pub fn build_create_table_sql(
     DdlClient::build_create_table_sql(db_type, table)
 }
 
-pub fn find_schemas() -> Option<Vec<RdbcSchemaVo>> {
+pub fn find_schemas() -> Option<Vec<BmbpRdbcSchema>> {
     None
 }
-pub fn find_schemas_by_matcher(_matcher: String) -> Option<Vec<RdbcSchemaVo>> {
+pub fn find_schemas_by_matcher(_matcher: String) -> Option<Vec<BmbpRdbcSchema>> {
     None
 }
-pub fn find_schemas_by_owner(_owner: String) -> Option<Vec<RdbcSchemaVo>> {
+pub fn find_schemas_by_owner(_owner: String) -> Option<Vec<BmbpRdbcSchema>> {
     None
 }
 
-pub fn find_schemas_with_table() -> Option<Vec<RdbcSchemaVo>> {
+pub fn find_schemas_with_table() -> Option<Vec<BmbpRdbcSchema>> {
     None
 }
-pub fn find_schemas_by_matcher_with_table(_matcher: String) -> Option<Vec<RdbcSchemaVo>> {
+pub fn find_schemas_by_matcher_with_table(_matcher: String) -> Option<Vec<BmbpRdbcSchema>> {
     None
 }
-pub fn find_schemas_by_owner_with_table(_owner: String) -> Option<Vec<RdbcSchemaVo>> {
+pub fn find_schemas_by_owner_with_table(_owner: String) -> Option<Vec<BmbpRdbcSchema>> {
     None
 }
-pub fn find_schemas_with_table_column() -> Option<Vec<RdbcSchemaVo>> {
+pub fn find_schemas_with_table_column() -> Option<Vec<BmbpRdbcSchema>> {
     None
 }
-pub fn find_schemas_by_matcher_with_table_column(_matcher: String) -> Option<Vec<RdbcSchemaVo>> {
+pub fn find_schemas_by_matcher_with_table_column(_matcher: String) -> Option<Vec<BmbpRdbcSchema>> {
     None
 }
-pub fn find_schemas_by_owner_with_table_column(_owner: String) -> Option<Vec<RdbcSchemaVo>> {
+pub fn find_schemas_by_owner_with_table_column(_owner: String) -> Option<Vec<BmbpRdbcSchema>> {
     None
 }
 
