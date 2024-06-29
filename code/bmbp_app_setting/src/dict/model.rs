@@ -15,7 +15,7 @@ pub struct DictQueryParams {
     parent_code: Option<String>,
     show_level: Option<usize>,
 }
-
+#[allow(dead_code)]
 impl DictQueryParams {
     pub fn new() -> Self {
         DictQueryParams {
@@ -61,7 +61,7 @@ pub struct BmbpSettingDict {
     // 字典类型
     dict_type: Option<BmbpDictType>,
 }
-
+#[allow(dead_code)]
 impl BmbpSettingDict {
     pub fn new() -> Self {
         BmbpSettingDict {

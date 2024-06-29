@@ -16,7 +16,7 @@ pub struct OrganQueryParams {
     parent_code: Option<String>,
     show_level: Option<usize>,
 }
-
+#[allow(dead_code)]
 impl OrganQueryParams {
     pub fn new() -> Self {
         OrganQueryParams {
@@ -79,7 +79,7 @@ pub struct BmbpRbacOrgan {
     organ_type: Option<BmbpRdbcOrganType>,
     organ_info: Option<BmbpRbacOrganInfo>,
 }
-
+#[allow(dead_code)]
 impl BmbpRbacOrgan {
     pub fn new() -> Self {
         BmbpRbacOrgan {

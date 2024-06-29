@@ -1,6 +1,6 @@
 use crate::dict::model::BmbpSettingDictOrmModel;
 use bmbp_app_common::{BmbpError, BmbpResp, PageVo};
-use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcORM, RdbcPage, Update};
+use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcORM, Update};
 
 pub struct BmbpRbacDictDao {}
 
@@ -12,7 +12,11 @@ impl BmbpRbacDictDao {
     ) -> BmbpResp<PageVo<BmbpSettingDictOrmModel>> {
         match RdbcORM
             .await
-            .select_page_by_query::<BmbpSettingDictOrmModel>(page_no.clone(), page_size.clone(), &query)
+            .select_page_by_query::<BmbpSettingDictOrmModel>(
+                page_no.clone(),
+                page_size.clone(),
+                &query,
+            )
             .await
         {
             Ok(mut page) => {
