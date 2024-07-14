@@ -1,5 +1,5 @@
 [workspace]
-members = [ "bmbp-data", "bmbp-data-datasource", "bmbp-data-meta", "bmbp-data-task","code/*"]
+members = ["code/*"]
 resolver = "2"
 [workspace.package]
 version = "0.0.1"
