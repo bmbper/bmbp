@@ -1,0 +1,12 @@
+[package]
+name = "bmbp_ui_lib"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+description.workspace = true
+
+[dependencies]
+salvo = { workspace = true }
+tera = { workspace = true }
+lazy_static = { workspace = true }
+rust-embed = { workspace = true }

@@ -8,9 +8,11 @@ use salvo::{handler, FlowCtrl, Response, Router, Service};
 use bmbp_app_base::build_app_base_router;
 use bmbp_app_common::{RespCode, RespVo};
 use bmbp_app_file::build_file_router;
+use bmbp_app_home::build_app_home_router;
 use bmbp_app_portal::build_home_router;
 use bmbp_app_rbac::build_rbac_router;
 use bmbp_app_setting::build_setting_router;
+use bmbp_ui_lib::build_ui_lib_router;
 
 /// init_webapp_router web应用的路由注册
 pub fn init_webapp_router() -> Service {
@@ -18,8 +20,14 @@ pub fn init_webapp_router() -> Service {
     // 增加日志
     router = router.hoop(Logger::new());
 
-    let static_file_router = build_file_router();
-    router = router.push(static_file_router);
+    // 首页
+    router = router.push(build_app_home_router());
+
+    // web 公共包
+    router = router.push(build_ui_lib_router());
+
+    let file_router = build_file_router();
+    router = router.push(file_router);
 
     //公共模块路由
     let app_base_router = build_app_base_router();

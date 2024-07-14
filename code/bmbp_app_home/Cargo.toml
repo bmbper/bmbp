@@ -1,0 +1,10 @@
+[package]
+name = "bmbp_app_home"
+version = "0.1.0"
+edition = "2021"
+description = "应用门户，显示登录、菜单导航等页面"
+[dependencies]
+salvo = { workspace = true }
+tera = { workspace = true }
+lazy_static = { workspace = true }
+rust-embed = { workspace = true }

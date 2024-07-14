@@ -49,3 +49,4 @@ syn = { version = "2.0.63", features = ["full", "parsing", "printing", "proc-mac
 quote = "*"
 openssl = { version = "0.10.64", features = ["vendored"] }
 openssl-sys = "0.9.102"
+lazy_static = "*"
