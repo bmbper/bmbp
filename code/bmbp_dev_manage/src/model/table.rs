@@ -39,6 +39,8 @@ pub struct BmbpDevTable {
     datasource_id: Option<String>,
     // 关联资源- 所属应用、所属模块、所属功能
     res_id: Option<String>,
+    // 所属模式
+    owner_schema: Option<String>,
     // 数据表名称
     table_name: Option<String>,
     // 数据表注释
