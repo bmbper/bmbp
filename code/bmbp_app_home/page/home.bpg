@@ -2,10 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Bmbp开发框架</title>
+    <link rel="stylesheet" href="/ui/lib/arco/arco.min.css"/>
 </head>
 <body>
-ABCDDDD
-<script src="/ui/lib/home/demo.js"></script>
+<div id="root"></div>
 </body>
+<script src="/ui/lib/react/react.production.min.js"></script>
+<script src="/ui/lib/react/react-dom.production.min.js"></script>
+<script src="/ui/lib/react/react-dom.profiling.min.js"></script>
+<script src="/ui/lib/arco/arco.min.js"></script>
+<script src="/ui/lib/arco/arco-icon.min.js"></script>
+<script src="/ui/lib/axios.min.js"></script>
+<script>
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    const h1 = React.createElement(arco.Button, {type: 'primary'}, 'Hello, world');
+    root.render(h1);
+</script>
 </html>
