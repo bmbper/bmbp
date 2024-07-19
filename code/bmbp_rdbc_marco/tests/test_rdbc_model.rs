@@ -19,7 +19,9 @@ fn test_rdbc_model_empty() {
     use bmbp_rdbc_orm::RdbcOrmRow;
     use bmbp_rdbc_orm::RDBC_DATA_ID;
     use bmbp_rdbc_orm::RDBC_TREE_ROOT_NODE;
-    use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
+    use bmbp_rdbc_orm::{
+        DeleteWrapper, InsertWrapper, QueryWrapper, RdbcFilter, RdbcTable, UpdateWrapper,
+    };
     use chrono::Utc;
     use salvo::*;
     use tracing::info;

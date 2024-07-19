@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use tokio_postgres::Row;
 use uuid::Uuid;
 
-use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcTable, RdbcValue};
+use bmbp_rdbc_sql::{DeleteWrapper, InsertWrapper, QueryWrapper, RdbcTable, RdbcValue};
 
 use crate::{
     RDBC_DATA_CREATE_TIME, RDBC_DATA_CREATE_USER, RDBC_DATA_FLAG, RDBC_DATA_ID, RDBC_DATA_LEVEL,
@@ -169,8 +169,8 @@ impl<T> BmbpRdbcModel<T>
 where
     T: Default + Debug + Clone + Serialize + RdbcModel,
 {
-    pub fn build_insert(&self) -> Insert {
-        let mut insert = Insert::new();
+    pub fn build_insert(&self) -> InsertWrapper {
+        let mut insert = InsertWrapper::new();
         insert.table(T::get_table_name());
         insert.insert_column_value(RDBC_DATA_ID, self.get_data_id());
         insert.insert_column_value(RDBC_DATA_FLAG, self.get_data_flag());
@@ -186,8 +186,8 @@ where
         insert.insert_column_value(RDBC_DATA_STATUS, self.get_data_status());
         insert
     }
-    pub fn build_query() -> Query {
-        let mut query = Query::new();
+    pub fn build_query() -> QueryWrapper {
+        let mut query = QueryWrapper::new();
         query.table(T::get_table_name());
         let fields = Self::get_table_fields();
         for field in fields {
@@ -195,8 +195,8 @@ where
         }
         query
     }
-    pub fn build_delete() -> Delete {
-        let mut delete = Delete::new();
+    pub fn build_delete() -> DeleteWrapper {
+        let mut delete = DeleteWrapper::new();
         delete.table(T::get_table_name());
         delete
     }
@@ -676,8 +676,8 @@ impl<T> BmbpOrmRdbcTree<T>
 where
     T: Default + Debug + Clone + Serialize + RdbcModel,
 {
-    pub fn build_insert(&self) -> Insert {
-        let mut insert = Insert::new();
+    pub fn build_insert(&self) -> InsertWrapper {
+        let mut insert = InsertWrapper::new();
         insert.table(T::get_table_name());
         insert.insert_column_value(RDBC_DATA_ID, self.get_data_id());
         insert.insert_column_value(RDBC_DATA_FLAG, self.get_data_flag());
@@ -700,8 +700,8 @@ where
         insert.insert_column_value(RDBC_TREE_NODE_LEAF, self.get_node_leaf());
         insert
     }
-    pub fn build_query() -> Query {
-        let mut query = Query::new();
+    pub fn build_query() -> QueryWrapper {
+        let mut query = QueryWrapper::new();
         query.table(T::get_table_name());
         let fields = Self::get_table_fields();
         for field in fields {
@@ -709,8 +709,8 @@ where
         }
         query
     }
-    pub fn build_delete() -> Delete {
-        let mut delete = Delete::new();
+    pub fn build_delete() -> DeleteWrapper {
+        let mut delete = DeleteWrapper::new();
         delete.table(T::get_table_name());
         delete
     }

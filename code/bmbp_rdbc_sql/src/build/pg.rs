@@ -5,18 +5,18 @@ use uuid::Uuid;
 use crate::build::base::base_build_sql;
 use crate::build::vars::PG_PARAMS_TAG;
 use crate::{
-    DatabaseType, Delete, Insert, Query, RdbcColumn, RdbcColumnFilterItem, RdbcCompareType,
-    RdbcConcatFunc, RdbcConcatType, RdbcDmlValue, RdbcFilterInner, RdbcFilterItem, RdbcFunc,
-    RdbcFuncColumn, RdbcOrder, RdbcOrderType, RdbcQueryColumn, RdbcQueryTable, RdbcReplaceFunc,
-    RdbcSQL, RdbcSchemaTable, RdbcTableColumn, RdbcTableInner, RdbcTableJoinType, RdbcValue,
-    RdbcValueColumn, RdbcValueFilterItem, Update,
+    DatabaseType, DeleteWrapper, InsertWrapper, QueryWrapper, RdbcColumn, RdbcColumnFilterItem,
+    RdbcCompareType, RdbcConcatFunc, RdbcConcatType, RdbcDmlValue, RdbcFilterInner, RdbcFilterItem,
+    RdbcFunc, RdbcFuncColumn, RdbcOrder, RdbcOrderType, RdbcQueryColumn, RdbcQueryTable,
+    RdbcReplaceFunc, RdbcSQL, RdbcSchemaTable, RdbcTableColumn, RdbcTableInner, RdbcTableJoinType,
+    RdbcValue, RdbcValueColumn, RdbcValueFilterItem, UpdateWrapper,
 };
 
 pub fn pg_build_sql(sql: String, params: HashMap<String, RdbcValue>) -> (String, Vec<RdbcValue>) {
     base_build_sql(PG_PARAMS_TAG, sql, params)
 }
 
-pub fn pg_build_query_script(query: &Query) -> (String, HashMap<String, RdbcValue>) {
+pub fn pg_build_query_script(query: &QueryWrapper) -> (String, HashMap<String, RdbcValue>) {
     let mut sql = "".to_string();
     let mut sql_prams = HashMap::new();
 
@@ -769,7 +769,7 @@ fn pg_build_select_table_column_sql(
     (sql, HashMap::new())
 }
 
-pub fn pg_build_insert_script(insert: &Insert) -> (String, HashMap<String, RdbcValue>) {
+pub fn pg_build_insert_script(insert: &InsertWrapper) -> (String, HashMap<String, RdbcValue>) {
     let mut insert_sql = "".to_string();
     let mut insert_params = HashMap::new();
 
@@ -851,7 +851,7 @@ fn pg_build_insert_value(
     }
 }
 
-pub fn pg_build_update_script(update: &Update) -> (String, HashMap<String, RdbcValue>) {
+pub fn pg_build_update_script(update: &UpdateWrapper) -> (String, HashMap<String, RdbcValue>) {
     let mut sql = "".to_string();
     let mut sql_prams = HashMap::new();
 
@@ -995,7 +995,7 @@ pub fn pg_build_update_table_column_sql(tc: &RdbcTableColumn) -> String {
     tc.get_name().clone()
 }
 
-pub fn pg_build_delete_script(delete: &Delete) -> (String, HashMap<String, RdbcValue>) {
+pub fn pg_build_delete_script(delete: &DeleteWrapper) -> (String, HashMap<String, RdbcValue>) {
     let mut sql = "".to_string();
     let mut sql_prams = HashMap::new();
 

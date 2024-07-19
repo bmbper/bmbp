@@ -3,7 +3,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 
 use bmbp_rdbc_model::RdbcOrmRow;
-use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcValue, Update};
+use bmbp_rdbc_sql::{DeleteWrapper, InsertWrapper, QueryWrapper, RdbcValue, UpdateWrapper};
 
 use crate::err::RdbcResult;
 use crate::pool::RdbcConnInner;
@@ -27,10 +27,13 @@ impl RdbcConnInner for SqliteDbClient {
         return true;
     }
 
-    async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
+    async fn select_list_by_query(
+        &self,
+        query: &QueryWrapper,
+    ) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
         Ok(None)
     }
-    async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>> {
+    async fn select_one_by_query(&self, query: &QueryWrapper) -> RdbcResult<Option<RdbcOrmRow>> {
         Ok(None)
     }
     async fn select_list_by_sql(
@@ -41,15 +44,15 @@ impl RdbcConnInner for SqliteDbClient {
         Ok(None)
     }
 
-    async fn execute_insert(&self, delete: &Insert) -> RdbcResult<u64> {
+    async fn execute_insert(&self, delete: &InsertWrapper) -> RdbcResult<u64> {
         Ok(0)
     }
 
-    async fn execute_update(&self, delete: &Update) -> RdbcResult<u64> {
+    async fn execute_update(&self, delete: &UpdateWrapper) -> RdbcResult<u64> {
         Ok(0)
     }
 
-    async fn execute_delete(&self, delete: &Delete) -> RdbcResult<u64> {
+    async fn execute_delete(&self, delete: &DeleteWrapper) -> RdbcResult<u64> {
         Ok(0)
     }
 }

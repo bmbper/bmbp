@@ -2,12 +2,14 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use tokio::sync::RwLock;
-use tokio_postgres::{Client, connect, NoTls};
 use tokio_postgres::types::ToSql;
+use tokio_postgres::{connect, Client, NoTls};
 use tracing::info;
 
 use bmbp_rdbc_model::{RdbcOrmRow, RdbcPage};
-use bmbp_rdbc_sql::{DatabaseType, Delete, Insert, Query, RdbcSQL, RdbcValue, Update};
+use bmbp_rdbc_sql::{
+    DatabaseType, DeleteWrapper, InsertWrapper, QueryWrapper, RdbcSQL, RdbcValue, UpdateWrapper,
+};
 
 use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 use crate::pool::RdbcConnInner;
@@ -93,12 +95,26 @@ impl RdbcConnInner for PgDbClient {
             .is_ok()
     }
 
-    async fn select_page_by_query(&self, page_no: usize, page_size: usize, query: &Query) -> RdbcResult<(usize, Option<Vec<RdbcOrmRow>>)> {
+    async fn select_page_by_query(
+        &self,
+        page_no: usize,
+        page_size: usize,
+        query: &QueryWrapper,
+    ) -> RdbcResult<(usize, Option<Vec<RdbcOrmRow>>)> {
         let (pg_sql, page_prams) = query.build_sql(DatabaseType::Postgres);
         let count_sql = format!("SELECT COUNT(1) AS count FROM ({}) ", pg_sql);
-        let query_sql = format!("SELECT * FROM ({}) OFFSET {} LIMIT {} ", pg_sql, ((page_no - 1) * page_size), page_size);
-        let total_row = self.select_one_by_sql(count_sql.as_str(), page_prams.as_slice()).await?;
-        let row_data = self.select_list_by_sql(query_sql.as_str(), page_prams.as_slice()).await?;
+        let query_sql = format!(
+            "SELECT * FROM ({}) OFFSET {} LIMIT {} ",
+            pg_sql,
+            ((page_no - 1) * page_size),
+            page_size
+        );
+        let total_row = self
+            .select_one_by_sql(count_sql.as_str(), page_prams.as_slice())
+            .await?;
+        let row_data = self
+            .select_list_by_sql(query_sql.as_str(), page_prams.as_slice())
+            .await?;
         let mut row_total = 0usize;
         if let Some(total) = total_row {
             if let Some(tv) = total.get_data().get("count") {
@@ -110,17 +126,25 @@ impl RdbcConnInner for PgDbClient {
         Ok((row_total, row_data))
     }
 
-    async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
+    async fn select_list_by_query(
+        &self,
+        query: &QueryWrapper,
+    ) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
         let (pg_sql, page_prams) = query.build_sql(DatabaseType::Postgres);
         self.select_list_by_sql(pg_sql.as_str(), page_prams.as_slice())
             .await
     }
 
-    async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>> {
+    async fn select_one_by_query(&self, query: &QueryWrapper) -> RdbcResult<Option<RdbcOrmRow>> {
         let (sql, params) = query.build_sql(DatabaseType::Postgres);
-        self.select_one_by_sql(sql.as_str(), params.as_slice()).await
+        self.select_one_by_sql(sql.as_str(), params.as_slice())
+            .await
     }
-    async fn select_one_by_sql(&self, sql: &str, params: &[RdbcValue]) -> RdbcResult<Option<RdbcOrmRow>> {
+    async fn select_one_by_sql(
+        &self,
+        sql: &str,
+        params: &[RdbcValue],
+    ) -> RdbcResult<Option<RdbcOrmRow>> {
         info!("sql=>{}; \n params={:#?}", sql, params);
         let pg_prams = params
             .iter()
@@ -172,17 +196,17 @@ impl RdbcConnInner for PgDbClient {
         }
     }
 
-    async fn execute_insert(&self, insert: &Insert) -> RdbcResult<u64> {
+    async fn execute_insert(&self, insert: &InsertWrapper) -> RdbcResult<u64> {
         let (sql, params) = insert.build_sql(DatabaseType::Postgres);
         self.execute(sql.as_str(), params.as_slice()).await
     }
 
-    async fn execute_update(&self, update: &Update) -> RdbcResult<u64> {
+    async fn execute_update(&self, update: &UpdateWrapper) -> RdbcResult<u64> {
         let (sql, params) = update.build_sql(DatabaseType::Postgres);
         self.execute(sql.as_str(), params.as_slice()).await
     }
 
-    async fn execute_delete(&self, delete: &Delete) -> RdbcResult<u64> {
+    async fn execute_delete(&self, delete: &DeleteWrapper) -> RdbcResult<u64> {
         let (sql, params) = delete.build_sql(DatabaseType::Postgres);
         self.execute(sql.as_str(), params.as_slice()).await
     }

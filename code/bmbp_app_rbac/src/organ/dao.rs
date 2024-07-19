@@ -1,5 +1,5 @@
 use bmbp_app_common::{BmbpError, BmbpResp, PageVo};
-use bmbp_rdbc_orm::{Delete, Insert, Query, RdbcORM, Update};
+use bmbp_rdbc_orm::{DeleteWrapper, InsertWrapper, QueryWrapper, RdbcORM, UpdateWrapper};
 
 use crate::organ::model::BmbpRbacOrganTree;
 
@@ -8,7 +8,7 @@ impl BmbpRbacOrganDao {
     pub async fn select_page_by_query(
         page_no: &usize,
         page_size: &usize,
-        query: &Query,
+        query: &QueryWrapper,
     ) -> BmbpResp<PageVo<BmbpRbacOrganTree>> {
         match RdbcORM
             .await
@@ -26,7 +26,9 @@ impl BmbpRbacOrganDao {
             Err(e) => Err(BmbpError::service(e.get_msg().as_str())),
         }
     }
-    pub async fn select_list_by_query(query: &Query) -> BmbpResp<Option<Vec<BmbpRbacOrganTree>>> {
+    pub async fn select_list_by_query(
+        query: &QueryWrapper,
+    ) -> BmbpResp<Option<Vec<BmbpRbacOrganTree>>> {
         match RdbcORM
             .await
             .select_list_by_query::<BmbpRbacOrganTree>(&query)
@@ -36,7 +38,7 @@ impl BmbpRbacOrganDao {
             Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
         }
     }
-    pub async fn select_one_by_query(query: &Query) -> BmbpResp<Option<BmbpRbacOrganTree>> {
+    pub async fn select_one_by_query(query: &QueryWrapper) -> BmbpResp<Option<BmbpRbacOrganTree>> {
         match RdbcORM
             .await
             .select_one_by_query::<BmbpRbacOrganTree>(&query)
@@ -46,19 +48,19 @@ impl BmbpRbacOrganDao {
             Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
         }
     }
-    pub async fn execute_insert(insert: &Insert) -> BmbpResp<usize> {
+    pub async fn execute_insert(insert: &InsertWrapper) -> BmbpResp<usize> {
         match RdbcORM.await.execute_insert(insert).await {
             Ok(data) => Ok(data as usize),
             Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
         }
     }
-    pub async fn execute_update(update: &Update) -> BmbpResp<usize> {
+    pub async fn execute_update(update: &UpdateWrapper) -> BmbpResp<usize> {
         match RdbcORM.await.execute_update(update).await {
             Ok(data) => Ok(data as usize),
             Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
         }
     }
-    pub async fn execute_delete(delete_dict: &Delete) -> BmbpResp<usize> {
+    pub async fn execute_delete(delete_dict: &DeleteWrapper) -> BmbpResp<usize> {
         match RdbcORM.await.execute_delete(delete_dict).await {
             Ok(data) => Ok(data as usize),
             Err(err) => Err(BmbpError::service(err.get_msg().as_str())),

@@ -4,13 +4,13 @@ use std::sync::RwLock;
 use std::time::{Duration, Instant};
 
 use async_trait::async_trait;
+use bmbp_app_common::BmbpError;
 use serde::Serialize;
 use tokio_postgres::types::IsNull::No;
 use tracing::info;
-use bmbp_app_common::BmbpError;
 
 use bmbp_rdbc_model::{RdbcOrmRow, RdbcPage};
-use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcValue, Update};
+use bmbp_rdbc_sql::{DeleteWrapper, InsertWrapper, QueryWrapper, RdbcValue, UpdateWrapper};
 
 use crate::client;
 use crate::ds::RdbcDataSource;
@@ -20,12 +20,24 @@ use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 #[async_trait]
 pub trait RdbcConnInner {
     async fn valid(&self) -> bool;
-    async fn select_page_by_query(&self,_page_no:usize,_page_size:usize,_query:&Query)-> RdbcResult<(usize, Option<Vec<RdbcOrmRow>>)>{
-        Err(RdbcError::new(RdbcErrorType::SQLError,"接口未实现"))
+    async fn select_page_by_query(
+        &self,
+        _page_no: usize,
+        _page_size: usize,
+        _query: &QueryWrapper,
+    ) -> RdbcResult<(usize, Option<Vec<RdbcOrmRow>>)> {
+        Err(RdbcError::new(RdbcErrorType::SQLError, "接口未实现"))
     }
-    async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>>;
-    async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>>;
-    async fn select_one_by_sql(&self, sql:&str, params:&[RdbcValue]) -> RdbcResult<Option<RdbcOrmRow>>{
+    async fn select_list_by_query(
+        &self,
+        query: &QueryWrapper,
+    ) -> RdbcResult<Option<Vec<RdbcOrmRow>>>;
+    async fn select_one_by_query(&self, query: &QueryWrapper) -> RdbcResult<Option<RdbcOrmRow>>;
+    async fn select_one_by_sql(
+        &self,
+        sql: &str,
+        params: &[RdbcValue],
+    ) -> RdbcResult<Option<RdbcOrmRow>> {
         Ok(None)
     }
     async fn select_list_by_sql(
@@ -33,9 +45,9 @@ pub trait RdbcConnInner {
         query: &str,
         params: &[RdbcValue],
     ) -> RdbcResult<Option<Vec<RdbcOrmRow>>>;
-    async fn execute_insert(&self, delete: &Insert) -> RdbcResult<u64>;
-    async fn execute_update(&self, delete: &Update) -> RdbcResult<u64>;
-    async fn execute_delete(&self, delete: &Delete) -> RdbcResult<u64>;
+    async fn execute_insert(&self, delete: &InsertWrapper) -> RdbcResult<u64>;
+    async fn execute_update(&self, delete: &UpdateWrapper) -> RdbcResult<u64>;
+    async fn execute_delete(&self, delete: &DeleteWrapper) -> RdbcResult<u64>;
 }
 
 /// RdbcTransConnInner 定义数据库事务连接抽象
@@ -70,7 +82,12 @@ impl<'a> RdbcConn<'a> {
         }
     }
 
-    pub async fn select_page_by_query(&self, page_no: usize, page_size: usize, query: &Query) ->  RdbcResult<(usize, Option<Vec<RdbcOrmRow>>)> {
+    pub async fn select_page_by_query(
+        &self,
+        page_no: usize,
+        page_size: usize,
+        query: &QueryWrapper,
+    ) -> RdbcResult<(usize, Option<Vec<RdbcOrmRow>>)> {
         if let Some(con) = &self.inner {
             con.select_page_by_query(page_no, page_size, query).await
         } else {
@@ -80,7 +97,10 @@ impl<'a> RdbcConn<'a> {
             ))
         }
     }
-    pub async fn select_list_by_query(&self, query: &Query) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
+    pub async fn select_list_by_query(
+        &self,
+        query: &QueryWrapper,
+    ) -> RdbcResult<Option<Vec<RdbcOrmRow>>> {
         if let Some(con) = &self.inner {
             con.select_list_by_query(query).await
         } else {
@@ -90,7 +110,10 @@ impl<'a> RdbcConn<'a> {
             ))
         }
     }
-    pub async fn select_one_by_query(&self, query: &Query) -> RdbcResult<Option<RdbcOrmRow>> {
+    pub async fn select_one_by_query(
+        &self,
+        query: &QueryWrapper,
+    ) -> RdbcResult<Option<RdbcOrmRow>> {
         if let Some(con) = &self.inner {
             con.select_one_by_query(query).await
         } else {
@@ -100,7 +123,7 @@ impl<'a> RdbcConn<'a> {
             ))
         }
     }
-    pub async fn execute_insert(&self, insert: &Insert) -> RdbcResult<u64> {
+    pub async fn execute_insert(&self, insert: &InsertWrapper) -> RdbcResult<u64> {
         if let Some(con) = &self.inner {
             con.execute_insert(insert).await
         } else {
@@ -111,7 +134,7 @@ impl<'a> RdbcConn<'a> {
         }
     }
 
-    pub async fn execute_update(&self, update: &Update) -> RdbcResult<u64> {
+    pub async fn execute_update(&self, update: &UpdateWrapper) -> RdbcResult<u64> {
         if let Some(con) = &self.inner {
             con.execute_update(update).await
         } else {
@@ -122,7 +145,7 @@ impl<'a> RdbcConn<'a> {
         }
     }
 
-    pub async fn execute_delete(&self, delete: &Delete) -> RdbcResult<u64> {
+    pub async fn execute_delete(&self, delete: &DeleteWrapper) -> RdbcResult<u64> {
         if let Some(con) = &self.inner {
             con.execute_delete(delete).await
         } else {
@@ -274,9 +297,9 @@ pub mod tests {
     use tracing_subscriber::fmt::init;
     use tracing_subscriber::util::SubscriberInitExt;
 
-    use crate::{RdbcDataBaseDriver, RdbcDataSource, RdbcOrmInner};
     use crate::err::RdbcResult;
     use crate::pool::RdbcConnPool;
+    use crate::{RdbcDataBaseDriver, RdbcDataSource, RdbcOrmInner};
 
     fn build_datasource() -> RdbcDataSource {
         let mut ds = RdbcDataSource::new();

@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 use std::sync::RwLock;
 
+use crate::build::{mysql_build_query_script, pg_build_query_script};
 use crate::{
     DatabaseType, RdbcColumn, RdbcColumnOrder, RdbcConcatType, RdbcFilter, RdbcFilterInner,
     RdbcOrder, RdbcSQL, RdbcTable, RdbcTableInner, RdbcValue, RdbcValueColumn,
 };
-use crate::build::{mysql_build_query_script, pg_build_query_script};
 
-pub struct Query {
+pub struct QueryWrapper {
     driver_: RwLock<Option<DatabaseType>>,
     select_: Vec<RdbcColumn>,
     table_: Vec<RdbcTableInner>,
@@ -18,14 +18,14 @@ pub struct Query {
     order_: Option<Vec<RdbcOrder>>,
     limit_: Option<u64>,
     offset_: Option<u64>,
-    union_all: Option<Vec<Query>>,
-    union_only: Option<Vec<Query>>,
+    union_all: Option<Vec<QueryWrapper>>,
+    union_only: Option<Vec<QueryWrapper>>,
     params_: Option<HashMap<String, RdbcValue>>,
 }
 
-impl Query {
-    pub fn new() -> Query {
-        Query {
+impl QueryWrapper {
+    pub fn new() -> QueryWrapper {
+        QueryWrapper {
             driver_: RwLock::new(None),
             select_: vec![],
             table_: vec![],
@@ -50,7 +50,7 @@ impl Query {
 }
 
 // Query的查询方法
-impl Query {
+impl QueryWrapper {
     pub fn set_driver(&self, driver: DatabaseType) -> &Self {
         *self.driver_.write().unwrap() = Some(driver);
         self
@@ -83,14 +83,14 @@ impl Query {
     pub fn get_offset(&self) -> Option<&u64> {
         self.offset_.as_ref()
     }
-    pub fn get_union_all(&self) -> Option<&Vec<Query>> {
+    pub fn get_union_all(&self) -> Option<&Vec<QueryWrapper>> {
         self.union_all.as_ref()
     }
-    pub fn get_union_only(&self) -> Option<&Vec<Query>> {
+    pub fn get_union_only(&self) -> Option<&Vec<QueryWrapper>> {
         self.union_only.as_ref()
     }
 }
-impl Query {
+impl QueryWrapper {
     // RdbcColumn: From<RC>, RdbcValue: From<RV>, SS: ToString, ST: ToString, SC: ToString, SA: ToString
     pub fn select<RC>(&mut self, column: RC) -> &mut Self
     where
@@ -262,7 +262,7 @@ impl Query {
     }
 }
 
-impl RdbcTable for Query {
+impl RdbcTable for QueryWrapper {
     fn get_table_mut(&mut self) -> &mut Vec<RdbcTableInner> {
         self.table_.as_mut()
     }
@@ -274,7 +274,7 @@ impl RdbcTable for Query {
     }
 }
 
-impl RdbcFilter for Query {
+impl RdbcFilter for QueryWrapper {
     fn init_filter(&mut self) -> &mut Self {
         if self.filter_.is_none() {
             self.filter_ = Some(RdbcFilterInner::new());
@@ -298,7 +298,7 @@ impl RdbcFilter for Query {
     }
 }
 
-impl RdbcSQL for Query {
+impl RdbcSQL for QueryWrapper {
     fn build_script(&self, database_type: DatabaseType) -> (String, HashMap<String, RdbcValue>) {
         match database_type {
             DatabaseType::Postgres => pg_build_query_script(self),

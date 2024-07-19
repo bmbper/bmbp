@@ -7,10 +7,10 @@ use tracing::info;
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
 use bmbp_app_utils::{is_empty_string, simple_uuid_upper};
 use bmbp_rdbc_orm::{
-    Query, RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER, RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME,
-    RDBC_TREE_NAME_PATH, RDBC_TREE_PARENT_CODE, RDBC_TREE_ROOT_NODE, RdbcColumn, RdbcFilter, RdbcModel,
-    RdbcTable, RdbcTableInner, RdbcTree, RdbcTreeUtil, simple_column,
-    Update, value_column,
+    simple_column, value_column, QueryWrapper, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable,
+    RdbcTableInner, RdbcTree, RdbcTreeUtil, UpdateWrapper, RDBC_DATA_UPDATE_TIME,
+    RDBC_DATA_UPDATE_USER, RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME,
+    RDBC_TREE_NAME_PATH, RDBC_TREE_PARENT_CODE, RDBC_TREE_ROOT_NODE,
 };
 
 use crate::dict::dao::BmbpRbacDictDao;
@@ -398,7 +398,7 @@ impl BmbpRbacDictService {
             ));
         }
         dict.init_update_values();
-        let mut update = Update::new();
+        let mut update = UpdateWrapper::new();
         update
             .table(BmbpSettingDict::get_table_name())
             .set(RDBC_TREE_PARENT_CODE, dict.get_parent_code())
@@ -417,7 +417,7 @@ impl BmbpRbacDictService {
     }
 
     async fn update_name_path_for_children(parent_name_path: &str) -> BmbpResp<usize> {
-        let mut update = Update::new();
+        let mut update = UpdateWrapper::new();
         update.table_alias(BmbpSettingDict::get_table_name(), "t1".to_string());
         let mut join_table =
             RdbcTableInner::table_alias(BmbpSettingDict::get_table_name(), "t2".to_string());
@@ -437,7 +437,7 @@ impl BmbpRbacDictService {
         BmbpRbacDictDao::execute_update(&update).await
     }
     async fn update_code_path_for_children(parent_code_path: &str) -> BmbpResp<usize> {
-        let mut update = Update::new();
+        let mut update = UpdateWrapper::new();
         update.table_alias(BmbpSettingDict::get_table_name(), "t1".to_string());
         let concat_column = RdbcColumn::concat(vec![
             simple_column("t2", "code_path"),

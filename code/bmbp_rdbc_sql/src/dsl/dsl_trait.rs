@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use crate::{
-    DatabaseType, Query, RdbcColumn, RdbcConcatType, RdbcDmlValue, RdbcFilterInner, RdbcTableInner,
-    RdbcValue,
-};
 use crate::build::{mysql_build_sql, pg_build_sql};
+use crate::{
+    DatabaseType, QueryWrapper, RdbcColumn, RdbcConcatType, RdbcDmlValue, RdbcFilterInner,
+    RdbcTableInner, RdbcValue,
+};
 
 pub trait RdbcFilter {
     fn init_filter(&mut self) -> &mut Self;
@@ -672,7 +672,7 @@ pub trait RdbcFilter {
     {
         self
     }
-    fn in_query<T, V>(&mut self, column: T, value: Query) -> &mut Self
+    fn in_query<T, V>(&mut self, column: T, value: QueryWrapper) -> &mut Self
     where
         RdbcColumn: From<T>,
     {
@@ -697,7 +697,7 @@ pub trait RdbcFilter {
     {
         self
     }
-    fn col_in_query(&mut self, column: RdbcColumn, value: Query) -> &mut Self {
+    fn col_in_query(&mut self, column: RdbcColumn, value: QueryWrapper) -> &mut Self {
         self
     }
     fn col_in_raw<V>(&mut self, column: RdbcColumn, value: V) -> &mut Self
@@ -721,7 +721,7 @@ pub trait RdbcFilter {
     {
         self
     }
-    fn not_in_query<T, V>(&mut self, column: T, value: Query) -> &mut Self
+    fn not_in_query<T, V>(&mut self, column: T, value: QueryWrapper) -> &mut Self
     where
         RdbcColumn: From<T>,
     {
@@ -746,7 +746,7 @@ pub trait RdbcFilter {
     {
         self
     }
-    fn col_not_in_query(&mut self, column: RdbcColumn, value: Query) -> &mut Self {
+    fn col_not_in_query(&mut self, column: RdbcColumn, value: QueryWrapper) -> &mut Self {
         self
     }
     fn col_not_in_raw<V>(&mut self, column: RdbcColumn, value: V) -> &mut Self
@@ -774,7 +774,7 @@ pub trait RdbcFilter {
         self
     }
 
-    fn exists_<T>(&mut self, column: T, value: Query) -> &mut Self
+    fn exists_<T>(&mut self, column: T, value: QueryWrapper) -> &mut Self
     where
         RdbcColumn: From<T>,
     {
@@ -787,7 +787,7 @@ pub trait RdbcFilter {
     {
         self
     }
-    fn not_exists_<T>(&mut self, column: T, value: Query) -> &mut Self
+    fn not_exists_<T>(&mut self, column: T, value: QueryWrapper) -> &mut Self
     where
         RdbcColumn: From<T>,
     {
@@ -839,11 +839,11 @@ pub trait RdbcTable {
             .push(RdbcTableInner::schema_table_alias(schema, table, alias));
         self
     }
-    fn temp_table(&mut self, table: Query) -> &mut Self {
+    fn temp_table(&mut self, table: QueryWrapper) -> &mut Self {
         self.get_table_mut().push(RdbcTableInner::temp_table(table));
         self
     }
-    fn temp_table_alias<T>(&mut self, table: Query, alias: T) -> &mut Self
+    fn temp_table_alias<T>(&mut self, table: QueryWrapper, alias: T) -> &mut Self
     where
         T: ToString,
     {
@@ -889,10 +889,10 @@ pub trait RdbcTable {
     {
         self
     }
-    fn join_temp_table(&mut self, table: Query) -> &mut Self {
+    fn join_temp_table(&mut self, table: QueryWrapper) -> &mut Self {
         self
     }
-    fn join_temp_table_alias<T>(&mut self, table: Query, alias: T) -> &mut Self
+    fn join_temp_table_alias<T>(&mut self, table: QueryWrapper, alias: T) -> &mut Self
     where
         T: ToString,
     {
@@ -927,10 +927,10 @@ pub trait RdbcTable {
     {
         self
     }
-    fn left_join_temp_table(&mut self, table: Query) -> &mut Self {
+    fn left_join_temp_table(&mut self, table: QueryWrapper) -> &mut Self {
         self
     }
-    fn left_join_temp_table_alias<T>(&mut self, table: Query, alias: T) -> &mut Self
+    fn left_join_temp_table_alias<T>(&mut self, table: QueryWrapper, alias: T) -> &mut Self
     where
         T: ToString,
     {
@@ -967,10 +967,10 @@ pub trait RdbcTable {
     {
         self
     }
-    fn right_join_temp_table(&mut self, table: Query) -> &mut Self {
+    fn right_join_temp_table(&mut self, table: QueryWrapper) -> &mut Self {
         self
     }
-    fn right_join_temp_table_alias<T>(&mut self, table: Query, alias: T) -> &mut Self
+    fn right_join_temp_table_alias<T>(&mut self, table: QueryWrapper, alias: T) -> &mut Self
     where
         T: ToString,
     {
@@ -1007,10 +1007,10 @@ pub trait RdbcTable {
     {
         self
     }
-    fn full_join_temp_table(&mut self, table: Query) -> &mut Self {
+    fn full_join_temp_table(&mut self, table: QueryWrapper) -> &mut Self {
         self
     }
-    fn full_join_temp_table_alias<T>(&mut self, table: Query, alias: T) -> &mut Self
+    fn full_join_temp_table_alias<T>(&mut self, table: QueryWrapper, alias: T) -> &mut Self
     where
         T: ToString,
     {
@@ -1046,10 +1046,10 @@ pub trait RdbcTable {
     {
         self
     }
-    fn inner_join_temp_table(&mut self, table: Query) -> &mut Self {
+    fn inner_join_temp_table(&mut self, table: QueryWrapper) -> &mut Self {
         self
     }
-    fn inner_join_temp_table_as_alias<T>(&mut self, table: Query, alias: T) -> &mut Self
+    fn inner_join_temp_table_as_alias<T>(&mut self, table: QueryWrapper, alias: T) -> &mut Self
     where
         T: ToString,
     {

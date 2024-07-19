@@ -3,23 +3,23 @@ use std::sync::RwLock;
 
 use crate::build::{mysql_build_insert_script, pg_build_insert_script};
 use crate::{
-    DatabaseType, Query, RdbcDmlValue, RdbcSQL, RdbcTable, RdbcTableColumn, RdbcTableInner,
+    DatabaseType, QueryWrapper, RdbcDmlValue, RdbcSQL, RdbcTable, RdbcTableColumn, RdbcTableInner,
     RdbcValue,
 };
 
-pub struct Insert {
+pub struct InsertWrapper {
     driver_: RwLock<Option<DatabaseType>>,
     table_: Vec<RdbcTableInner>,
     join_: Option<Vec<RdbcTableInner>>,
     column_: Vec<RdbcTableColumn>,
     values_: Vec<RdbcDmlValue>,
     column_values: Vec<(RdbcTableColumn, RdbcDmlValue)>,
-    query_: Option<Query>,
+    query_: Option<QueryWrapper>,
 }
 
-impl Insert {
-    pub fn new() -> Insert {
-        Insert {
+impl InsertWrapper {
+    pub fn new() -> InsertWrapper {
+        InsertWrapper {
             driver_: RwLock::new(None),
             table_: Vec::new(),
             join_: None,
@@ -46,13 +46,13 @@ impl Insert {
     pub fn get_column_values(&self) -> &Vec<(RdbcTableColumn, RdbcDmlValue)> {
         &self.column_values
     }
-    pub fn get_query(&self) -> Option<&Query> {
+    pub fn get_query(&self) -> Option<&QueryWrapper> {
         self.query_.as_ref()
     }
 }
 
-impl Insert {
-    pub fn insert_query(&mut self, query: Query) -> &mut Self {
+impl InsertWrapper {
+    pub fn insert_query(&mut self, query: QueryWrapper) -> &mut Self {
         self.query_ = Some(query);
         self
     }
@@ -82,7 +82,7 @@ impl Insert {
         self
     }
 }
-impl RdbcTable for Insert {
+impl RdbcTable for InsertWrapper {
     fn get_table_mut(&mut self) -> &mut Vec<RdbcTableInner> {
         self.table_.as_mut()
     }
@@ -94,7 +94,7 @@ impl RdbcTable for Insert {
     }
 }
 
-impl RdbcSQL for Insert {
+impl RdbcSQL for InsertWrapper {
     fn build_script(&self, database_type: DatabaseType) -> (String, HashMap<String, RdbcValue>) {
         match database_type {
             DatabaseType::Postgres => pg_build_insert_script(self),

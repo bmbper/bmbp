@@ -7,7 +7,7 @@ use crate::{
     RdbcSQL, RdbcTable, RdbcTableInner, RdbcValue,
 };
 
-pub struct Update {
+pub struct UpdateWrapper {
     driver_: RwLock<Option<DatabaseType>>,
     set_values_: Vec<(RdbcColumn, Option<RdbcDmlValue>)>,
     table_: Vec<RdbcTableInner>,
@@ -21,9 +21,9 @@ pub struct Update {
     params_: Option<HashMap<String, RdbcValue>>,
 }
 
-impl Update {
-    pub fn new() -> Update {
-        Update {
+impl UpdateWrapper {
+    pub fn new() -> UpdateWrapper {
+        UpdateWrapper {
             driver_: RwLock::new(None),
             set_values_: vec![],
             table_: Vec::new(),
@@ -70,7 +70,7 @@ impl Update {
     }
 }
 
-impl Update {
+impl UpdateWrapper {
     pub fn set<SC, RV>(&mut self, column: SC, value: RV) -> &mut Self
     where
         RdbcColumn: From<SC>,
@@ -82,7 +82,7 @@ impl Update {
     }
 }
 
-impl RdbcTable for Update {
+impl RdbcTable for UpdateWrapper {
     fn get_table_mut(&mut self) -> &mut Vec<RdbcTableInner> {
         self.table_.as_mut()
     }
@@ -94,7 +94,7 @@ impl RdbcTable for Update {
     }
 }
 
-impl RdbcFilter for Update {
+impl RdbcFilter for UpdateWrapper {
     fn init_filter(&mut self) -> &mut Self {
         if self.filter_.is_none() {
             self.filter_ = Some(RdbcFilterInner::new());
@@ -118,7 +118,7 @@ impl RdbcFilter for Update {
     }
 }
 
-impl RdbcSQL for Update {
+impl RdbcSQL for UpdateWrapper {
     fn build_script(&self, database_type: DatabaseType) -> (String, HashMap<String, RdbcValue>) {
         match database_type {
             DatabaseType::Postgres => pg_build_update_script(self),

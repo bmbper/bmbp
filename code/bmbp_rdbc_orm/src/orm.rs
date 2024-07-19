@@ -4,7 +4,9 @@ use std::sync::Arc;
 use serde::Serialize;
 
 use bmbp_rdbc_model::{RdbcModel, RdbcOrmRow, RdbcPage};
-use bmbp_rdbc_sql::{Delete, Insert, Query, RdbcFilter, RdbcTable, Update};
+use bmbp_rdbc_sql::{
+    DeleteWrapper, InsertWrapper, QueryWrapper, RdbcFilter, RdbcTable, UpdateWrapper,
+};
 
 use crate::ds::RdbcDataSource;
 use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
@@ -38,7 +40,7 @@ impl RdbcOrmInner {
         &self,
         page_no: usize,
         page_size: usize,
-        query: &Query,
+        query: &QueryWrapper,
     ) -> RdbcResult<RdbcPage<T>>
     where
         T: Default + Debug + Clone + Serialize + From<RdbcOrmRow>,
@@ -65,7 +67,7 @@ impl RdbcOrmInner {
         new_page.set_data(Some(data_vec));
         Ok(new_page)
     }
-    pub async fn select_list_by_query<T>(&self, query: &Query) -> RdbcResult<Option<Vec<T>>>
+    pub async fn select_list_by_query<T>(&self, query: &QueryWrapper) -> RdbcResult<Option<Vec<T>>>
     where
         T: Default + Debug + Clone + Serialize + From<RdbcOrmRow>,
     {
@@ -87,7 +89,7 @@ impl RdbcOrmInner {
             None => Ok(None),
         }
     }
-    pub async fn select_one_by_query<T>(&self, query: &Query) -> RdbcResult<Option<T>>
+    pub async fn select_one_by_query<T>(&self, query: &QueryWrapper) -> RdbcResult<Option<T>>
     where
         T: Default + Debug + Clone + Serialize + From<RdbcOrmRow>,
     {
@@ -102,13 +104,13 @@ impl RdbcOrmInner {
             None => Ok(None),
         }
     }
-    pub async fn execute_insert(&self, insert: &Insert) -> RdbcResult<u64> {
+    pub async fn execute_insert(&self, insert: &InsertWrapper) -> RdbcResult<u64> {
         self.pool.get_conn().await?.execute_insert(insert).await
     }
-    pub async fn execute_update(&self, update: &Update) -> RdbcResult<u64> {
+    pub async fn execute_update(&self, update: &UpdateWrapper) -> RdbcResult<u64> {
         self.pool.get_conn().await?.execute_update(update).await
     }
-    pub async fn execute_delete(&self, delete: &Delete) -> RdbcResult<u64> {
+    pub async fn execute_delete(&self, delete: &DeleteWrapper) -> RdbcResult<u64> {
         self.pool.get_conn().await?.execute_delete(delete).await
     }
     pub async fn delete_by_id<T>(&self, id: String) -> RdbcResult<u64>
@@ -121,7 +123,7 @@ impl RdbcOrmInner {
                 "请指定要删除的记录",
             ));
         }
-        let mut delete_sql = Delete::new();
+        let mut delete_sql = DeleteWrapper::new();
         delete_sql
             .table(T::get_table_name())
             .eq_(T::get_table_primary_key(), id);

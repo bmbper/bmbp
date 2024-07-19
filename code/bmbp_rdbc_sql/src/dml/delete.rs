@@ -7,7 +7,7 @@ use crate::{
     RdbcTable, RdbcTableInner, RdbcValue,
 };
 
-pub struct Delete {
+pub struct DeleteWrapper {
     driver_: RwLock<Option<DatabaseType>>,
     table_: Vec<RdbcTableInner>,
     join_: Option<Vec<RdbcTableInner>>,
@@ -20,9 +20,9 @@ pub struct Delete {
     params_: Option<HashMap<String, RdbcValue>>,
 }
 
-impl Delete {
-    pub fn new() -> Delete {
-        Delete {
+impl DeleteWrapper {
+    pub fn new() -> DeleteWrapper {
+        DeleteWrapper {
             driver_: RwLock::new(None),
             table_: Vec::new(),
             join_: None,
@@ -70,7 +70,7 @@ impl Delete {
     }
 }
 
-impl RdbcTable for Delete {
+impl RdbcTable for DeleteWrapper {
     fn get_table_mut(&mut self) -> &mut Vec<RdbcTableInner> {
         self.table_.as_mut()
     }
@@ -82,7 +82,7 @@ impl RdbcTable for Delete {
     }
 }
 
-impl RdbcFilter for Delete {
+impl RdbcFilter for DeleteWrapper {
     fn init_filter(&mut self) -> &mut Self {
         if self.filter_.is_none() {
             self.filter_ = Some(RdbcFilterInner::new());
@@ -106,7 +106,7 @@ impl RdbcFilter for Delete {
     }
 }
 
-impl RdbcSQL for Delete {
+impl RdbcSQL for DeleteWrapper {
     fn build_script(&self, database_type: DatabaseType) -> (String, HashMap<String, RdbcValue>) {
         match database_type {
             DatabaseType::Postgres => pg_build_delete_script(self),

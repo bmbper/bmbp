@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{Query, RdbcFunc, RdbcReplaceFunc, RdbcValue};
+use crate::{QueryWrapper, RdbcFunc, RdbcReplaceFunc, RdbcValue};
 
 /// RdbcColumn SELECT 返回列
 
@@ -30,7 +30,7 @@ impl RdbcColumn {
             _ => false,
         }
     }
-    pub fn get_query(&self) -> Option<&Query> {
+    pub fn get_query(&self) -> Option<&QueryWrapper> {
         match self {
             RdbcColumn::Query(column) => Some(column.get_name()),
             _ => None,
@@ -169,10 +169,10 @@ impl RdbcColumn {
     {
         RdbcColumn::Value(RdbcValueColumn::string_value_alias(value, alias))
     }
-    pub fn query(query: Query) -> RdbcColumn {
+    pub fn query(query: QueryWrapper) -> RdbcColumn {
         RdbcColumn::Query(RdbcQueryColumn::query(query))
     }
-    pub fn query_alias<T>(query: Query, alias: T) -> RdbcColumn
+    pub fn query_alias<T>(query: QueryWrapper, alias: T) -> RdbcColumn
     where
         T: ToString,
     {
@@ -416,12 +416,12 @@ impl RdbcFuncColumn {
 }
 
 pub struct RdbcQueryColumn {
-    name_: Query,
+    name_: QueryWrapper,
     alias_: Option<String>,
 }
 
 impl RdbcQueryColumn {
-    pub fn get_name(&self) -> &Query {
+    pub fn get_name(&self) -> &QueryWrapper {
         &self.name_
     }
     pub fn get_alias(&self) -> Option<&String> {
@@ -430,13 +430,13 @@ impl RdbcQueryColumn {
 }
 
 impl RdbcQueryColumn {
-    fn query(query: Query) -> RdbcQueryColumn {
+    fn query(query: QueryWrapper) -> RdbcQueryColumn {
         RdbcQueryColumn {
             name_: query,
             alias_: None,
         }
     }
-    fn query_alias<T>(query: Query, alias: T) -> RdbcQueryColumn
+    fn query_alias<T>(query: QueryWrapper, alias: T) -> RdbcQueryColumn
     where
         T: ToString,
     {
@@ -501,16 +501,16 @@ impl RdbcTableInner {
     {
         RdbcTableInner::Table(RdbcSchemaTable::left_join_table(table))
     }
-    pub fn temp_table(table: Query) -> RdbcTableInner {
+    pub fn temp_table(table: QueryWrapper) -> RdbcTableInner {
         RdbcTableInner::Query(RdbcQueryTable::query(table))
     }
-    pub fn temp_table_alias<T>(table: Query, alias: T) -> RdbcTableInner
+    pub fn temp_table_alias<T>(table: QueryWrapper, alias: T) -> RdbcTableInner
     where
         T: ToString,
     {
         RdbcTableInner::Query(RdbcQueryTable::query_alias(table, alias))
     }
-    fn query(table: Query) -> RdbcTableInner {
+    fn query(table: QueryWrapper) -> RdbcTableInner {
         RdbcTableInner::Query(RdbcQueryTable::query(table))
     }
 }
@@ -745,14 +745,14 @@ impl RdbcSchemaTable {
 }
 
 pub struct RdbcQueryTable {
-    name_: Query,
+    name_: QueryWrapper,
     alias_: Option<String>,
     join_: Option<RdbcTableJoinType>,
     filter_: Option<RdbcFilterInner>,
 }
 
 impl RdbcQueryTable {
-    pub fn get_name(&self) -> &Query {
+    pub fn get_name(&self) -> &QueryWrapper {
         &self.name_
     }
     pub fn get_alias(&self) -> Option<&String> {
@@ -767,7 +767,7 @@ impl RdbcQueryTable {
 }
 
 impl RdbcQueryTable {
-    fn query(table: Query) -> RdbcQueryTable {
+    fn query(table: QueryWrapper) -> RdbcQueryTable {
         RdbcQueryTable {
             name_: table,
             alias_: None,
@@ -775,7 +775,7 @@ impl RdbcQueryTable {
             filter_: None,
         }
     }
-    fn query_alias<T>(table: Query, alias: T) -> RdbcQueryTable
+    fn query_alias<T>(table: QueryWrapper, alias: T) -> RdbcQueryTable
     where
         T: ToString,
     {

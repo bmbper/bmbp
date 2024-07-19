@@ -1,23 +1,25 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap demo</title>
-    <link href="ui/lib/bootstrap5.3.0/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <title>Bmbp开发框架</title>
+    <link rel="stylesheet" href="/ui/lib/arco/arco.min.css"/>
 </head>
 <body>
-<h1>Hello, world!</h1>
-<button type="button" class="btn btn-primary">Primary</button>
-<button type="button" class="btn btn-secondary">Secondary</button>
-<button type="button" class="btn btn-success">Success</button>
-<button type="button" class="btn btn-danger">Danger</button>
-<button type="button" class="btn btn-warning">Warning</button>
-<button type="button" class="btn btn-info">Info</button>
-<button type="button" class="btn btn-light">Light</button>
-<button type="button" class="btn btn-dark">Dark</button>
-
-<button type="button" class="btn btn-link">Link</button>
-<script src="ui/lib/bootstrap5.3.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<div id="root"></div>
 </body>
+<script src="/ui/lib/react/react.production.min.js"></script>
+<script src="/ui/lib/react/react-dom.production.min.js"></script>
+<script src="/ui/lib/react/react-dom.profiling.min.js"></script>
+<script src="/ui/lib/arco/arco.min.js"></script>
+<script src="/ui/lib/arco/arco-icon.min.js"></script>
+<script src="/ui/lib/axios.min.js"></script>
+<script src="/ui/lib/home/login/login.js"></script>
+<script>
+    window.onload = function () {
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        const app = React.createElement(LoginApp, {}, null);
+        root.render(app);
+    }
+</script>
 </html>
