@@ -370,50 +370,50 @@ fn build_struct_sql_method_token(struct_ident: &Ident, struct_fields: &[Field]) 
     let update_sql_token = build_struct_sql_method_update_token(struct_fields);
     let sql_token = quote! {
         impl #struct_ident {
-            pub fn build_query_sql() -> Query {
-                let mut query = Query::new();
+            pub fn build_query_sql() -> QueryWrapper {
+                let mut query = QueryWrapper::new();
                 query.table(Self::get_rdbc_table_name());
                 query.select_vec(Self::get_rdbc_table_columns());
                 query.order_by("data_sort", true);
                 query.order_by("data_update_time", false);
                 query
             }
-            pub fn build_info_sql(data_id:&Option<String>) -> Query {
-                let mut query = Query::new();
+            pub fn build_info_sql(data_id:&Option<String>) -> QueryWrapper {
+                let mut query = QueryWrapper::new();
                 query.table(Self::get_rdbc_table_name());
                 query.select_vec(Self::get_rdbc_table_columns());
                 query.eq_(Self::get_table_primary_key(), data_id);
                 query
             }
-            pub fn build_remove_sql(data_id:&Option<String>) -> Delete {
-                let mut delete = Delete::new();
+            pub fn build_remove_sql(data_id:&Option<String>) -> DeleteWrapper {
+                let mut delete = DeleteWrapper::new();
                 delete.table(Self::get_rdbc_table_name());
                 delete.eq_(Self::get_table_primary_key(), data_id);
                 delete
             }
-            pub fn build_enable_sql(data_id:&Option<String>) -> Update {
-                let mut update = Update::new();
+            pub fn build_enable_sql(data_id:&Option<String>) -> UpdateWrapper {
+                let mut update = UpdateWrapper::new();
                 update.table(Self::get_rdbc_table_name());
                 update.set("data_status", "1");
                 update.eq_(Self::get_table_primary_key(), data_id);
                 update
             }
-            pub fn build_disable_sql(data_id:&Option<String>) -> Update {
-                let mut update = Update::new();
+            pub fn build_disable_sql(data_id:&Option<String>) -> UpdateWrapper {
+                let mut update = UpdateWrapper::new();
                 update.table(Self::get_rdbc_table_name());
                 update.set("data_status", "0");
                 update.eq_(Self::get_table_primary_key(), data_id);
                 update
             }
-            pub fn build_update_status_sql(data_id:&Option<String>, status: String ) -> Update {
-                let mut update = Update::new();
+            pub fn build_update_status_sql(data_id:&Option<String>, status: String ) -> UpdateWrapper {
+                let mut update = UpdateWrapper::new();
                 update.table(Self::get_rdbc_table_name());
                 update.set("data_status", status);
                 update.eq_(Self::get_table_primary_key(), data_id);
                 update
             }
-            pub fn build_update_flag_sql(data_id:&Option<String>, flag: String) -> Update {
-                let mut update = Update::new();
+            pub fn build_update_flag_sql(data_id:&Option<String>, flag: String) -> UpdateWrapper {
+                let mut update = UpdateWrapper::new();
                 update.table(Self::get_rdbc_table_name());
                 update.set("data_flag", flag);
                 update.eq_(Self::get_table_primary_key(), data_id);
@@ -442,8 +442,8 @@ fn build_struct_sql_method_insert_token(struct_fields: &[Field]) -> TokenStream2
         insert_field_vec.push(insert_item);
     }
     quote! {
-        pub fn build_insert_sql(&self) -> Insert {
-                let mut insert = Insert::new();
+        pub fn build_insert_sql(&self) -> InsertWrapper {
+                let mut insert = InsertWrapper::new();
                 insert.table(Self::get_rdbc_table_name());
                 #(#insert_field_vec)*
                 insert
@@ -467,8 +467,8 @@ fn build_struct_sql_method_update_token(struct_fields: &[Field]) -> TokenStream2
         update_field_vec.push(insert_item);
     }
     quote! {
-        pub fn build_update_sql(&self) -> Update {
-                let mut update = Update::new();
+        pub fn build_update_sql(&self) -> UpdateWrapper {
+                let mut update = UpdateWrapper::new();
                 update.table(Self::get_rdbc_table_name());
                 #(#update_field_vec)*
                 update.eq_(Self::get_table_primary_key(),self.get_data_id());
@@ -534,7 +534,7 @@ fn build_struct_curd_method_token(struct_ident: &Ident, struct_fields: &[Field])
                 query.eq_("data_flag","-1");
                 Self::find_page_by_query(page_params.get_page_no(), page_params.get_page_size(), &query).await
             }
-            pub async fn find_page_by_query(page_no: &usize, page_size: &usize,query:&Query) -> BmbpResp<PageVo<Self>> {
+            pub async fn find_page_by_query(page_no: &usize, page_size: &usize,query:&QueryWrapper) -> BmbpResp<PageVo<Self>> {
                 #orm_ident::select_page_by_query(page_no, page_size, &query).await
             }
 
@@ -555,7 +555,7 @@ fn build_struct_curd_method_token(struct_ident: &Ident, struct_fields: &[Field])
                 query.eq_("data_flag","-1");
                 Self::find_list_by_query(&query).await
             }
-            pub async fn find_list_by_query(query:&Query)-> BmbpResp<Option<Vec<Self>>> {
+            pub async fn find_list_by_query(query:&QueryWrapper)-> BmbpResp<Option<Vec<Self>>> {
                 #orm_ident::select_list_by_query(query).await
             }
             pub async fn find_by_id(id: &Option<String>) -> BmbpResp<Option<Self>> {
@@ -947,7 +947,7 @@ fn build_struct_tree_curd_save_update_token(
             node.update().await
         }
         pub async fn change_node_path(old_title_path:String,new_title_path:String,old_code_path:String,new_code_path:String) -> BmbpResp<usize> {
-            let mut update = Update::new();
+            let mut update = UpdateWrapper::new();
             update.table(Self::get_rdbc_table_name())
             .set(#name_path_column,RdbcColumn::replace(#name_path_column,&old_title_path,&new_title_path))
             .set(#code_path_column,RdbcColumn::replace(#code_path_column,&old_code_path,&new_code_path));
@@ -1130,7 +1130,7 @@ fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
             pub async fn select_page_by_query(
                 page_no: &usize,
                 page_size: &usize,
-                query: &Query,
+                query: &QueryWrapper,
             ) -> BmbpResp<PageVo<#struct_ident>> {
                 match RdbcORM
                     .await
@@ -1148,7 +1148,7 @@ fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
                     Err(e) => Err(BmbpError::service(e.get_msg().as_str())),
                 }
             }
-                pub async fn select_list_by_query(query: &Query) -> BmbpResp<Option<Vec<#struct_ident>>> {
+                pub async fn select_list_by_query(query: &QueryWrapper) -> BmbpResp<Option<Vec<#struct_ident>>> {
                     match RdbcORM
                         .await
                         .select_list_by_query::<#struct_ident>(query)
@@ -1158,7 +1158,7 @@ fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
                         Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
                     }
                 }
-                pub async fn select_one_by_query(query: &Query) -> BmbpResp<Option<#struct_ident>> {
+                pub async fn select_one_by_query(query: &QueryWrapper) -> BmbpResp<Option<#struct_ident>> {
                     match RdbcORM
                         .await
                         .select_one_by_query::<#struct_ident>(query)
@@ -1168,19 +1168,19 @@ fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
                         Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
                     }
                 }
-                pub async fn execute_insert(insert: &Insert) -> BmbpResp<usize> {
+                pub async fn execute_insert(insert: &InsertWrapper) -> BmbpResp<usize> {
                     match RdbcORM.await.execute_insert(insert).await {
                         Ok(data) => Ok(data as usize),
                         Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
                     }
                 }
-                pub async fn execute_update(update: &Update) -> BmbpResp<usize> {
+                pub async fn execute_update(update: &UpdateWrapper) -> BmbpResp<usize> {
                     match RdbcORM.await.execute_update(update).await {
                         Ok(data) => Ok(data as usize),
                         Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
                     }
                 }
-                pub async fn execute_delete(delete: &Delete) -> BmbpResp<usize> {
+                pub async fn execute_delete(delete: &DeleteWrapper) -> BmbpResp<usize> {
                     match RdbcORM.await.execute_delete(delete).await {
                         Ok(data) => Ok(data as usize),
                         Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
