@@ -1,6 +1,6 @@
 use crate::bean::db_type::BmbpColumnDefaultValue;
 use crate::BmbpColumnDataType;
-use bmbp_marco_bean::bean;
+use bmbp_marco::bean;
 use serde::{Deserialize, Serialize};
 
 #[bean]

@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_marco_bean"
+name = "bmbp_marco"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

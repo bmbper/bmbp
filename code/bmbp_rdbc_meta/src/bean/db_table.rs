@@ -2,7 +2,7 @@ use crate::{
     BmbpRdbcColumn, BmbpRdbcTableCheck, BmbpRdbcTableForeignKey, BmbpRdbcTableIndex,
     BmbpRdbcTablePrimaryKey,
 };
-use bmbp_marco_bean::bean;
+use bmbp_marco::bean;
 use serde::{Deserialize, Serialize};
 
 #[bean]
