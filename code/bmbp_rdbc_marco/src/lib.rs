@@ -17,3 +17,20 @@ mod utils;
 pub fn rdbc_model(model_meta_token: TokenStream, tree_struct_token: TokenStream) -> TokenStream {
     marco_rdbc_model::rdbc_model(model_meta_token, tree_struct_token)
 }
+
+///
+/// ```rust
+///     #[rdbc_table]
+///     pub struct User{
+///         #[id]
+///         id:  String,
+///         #[column(name=user_name)]
+///         name: String,
+///         #[column(ignore=true)]
+///         organ: Organ
+///     }
+/// ```
+#[proc_macro_attribute]
+pub fn rdbc_table(model_meta_token: TokenStream, tree_struct_token: TokenStream) -> TokenStream {
+    tree_struct_token
+}
