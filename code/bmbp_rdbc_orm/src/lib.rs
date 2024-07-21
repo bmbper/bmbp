@@ -1,14 +1,14 @@
 use async_static::async_static;
 
+use crate::err::RdbcResult;
 use bmbp_app_common::map::{
     global_hash_map_vars, global_hash_map_vars_to_bool, global_hash_map_vars_to_usize,
 };
 pub use bmbp_rdbc_model::*;
 pub use bmbp_rdbc_sql::*;
 pub use ds::*;
+pub use orm::RdbcOrm;
 pub use orm::*;
-
-use crate::err::RdbcResult;
 
 mod client;
 mod ds;
@@ -18,12 +18,12 @@ mod pool;
 mod val;
 
 async_static! {
-    pub static ref RdbcORM:RdbcOrmInner = build_orm().await;
+    pub static ref RdbcOrmIns:RdbcOrm = build_orm().await;
 }
-async fn build_orm() -> RdbcOrmInner {
+async fn build_orm() -> RdbcOrm {
     let ds_rs = build_data_source_from_vars();
     match ds_rs {
-        Ok(ds) => match RdbcOrmInner::new(ds).await {
+        Ok(ds) => match RdbcOrm::new(ds).await {
             Ok(orm) => orm,
             Err(err) => {
                 panic!("连接数据库失败:{:#?}", err);
@@ -71,7 +71,7 @@ fn build_data_source_from_vars() -> RdbcResult<RdbcDataSource> {
 
 #[cfg(test)]
 pub mod tests {
-    use crate::{RdbcDataBaseDriver, RdbcDataSource, RdbcOrmInner};
+    use crate::{RdbcDataBaseDriver, RdbcDataSource, RdbcOrm};
 
     fn build_datasource() -> RdbcDataSource {
         let mut ds = RdbcDataSource::new();
@@ -92,7 +92,7 @@ pub mod tests {
     #[tokio::test]
     async fn test_rom() {
         let ds = build_datasource();
-        if let Ok(orm) = RdbcOrmInner::new(ds).await {
+        if let Ok(orm) = RdbcOrm::new(ds).await {
             if let Ok(conn) = orm.get_conn().await {
                 assert!(conn.valid().await);
             };

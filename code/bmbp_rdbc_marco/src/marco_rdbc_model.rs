@@ -1132,7 +1132,7 @@ fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
                 page_size: &usize,
                 query: &QueryWrapper,
             ) -> BmbpResp<PageVo<#struct_ident>> {
-                match RdbcORM
+                match RdbcOrmIns
                     .await
                     .select_page_by_query::<#struct_ident>(page_no.clone(), page_size.clone(), query)
                     .await
@@ -1149,7 +1149,7 @@ fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
                 }
             }
                 pub async fn select_list_by_query(query: &QueryWrapper) -> BmbpResp<Option<Vec<#struct_ident>>> {
-                    match RdbcORM
+                    match RdbcOrmIns
                         .await
                         .select_list_by_query::<#struct_ident>(query)
                         .await
@@ -1159,7 +1159,7 @@ fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
                     }
                 }
                 pub async fn select_one_by_query(query: &QueryWrapper) -> BmbpResp<Option<#struct_ident>> {
-                    match RdbcORM
+                    match RdbcOrmIns
                         .await
                         .select_one_by_query::<#struct_ident>(query)
                         .await
@@ -1169,19 +1169,19 @@ fn build_struct_orm_token(struct_ident: &Ident) -> TokenStream2 {
                     }
                 }
                 pub async fn execute_insert(insert: &InsertWrapper) -> BmbpResp<usize> {
-                    match RdbcORM.await.execute_insert(insert).await {
+                    match RdbcOrmIns.await.execute_insert(insert).await {
                         Ok(data) => Ok(data as usize),
                         Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
                     }
                 }
                 pub async fn execute_update(update: &UpdateWrapper) -> BmbpResp<usize> {
-                    match RdbcORM.await.execute_update(update).await {
+                    match RdbcOrmIns.await.execute_update(update).await {
                         Ok(data) => Ok(data as usize),
                         Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
                     }
                 }
                 pub async fn execute_delete(delete: &DeleteWrapper) -> BmbpResp<usize> {
-                    match RdbcORM.await.execute_delete(delete).await {
+                    match RdbcOrmIns.await.execute_delete(delete).await {
                         Ok(data) => Ok(data as usize),
                         Err(err) => Err(BmbpError::service(err.get_msg().as_str())),
                     }

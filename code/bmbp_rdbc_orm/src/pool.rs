@@ -299,7 +299,7 @@ pub mod tests {
 
     use crate::err::RdbcResult;
     use crate::pool::RdbcConnPool;
-    use crate::{RdbcDataBaseDriver, RdbcDataSource, RdbcOrmInner};
+    use crate::{RdbcDataBaseDriver, RdbcDataSource, RdbcOrm};
 
     fn build_datasource() -> RdbcDataSource {
         let mut ds = RdbcDataSource::new();

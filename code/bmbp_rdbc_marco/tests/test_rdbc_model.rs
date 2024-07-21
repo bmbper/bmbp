@@ -15,7 +15,7 @@ fn test_rdbc_model_empty() {
     use bmbp_rdbc_orm::RdbcColumn;
     use bmbp_rdbc_orm::RdbcMacroTree;
     use bmbp_rdbc_orm::RdbcMarcoTreeUtil;
-    use bmbp_rdbc_orm::RdbcORM;
+    use bmbp_rdbc_orm::RdbcOrmIns;
     use bmbp_rdbc_orm::RdbcOrmRow;
     use bmbp_rdbc_orm::RDBC_DATA_ID;
     use bmbp_rdbc_orm::RDBC_TREE_ROOT_NODE;

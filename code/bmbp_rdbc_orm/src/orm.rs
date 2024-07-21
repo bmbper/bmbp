@@ -12,24 +12,24 @@ use crate::ds::RdbcDataSource;
 use crate::err::{RdbcError, RdbcErrorType, RdbcResult};
 use crate::pool::{RdbcConn, RdbcConnPool};
 
-pub struct RdbcOrmInner {
+pub struct RdbcOrm {
     datasource: Arc<RdbcDataSource>,
     pool: RdbcConnPool,
 }
 
-impl RdbcOrmInner {
+impl RdbcOrm {
     pub async fn new(data_source: RdbcDataSource) -> RdbcResult<Self> {
         let arc_ds = Arc::new(data_source);
         let arc_pool = RdbcConnPool::new(arc_ds.clone());
         arc_pool.init().await?;
-        Ok(RdbcOrmInner {
+        Ok(RdbcOrm {
             datasource: arc_ds.clone(),
             pool: arc_pool,
         })
     }
 }
 
-impl RdbcOrmInner {
+impl RdbcOrm {
     pub async fn get_conn(&self) -> RdbcResult<RdbcConn> {
         self.pool.get_conn().await
     }
