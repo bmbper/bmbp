@@ -1,12 +1,13 @@
 use async_static::async_static;
 
-use crate::err::RdbcResult;
+pub use crate::err::RdbcResult;
 use bmbp_app_common::map::{
     global_hash_map_vars, global_hash_map_vars_to_bool, global_hash_map_vars_to_usize,
 };
 pub use bmbp_rdbc_model::*;
 pub use bmbp_rdbc_sql::*;
 pub use ds::*;
+pub use err::*;
 pub use orm::RdbcOrm;
 pub use orm::*;
 

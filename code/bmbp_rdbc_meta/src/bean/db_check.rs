@@ -1,4 +1,4 @@
-use bmbp_marco::bean;
+use bmbp_bean_marco::bean;
 use serde::{Deserialize, Serialize};
 
 #[bean]

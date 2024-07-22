@@ -1,6 +1,7 @@
 use proc_macro::TokenStream;
 mod consts;
 mod marco_rdbc_model;
+mod model;
 mod types;
 mod utils;
 
@@ -33,4 +34,29 @@ pub fn rdbc_model(model_meta_token: TokenStream, tree_struct_token: TokenStream)
 #[proc_macro_attribute]
 pub fn rdbc_table(model_meta_token: TokenStream, tree_struct_token: TokenStream) -> TokenStream {
     tree_struct_token
+}
+
+/// 数据库记录
+/// ```rust
+/// use bmbp_rdbc_marco::orm_record;
+/// #[orm_record(table_name)]
+/// pub struct User{
+///     #[id]
+///     id:  String,
+///     name: String,
+///     #[skip]
+///     organ: Organ
+/// }
+///
+/// impl RdbcActiveModel<User> for User{
+///     fn get_table_name() -> String {
+///         "user".to_string()
+///     }
+/// }
+///
+/// ```
+///
+#[proc_macro_attribute]
+pub fn orm_record(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
+    struct_token
 }

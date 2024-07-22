@@ -3,6 +3,7 @@ mod bean;
 mod bmbp_curd;
 mod rdbc_bean;
 mod rdbc_record;
+mod rdbc_tree_bean;
 mod tree_bean;
 
 /// bean 增加get set 方法
