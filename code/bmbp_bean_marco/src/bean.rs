@@ -1,3 +1,4 @@
+use crate::util::parse_struct_fields;
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
@@ -11,7 +12,6 @@ pub(crate) fn marco_bean(_: TokenStream, model_token: TokenStream) -> TokenStrea
     let struct_field_token = build_struct_field_token(struct_fields.as_slice());
     let struct_method_token = build_struct_props_method_token(struct_fields.as_slice());
     let bean_token = quote! {
-
         #[derive(Default, Debug, Clone, Serialize, Deserialize)]
         #[serde(rename_all = "camelCase")]
         #[serde(default)]
@@ -62,21 +62,4 @@ fn build_struct_props_method_token(struct_fields: &[Field]) -> Vec<TokenStream2>
         method_vec.push(method_token);
     }
     method_vec
-}
-
-fn parse_struct_fields(struct_input: &DeriveInput) -> Vec<Field> {
-    let mut field_vec = vec![];
-    match &struct_input.data {
-        syn::Data::Struct(data_struct) => match &data_struct.fields {
-            syn::Fields::Named(fields_named) => {
-                for field in fields_named.named.iter() {
-                    field_vec.push(field.clone())
-                }
-            }
-            syn::Fields::Unnamed(_) => {}
-            syn::Fields::Unit => {}
-        },
-        _ => {}
-    }
-    field_vec
 }
