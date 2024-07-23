@@ -13,11 +13,13 @@ pub(crate) fn marco_bean(_: TokenStream, model_token: TokenStream) -> TokenStrea
     let struct_fields = parse_struct_fields(&struct_input_token);
     let struct_field_token = build_struct_field_token(struct_fields.as_slice());
     let struct_method_token = build_struct_props_method_token(struct_fields.as_slice());
-    util::build_struct_token(
+    let token = util::build_struct_token(
         struct_ident,
         struct_attrs,
         struct_field_token,
         struct_method_token,
     )
-    .into()
+    .into();
+    println!("===>{}", token);
+    token
 }

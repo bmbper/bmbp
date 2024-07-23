@@ -2,6 +2,9 @@ use proc_macro::TokenStream;
 mod consts;
 mod marco_rdbc_model;
 mod model;
+mod table;
+mod table_orm;
+mod table_rdbc;
 mod types;
 mod utils;
 
@@ -19,9 +22,9 @@ pub fn rdbc_model(model_meta_token: TokenStream, tree_struct_token: TokenStream)
     marco_rdbc_model::rdbc_model(model_meta_token, tree_struct_token)
 }
 
-///
+/// #[table(table_name)] 仅增加获取表名、获取列表、列枚举方法
 /// ```rust
-///     #[rdbc_table]
+///     #[table(bmbp_table)]
 ///     pub struct User{
 ///         #[id]
 ///         id:  String,
@@ -32,36 +35,40 @@ pub fn rdbc_model(model_meta_token: TokenStream, tree_struct_token: TokenStream)
 ///     }
 /// ```
 #[proc_macro_attribute]
-pub fn rdbc_table(model_meta_token: TokenStream, tree_struct_token: TokenStream) -> TokenStream {
-    tree_struct_token
+pub fn table(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
+    table::macro_table(meta_token, struct_token)
 }
-
-/// 数据库记录
+///
+/// #[table(table_name)] 增加公共字段后 增加获取表名、获取列表、列枚举方法
 /// ```rust
-/// use bmbp_marco_rdbc::orm_record;
-/// #[orm_record(table_name)]
-/// pub struct User{
-///     #[id]
-///     id:  String,
-///     name: String,
-///     #[skip]
-///     organ: Organ
-/// }
-///
-/// impl RdbcActiveModel<User> for User{
-///     fn get_table_name() -> String {
-///         "user".to_string()
+///     #[table_rdbc(bmbp_table)]
+///     pub struct User{
+///         #[id]
+///         id:  String,
+///         #[column(name=user_name)]
+///         name: String,
+///         #[column(ignore=true)]
+///         organ: Organ
 ///     }
-/// }
-///
 /// ```
-///
 #[proc_macro_attribute]
-pub fn orm_record(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
-    struct_token
+pub fn table_rdbc(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
+    table_rdbc::marco_table_rdbc(meta_token, struct_token)
 }
-
+///
+/// #[table_orm(table_name)] 增加公共字段后 增加获取表名、获取列表、列枚举方法 ， 并实现和数据库的交互
+/// ```rust
+///     #[table_orm(bmbp_table)]
+///     pub struct User{
+///         #[id]
+///         id:  String,
+///         #[column(name=user_name)]
+///         name: String,
+///         #[column(ignore=true)]
+///         organ: Organ
+///     }
+/// ```
 #[proc_macro_attribute]
-pub fn orm_table(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
-    struct_token
+pub fn table_orm(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
+    table_orm::marco_table_orm(meta_token, struct_token)
 }
