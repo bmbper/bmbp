@@ -1,5 +1,5 @@
 use proc_macro2::{Ident, TokenStream};
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, ToTokens};
 use syn::__private::TokenStream2;
 use syn::parse::Parser;
 use syn::{parse_quote, Attribute, DeriveInput, Field, FieldMutability};
@@ -86,7 +86,7 @@ pub fn build_struct_token(
         #[derive(Default, Debug, Clone, Serialize, Deserialize)]
         #[serde(rename_all = "camelCase")]
         #[serde(default)]
-        #(#struct_attrs,)*
+        #(#struct_attrs)*
         pub struct #struct_ident {
                #(#struct_field_token,)*
         }

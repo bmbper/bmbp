@@ -2,6 +2,7 @@ use proc_macro::TokenStream;
 mod consts;
 mod marco_rdbc_model;
 mod model;
+mod orm_row;
 mod table;
 mod table_orm;
 mod table_rdbc;
@@ -71,4 +72,9 @@ pub fn table_rdbc(meta_token: TokenStream, struct_token: TokenStream) -> TokenSt
 #[proc_macro_attribute]
 pub fn table_orm(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
     table_orm::marco_table_orm(meta_token, struct_token)
+}
+
+#[proc_macro_attribute]
+pub fn orm_row(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
+    orm_row::marco_orm_row(meta_token, struct_token)
 }

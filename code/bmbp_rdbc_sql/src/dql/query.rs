@@ -24,8 +24,8 @@ pub struct QueryWrapper {
 }
 
 impl QueryWrapper {
-    pub fn new() -> QueryWrapper {
-        QueryWrapper {
+    pub fn new<T>() -> QueryWrapper {
+        let query = QueryWrapper {
             driver_: RwLock::new(None),
             select_: vec![],
             table_: vec![],
@@ -39,7 +39,11 @@ impl QueryWrapper {
             union_all: None,
             union_only: None,
             params_: None,
-        }
+        };
+        query
+    }
+    pub fn new_from<T>() -> QueryWrapper {
+        QueryWrapper::new()
     }
     fn init_order(&mut self) -> &mut Self {
         if self.order_.is_none() {

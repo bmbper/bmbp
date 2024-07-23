@@ -11,7 +11,7 @@ bmbp_app_common = { path = "../bmbp_app_common" }
 bmbp_app_utils = { path = "../bmbp_app_utils" }
 bmbp_rdbc_orm = { path = "../bmbp_rdbc_orm" }
 bmbp_marco_rdbc = { path = "../bmbp_marco_rdbc" }
-
+bmbp_marco_bean = { path = "../bmbp_marco_bean" }
 reqwest = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
