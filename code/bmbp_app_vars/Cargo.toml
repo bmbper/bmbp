@@ -1,0 +1,7 @@
+[package]
+name = "bmbp_app_vars"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+description = "存储全局变量"
+[dependencies]
