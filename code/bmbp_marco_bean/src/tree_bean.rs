@@ -1,5 +1,4 @@
-use crate::util;
-use crate::util::*;
+use bmbp_marco_tuil::util::*;
 use proc_macro::TokenStream;
 use syn::parse::Parse;
 use syn::{parse_macro_input, DeriveInput};
@@ -11,7 +10,7 @@ pub(crate) fn marco_tree_bean(meta_token: TokenStream, model_token: TokenStream)
     let struct_attrs = struct_input_token.attrs.as_slice();
     let struct_fields = parse_struct_fields(&struct_input_token);
     // 获取树型标记
-    let tree_prefix = parse_tree_meta(meta_token);
+    let tree_prefix = parse_tree_meta(meta_token.into());
     let mut tree_field_name = build_tree_field_name(tree_prefix);
     let mut tree_field = build_tree_field(tree_field_name.as_slice(), &struct_ident);
     for field in struct_fields {
@@ -28,4 +27,5 @@ pub(crate) fn marco_tree_bean(meta_token: TokenStream, model_token: TokenStream)
         struct_field_token,
         struct_method_token,
     )
+    .into()
 }

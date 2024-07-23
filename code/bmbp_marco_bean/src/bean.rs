@@ -1,5 +1,7 @@
-use crate::util;
-use crate::util::{build_struct_field_token, build_struct_props_method_token, parse_struct_fields};
+use bmbp_marco_tuil::util;
+use bmbp_marco_tuil::util::{
+    build_struct_field_token, build_struct_props_method_token, parse_struct_fields,
+};
 use proc_macro::TokenStream;
 use syn::{parse_macro_input, DeriveInput};
 
@@ -17,4 +19,5 @@ pub(crate) fn marco_bean(_: TokenStream, model_token: TokenStream) -> TokenStrea
         struct_field_token,
         struct_method_token,
     )
+    .into()
 }

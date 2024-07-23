@@ -1,5 +1,4 @@
-use proc_macro::TokenStream;
-use proc_macro2::Ident;
+use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use syn::__private::TokenStream2;
 use syn::parse::Parser;
@@ -26,7 +25,7 @@ pub fn parse_struct_fields(struct_input: &DeriveInput) -> Vec<Field> {
     field_vec
 }
 
-pub(crate) fn build_tree_field_name(tree_prefix: String) -> Vec<String> {
+pub fn build_tree_field_name(tree_prefix: String) -> Vec<String> {
     vec![
         format!("{}_code", tree_prefix),
         format!("{}_parent_code", tree_prefix),
@@ -40,7 +39,7 @@ pub(crate) fn build_tree_field_name(tree_prefix: String) -> Vec<String> {
     ]
 }
 
-pub(crate) fn build_struct_field_token(struct_fields: &[Field]) -> Vec<TokenStream2> {
+pub fn build_struct_field_token(struct_fields: &[Field]) -> Vec<TokenStream2> {
     let mut field_vec = vec![];
     for field in struct_fields {
         let field_ident = field.ident.as_ref().unwrap();
@@ -52,7 +51,7 @@ pub(crate) fn build_struct_field_token(struct_fields: &[Field]) -> Vec<TokenStre
     field_vec
 }
 
-pub(crate) fn build_struct_props_method_token(struct_fields: &[Field]) -> Vec<TokenStream2> {
+pub fn build_struct_props_method_token(struct_fields: &[Field]) -> Vec<TokenStream2> {
     let mut method_vec = vec![];
     for item in struct_fields {
         let field_name = item.ident.as_ref().unwrap();
@@ -77,7 +76,7 @@ pub(crate) fn build_struct_props_method_token(struct_fields: &[Field]) -> Vec<To
     method_vec
 }
 
-pub(crate) fn build_struct_token(
+pub fn build_struct_token(
     struct_ident: &Ident,
     struct_attrs: &[Attribute],
     struct_field_token: Vec<TokenStream2>,
@@ -101,7 +100,7 @@ pub(crate) fn build_struct_token(
     bean_token.into()
 }
 
-pub(crate) fn build_base_field_name() -> Vec<String> {
+pub fn build_base_field_name() -> Vec<String> {
     vec![
         "data_id".to_string(),
         "data_level".to_string(),
@@ -116,7 +115,7 @@ pub(crate) fn build_base_field_name() -> Vec<String> {
         "data_sign".to_string(),
     ]
 }
-pub(crate) fn build_base_field() -> Vec<Field> {
+pub fn build_base_field() -> Vec<Field> {
     let field_names = build_base_field_name();
     let mut field_vec = vec![];
     for item in field_names {
@@ -138,7 +137,7 @@ pub(crate) fn build_base_field() -> Vec<Field> {
     }
     field_vec
 }
-pub(crate) fn build_tree_field(filed_names: &[String], struct_name: &Ident) -> Vec<Field> {
+pub fn build_tree_field(filed_names: &[String], struct_name: &Ident) -> Vec<Field> {
     let mut field_vec = vec![];
     for item in filed_names {
         let field_ident = format_ident!("{}", item);

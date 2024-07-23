@@ -1,5 +1,5 @@
-use crate::util;
-use crate::util::{
+use bmbp_marco_tuil::util;
+use bmbp_marco_tuil::util::{
     build_struct_field_token, build_struct_props_method_token, build_struct_token,
     build_tree_field, build_tree_field_name, parse_struct_fields, parse_tree_meta,
 };
@@ -19,7 +19,7 @@ pub(crate) fn marco_rdbc_tree_bean(
     let mut struct_base_fields = util::build_base_field();
 
     // 获取树型标记
-    let tree_prefix = parse_tree_meta(meta_token);
+    let tree_prefix = parse_tree_meta(meta_token.into());
     let mut tree_field_name = build_tree_field_name(tree_prefix);
     let mut tree_field = build_tree_field(tree_field_name.as_slice(), &struct_ident);
     // 合并公共字段
@@ -39,4 +39,5 @@ pub(crate) fn marco_rdbc_tree_bean(
         struct_field_token,
         struct_method_token,
     )
+    .into()
 }
