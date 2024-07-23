@@ -1,5 +1,5 @@
 mod bean;
 mod meta;
-mod meta_service;
+mod proxy;
 pub use bean::*;
-pub use meta_service::*;
+pub use proxy::*;
