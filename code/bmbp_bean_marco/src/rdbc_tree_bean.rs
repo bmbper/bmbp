@@ -13,6 +13,7 @@ pub(crate) fn marco_rdbc_tree_bean(
     // 获取结构体名称
     let struct_input_token = parse_macro_input!(model_token as DeriveInput);
     let struct_ident = &struct_input_token.ident;
+    let struct_attrs = &struct_input_token.attrs.as_slice();
     // 基础字段
     let mut struct_base_field_name = util::build_base_field_name();
     let mut struct_base_fields = util::build_base_field();
@@ -32,5 +33,10 @@ pub(crate) fn marco_rdbc_tree_bean(
     }
     let struct_field_token = build_struct_field_token(struct_base_fields.as_slice());
     let struct_method_token = build_struct_props_method_token(struct_base_fields.as_slice());
-    build_struct_token(struct_ident, struct_field_token, struct_method_token)
+    build_struct_token(
+        struct_ident,
+        struct_attrs,
+        struct_field_token,
+        struct_method_token,
+    )
 }

@@ -3,7 +3,7 @@ use proc_macro2::Ident;
 use quote::{format_ident, quote};
 use syn::__private::TokenStream2;
 use syn::parse::Parser;
-use syn::{parse_quote, DeriveInput, Field, FieldMutability};
+use syn::{parse_quote, Attribute, DeriveInput, Field, FieldMutability};
 
 /// parse_tree_meta 获取树型标记
 pub fn parse_tree_meta(meta_token: TokenStream) -> String {
@@ -79,6 +79,7 @@ pub(crate) fn build_struct_props_method_token(struct_fields: &[Field]) -> Vec<To
 
 pub(crate) fn build_struct_token(
     struct_ident: &Ident,
+    struct_attrs: &[Attribute],
     struct_field_token: Vec<TokenStream2>,
     struct_method_token: Vec<TokenStream2>,
 ) -> TokenStream {
@@ -86,6 +87,7 @@ pub(crate) fn build_struct_token(
         #[derive(Default, Debug, Clone, Serialize, Deserialize)]
         #[serde(rename_all = "camelCase")]
         #[serde(default)]
+        #(#struct_attrs,)*
         pub struct #struct_ident {
                #(#struct_field_token,)*
         }

@@ -1,3 +1,5 @@
+extern crate core;
+
 use proc_macro::TokenStream;
 mod bean;
 mod rdbc_bean;
