@@ -45,7 +45,7 @@ md5 = "*"
 rs_sha256 = "*"
 libsm = "*"
 base64 = "*"
-syn = { version = "2.0.63", features = ["full", "parsing", "printing", "proc-macro", "clone-impls"] }
+syn = { version = "2.0.72", features = ["full", "parsing", "printing", "proc-macro", "clone-impls"] }
 quote = "*"
 openssl = { version = "0.10.64", features = ["vendored"] }
 openssl-sys = "0.9.102"
