@@ -1,4 +1,4 @@
-use bmbp_bean_marco::tree_bean;
+use bmbp_marco_bean::tree_bean;
 #[test]
 pub fn test_bean() {
     use serde::Deserialize;

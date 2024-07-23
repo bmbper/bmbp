@@ -1,4 +1,4 @@
-use bmbp_rdbc_marco::rdbc_model;
+use bmbp_marco_rdbc::rdbc_model;
 
 #[test]
 fn test_rdbc_model_empty() {

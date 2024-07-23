@@ -1,5 +1,5 @@
 use crate::BmbpRdbcTable;
-use bmbp_bean_marco::bean;
+use bmbp_marco_bean::bean;
 use serde::{Deserialize, Serialize};
 
 #[bean]

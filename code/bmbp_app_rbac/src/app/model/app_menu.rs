@@ -2,7 +2,7 @@ use crate::app::model::types::{RbacAppMenuOpenType, RbacAppMenuType};
 use ::serde::Deserialize;
 use ::serde::Serialize;
 use bmbp_app_common::*;
-use bmbp_rdbc_marco::rdbc_model;
+use bmbp_marco_rdbc::rdbc_model;
 use bmbp_rdbc_orm::RdbcMacroTree;
 use bmbp_rdbc_orm::*;
 use chrono::Utc;

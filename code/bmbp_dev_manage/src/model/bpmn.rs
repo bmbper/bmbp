@@ -5,7 +5,7 @@ use salvo::*;
 use tracing::*;
 
 use bmbp_app_common::*;
-use bmbp_rdbc_marco::rdbc_model;
+use bmbp_marco_rdbc::rdbc_model;
 use bmbp_rdbc_orm::*;
 
 /// BmbpDevBpmn 存储流程

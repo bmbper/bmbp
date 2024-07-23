@@ -38,7 +38,7 @@ pub fn rdbc_table(model_meta_token: TokenStream, tree_struct_token: TokenStream)
 
 /// 数据库记录
 /// ```rust
-/// use bmbp_rdbc_marco::orm_record;
+/// use bmbp_marco_rdbc::orm_record;
 /// #[orm_record(table_name)]
 /// pub struct User{
 ///     #[id]
@@ -58,5 +58,10 @@ pub fn rdbc_table(model_meta_token: TokenStream, tree_struct_token: TokenStream)
 ///
 #[proc_macro_attribute]
 pub fn orm_record(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
+    struct_token
+}
+
+#[proc_macro_attribute]
+pub fn orm_table(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
     struct_token
 }
