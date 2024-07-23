@@ -1,4 +1,5 @@
 use proc_macro::TokenStream;
+mod bean;
 mod consts;
 mod marco_rdbc_model;
 mod model;
@@ -6,6 +7,9 @@ mod orm_row;
 mod table;
 mod table_orm;
 mod table_rdbc;
+mod table_tree;
+mod table_tree_orm;
+mod table_tree_rdbc;
 mod types;
 mod utils;
 
@@ -23,58 +27,39 @@ pub fn rdbc_model(model_meta_token: TokenStream, tree_struct_token: TokenStream)
     marco_rdbc_model::rdbc_model(model_meta_token, tree_struct_token)
 }
 
-/// #[table(table_name)] 仅增加获取表名、获取列表、列枚举方法
-/// ```rust
-///     #[table(bmbp_table)]
-///     pub struct User{
-///         #[id]
-///         id:  String,
-///         #[column(name=user_name)]
-///         name: String,
-///         #[column(ignore=true)]
-///         organ: Organ
-///     }
-/// ```
+/// #[table(table_name)]
 #[proc_macro_attribute]
 pub fn table(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
     table::macro_table(meta_token, struct_token)
 }
-///
-/// #[table(table_name)] 增加公共字段后 增加获取表名、获取列表、列枚举方法
-/// ```rust
-///     #[table_rdbc(bmbp_table)]
-///     pub struct User{
-///         #[id]
-///         id:  String,
-///         #[column(name=user_name)]
-///         name: String,
-///         #[column(ignore=true)]
-///         organ: Organ
-///     }
-/// ```
+/// #[table_rdbc(table_name)]
 #[proc_macro_attribute]
 pub fn table_rdbc(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
     table_rdbc::marco_table_rdbc(meta_token, struct_token)
 }
-///
-/// #[table_orm(table_name)] 增加公共字段后 增加获取表名、获取列表、列枚举方法 ， 并实现和数据库的交互
-/// ```rust
-///     #[table_orm(bmbp_table)]
-///     pub struct User{
-///         #[id]
-///         id:  String,
-///         #[column(name=user_name)]
-///         name: String,
-///         #[column(ignore=true)]
-///         organ: Organ
-///     }
-/// ```
+/// #[table_orm(table_name)]
 #[proc_macro_attribute]
 pub fn table_orm(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
     table_orm::marco_table_orm(meta_token, struct_token)
 }
 
+/// #[table_tree(table_name,tree_prefix)]
 #[proc_macro_attribute]
-pub fn orm_row(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
+pub fn table_tree(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
+    table_tree::marco_table_tree(meta_token, struct_token)
+}
+/// #[table_tree_rdbc(table_name,tree_prefix)]
+#[proc_macro_attribute]
+pub fn table_tree_rdbc(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
+    table_tree_rdbc::marco_table_tree_rdbc(meta_token, struct_token)
+}
+/// #[table_tree_orm(table_name,tree_prefix)]
+#[proc_macro_attribute]
+pub fn table_tree_orm(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
+    table_tree_orm::marco_table_tree_orm(meta_token, struct_token)
+}
+
+#[proc_macro_attribute]
+pub fn from_row(meta_token: TokenStream, struct_token: TokenStream) -> TokenStream {
     orm_row::marco_orm_row(meta_token, struct_token)
 }
