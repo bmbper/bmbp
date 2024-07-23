@@ -8,7 +8,7 @@ description.workspace = true
 [lib]
 proc-macro = true
 [dependencies]
-bmbp_marco_tuil = { path = "../bmbp_marco_util" }
+bmbp_marco_util = { path = "../bmbp_marco_util" }
 quote = { workspace = true }
 syn = { workspace = true }
 proc-macro2 = "1.0.82"

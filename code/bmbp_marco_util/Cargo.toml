@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_marco_tuil"
+name = "bmbp_marco_util"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

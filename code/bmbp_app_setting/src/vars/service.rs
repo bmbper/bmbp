@@ -7,6 +7,6 @@ impl VarsService {
         VarsService {}
     }
     pub fn save(vars: BmbpVars) {
-        let query_wrapper = QueryWrapper::new_from::<BmbpVars>();
+        let query_wrapper = QueryWrapper::new_from();
     }
 }

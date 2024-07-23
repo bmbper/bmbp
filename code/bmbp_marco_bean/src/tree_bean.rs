@@ -1,4 +1,4 @@
-use bmbp_marco_tuil::util::*;
+use bmbp_marco_util::util::*;
 use proc_macro::TokenStream;
 use syn::parse::Parse;
 use syn::{parse_macro_input, DeriveInput};
