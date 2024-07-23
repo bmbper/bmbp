@@ -1,4 +1,4 @@
-use bmbp_rdbc_meta::{build_create_table_sql, BmbpDBType, BmbpRdbcTable};
+use bmbp_data_meta::{build_create_table_sql, BmbpDBType, BmbpRdbcTable};
 
 #[test]
 fn test_create_table_sql() {
