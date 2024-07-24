@@ -5,3 +5,5 @@ authors.workspace = true
 edition.workspace = true
 description = "存储全局变量"
 [dependencies]
+bmbp_rdbc = { path = "../bmbp_rdbc" }
+

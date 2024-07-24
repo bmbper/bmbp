@@ -2,6 +2,7 @@ use proc_macro::TokenStream;
 mod bean;
 mod consts;
 mod marco_rdbc_model;
+mod meta;
 mod model;
 mod orm_row;
 mod table;

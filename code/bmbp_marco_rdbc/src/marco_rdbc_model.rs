@@ -5,7 +5,7 @@ use syn::parse::Parser;
 use syn::{parse_macro_input, parse_quote, DeriveInput, Field};
 
 use crate::consts::*;
-use crate::types::RdbcMeta;
+use crate::meta::RdbcOrmMeta;
 use crate::utils::{
     build_base_struct_token, build_base_tree_struct_token, build_struct_field_cache,
     camel_to_snake, field_has_attribute_args, field_has_option_type, filter_field_by_marco_attrs,
@@ -17,7 +17,7 @@ pub(crate) fn rdbc_model(meta_token: TokenStream, model_token: TokenStream) -> T
     let struct_input_token = parse_macro_input!(model_token as DeriveInput);
     let struct_ident = &struct_input_token.ident;
     // 获取RDBC_MODEL宏参数
-    let mut mode_meta: RdbcMeta = parse_macro_input!(meta_token as RdbcMeta);
+    let mut mode_meta: RdbcOrmMeta = parse_macro_input!(meta_token as RdbcOrmMeta);
     if mode_meta.get_table_name().is_none() || mode_meta.get_table_name().unwrap().is_empty() {
         mode_meta.set_table_name(camel_to_snake(struct_ident.to_string()));
     }
