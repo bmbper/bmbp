@@ -11,42 +11,43 @@ description = """
 [workspace.build]
 openssl = "/opt/homebrew/Cellar/openssl@3/3.3.0"
 [workspace.dependencies]
+# 注意：版本号被保留为 '*' 或具体版本，根据你的需求。
+async-lock = "*"
+async-once-cell = "*"
+async-recursion = "*"
+async-static = "*"
+async-trait = "*"
+async_trait = "*" # 注意：这是 async_trait 的正确键名
+base64 = "*"
+case_style = "*"
+chrono = "*"
+convert_case = "*"
+dashmap = "*"
+futures = "*"
+lazy_static = "*"
+libsm = "*"
+log = "*"
+md5 = "*"
+openssl = { version = "0.10.64", features = ["vendored"] }
+openssl-sys = "0.9.102"
+once_cell = "*"
+rand = "*"
+regex = "*"
+reqwest = "*"
+rs_sha256 = "*"
+rust-embed = "*"
 salvo = { version = "*", features = ["default", "serve-static", "cors", "size-limiter", "logging"] }
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
 serde_repr = "*"
-uuid = { version = "*", features = ["serde", "v4"] }
+serde_yaml = "*"
+svg = "*"
+syn = { version = "2.0.72", features = ["full", "parsing", "printing", "proc-macro", "clone-impls"] }
+tokio = { version = "*", features = ["full"] }
+tokio-postgres = { version = "*", features = ["with-chrono-0_4"] }
 tracing = "*"
 tracing-subscriber = { version = "*", features = ["env-filter"] }
-log = "*"
-tokio = { version = "*", features = ["full"] }
-async-trait = "*"
-reqwest = "*"
 toml = "*"
-once_cell = "*"
-svg = "*"
-chrono = "*"
 tera = "*"
-rust-embed = "*"
-async-once-cell = "*"
-async_static = "*"
-async-lock = "*"
-
-tokio-postgres = { version = "*", features = ["with-chrono-0_4"] }
-serde_yaml = "*"
-async-recursion = "*"
-futures = "*"
-convert_case = "*"
-dashmap = "*"
-regex = "*"
-rand = "*"
-case_style = "*"
-md5 = "*"
-rs_sha256 = "*"
-libsm = "*"
-base64 = "*"
-syn = { version = "2.0.72", features = ["full", "parsing", "printing", "proc-macro", "clone-impls"] }
 quote = "*"
-openssl = { version = "0.10.64", features = ["vendored"] }
-openssl-sys = "0.9.102"
-lazy_static = "*"
+uuid = { version = "*", features = ["serde", "v4"] }
