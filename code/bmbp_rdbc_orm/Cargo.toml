@@ -5,8 +5,6 @@ authors.workspace = true
 edition.workspace = true
 description.workspace = true
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 # sql
 bmbp_rdbc_sql = { path = "../bmbp_rdbc_sql" }
@@ -17,13 +15,13 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 # 运行时
 tokio = { workspace = true }# 异步抽象
-async-trait = { workspace = true }
 async_static = { workspace = true }
+async-trait = { workspace = true }
 once_cell = { workspace = true }
 # 数据库
-tokio-postgres =  { workspace = true }
+tokio-postgres = { workspace = true }
 # 序列化库
 serde = { workspace = true }
-serde_json ={ workspace = true }
+serde_json = { workspace = true }
 # 时间库
-chrono ={ workspace = true }
+chrono = { workspace = true }
