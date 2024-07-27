@@ -14,5 +14,5 @@
 <script src="/ui/lib/arco/arco.min.js"></script>
 <script src="/ui/lib/arco/arco-icon.min.js"></script>
 <script src="/ui/lib/axios.min.js"></script>
-<script src="/ui/lib/home/home/home.js"></script>
+<script src="/ui/home/home/home.js"></script>
 </html>

@@ -26,5 +26,5 @@ lazy_static! {
 #[folder = "script"]
 pub struct HomeScriptAsset;
 pub fn inner_script_router() -> Router {
-    Router::with_path("/ui/lib/home/<**path>").get(static_embed::<HomeScriptAsset>())
+    Router::with_path("/ui/home/<**path>").get(static_embed::<HomeScriptAsset>())
 }

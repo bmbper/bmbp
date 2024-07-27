@@ -14,7 +14,7 @@
 <script src="/ui/lib/arco/arco.min.js"></script>
 <script src="/ui/lib/arco/arco-icon.min.js"></script>
 <script src="/ui/lib/axios.min.js"></script>
-<script src="/ui/lib/home/login/login.js"></script>
+<script src="/ui/home/login/login.js"></script>
 <script>
     window.onload = function () {
         const root = ReactDOM.createRoot(document.getElementById('root'));
