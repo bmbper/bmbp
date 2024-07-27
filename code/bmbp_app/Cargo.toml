@@ -17,7 +17,6 @@ bmbp_app_init = { path = "../bmbp_app_init" }
 bmbp_app_upgrade = { path = "../bmbp_app_upgrade" }
 bmbp_app_file = { path = "../bmbp_app_file" }
 bmbp_dev = { path = "../bmbp_dev" }
-bmbp_file = { path = "../bmbp_file" }
 bmbp_app_home = { path = "../bmbp_app_home" }
 bmbp_ui_lib = { path = "../bmbp_ui_lib" }
 # web

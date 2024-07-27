@@ -1,7 +1,6 @@
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, ToTokens};
 use syn::__private::TokenStream2;
-use syn::parse::Parser;
 use syn::{parse_quote, Attribute, DeriveInput, Field, FieldMutability};
 
 /// parse_tree_meta 获取树型标记
