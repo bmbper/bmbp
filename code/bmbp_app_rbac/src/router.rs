@@ -5,9 +5,9 @@ use crate::user::user_router;
 use salvo::Router;
 
 pub fn build_rbac_router() -> Router {
-    Router::with_path("/rbac/v1")
-        .push(Router::with_path("/app").push(app_router()))
-        .push(Router::with_path("/organ").push(organ_router()))
-        .push(Router::with_path("/user").push(user_router()))
-        .push(Router::with_path("/role").push(role_router()))
+    Router::with_path("rbac/v1")
+        .push(Router::with_path("app").push(app_router()))
+        .push(Router::with_path("organ").push(organ_router()))
+        .push(Router::with_path("user").push(user_router()))
+        .push(Router::with_path("role").push(role_router()))
 }

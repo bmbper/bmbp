@@ -6,5 +6,5 @@ use salvo::Router;
 #[folder = "lib"]
 struct Asset;
 pub fn build_ui_lib_router() -> Router {
-    Router::with_path("/ui/lib/<**path>").get(static_embed::<Asset>())
+    Router::with_path("ui/lib/<**path>").get(static_embed::<Asset>())
 }

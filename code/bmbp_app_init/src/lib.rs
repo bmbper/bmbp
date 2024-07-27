@@ -1,5 +1,13 @@
-// 应用初始化
-//     1. 初始化表结构
-//     2. 初始化系统参数
-//     3. 初始化系统配置
-//     4. 连接配置中心
+mod init;
+mod view;
+use bmbp_ui_lib::build_ui_lib_router;
+use init::build_init_script_router;
+use salvo::Router;
+use view::init_view;
+pub fn build_init_router() -> Router {
+    let mut router = Router::new();
+    router = router.push(build_ui_lib_router());
+    router = router.push(build_init_script_router());
+    router = router.get(init_view);
+    router
+}

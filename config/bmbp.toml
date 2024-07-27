@@ -10,12 +10,12 @@ log_level = "debug"
 [bmbp.server]
 host = ""
 port = 8011
-[bmbp.ds]
+[bmbp.datasource]
 driver = "postgres"
 host = "127.0.0.1"
 port = 5432
 database = "bmbp"
 schema = "public"
-user = "bmbp"
+username = "bmbp"
 password = "zgk0130!"
 ignore_case = true

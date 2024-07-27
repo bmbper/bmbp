@@ -9,8 +9,8 @@ use file::file_router;
 
 pub fn build_file_router() -> Router {
     Router::new().push(
-        Router::with_path("/bmbp/file")
-            .push(Router::with_path("/manage").get(file_view))
+        Router::with_path("bmbp/file")
+            .push(Router::with_path("manage").get(file_view))
             .push(file_router()),
     )
 }

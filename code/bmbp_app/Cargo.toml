@@ -19,6 +19,7 @@ bmbp_app_file = { path = "../bmbp_app_file" }
 bmbp_dev = { path = "../bmbp_dev" }
 bmbp_app_home = { path = "../bmbp_app_home" }
 bmbp_ui_lib = { path = "../bmbp_ui_lib" }
+bmbp_app_vars = { path = "../bmbp_app_vars" }
 # web
 uuid = { workspace = true }
 once_cell = { workspace = true }
