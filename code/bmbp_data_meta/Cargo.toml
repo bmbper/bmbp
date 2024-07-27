@@ -1,9 +1,0 @@
-[package]
-name = "bmbp_data_meta"
-version.workspace = true
-authors.workspace = true
-edition.workspace = true
-description = "管理数据库元数据，查询表结构信息、生成建表表语句、更新语句，根据元数据模型对比差异，连接数据库，处理公共数据操作"
-[dependencies]
-serde = { workspace = true }
-bmbp_marco_bean = { path = "../bmbp_marco_bean" }
