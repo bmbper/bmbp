@@ -1,8 +1,0 @@
-[package]
-name = "bmbp_extend"
-version.workspace = true
-authors.workspace = true
-edition.workspace = true
-description.workspace = true
-
-[dependencies]

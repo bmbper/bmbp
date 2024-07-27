@@ -1,13 +1,20 @@
 [package]
 name = "bmbp_app"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+license.workspace = true
+readme.workspace = true
+homepage.workspace = true
+repository.workspace = true
+documentation.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 # 全局参数存放
 bmbp_app_common = { path = "../bmbp_app_common" }
-bmbp_app_base = { path = "../bmbp_app_base" }
+bmbp_app_cms = { path = "../bmbp_app_cms" }
 bmbp_app_auth = { path = "../bmbp_app_auth" }
 bmbp_app_rbac = { path = "../bmbp_app_rbac" }
 bmbp_app_portal = { path = "../bmbp_app_portal" }
@@ -16,7 +23,6 @@ bmbp_app_setting = { path = "../bmbp_app_setting" }
 bmbp_app_init = { path = "../bmbp_app_init" }
 bmbp_app_upgrade = { path = "../bmbp_app_upgrade" }
 bmbp_app_file = { path = "../bmbp_app_file" }
-bmbp_dev = { path = "../bmbp_dev" }
 bmbp_app_home = { path = "../bmbp_app_home" }
 bmbp_ui_lib = { path = "../bmbp_ui_lib" }
 bmbp_app_vars = { path = "../bmbp_app_vars" }

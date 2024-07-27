@@ -1,21 +1,26 @@
 [package]
-name = "bmbp_app_portal"
+name = "bmbp_app_export"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
-description = "门户应用，网站介绍"
+description.workspace = true
 license.workspace = true
 readme.workspace = true
 homepage.workspace = true
 repository.workspace = true
 documentation.workspace = true
+
 [dependencies]
 
-bmbp_app_common = { path = "../bmbp_app_common" }
-bmbp_app_utils = { path = "../bmbp_app_utils" }
+bmbp_app_cms = { path = "../bmbp_app_cms" }
+
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 tokio = { workspace = true }
-salvo = { workspace = true }
+reqwest = { workspace = true }
+# 序列
 serde = { workspace = true }
 serde_json = { workspace = true }
+serde_repr = { workspace = true }
+async-trait = { workspace = true }
+salvo = { workspace = true }
