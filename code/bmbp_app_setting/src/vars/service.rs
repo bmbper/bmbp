@@ -1,5 +1,5 @@
 use crate::vars::bean::BmbpVars;
-use bmbp_rdbc_orm::QueryWrapper;
+use bmbp_app_orm::QueryWrapper;
 
 pub struct VarsService {}
 impl VarsService {

@@ -12,14 +12,14 @@ fn test_rdbc_model_empty() {
     use bmbp_app_common::HttpRespVo;
     use bmbp_app_common::PageVo;
     use bmbp_app_common::RespVo;
-    use bmbp_rdbc_orm::RdbcColumn;
-    use bmbp_rdbc_orm::RdbcMacroTree;
-    use bmbp_rdbc_orm::RdbcMarcoTreeUtil;
-    use bmbp_rdbc_orm::RdbcOrmIns;
-    use bmbp_rdbc_orm::RdbcOrmRow;
-    use bmbp_rdbc_orm::RDBC_DATA_ID;
-    use bmbp_rdbc_orm::RDBC_TREE_ROOT_NODE;
-    use bmbp_rdbc_orm::{
+    use bmbp_app_orm::RdbcColumn;
+    use bmbp_app_orm::RdbcMacroTree;
+    use bmbp_app_orm::RdbcMarcoTreeUtil;
+    use bmbp_app_orm::RdbcOrmIns;
+    use bmbp_app_orm::RdbcOrmRow;
+    use bmbp_app_orm::RDBC_DATA_ID;
+    use bmbp_app_orm::RDBC_TREE_ROOT_NODE;
+    use bmbp_app_orm::{
         DeleteWrapper, InsertWrapper, QueryWrapper, RdbcFilter, RdbcTable, UpdateWrapper,
     };
     use chrono::Utc;

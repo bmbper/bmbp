@@ -1,4 +1,4 @@
-use bmbp_rdbc_orm::{
+use bmbp_app_orm::{
     DeleteWrapper, InsertWrapper, QueryWrapper, RdbcError, RdbcOrmRow, RdbcPage, UpdateWrapper,
 };
 use serde::Serialize;

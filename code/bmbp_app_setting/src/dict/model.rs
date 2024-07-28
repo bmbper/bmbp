@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use bmbp_app_common::BmbpPageParam;
-use bmbp_rdbc_orm::{BmbpOrmRdbcTree, RdbcModel, RdbcOrmRow};
+use bmbp_app_orm::{BmbpOrmRdbcTree, RdbcModel, RdbcOrmRow};
 
 use crate::dict::model::BmbpDictType::{Custom, Inner};
 

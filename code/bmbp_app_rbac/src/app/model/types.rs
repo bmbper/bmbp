@@ -1,4 +1,4 @@
-use bmbp_rdbc_orm::RdbcValue;
+use bmbp_app_orm::RdbcValue;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -1,4 +1,4 @@
-use bmbp_rdbc_orm::{
+use bmbp_app_orm::{
     DeleteWrapper, InsertWrapper, QueryWrapper, RdbcFilter, RdbcModel, RdbcTable, RdbcTree,
     UpdateWrapper, RDBC_DATA_ID, RDBC_DATA_STATUS,
 };

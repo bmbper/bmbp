@@ -1,5 +1,5 @@
 use bmbp_app_common::{BmbpError, BmbpResp, PageVo};
-use bmbp_rdbc_orm::{DeleteWrapper, InsertWrapper, QueryWrapper, RdbcOrmIns, UpdateWrapper};
+use bmbp_app_orm::{DeleteWrapper, InsertWrapper, QueryWrapper, RdbcOrmIns, UpdateWrapper};
 
 use crate::organ::model::BmbpRbacOrganTree;
 

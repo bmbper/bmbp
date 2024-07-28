@@ -25,7 +25,7 @@ pub const RDBC_TREE_NODE_GRADE: &str = "grade";
 
 pub const RDBC_TREE_NODE_LEAF: &str = "node_leaf";
 
-pub const RDBC_DATA_TABLE_PRIMARY_KEY: &str = bmbp_rdbc_orm::RDBC_DATA_ID;
+pub const RDBC_DATA_TABLE_PRIMARY_KEY: &str = bmbp_app_orm::RDBC_DATA_ID;
 
 pub const RDBC_ENABLE: &str = "1";
 pub const RDBC_DISABLE: &str = "0";

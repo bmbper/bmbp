@@ -1,5 +1,5 @@
 use crate::types::{ValidMeta, ValidRule, ValidRuleMethod};
-use bmbp_rdbc_orm::RdbcValidMeta;
+use bmbp_app_orm::RdbcValidMeta;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote, ToTokens};
 use std::collections::HashMap;

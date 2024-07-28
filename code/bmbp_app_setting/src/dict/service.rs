@@ -5,13 +5,13 @@ use serde_json::{Map, Value};
 use tracing::info;
 
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
-use bmbp_app_utils::{is_empty_string, simple_uuid_upper};
-use bmbp_rdbc_orm::{
+use bmbp_app_orm::{
     simple_column, value_column, QueryWrapper, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable,
     RdbcTableInner, RdbcTree, RdbcTreeUtil, UpdateWrapper, RDBC_DATA_UPDATE_TIME,
     RDBC_DATA_UPDATE_USER, RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME,
     RDBC_TREE_NAME_PATH, RDBC_TREE_PARENT_CODE, RDBC_TREE_ROOT_NODE,
 };
+use bmbp_app_utils::{is_empty_string, simple_uuid_upper};
 
 use crate::dict::dao::BmbpRbacDictDao;
 use crate::dict::model::{
