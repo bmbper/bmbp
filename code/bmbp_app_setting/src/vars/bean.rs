@@ -1,4 +1,4 @@
-use bmbp_marco_bean::{rdbc_tree_bean, tree_bean};
+use bmbp_marco::rdbc_tree_bean;
 use serde::Deserialize;
 use serde::Serialize;
 

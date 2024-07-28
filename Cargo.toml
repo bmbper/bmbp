@@ -14,7 +14,11 @@ documentation = "https://github.com/bmbper/bmbp"
 [workspace.build]
 openssl = "/opt/homebrew/Cellar/openssl@3/3.3.0"
 [workspace.dependencies]
-bmbp_rdbc = "0.2.0"
+bmbp_app = { version = "0.0.1", path = "code/bmbp_app" }
+bmbp_app_orm = { version = "0.0.1", path = "code/bmbp_app_orm" }
+bmbp_marco = "0.0.2"
+bmbp_rdbc = "0.2.1"
+bmbp_rdbc_orm = "0.2.1"
 async-lock = "3.4.0"
 async-once-cell = "0.5.3"
 async-recursion = "1.1.1"
