@@ -47,7 +47,7 @@ impl DictQueryParams {
         self
     }
 }
-
+#[allow(dead_code)]
 type DictPageQueryParams = BmbpPageParam<DictQueryParams>;
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
@@ -173,7 +173,7 @@ pub struct BmbpComboVo {
     value: String,
     children: Vec<BmbpComboVo>,
 }
-
+#[allow(dead_code)]
 impl BmbpComboVo {
     pub fn new() -> Self {
         BmbpComboVo {

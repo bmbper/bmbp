@@ -1,15 +1,14 @@
 use std::collections::HashMap;
-use std::process::id;
 
 use serde_json::{Map, Value};
 use tracing::info;
 
 use bmbp_app_common::{BmbpError, BmbpPageParam, BmbpResp, PageVo};
 use bmbp_app_orm::{
-    simple_column, value_column, QueryWrapper, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable,
-    RdbcTableInner, RdbcTree, RdbcTreeUtil, UpdateWrapper, RDBC_DATA_UPDATE_TIME,
-    RDBC_DATA_UPDATE_USER, RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME,
-    RDBC_TREE_NAME_PATH, RDBC_TREE_PARENT_CODE, RDBC_TREE_ROOT_NODE,
+    simple_column, value_column, RdbcColumn, RdbcFilter, RdbcModel, RdbcTable, RdbcTableInner,
+    RdbcTree, RdbcTreeUtil, UpdateWrapper, RDBC_DATA_UPDATE_TIME, RDBC_DATA_UPDATE_USER,
+    RDBC_DISABLE, RDBC_ENABLE, RDBC_TREE_CODE_PATH, RDBC_TREE_NAME, RDBC_TREE_NAME_PATH,
+    RDBC_TREE_PARENT_CODE, RDBC_TREE_ROOT_NODE,
 };
 use bmbp_app_utils::{is_empty_string, simple_uuid_upper};
 
@@ -18,10 +17,9 @@ use crate::dict::model::{
     BmbpComboVo, BmbpDictType, BmbpSettingDict, BmbpSettingDictOrmModel, DictQueryParams,
 };
 use crate::dict::scripts::BmbpRdbcDictScript;
-use crate::dict::web::find_dict_info;
 
 pub struct BmbpRbacDictService {}
-
+#[allow(dead_code)]
 impl BmbpRbacDictService {
     pub async fn find_dict_tree(
         params: DictQueryParams,
@@ -352,11 +350,11 @@ impl BmbpRbacDictService {
             return Err(BmbpError::service("请指定变更的目标字典!"));
         }
         let parent_code = parent_code.unwrap().clone();
-        let mut parent_code_path = "".to_string();
-        let mut parent_name_path = "".to_string();
+        let mut parent_code_path = "/".to_string();
+        let mut parent_name_path = "/".to_string();
         if RDBC_TREE_ROOT_NODE == parent_code {
-            parent_code_path = "/".to_string();
-            parent_name_path = "/".to_string();
+            //parent_code_path = "/".to_string();
+            //parent_name_path = "/".to_string();
         } else {
             let parent_dict = Self::find_dict_by_code(&parent_code).await?;
             if parent_dict.is_none() {
@@ -456,7 +454,7 @@ impl BmbpRbacDictService {
         BmbpRbacDictDao::execute_update(&update).await
     }
     pub async fn disable_dict(dict_id: Option<String>) -> BmbpResp<usize> {
-        let mut dict = Self::find_dict_by_id(dict_id.as_ref()).await?;
+        let dict = Self::find_dict_by_id(dict_id.as_ref()).await?;
         if dict.is_none() {
             return Err(BmbpError::service("待停用的字典不存在!"));
         }
@@ -803,7 +801,7 @@ impl BmbpRbacDictService {
         }
         Ok(translate)
     }
-    fn convert_dict_list_to_combo(mut dict_vec: &Vec<BmbpSettingDictOrmModel>) -> Vec<BmbpComboVo> {
+    fn convert_dict_list_to_combo(dict_vec: &Vec<BmbpSettingDictOrmModel>) -> Vec<BmbpComboVo> {
         let mut como_vec = vec![];
         for dict in dict_vec {
             let mut vo = BmbpComboVo::new();
@@ -820,7 +818,7 @@ impl BmbpRbacDictService {
         como_vec
     }
     fn convert_dict_list_to_translate(
-        mut dict_vec: &Vec<BmbpSettingDictOrmModel>,
+        dict_vec: &Vec<BmbpSettingDictOrmModel>,
     ) -> HashMap<String, String> {
         let mut mp = HashMap::new();
         for dict in dict_vec {
@@ -837,7 +835,7 @@ impl BmbpRbacDictService {
         mp
     }
     fn convert_dict_list_to_translate_nest(
-        mut dict_vec: &Vec<BmbpSettingDictOrmModel>,
+        dict_vec: &Vec<BmbpSettingDictOrmModel>,
     ) -> Map<String, Value> {
         let mut mp = Map::new();
         for dict in dict_vec {

@@ -302,11 +302,9 @@ impl BmbpRbacOrganService {
             return Err(BmbpError::service("请指定变更的目标组织机构!"));
         }
         let parent_code = parent_code.unwrap().clone();
-        let mut parent_code_path = "".to_string();
-        let mut parent_name_path = "".to_string();
+        let mut parent_code_path = "/".to_string();
+        let mut parent_name_path = "/".to_string();
         if RDBC_TREE_ROOT_NODE == parent_code {
-            parent_code_path = "/".to_string();
-            parent_name_path = "/".to_string();
         } else {
             let parent_organ = Self::find_organ_by_code(Some(&parent_code)).await?;
             if parent_organ.is_none() {
@@ -397,7 +395,7 @@ impl BmbpRbacOrganService {
         BmbpRbacOrganDao::execute_update(&update).await
     }
     pub async fn disable_organ(organ_id: Option<String>) -> BmbpResp<usize> {
-        let mut organ = Self::find_organ_by_id(organ_id.as_ref()).await?;
+        let organ = Self::find_organ_by_id(organ_id.as_ref()).await?;
         if organ.is_none() {
             return Err(BmbpError::service("待停用的组织机构不存在!"));
         }

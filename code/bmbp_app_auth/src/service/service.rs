@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use bmbp_app_common::{BmbpHashMap, BmbpResp};
-
+#[allow(dead_code)]
 #[async_trait]
 pub trait AuthService {
     /// 根据用户名称查询用户信息

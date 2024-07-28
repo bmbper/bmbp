@@ -1,6 +1,5 @@
 use crate::inner::inner_script_router;
 use crate::view::{home_view, login_view};
-use rust_embed::RustEmbed;
 use salvo::Router;
 
 pub fn build_app_home_router() -> Router {
