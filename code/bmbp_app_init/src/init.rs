@@ -23,7 +23,7 @@ lazy_static! {
 }
 
 #[derive(RustEmbed)]
-#[folder = "script"]
+#[folder = "lib"]
 pub struct ScriptAsset;
 
 pub fn build_init_script_router() -> Router {

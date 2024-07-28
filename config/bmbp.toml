@@ -7,7 +7,7 @@ login = "Bmbp低代码平台"
 copy_right = "Bmbp低代码平台 版权信息"
 env = "dev"
 log_level = "debug"
-[bmbp.server]
+[bmbp.server1]
 host = ""
 port = 8011
 [bmbp.datasource]
