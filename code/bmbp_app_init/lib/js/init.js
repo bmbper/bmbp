@@ -31,12 +31,19 @@ const FormBody = () => {
   }, formCard);
 }
 
-const BaseFormCard = () => {
-  let fields = [
-    React.createElement(arco.Form.Item, { label: '应用编码', field: 'code' }, React.createElement(arco.Input, { palaceHolder: '请输入应用名称' }, null)),
-  ];
 
-  return React.createElement(arco.Card, { className: "form-card", title: '应用基本信息' }, ...fields);
+const BaseFormCard = () => {
+  let cols = [
+    React.createElement(arco.Grid.Col, { span: 12 }, React.createElement(arco.Form.Item, { label: '应用编码', field: 'code' }, React.createElement(arco.Input, { palaceHolder: '请输入应用编码' }, null))),
+    React.createElement(arco.Grid.Col, { span: 12 }, React.createElement(arco.Form.Item, { label: '应用名称', field: 'name' }, React.createElement(arco.Input, { palaceHolder: '请输入应用名称' }, null))),
+    React.createElement(arco.Grid.Col, { span: 12 }, React.createElement(arco.Form.Item, { label: '登录标题', field: 'login_name' }, React.createElement(arco.Input, { palaceHolder: '请输入登录标题' }, null))),
+    React.createElement(arco.Grid.Col, { span: 12 }, React.createElement(arco.Form.Item, { label: '导航标题', field: 'nav_name' }, React.createElement(arco.Input, { palaceHolder: '请输入导航标题' }, null))),
+    React.createElement(arco.Grid.Col, { span: 12 }, React.createElement(arco.Form.Item, { label: '版权信息', field: 'copy_right' }, React.createElement(arco.Input, { palaceHolder: '请输入版权信息' }, null)))
+
+  ];
+  let rows = [React.createElement(arco.Grid.Row, {}, ...cols)];
+
+  return React.createElement(arco.Card, { className: "form-card", title: '应用基本信息' }, ...rows);
 
 }
 
