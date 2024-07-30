@@ -1,21 +1,19 @@
-[bmbp]
 [bmbp.app]
-code = "bmbp"
-name = "Bmbp低代码平台"
-title = "Bmbp低代码平台"
-login = "Bmbp低代码平台"
-copy_right = "Bmbp低代码平台 版权信息"
-env = "dev"
-log_level = "debug"
-[bmbp.server1]
-host = ""
-port = 8011
-[bmbp.datasource]
-driver = "postgres"
+code = "bmmbp"
+name = "bmbp"
+login_name = "bmbmp"
+nav_name = "bmbp"
+copy_right = "bmbpbmmbpbmpbbmmbp"
+
+[bmbp.server]
 host = "127.0.0.1"
-port = 5432
-database = "bmbp"
-schema = "public"
+port = 30009
+env = "dev"
+log_level = "info"
+
+[bmbp.datasource]
+driver = "mysql"
+host = "127.0.0.1"
+port = 4000
 username = "bmbp"
-password = "zgk0130!"
-ignore_case = true
+password = "123456aa"

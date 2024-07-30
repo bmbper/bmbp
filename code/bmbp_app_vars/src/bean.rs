@@ -34,6 +34,26 @@ impl BmbpVars {
     pub fn valid_msg(&self) -> (bool, String) {
         return (true, "".to_string());
     }
+    pub fn server_host(&self) -> String {
+        if let Some(bmbp) = self.bmbp.as_ref() {
+            if let Some(server) = bmbp.server.as_ref() {
+                let mut host = "127.0.0.1".to_string();
+                let mut port = 0u32;
+                if let Some(server_host) = server.host.as_ref() {
+                    host = server_host.clone()
+                }
+                if let Some(server_port) = server.port.as_ref() {
+                    port = server_port.clone();
+                }
+                if port != 0u32 {
+                    return format!("{}:{}", host, port);
+                } else {
+                    return host;
+                }
+            }
+        }
+        "".to_string()
+    }
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
