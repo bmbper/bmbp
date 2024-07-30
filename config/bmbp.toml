@@ -1,19 +1,1 @@
-[bmbp.app]
-code = "bmmbp"
-name = "bmbp"
-login_name = "bmbmp"
-nav_name = "bmbp"
-copy_right = "bmbpbmmbpbmpbbmmbp"
 
-[bmbp.server]
-host = "127.0.0.1"
-port = 30009
-env = "dev"
-log_level = "info"
-
-[bmbp.datasource]
-driver = "mysql"
-host = "127.0.0.1"
-port = 4000
-username = "bmbp"
-password = "123456aa"
