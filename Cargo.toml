@@ -16,6 +16,10 @@ openssl = "/opt/homebrew/Cellar/openssl@3/3.3.0"
 [workspace.dependencies]
 bmbp_app = { version = "0.0.1", path = "code/bmbp_app" }
 bmbp_app_orm = { version = "0.0.1", path = "code/bmbp_app_orm" }
+bmbp_ui_lib = { version = "0.0.1", path = "code/bmbp_ui_lib" }
+bmbp_app_common = { version = "0.0.1", path = "code/bmbp_app_common" }
+bmbp_app_vars = { version = "0.0.1", path = "code/bmbp_app_vars" }
+
 bmbp_marco = "0.0.2"
 bmbp_rdbc = "0.2.1"
 bmbp_rdbc_orm = "0.2.1"

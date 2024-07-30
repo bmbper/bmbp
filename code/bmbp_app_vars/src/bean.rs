@@ -31,6 +31,9 @@ impl BmbpVars {
 
         return true;
     }
+    pub fn valid_msg(&self) -> (bool, String) {
+        return (true, "".to_string());
+    }
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]

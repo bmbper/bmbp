@@ -17,5 +17,6 @@
 <script src="/ui/lib/arco/arco.min.js"></script>
 <script src="/ui/lib/arco/arco-icon.min.js"></script>
 <script src="/ui/lib/axios.min.js"></script>
+<script src="/ui/lib/http.js"></script>
 <script src="/ui/init/js/init.js"></script>
 </html>
