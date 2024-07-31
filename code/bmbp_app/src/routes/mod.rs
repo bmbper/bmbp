@@ -1,3 +1,4 @@
+use bmbp_app_init::build_init_config_router;
 use salvo::catcher::Catcher;
 use salvo::cors::{Cors, CorsHandler};
 use salvo::http::{Method, StatusCode};
@@ -19,6 +20,9 @@ pub fn init_webapp_router() -> Service {
     let mut router = Router::new();
     // 增加日志
     router = router.hoop(Logger::new());
+
+    // 初始化路径
+    router = router.push(build_init_config_router());
 
     // 首页
     router = router.push(build_app_home_router());

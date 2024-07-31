@@ -1,4 +1,4 @@
-use bmbp_app_init::build_init_router;
+use bmbp_app_init::build_init_app_router;
 use bmbp_app_vars::BmbpVar;
 use salvo::prelude::*;
 
@@ -32,7 +32,7 @@ impl BmbpWebApp {
         let host = "0.0.0.0:7027";
         tracing::info!("启动初始化服务,监听地址:{}......", host);
         let acceptor = TcpListener::new(host).bind().await;
-        let router = build_init_router();
+        let router = build_init_app_router();
         Server::new(acceptor).serve(router).await;
     }
 

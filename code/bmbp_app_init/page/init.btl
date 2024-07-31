@@ -11,6 +11,27 @@
 <body>
 <div id="app">
 </body>
+<script>
+    const initValue = {{bmbp}};
+    const getAppValue = ()=>{
+        if (initValue && initValue.bmbp && initValue.bmbp.app) {
+            return initValue.bmbp.app;
+        }
+        return {};
+    }
+    const getServerValue = ()=>{
+        if (initValue && initValue.bmbp && initValue.bmbp.server) {
+            return initValue.bmbp.server;
+        }
+        return {};
+    }
+    const getDatasourceValue = ()=>{
+        if (initValue && initValue.bmbp && initValue.bmbp.datasource) {
+            return initValue.bmbp.datasource;
+        }
+        return {};
+    }
+</script>
 <script src="/ui/lib/react/react.production.min.js"></script>
 <script src="/ui/lib/react/react-dom.production.min.js"></script>
 <script src="/ui/lib/react/react-dom.profiling.min.js"></script>

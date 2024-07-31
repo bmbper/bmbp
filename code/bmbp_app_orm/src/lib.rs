@@ -48,11 +48,11 @@ fn build_datasource_with_vars() -> RdbcDataSource {
             if let Some(database) = datasource.database.as_ref() {
                 ds.set_database(database.to_string());
             }
-            if let Some(pool_size) = datasource.init.as_ref() {
+            if let Some(pool_size) = datasource.init_size.as_ref() {
                 ds.set_init_conn_size(pool_size.clone() as usize);
             }
-            if let Some(pool_size) = datasource.max_idle.as_ref() {
-                ds.set_max_idle_conn(pool_size.clone() as usize);
+            if let Some(pool_size) = datasource.max_size.as_ref() {
+                ds.set_max_conn_size(pool_size.clone() as usize);
             }
         }
     }

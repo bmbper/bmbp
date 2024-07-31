@@ -4,6 +4,7 @@ use std::io::Write;
 use bmbp_app_common::HttpRespVo;
 use bmbp_app_common::RespVo;
 use bmbp_app_vars::BmbpVars;
+use bmbp_app_vars::DataSource;
 use salvo::handler;
 use salvo::prelude::*;
 use toml;
@@ -25,6 +26,17 @@ pub async fn save_config(req: &mut Request, res: &mut Response) -> HttpRespVo<St
         } else {
             Ok(RespVo::fail_msg("创建配置文件失败，请重试！"))
         }
+    } else {
+        Ok(RespVo::fail_msg(msg.as_str()))
+    }
+}
+
+#[handler]
+pub async fn valid_datasource(req: &mut Request, res: &mut Response) -> HttpRespVo<String> {
+    let vars = req.parse_json::<DataSource>().await?;
+    let (valid, msg) = vars.valid_msg();
+    if valid {
+        Ok(RespVo::ok_msg("数据源验证成功"))
     } else {
         Ok(RespVo::fail_msg(msg.as_str()))
     }

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct BmbpVars {
     pub bmbp: Option<Bmbp>,
 }
@@ -56,14 +56,14 @@ impl BmbpVars {
     }
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Bmbp {
     pub app: Option<App>,
     pub server: Option<Server>,
     pub datasource: Option<DataSource>,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct App {
     pub code: Option<String>,
     pub name: Option<String>,
@@ -72,7 +72,7 @@ pub struct App {
     pub copy_right: Option<String>,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Server {
     pub host: Option<String>,
     pub port: Option<u32>,
@@ -80,7 +80,7 @@ pub struct Server {
     pub log_level: Option<String>,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct DataSource {
     pub driver: Option<String>,
     pub host: Option<String>,
@@ -96,4 +96,9 @@ pub struct DataSource {
     pub min_idle: Option<u32>,
     pub max_time_wait: Option<u32>,
     pub max_connect_time_wait: Option<u32>,
+}
+impl DataSource {
+    pub fn valid_msg(&self) -> (bool, String) {
+        return (false, "数据库验证失败".to_string());
+    }
 }

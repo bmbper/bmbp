@@ -1,1 +1,20 @@
+[bmbp.app]
+code = "know"
+name = "知识库应用"
+login_name = "知识库应用"
+nav_name = "知识库应用"
+copy_right = "知识库应用知识库应用知识库应用知识库应用知识库应用知识库应用知识库应用"
 
+[bmbp.server]
+host = "127.0.0.1"
+port = 10031
+env = "prod"
+log_level = "info"
+
+[bmbp.datasource]
+driver = "postgres"
+host = "127.0.0.1"
+port = 1532
+username = "bmbp"
+password = "zgk0130!"
+init_size = 5

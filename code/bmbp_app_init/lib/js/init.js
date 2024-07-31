@@ -172,6 +172,7 @@ const BaseFormCard = () => {
     {
       ref: window.baseFormRef,
       layout: "vertical",
+      initialValues: getAppValue()
     },
     baseCard,
   );
@@ -220,20 +221,12 @@ const ServerFormCard = () => {
         {
           required: true,
           message: "服务端口不能为空",
-        },
-        {
-          min: 10000,
-          message: "请使用大于10000的端口",
-        },
-        {
-          max: 40000,
-          message: "请使用小于40000的端口",
-        },
+        }
       ],
     },
     React.createElement(
       arco.InputNumber,
-      { palaceHolder: "请输入服务端口" },
+      { palaceHolder: "请输入服务端口", min: 10000, max: 40000 },
       null,
     ),
   );
@@ -283,6 +276,7 @@ const ServerFormCard = () => {
     {
       ref: window.serverFormRef,
       layout: "vertical",
+      initialValues: getServerValue()
     },
     serverCard,
   );
@@ -338,20 +332,12 @@ const DataSourceFormCard = () => {
         {
           required: true,
           message: "数据库端口不能为空",
-        },
-        {
-          min: 1000,
-          message: "请使用大于1000的端口",
-        },
-        {
-          max: 100000,
-          message: "请使用小于100000的端口",
-        },
+        }
       ],
     },
     React.createElement(
       arco.InputNumber,
-      { palaceHolder: "请输入数据库端口" },
+      { palaceHolder: "请输入数据库端口", min: 1000, max: 65535 },
       null,
     ),
   );
@@ -458,19 +444,11 @@ const DataSourceFormCard = () => {
           required: true,
           message: "初始连接数不能为空",
         },
-        {
-          min: 1,
-          message: "初始连接数不能小于1",
-        },
-        {
-          max: 1000000,
-          message: "初始连接数不能大于1000000",
-        },
       ],
     },
     React.createElement(
       arco.InputNumber,
-      { palaceHolder: "请输入初始连接数" },
+      { palaceHolder: "请输入初始连接数", min: 1, max: 10000 },
       null,
     ),
   );
@@ -479,20 +457,11 @@ const DataSourceFormCard = () => {
     {
       label: "最大连接数",
       field: "max_size",
-      rules: [
-        {
-          min: 1,
-          message: "最大连接数不能小于1",
-        },
-        {
-          max: 1000000,
-          message: "最大连接数不能大于1000000",
-        },
-      ],
+
     },
     React.createElement(
       arco.InputNumber,
-      { palaceHolder: "请输入最大连接数" },
+      { palaceHolder: "请输入最大连接数", min: 1, max: 10000 },
       null,
     ),
   );
@@ -501,20 +470,11 @@ const DataSourceFormCard = () => {
     {
       label: "最大空闲连接数",
       field: "max_idle",
-      rules: [
-        {
-          min: 0,
-          message: "最大空闲连接数不能小于0",
-        },
-        {
-          max: 1000000,
-          message: "最大空闲连接数不能大于1000000",
-        },
-      ],
+
     },
     React.createElement(
       arco.InputNumber,
-      { palaceHolder: "请输入最大空闲连接数" },
+      { palaceHolder: "请输入最大空闲连接数", min: 1, max: 10000 },
       null,
     ),
   );
@@ -523,20 +483,11 @@ const DataSourceFormCard = () => {
     {
       label: "最小空闲连接数",
       field: "min_idle",
-      rules: [
-        {
-          min: 0,
-          message: "最小空闲连接数不能小于0",
-        },
-        {
-          max: 1000000,
-          message: "最小空闲连接数不能大于1000000",
-        },
-      ],
+
     },
     React.createElement(
       arco.InputNumber,
-      { palaceHolder: "请输入最小空闲连接数" },
+      { palaceHolder: "请输入最小空闲连接数", min: 1, max: 10000 },
       null,
     ),
   );
@@ -566,6 +517,7 @@ const DataSourceFormCard = () => {
     {
       ref: window.datasourceFormRef,
       layout: "vertical",
+      initialValues: getDatasourceValue()
     },
     datasourceCard,
   );
@@ -679,7 +631,7 @@ const saveFormData = () => {
           bmbp: bmbpData,
         };
         axios
-          .post("/save/config.do", bmbpConfigData, {
+          .post("/init/save/config.do", bmbpConfigData, {
             headers: {
               "Content-Type": "application/json",
             },
@@ -687,7 +639,23 @@ const saveFormData = () => {
           .then((resp) => {
             // TODO 增加重启等待框
             if (resp.code == 0) {
-              arco.Message.success(resp.msg);
+              let host = serverData.host + ":" + serverData.port
+              arco.Notification.success({
+                id: 'need_update',
+                title: '服务重启中',
+                duration: 500000,
+                content: React.createElement('span', {}, host, React.createElement(arco.Spin, {}, null)),
+                onClose: () => {
+                  arco.Message.warning("自动重启失败，请重试!");
+                }
+              });
+              setTimeout(() => {
+                axios.get(host).then(resp => {
+                  if (resp.code == 0) {
+                    window.location.href = host;
+                  }
+                });
+              }, 5000);
             } else {
               arco.Message.error(resp.msg);
             }
