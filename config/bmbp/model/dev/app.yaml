@@ -93,6 +93,6 @@ models: # 具体的数据模型列表
       normal: # 正常约束
         name: "bmbpDevAppNormal"
         filed:
-          - code
+          - crates
           - tableName
           - schema
