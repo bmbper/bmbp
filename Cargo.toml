@@ -12,4 +12,38 @@ homepage = "https://github.com/bmbper/bmbp"
 repository = "https://github.com/bmbper/bmbp"
 documentation = "https://github.com/bmbper/bmbp"
 [workspace.dependencies]
-
+bmbp_app = { version = "0.0.1", path = "crates/bmbp_app" }
+# web框架
+axum = { version = "0.7.5", features = ["default"] }
+tokio = { version = "1.40.0", features = ["full"] }
+tower-http = { version = "0.5.2", features = ["full"] }
+tracing = { version = "0.1.40", features = ["default"] }
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+rust-embed = { version = "8.5.0" }
+include_dir = { version = "0.7.4" }
+reqwest = "0.12.7"
+#模板
+tera = { version = "1.20.0", features = ["serde"] }
+#序列化
+serde = { version = "1.0.209", features = ["derive"] }
+serde_json = { version = "1.0.127", features = ["serde_derive"] }
+toml = { version = "0.8.19", features = ["serde"] }
+# 数据库
+redis = { version = "0.27.5", features = ["tokio-runtime"] }
+r2d2 = { version = "0.8.10", features = [] }
+r2d2_redis = { version = "0.15.0", features = ["tokio"] }
+r2d2_postgres = { version = "0.18.1", features = ["tokio"] }
+tokio-postgres = { version = "0.7.11", features = ["with-chrono-0_4"] }
+redb = { version = "2.1.2" }
+# 工具
+chrono = { version = "0.4.38" }
+once_cell = { version = "1.19.0" }
+async-trait = { version = "0.1.82" }
+gm-rs = { version = "0.8.0" }
+uuid = { version = "1.10.0", features = ["v4"] }
+digest = "0.10.7"
+hmac = "0.12.1"
+md-5 = "0.10.6"
+regex = "1.10.6"
+# msg
+rdkafka = "0.36.2"

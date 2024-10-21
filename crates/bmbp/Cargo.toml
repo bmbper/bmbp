@@ -3,3 +3,5 @@ name = "bmbp"
 version = "0.1.0"
 edition = "2021"
 [dependencies]
+bmbp_app = { workspace = true }
+tokio = { workspace = true }
