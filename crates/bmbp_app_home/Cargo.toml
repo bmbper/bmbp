@@ -4,7 +4,3 @@ version = "0.1.0"
 edition = "2021"
 description = "系统外壳，登录、门户导航"
 [dependencies]
-salvo = { workspace = true }
-tera = { workspace = true }
-lazy_static = { workspace = true }
-rust-embed = { workspace = true }

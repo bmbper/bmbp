@@ -10,12 +10,3 @@ homepage.workspace = true
 repository.workspace = true
 documentation.workspace = true
 [dependencies]
-
-bmbp_app_common = { path = "../bmbp_app_common" }
-bmbp_app_utils = { path = "../bmbp_app_utils" }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
-tokio = { workspace = true }
-salvo = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }

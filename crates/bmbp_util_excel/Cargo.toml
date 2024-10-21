@@ -1,12 +1,13 @@
 [package]
-name = "bmbp_app_audit"
+name = "bmbp_util_excel"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
-description = "审计模块"
+description = "导入导出"
 license.workspace = true
 readme.workspace = true
 homepage.workspace = true
 repository.workspace = true
 documentation.workspace = true
+
 [dependencies]

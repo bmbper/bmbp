@@ -2,4 +2,5 @@
 name = "bmbp_app_cache"
 version = "0.1.0"
 edition = "2021"
+description = "应用缓存模块"
 [dependencies]

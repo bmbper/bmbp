@@ -9,34 +9,5 @@ readme.workspace = true
 homepage.workspace = true
 repository.workspace = true
 documentation.workspace = true
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-# 全局参数存放
-bmbp_app_common = { path = "../bmbp_app_common" }
-bmbp_app_cms = { path = "../bmbp_app_cms" }
-bmbp_app_auth = { path = "../bmbp_app_auth" }
-bmbp_app_rbac = { path = "../bmbp_app_rbac" }
-bmbp_app_portal = { path = "../bmbp_app_portal" }
-bmbp_app_audit = { path = "../bmbp_app_audit" }
-bmbp_app_setting = { path = "../bmbp_app_setting" }
-bmbp_app_init = { path = "../bmbp_app_init" }
-bmbp_app_upgrade = { path = "../bmbp_app_upgrade" }
-bmbp_app_file = { path = "../bmbp_app_file" }
-bmbp_app_home = { path = "../bmbp_app_home" }
-bmbp_ui_lib = { path = "../bmbp_ui_lib" }
-bmbp_app_vars = { path = "../bmbp_app_vars" }
-bmbp_app_orm = { path = "../bmbp_app_orm" }
 
-# web
-uuid = { workspace = true }
-once_cell = { workspace = true }
-toml = { workspace = true }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-serde_repr = { workspace = true }
-async-trait = { workspace = true }
-tokio = { workspace = true }
-salvo = { workspace = true }

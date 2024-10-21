@@ -1,9 +1,9 @@
 [package]
-name = "bmbp_app_audit"
+name = "bmbp_app_bean"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
-description = "审计模块"
+description = "应用中使用的类的定义"
 license.workspace = true
 readme.workspace = true
 homepage.workspace = true

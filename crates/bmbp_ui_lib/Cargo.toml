@@ -6,7 +6,3 @@ edition.workspace = true
 description.workspace = true
 
 [dependencies]
-salvo = { workspace = true }
-tera = { workspace = true }
-lazy_static = { workspace = true }
-rust-embed = { workspace = true }

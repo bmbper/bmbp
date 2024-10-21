@@ -1,0 +1,6 @@
+[package]
+name = "bmbp_app_preview"
+version = "0.1.0"
+edition = "2021"
+description = "文检预览模块"
+[dependencies]

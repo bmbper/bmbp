@@ -10,8 +10,3 @@ homepage.workspace = true
 repository.workspace = true
 documentation.workspace = true
 [dependencies]
-async_static = { workspace = true }
-bmbp_rdbc = { workspace = true }
-bmbp_rdbc_orm = { workspace = true }
-once_cell = { workspace = true }
-bmbp_app_vars = { path = "../bmbp_app_vars" }

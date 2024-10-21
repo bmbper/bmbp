@@ -3,7 +3,7 @@ name = "bmbp_app_init"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
-description = "系统初始化"
+description = "系统初始化-升级模块"
 license.workspace = true
 readme.workspace = true
 homepage.workspace = true
@@ -11,13 +11,3 @@ repository.workspace = true
 documentation.workspace = true
 
 [dependencies]
-bmbp_ui_lib = { workspace = true }
-bmbp_app_common = { workspace = true }
-bmbp_app_vars = { workspace = true }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-salvo = { workspace = true }
-tera = { workspace = true }
-lazy_static = { workspace = true }
-rust-embed = { workspace = true }
-toml = {workspace = true}

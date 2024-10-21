@@ -1,2 +1,1 @@
-mod bean;
-mod service;
+

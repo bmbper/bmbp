@@ -2,23 +2,4 @@
 name = "bmbp_app_setting"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-
-bmbp_app_common = { path = "../bmbp_app_common" }
-bmbp_app_utils = { path = "../bmbp_app_utils" }
-bmbp_app_orm = { path = "../bmbp_app_orm" }
-bmbp_marco = { workspace = true }
-reqwest = { workspace = true }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-serde_repr = { workspace = true }
-async-trait = { workspace = true }
-tokio = { workspace = true }
-salvo = { workspace = true }
-uuid = { workspace = true }
-chrono = { workspace = true }

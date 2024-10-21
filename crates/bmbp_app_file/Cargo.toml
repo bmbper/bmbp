@@ -4,19 +4,3 @@ version = "0.1.0"
 edition = "2021"
 description = "应用中附件和静态文件的管理模块"
 [dependencies]
-
-bmbp_app_common = { path = "../bmbp_app_common" }
-
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
-
-uuid = { workspace = true }
-tokio = { workspace = true }
-# 序列
-serde = { workspace = true }
-serde_json = { workspace = true }
-serde_repr = { workspace = true }
-salvo = { workspace = true }
-tera = { workspace = true }
-lazy_static = { workspace = true }
-rust-embed = { workspace = true }
