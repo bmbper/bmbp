@@ -1,17 +1,29 @@
 use axum::routing::get;
 use axum::Router;
 
-pub struct BmbpApp;
+async fn root() -> &'static str {
+    "Hello, World!"
+}
+pub struct BmbpApp {
+    router: Router,
+}
 impl BmbpApp {
     pub fn new() -> Self {
-        BmbpApp
+        BmbpApp {
+            router: Router::new(),
+        }
     }
-    pub async fn run(&self) {
+    pub fn init(&mut self) {
+        let mut router = Router::new();
+        let root_router = Router::new().route("/", get(root));
+        router = router.merge(root_router);
+        self.router = router;
+    }
+    pub async fn run(&mut self) {
+        self.init();
         tracing_subscriber::fmt::init();
         tracing::info!("starting up");
-        async fn root() -> &'static str {
-            "Hello, World!"
-        }
+
         // build our application with a route
         let app = Router::new().route("/", get(root));
 
