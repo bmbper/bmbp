@@ -1,26 +1,83 @@
-html,body{
-    width: 100vw;
-    height:100vh;
-    margin:0;
-    padding:0;
-    backgroud: #fff
+html,
+body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+  box-sizing: border-box;
 }
-.bmbp-app{
-    width: 100vw;
-    height:100vh;
-    margin:0;
-    padding:0;
+
+.bmbp-app {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-.bmbp-app-container{
-    width: 90vw;
-    height:80vh;
-    margin-left:auto;
-    margin-right:auto;
-    padding:5px;
+
+.bmbp-app-container {
+  width: 90vw;
+  height: 80vh;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 5px;
+  box-sizing: border-box;
 }
-.bmbp-app-fluid{
-    width: 100vw;
-    height:100vh;
-    margin:0;
-    padding:5px;
+
+.bmbp-app-fluid {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 5px;
+  box-sizing: border-box;
 }
+
+.bmbp-grid-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+.bmbp-grid-container .bmbp-grid-search {
+  padding: 12px 0 0 0;
+  box-sizing: border-box;
+}
+.bmbp-grid-container .bmbp-grid-toolbar {
+  padding: 4px 0;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+}
+.bmbp-grid-container .bmbp-grid-toolbar .major {
+  box-sizing: border-box;
+  height: 100%;
+  flex: 1;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  gap: 5px;
+}
+.bmbp-grid-container .bmbp-grid-toolbar .extra {
+  box-sizing: border-box;
+  height: 100%;
+  flex: 1;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  gap: 5px;
+}
+.bmbp-grid-container .bmbp-grid-table {
+  box-sizing: border-box;
+  flex: 1;
+}
+.bmbp-grid-container .bmbp-grid-page {
+  padding: 4px 0 12px 0;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+}
+
+/*# sourceMappingURL=bmbp.css.map */
