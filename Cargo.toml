@@ -16,7 +16,7 @@ bmbp_app = { version = "0.0.1", path = "crates/bmbp_app" }
 # web框架
 axum = { version = "0.7.5", features = ["default"] }
 tokio = { version = "1.40.0", features = ["full"] }
-tower-http = { version = "0.5.2", features = ["full"] }
+tower-http = { version = "0.6.1", features = ["full"] }
 tracing = { version = "0.1.40", features = ["default"] }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 rust-embed = { version = "8.5.0" }
@@ -31,7 +31,7 @@ toml = { version = "0.8.19", features = ["serde"] }
 # 数据库
 redis = { version = "0.27.5", features = ["tokio-runtime"] }
 r2d2 = { version = "0.8.10", features = [] }
-r2d2_redis = { version = "0.15.0", features = ["tokio"] }
+r2d2_redis = { version = "0.14.0", features = ["tokio"] }
 r2d2_postgres = { version = "0.18.1", features = ["tokio"] }
 tokio-postgres = { version = "0.7.11", features = ["with-chrono-0_4"] }
 redb = { version = "2.1.2" }

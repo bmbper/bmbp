@@ -1,0 +1,9 @@
+[submodule "crates/bmbp_sql"]
+	path = crates/bmbp_sql
+	url = git@github.com:bmbper/bmbp_sql.git
+[submodule "crates/bmbp_orm"]
+	path = crates/bmbp_orm
+	url = git@github.com:bmbper/bmbp_orm.git
+[submodule "crates/bmbp_sql_marco"]
+	path = crates/bmbp_sql_marco
+	url = git@github.com:bmbper/bmbp_sql_marco.git
