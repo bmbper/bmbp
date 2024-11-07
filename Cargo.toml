@@ -14,9 +14,8 @@ documentation = "https://github.com/bmbper/bmbp"
 [workspace.dependencies]
 bmbp_app = { version = "0.0.1", path = "crates/bmbp_app" }
 # web框架
-axum = { version = "0.7.5", features = ["default"] }
+salvo = { version = "0.74", features = ["serve-static"] }
 tokio = { version = "1.40.0", features = ["full"] }
-tower-http = { version = "0.6.1", features = ["full"] }
 tracing = { version = "0.1.40", features = ["default"] }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 rust-embed = { version = "8.5.0" }

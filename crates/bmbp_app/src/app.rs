@@ -1,6 +1,8 @@
-use axum::routing::get;
-use axum::Router;
+use salvo::conn::TcpListener;
+use salvo::routing::get;
+use salvo::{handler, Listener, Router, Server};
 
+#[handler]
 async fn root() -> &'static str {
     "Hello, World!"
 }
@@ -13,22 +15,15 @@ impl BmbpApp {
             router: Router::new(),
         }
     }
-    pub fn init(&mut self) {
-        let mut router = Router::new();
-        let root_router = Router::new().route("/", get(root));
-        router = router.merge(root_router);
-        self.router = router;
-    }
+    pub fn init(&mut self) {}
     pub async fn run(&mut self) {
         self.init();
         tracing_subscriber::fmt::init();
         tracing::info!("starting up");
-
-        // build our application with a route
-        let app = Router::new().route("/", get(root));
-
-        // run our app with hyper, listening globally on port 3000
-        let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-        axum::serve(listener, app).await.unwrap();
+        let mut router = Router::new();
+        let root_router = Router::with_path("").get(root);
+        router = router.push(root_router);
+        let acceptor = TcpListener::new("127.0.0.1:5800").bind().await;
+        Server::new(acceptor).serve(router).await;
     }
 }

@@ -3,4 +3,4 @@ name = "bmbp_app_setting"
 version = "0.1.0"
 edition = "2021"
 [dependencies]
-axum = { workspace = true }
+salvo = { workspace = true }
