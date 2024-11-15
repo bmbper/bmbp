@@ -1,6 +1,0 @@
-[package]
-name = "bmbp_app_home"
-version = "0.1.0"
-edition = "2021"
-description = "系统外壳，登录、门户导航"
-[dependencies]

@@ -14,3 +14,12 @@
 [submodule "crates/bmbp_data"]
 	path = crates/bmbp_data
 	url = git@github.com:bmbper/bmbp_data.git
+[submodule "crates/bmbp_framework"]
+	path = crates/bmbp_framework
+	url = git@github.com:bmbper/bmbp_frameword.git
+[submodule "crates/bmbp_rbac"]
+	path = crates/bmbp_rbac
+	url = git@github.com:bmbper/bmbp_rbac.git
+[submodule "crates/bmbp_config"]
+	path = crates/bmbp_config
+	url = git@github.com:bmbper/bmbp_config.git
