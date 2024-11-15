@@ -7,3 +7,7 @@
 [submodule "crates/bmbp_sql_marco"]
 	path = crates/bmbp_sql_marco
 	url = git@github.com:bmbper/bmbp_sql_marco.git
+[submodule "crates/bmbp_db_meta"]
+	path = crates/bmbp_db_meta
+	url = git@github.com:bmbper/bmbp_db_meta.git
+	branch = dev
