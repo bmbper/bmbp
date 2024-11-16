@@ -11,9 +11,6 @@
 	path = crates/bmbp_db_meta
 	url = git@github.com:bmbper/bmbp_db_meta.git
 	branch = dev
-[submodule "crates/bmbp_data"]
-	path = crates/bmbp_data
-	url = git@github.com:bmbper/bmbp_data.git
 [submodule "crates/bmbp_framework"]
 	path = crates/bmbp_framework
 	url = git@github.com:bmbper/bmbp_frameword.git
