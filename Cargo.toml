@@ -28,11 +28,13 @@ serde = { version = "1.0.209", features = ["derive"] }
 serde_json = { version = "1.0.127", features = ["serde_derive"] }
 toml = { version = "0.8.19", features = ["serde"] }
 # 数据库
-redis = { version = "0.27.5", features = ["tokio-runtime"] }
-r2d2 = { version = "0.8.10", features = [] }
-r2d2_redis = { version = "0.14.0", features = ["tokio"] }
-r2d2_postgres = { version = "0.18.1", features = ["tokio"] }
-tokio-postgres = { version = "0.7.11", features = ["with-chrono-0_4"] }
+r2d2 = "0.8.10"
+r2d2_redis = "0.14.0"
+r2d2_postgres = "0.18.1"
+r2d2_mysql = "25.0.0"
+r2d2_sqlite = "0.25.0"
+r2d2-oracle = "0.7.0"
+r2d2_odbc = "0.5.0"
 redb = { version = "2.1.2" }
 # 工具
 chrono = { version = "0.4.38" }

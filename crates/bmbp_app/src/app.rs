@@ -6,14 +6,10 @@ use salvo::{handler, Listener, Router, Server};
 async fn root() -> &'static str {
     "Hello, World!"
 }
-pub struct BmbpApp {
-    router: Router,
-}
+pub struct BmbpApp {}
 impl BmbpApp {
     pub fn new() -> Self {
-        BmbpApp {
-            router: Router::new(),
-        }
+        BmbpApp {}
     }
     pub fn init(&mut self) {}
     pub async fn run(&mut self) {
