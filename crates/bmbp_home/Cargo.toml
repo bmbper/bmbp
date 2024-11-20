@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_ui_lib"
+name = "bmbp_home"
 version = "0.0.1"
 edition = "2021"
 authors = ["bmbp<rs_bmbp.163.com>"]

@@ -1,8 +1,14 @@
 [package]
 name = "bmbp_ui_theme"
-version.workspace = true
-authors.workspace = true
-edition.workspace = true
-description.workspace = true
-
+version = "0.0.1"
+edition = "2021"
+authors = ["bmbp<rs_bmbp.163.com>"]
+description = "BMBP"
+license = "MIT"
+readme = "README.MD"
+homepage = "https://github.com/bmbper/bmbp"
+repository = "https://github.com/bmbper/bmbp"
+documentation = "https://github.com/bmbper/bmbp"
 [dependencies]
+rust-embed = "8.5.0"
+salvo = { version = "0.74.2", features = ["serve-static"] }
