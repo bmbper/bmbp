@@ -16,9 +16,7 @@ impl BmbpApp {
         self.init();
         tracing_subscriber::fmt::init();
         tracing::info!("starting up");
-        let mut router = Router::new();
-        let root_router = Router::with_path("").get(root);
-        router = router.push(root_router);
+
         let acceptor = TcpListener::new("127.0.0.1:5800").bind().await;
         Server::new(acceptor).serve(router).await;
     }

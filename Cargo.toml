@@ -13,6 +13,9 @@ repository = "https://github.com/bmbper/bmbp"
 documentation = "https://github.com/bmbper/bmbp"
 [workspace.dependencies]
 bmbp_app = { version = "0.0.1", path = "crates/bmbp_app" }
+bmbp_orm = { version = "0.0.1", path = "crates/bmbp_orm" }
+bmbp_sql = { version = "0.0.1", path = "crates/bmbp_sql" }
+
 # web框架
 salvo = { version = "0.74", features = ["serve-static"] }
 tokio = { version = "1.40.0", features = ["full"] }
