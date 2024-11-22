@@ -54,5 +54,6 @@ digest = "0.10.7"
 hmac = "0.12.1"
 md-5 = "0.10.6"
 regex = "1.10.6"
+rust-i18n = "3.1.2"
 # msg
 rdkafka = "0.36.2"

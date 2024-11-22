@@ -5,4 +5,6 @@ authors.workspace = true
 edition.workspace = true
 description = "存储全局变量"
 [dependencies]
+rust-i18n = { workspace = true }
+rust-embed = { workspace = true }
 

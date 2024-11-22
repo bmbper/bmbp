@@ -1,3 +1,5 @@
+use bmbp_vars::app_locale;
+use rust_embed::RustEmbed;
 use salvo::Router;
 
 pub fn init_app_router() -> Router {
