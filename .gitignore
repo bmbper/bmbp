@@ -1,5 +1,6 @@
 .idea/
 target/
+static/
 Cargo.lock
 **/*.rs.bk
 *.sublime-project

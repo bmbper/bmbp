@@ -19,3 +19,4 @@ bmbp_sql = { workspace = true }
 bmbp_ui_lib = { workspace = true }
 bmbp_ui_theme = { workspace = true }
 bmbp_home = { workspace = true }
+bmbp_framework = { workspace = true }

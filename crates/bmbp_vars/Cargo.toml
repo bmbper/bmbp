@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_app_vars"
+name = "bmbp_vars"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

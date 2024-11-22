@@ -18,7 +18,9 @@ bmbp_sql = { version = "0.0.1", path = "crates/bmbp_sql" }
 bmbp_ui_lib = { version = "0.0.1", path = "crates/bmbp_ui_lib" }
 bmbp_ui_theme = { version = "0.0.1", path = "crates/bmbp_ui_theme" }
 bmbp_home = { version = "0.0.1", path = "crates/bmbp_home" }
-
+bmbp_vars = { version = "0.0.1", path = "crates/bmbp_vars" }
+bmbp_framework = { version = "0.0.1", path = "crates/bmbp_framework" }
+bmbp_abc = { version = "0.0.1", path = "crates/bmbp_abc" }
 # web框架
 salvo = { version = "0.74", features = ["serve-static"] }
 tokio = { version = "1.40.0", features = ["full"] }
@@ -28,7 +30,7 @@ rust-embed = { version = "8.5.0" }
 include_dir = { version = "0.7.4" }
 reqwest = "0.12.7"
 #模板
-tera = { version = "1.20.0", features = ["serde"] }
+tera = { version = "1.20.0" }
 #序列化
 serde = { version = "1.0.209", features = ["derive"] }
 serde_json = { version = "1.0.127", features = ["serde_derive"] }

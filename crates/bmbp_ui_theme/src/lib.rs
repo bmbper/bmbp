@@ -3,9 +3,9 @@ use salvo::serve_static::static_embed;
 use salvo::Router;
 
 #[derive(RustEmbed)]
-#[folder = "web/static/theme"]
+#[folder = "static/theme"]
 struct StaticAssets;
 
-pub fn build_bmbp_ui_theme_router() -> Router {
+pub fn build_router() -> Router {
     Router::with_path("/static/theme/<**path>").get(static_embed::<StaticAssets>())
 }

@@ -1,0 +1,16 @@
+[package]
+name = "bmbp_abc"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+license.workspace = true
+readme.workspace = true
+homepage.workspace = true
+repository.workspace = true
+documentation.workspace = true
+
+[dependencies]
+bmbp_vars = { workspace = true }
+tera = { workspace = true }
+rust-embed = "8.5.0"
