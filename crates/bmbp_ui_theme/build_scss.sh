@@ -1,0 +1,1 @@
+sass --watch web/scss/theme/default/index.scss:static/theme/default/index.css
