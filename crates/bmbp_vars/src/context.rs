@@ -1,7 +1,7 @@
 use crate::{
     BMBP_APP_COPY_WRITE, BMBP_APP_EMAIL, BMBP_APP_GROUP_NAME, BMBP_APP_ICON, BMBP_APP_LOCALE,
     BMBP_APP_LOGIN_NAME, BMBP_APP_MODEL, BMBP_APP_NAME, BMBP_APP_SHORT_NAME, BMBP_APP_TITLE,
-    BMBP_APP_VERSION,
+    BMBP_APP_VERSION, BMBP_HOME_URL,
 };
 use std::collections::HashMap;
 use std::sync::{LazyLock, RwLock};
@@ -103,5 +103,14 @@ pub fn app_locale() -> String {
         .unwrap()
         .get(BMBP_APP_LOCALE)
         .unwrap_or(&"zh_cn".to_string())
+        .to_string()
+}
+
+pub fn app_home_url() -> String {
+    BMBP_CONTEXT_VARS
+        .read()
+        .unwrap()
+        .get(BMBP_HOME_URL)
+        .unwrap_or(&"".to_string())
         .to_string()
 }
