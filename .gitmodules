@@ -20,3 +20,11 @@
 [submodule "crates/bmbp_config"]
 	path = crates/bmbp_config
 	url = git@github.com:bmbper/bmbp_config.git
+[submodule "crates/bmbp_auth"]
+	path = crates/bmbp_auth
+	url = git@github.com:bmbper/bmbp_auth.git
+	branch = main
+[submodule "crates/bmbp_bean"]
+	path = crates/bmbp_bean
+	url = git@github.com:bmbper/bmbp_bean.git
+	branch = main
