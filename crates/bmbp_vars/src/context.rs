@@ -1,7 +1,7 @@
 use crate::{
-    BMBP_APP_COPY_WRITE, BMBP_APP_EMAIL, BMBP_APP_GROUP_NAME, BMBP_APP_ICON, BMBP_APP_LOCALE,
-    BMBP_APP_LOGIN_NAME, BMBP_APP_MODEL, BMBP_APP_NAME, BMBP_APP_SHORT_NAME, BMBP_APP_TITLE,
-    BMBP_APP_VERSION, BMBP_HOME_URL,
+    BMBP_APP_COPY_WRITE, BMBP_APP_EMAIL, BMBP_APP_GROUP_NAME, BMBP_APP_HOME_URL, BMBP_APP_ICON,
+    BMBP_APP_LOCALE, BMBP_APP_LOGIN_NAME, BMBP_APP_MODEL, BMBP_APP_NAME, BMBP_APP_SHORT_NAME,
+    BMBP_APP_TITLE, BMBP_APP_TOKEN_NAME, BMBP_APP_VERSION, BMBP_APP_WHITE_LIST,
 };
 use std::collections::HashMap;
 use std::sync::{LazyLock, RwLock};
@@ -110,7 +110,38 @@ pub fn app_home_url() -> String {
     BMBP_CONTEXT_VARS
         .read()
         .unwrap()
-        .get(BMBP_HOME_URL)
+        .get(BMBP_APP_HOME_URL)
         .unwrap_or(&"".to_string())
         .to_string()
+}
+
+pub fn app_white_list_url() -> Vec<String> {
+    let url = BMBP_CONTEXT_VARS
+        .read()
+        .unwrap()
+        .get(BMBP_APP_WHITE_LIST)
+        .unwrap_or(&"".to_string())
+        .to_string();
+    url.split(",").map(|s| s.to_string()).collect()
+}
+pub fn app_token_name() -> String {
+    BMBP_CONTEXT_VARS
+        .read()
+        .unwrap()
+        .get(BMBP_APP_TOKEN_NAME)
+        .unwrap_or(&"".to_string())
+        .to_string()
+}
+pub fn set_ctx_vars(vars: HashMap<String, String>) {
+    BMBP_CONTEXT_VARS.write().unwrap().extend(vars);
+}
+pub fn set_ctx_var<K, V>(key: K, var_value: V)
+where
+    K: ToString,
+    V: ToString,
+{
+    BMBP_CONTEXT_VARS
+        .write()
+        .unwrap()
+        .insert(key.to_string(), var_value.to_string());
 }

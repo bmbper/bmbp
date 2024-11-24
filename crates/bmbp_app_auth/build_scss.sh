@@ -1,0 +1,1 @@
+sass --watch web/scss/login/index.scss:static/bmbp_app_auth/css/login/index.css

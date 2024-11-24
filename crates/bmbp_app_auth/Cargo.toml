@@ -10,3 +10,9 @@ homepage.workspace = true
 repository.workspace = true
 documentation.workspace = true
 [dependencies]
+bmbp_auth = { workspace = true }
+bmbp_vars = { workspace = true }
+salvo = { workspace = true }
+wildmatch = "2.4.0"
+rust-embed = { workspace = true }
+bmbp_abc = { workspace = true }

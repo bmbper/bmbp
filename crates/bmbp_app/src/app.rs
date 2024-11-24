@@ -1,4 +1,4 @@
-use crate::init::{init_app_router, init_template};
+use crate::init::{init_app_router, init_template, init_white_list};
 use bmbp_vars::app_locale;
 use salvo::conn::TcpListener;
 use salvo::routing::get;
@@ -14,6 +14,8 @@ impl BmbpApp {
         tracing_subscriber::fmt::init();
         tracing::info!("start_app");
         tracing::info!("init app web template ...... ");
+        tracing::info!("init white list:{}", app_locale());
+        init_white_list();
         init_template();
     }
     pub async fn run(&mut self) {

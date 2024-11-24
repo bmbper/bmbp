@@ -23,6 +23,7 @@ bmbp_framework = { version = "0.0.1", path = "crates/bmbp_framework" }
 bmbp_abc = { version = "0.0.1", path = "crates/bmbp_abc" }
 bmbp_bean = { version = "0.0.1", path = "crates/bmbp_bean" }
 bmbp_auth = { version = "0.0.1", path = "crates/bmbp_auth" }
+bmbp_app_auth = { version = "0.0.1", path = "crates/bmbp_app_auth" }
 # web框架
 salvo = { version = "0.74", features = ["serve-static"] }
 tokio = { version = "1.40.0", features = ["full"] }
