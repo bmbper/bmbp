@@ -1,4 +1,5 @@
 use bmbp_abc::{base_ctx, BMBP_TERA};
+use bmbp_auth::{BmbpAuthTokenUtil, BmbpAuthUtil};
 use salvo::prelude::*;
 
 /// 登录界面
@@ -12,7 +13,9 @@ pub async fn login_view(req: &mut Request, resp: &mut Response, depot: &mut Depo
 }
 /// 登录逻辑
 #[handler]
-pub async fn do_login(req: &mut Request, resp: &mut Response, depot: &mut Depot) {}
+pub async fn do_login(req: &mut Request, resp: &mut Response, depot: &mut Depot) {
+    let token = BmbpAuthUtil::login_by_uid("admin".to_string());
+}
 /// 登录回调，用于sso登录
 #[handler]
 pub async fn login_call_back(req: &mut Request, resp: &mut Response, depot: &mut Depot) {}

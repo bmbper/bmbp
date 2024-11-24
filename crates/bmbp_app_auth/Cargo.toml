@@ -16,3 +16,4 @@ salvo = { workspace = true }
 wildmatch = "2.4.0"
 rust-embed = { workspace = true }
 bmbp_abc = { workspace = true }
+uuid = { version = "1.11.0", features = ["v4"] }
