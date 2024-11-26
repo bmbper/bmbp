@@ -1,4 +1,7 @@
+use bmbp_auth::BmbpAuthUtil;
 use bmbp_vars::{app_token_name, app_white_list_url};
+use http::header::SET_COOKIE;
+use salvo::http::headers::SetCookie;
 use salvo::prelude::*;
 use wildmatch::WildMatch;
 
@@ -11,11 +14,19 @@ pub async fn auth_middle(req: &mut Request, depot: &mut Depot, resp: &mut Respon
     }
     let token_value = get_token_value(req);
     if token_value.is_empty() {
-        println!("token 为空");
         resp.render(Redirect::found("/auth/login.view"));
         return;
     }
-    println!("auth middleware:{}", req_path)
+    match BmbpAuthUtil::get_session_by_token(token_value) {
+        Some(session) => {
+            depot.insert("session", session);
+        }
+        None => {
+            resp.headers.remove(SET_COOKIE);
+            resp.render(Redirect::found("/auth/login.view"));
+            return;
+        }
+    }
 }
 
 pub fn match_white_list_url(path: &str) -> bool {

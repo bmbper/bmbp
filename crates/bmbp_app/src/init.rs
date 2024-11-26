@@ -1,4 +1,7 @@
-use bmbp_vars::{app_locale, set_ctx_var, BMBP_APP_LOGIN_NAME, BMBP_APP_WHITE_LIST};
+use bmbp_vars::{
+    app_locale, set_ctx_var, BMBP_APP_HOME_URL, BMBP_APP_LOCALE, BMBP_APP_LOGIN_NAME,
+    BMBP_APP_WHITE_LIST,
+};
 use rust_embed::RustEmbed;
 use salvo::Router;
 
@@ -20,4 +23,5 @@ pub fn init_template() {
 pub fn init_white_list() {
     set_ctx_var(BMBP_APP_WHITE_LIST, "/static/**,/auth/**");
     set_ctx_var(BMBP_APP_LOGIN_NAME, "Bmbp应用开发脚手架");
+    set_ctx_var(BMBP_APP_HOME_URL, "/framework.view");
 }

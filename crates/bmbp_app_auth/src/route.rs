@@ -1,4 +1,4 @@
-use crate::login::{do_login, login_call_back, login_view};
+use crate::login::{do_login, login_call_back, login_out, login_view};
 use crate::middle::auth_middle;
 use bmbp_abc::tera_add_template;
 use rust_embed::RustEmbed;
@@ -16,7 +16,13 @@ pub fn build_router() -> Router {
     let auth_router = Router::with_path("auth")
         .push(Router::with_path("login.view").get(login_view))
         .push(Router::with_path("login.action").post(do_login))
-        .push(Router::with_path("callback.action").get(login_call_back));
+        .push(Router::with_path("callback.action").get(login_call_back))
+        .push(
+            Router::with_path("logout.action")
+                .get(login_out)
+                .post(login_out),
+        );
+
     router = router.push(auth_router);
     router = router.push(
         Router::with_path("/static/bmbp_app_auth/<**path>").get(static_embed::<StaticAssets>()),

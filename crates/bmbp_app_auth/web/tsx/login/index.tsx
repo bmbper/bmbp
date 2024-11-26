@@ -6,6 +6,7 @@ window.onload = () => {
 }
 
 const LoginView = () => {
+    HomeAction.init();
     return (
         <>
             <div className="bmbp_login">
@@ -32,7 +33,7 @@ const LoginView = () => {
 }
 const FormView = () => {
     return (<>
-        <arco.Form style={{width: "100%"}} autoComplete='off' className={"login_form_body"}>
+        <arco.Form ref={HomeState.loginRef} style={{width: "100%"}} autoComplete='off' className={"login_form_body"}>
             <arco.Form.Item label='用户名' field={'username'} className={"login_form_field"}
                             rules={[{required: true, message: "用户名不能为空"}]}>
                 <arco.Input placeholder=''/>
@@ -42,7 +43,10 @@ const FormView = () => {
                 <arco.Input type="password" placeholder=''/>
             </arco.Form.Item>
             <arco.Form.Item label=" " className={"login_form_field"}>
-                <arco.Button type='primary' className={"login_form_button"}>登录</arco.Button>
+                <arco.Button type='primary' className={"login_form_button"} onClick={() => {
+                    HomeAction.doLogin();
+                }}>登录
+                </arco.Button>
             </arco.Form.Item>
         </arco.Form>
     </>)
