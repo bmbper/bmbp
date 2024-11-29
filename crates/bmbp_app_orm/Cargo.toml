@@ -10,3 +10,4 @@ homepage.workspace = true
 repository.workspace = true
 documentation.workspace = true
 [dependencies]
+bmbp_orm = { workspace = true }
