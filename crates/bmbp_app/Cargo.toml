@@ -10,10 +10,7 @@ homepage.workspace = true
 repository.workspace = true
 documentation.workspace = true
 [dependencies]
-salvo = { workspace = true }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
-tokio = { workspace = true }
+
 bmbp_orm = { workspace = true }
 bmbp_sql = { workspace = true }
 bmbp_ui_lib = { workspace = true }
@@ -22,5 +19,15 @@ bmbp_home = { workspace = true }
 bmbp_framework = { workspace = true }
 bmbp_vars = { workspace = true }
 bmbp_app_auth = { workspace = true }
+bmbp_rbac = { workspace = true }
+
+
+
+
+salvo = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tokio = { workspace = true }
+
 rust-i18n = { workspace = true }
 rust-embed = { workspace = true }

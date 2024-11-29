@@ -34,7 +34,7 @@ var LoginView = () => {
   }, /* @__PURE__ */ React.createElement("div", {
     className: "login_image"
   }, /* @__PURE__ */ React.createElement("img", {
-    src: "/static/bmbp_app_auth/image/login.jpeg"
+    src: "./../static/bmbp_app_auth/image/login.jpeg"
   }))), /* @__PURE__ */ React.createElement("div", {
     className: "login_right"
   }, /* @__PURE__ */ React.createElement("div", {

@@ -1,1 +1,1 @@
-sass --watch web/scss/theme/default/index.scss:static/theme/default/index.css
+sass --watch web/scss/default/index.scss:static/bmbp_ui_theme/css/default/index.css

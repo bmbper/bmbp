@@ -11,7 +11,7 @@ use salvo::prelude::*;
 #[handler]
 pub async fn login_view(req: &mut Request, resp: &mut Response, depot: &mut Depot) {
     let ctx = base_ctx();
-    let view_html = "login.html";
+    let view_html = "bmbp_app_auth/login.html";
     resp.render(Text::Html(
         BMBP_TERA.read().unwrap().render(view_html, &ctx).unwrap(),
     ));

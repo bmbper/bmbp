@@ -6,7 +6,7 @@ use salvo::serve_static::static_embed;
 use salvo::Router;
 
 #[derive(RustEmbed)]
-#[folder = "static/bmbp_app_auth"]
+#[folder = "static/bmbp_app_auth/"]
 struct StaticAssets;
 
 pub fn build_router() -> Router {
@@ -31,8 +31,10 @@ pub fn build_router() -> Router {
 }
 
 #[derive(RustEmbed)]
-#[folder = "web/templates"]
+#[folder = "web/templates/"]
+#[prefix = "bmbp_app_auth/"]
 pub(crate) struct PageAssets;
+
 pub fn build_template() {
     for file_path in PageAssets::iter() {
         tera_add_template(file_path.as_ref(), PageAssets::get(file_path.as_ref()));

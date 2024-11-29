@@ -12,7 +12,7 @@ const LoginView = () => {
             <div className="bmbp_login">
                 <div className={"login_left"}>
                     <div className={'login_image'}>
-                        <img src={"/static/bmbp_app_auth/image/login.jpeg"}></img>
+                        <img src={"./../static/bmbp_app_auth/image/login.jpeg"}></img>
                     </div>
                 </div>
                 <div className={"login_right"}>
