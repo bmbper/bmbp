@@ -25,7 +25,7 @@ bmbp_bean = { version = "0.0.1", path = "crates/bmbp_bean" }
 bmbp_auth = { version = "0.0.1", path = "crates/bmbp_auth" }
 bmbp_app_auth = { version = "0.0.1", path = "crates/bmbp_app_auth" }
 bmbp_rbac = { version = "0.0.1", path = "crates/bmbp_rbac" }
-bmbp_util = { version = "0.0.1", path = "crates/bmbp_util" }
+bmbp_util = { version = "0.0.6", path = "crates/bmbp_util" }
 # web框架
 salvo = { version = "0.74", features = ["serve-static"] }
 tokio = { version = "1.40.0", features = ["full"] }
