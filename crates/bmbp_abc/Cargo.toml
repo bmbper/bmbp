@@ -13,4 +13,6 @@ documentation.workspace = true
 [dependencies]
 bmbp_vars = { workspace = true }
 tera = { workspace = true }
-rust-embed = "8.5.0"
+rust-embed = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

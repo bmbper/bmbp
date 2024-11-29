@@ -17,6 +17,6 @@ salvo = { workspace = true }
 wildmatch = "2.4.0"
 rust-embed = { workspace = true }
 bmbp_abc = { workspace = true }
-uuid = { version = "1.11.0", features = ["v4"] }
-serde = { version = "1.0.215", features = ["derive"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
 http = "1.1.0"
