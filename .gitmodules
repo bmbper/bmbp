@@ -28,3 +28,6 @@
 	path = crates/bmbp_bean
 	url = git@github.com:bmbper/bmbp_bean.git
 	branch = main
+[submodule "crates/bmbp_util"]
+	path = crates/bmbp_util
+	url = git@github.com:bmbper/bmbp_util.git

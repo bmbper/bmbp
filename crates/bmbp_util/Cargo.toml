@@ -1,6 +1,0 @@
-[package]
-name = "bmbp_util"
-version = "0.1.0"
-edition = "2021"
-[dependencies]
-gm-rs = { workspace = true }
