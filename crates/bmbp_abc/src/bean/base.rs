@@ -18,3 +18,15 @@ pub struct BmbpBase {
     pub data_update_time: String,
     pub data_update_user: String,
 }
+pub enum BmbpBaseColumn {
+    DataId,
+    DataStatus,
+    DataFlag,
+    DataLevel,
+    DataSign,
+    DataOwnerOrgCode,
+    DataCreateTime,
+    DataCreateUser,
+    DataUpdateTime,
+    DataUpdateUser,
+}

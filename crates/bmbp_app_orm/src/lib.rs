@@ -1,7 +1,7 @@
 use bmbp_orm::{RdbcDataSource, RdbcDbType, RdbcOrm};
-use std::sync::{Arc, LazyLock};
+use std::sync::{Arc, LazyLock, RwLock};
 
-pub static BMBP_APP_ORM: LazyLock<RdbcOrm> = LazyLock::new(|| {
+pub static BMBP_APP_ORM: LazyLock<RwLock<RdbcOrm>> = LazyLock::new(|| {
     // TODO BMBP_VARS
     let ds = RdbcDataSource {
         db_type: RdbcDbType::Mysql,
@@ -13,5 +13,5 @@ pub static BMBP_APP_ORM: LazyLock<RdbcOrm> = LazyLock::new(|| {
         charset: "".to_string(),
         pool_config: Default::default(),
     };
-    RdbcOrm::new(Arc::new(ds)).unwrap()
+    RwLock::new(RdbcOrm::new(Arc::new(ds)).unwrap())
 });

@@ -38,6 +38,26 @@ where
     pub data_update_user: String,
 }
 
+pub enum BmbpTreeColumn {
+    ParentNodeCode,
+    NodeCode,
+    NodeCodePath,
+    NodeName,
+    NodeNamePath,
+    NodeDesc,
+    NodeType,
+    NodeOrder,
+    DataId,
+    DataStatus,
+    DataFlag,
+    DataLevel,
+    DataSign,
+    DataOwnerOrgCode,
+    DataCreateTime,
+    DataUpdateTime,
+    DataUpdateUser,
+}
+
 /// RdbcTree 定义树型抽象
 struct RdbcTreeNodeRef<'a, T>
 where

@@ -27,6 +27,7 @@ bmbp_app_auth = { version = "0.0.1", path = "crates/bmbp_app_auth" }
 bmbp_rbac = { version = "0.0.1", path = "crates/bmbp_rbac" }
 bmbp_util = { version = "0.0.6", path = "crates/bmbp_util" }
 bmbp_app_orm = { version = "0.0.1", path = "crates/bmbp_app_orm" }
+bmbp_marco_table = { version = "0.0.1", path = "crates/bmbp_marco_table" }
 # web框架
 salvo = { version = "0.74", features = ["serve-static"] }
 tokio = { version = "1.40.0", features = ["full"] }
@@ -64,4 +65,3 @@ case_style = "0.2.1"
 base64 = "0.22.1"
 rust-i18n = "3.1.2"
 # msg
-rdkafka = "0.36.2"
