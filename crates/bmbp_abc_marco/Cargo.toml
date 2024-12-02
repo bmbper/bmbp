@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_marco_table"
+name = "bmbp_abc_marco"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

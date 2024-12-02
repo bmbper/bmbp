@@ -1,5 +1,8 @@
+use bmbp_orm::{RdbcDataSource, RdbcDbType, RdbcOrm, BMBP_ORM};
 use bmbp_vars::{set_ctx_var, BMBP_APP_HOME_URL, BMBP_APP_LOGIN_NAME, BMBP_APP_WHITE_LIST};
 use salvo::Router;
+use std::sync::Arc;
+use tokio::sync::RwLock;
 
 pub fn init_app_router() -> Router {
     let mut router = Router::new()
@@ -22,4 +25,27 @@ pub fn init_white_list() {
     set_ctx_var(BMBP_APP_WHITE_LIST, "/static/**,/auth/**");
     set_ctx_var(BMBP_APP_LOGIN_NAME, "Bmbp应用开发脚手架");
     set_ctx_var(BMBP_APP_HOME_URL, "/framework.view");
+}
+
+pub async fn initialize_orm() {
+    let ds = RdbcDataSource {
+        db_type: RdbcDbType::Postgres,
+        host: "127.0.0.1".to_string(),
+        port: 5432,
+        user: "bmbp".to_string(),
+        password: "zgk0130!".to_string(),
+        db_name: "bmbp".to_string(),
+        charset: "utf8".to_string(),
+        pool_config: Default::default(),
+    };
+
+    let orm = RdbcOrm::new(Arc::new(ds))
+        .await
+        .expect("Failed to initialize ORM");
+    match BMBP_ORM.set(RwLock::new(orm)) {
+        Ok(v) => {}
+        Err(err) => {
+            println!("{}", "赋值失败¬")
+        }
+    }
 }
