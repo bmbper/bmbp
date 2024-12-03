@@ -1,5 +1,5 @@
 [package]
-name = "bmbp_app_orm"
+name = "bmbp_orm_marco"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -9,5 +9,6 @@ readme.workspace = true
 homepage.workspace = true
 repository.workspace = true
 documentation.workspace = true
+
 [dependencies]
-bmbp_orm = { workspace = true }
+bmbp_sql = { workspace = true }
