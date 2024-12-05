@@ -1,0 +1,161 @@
+@use "./vars";
+
+.bmbp_framework {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: stretch;
+  box-sizing: border-box;
+}
+
+.bmbp_header {
+  width: 100%;
+  height: vars.$bmbp_header_height;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  background: vars.$bmbp_header_background;
+}
+
+.bmbp_app_icon {
+  height: vars.$bmbp_header_height;
+  width: vars.$bmbp_aside_width;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  align-content: center;
+  gap: 12px;
+
+  img {
+    width: vars.$bmbp_header_height - 18px;
+    height: vars.$bmbp_header_height - 18px;
+    color: white;
+  }
+
+  span {
+    width: 100%;
+    height: vars.$bmbp_header_height;
+    font-family: "Microsoft YaHei", serif;
+    font-size: 30px;
+    font-weight: bolder;
+    color: white;
+    text-wrap: nowrap;
+    display: flex;
+    align-items: center;
+    align-content: center;
+  }
+
+}
+
+.bmbp_app_nav {
+  height: vars.$bmbp_header_height;
+  flex: 1;
+  padding: 0 4px;
+  display: flex;
+  justify-content: start;
+  align-content: center;
+  align-items: center;
+  color: white;
+  gap: 16px;
+}
+
+.bmbp_app_setting {
+  height: vars.$bmbp_header_height;
+  width: 200px;
+  display: flex;
+  align-content: center;
+  justify-content: flex-end;
+  align-items: center;
+  color: white;
+  box-sizing: border-box;
+  gap: 24px;
+  margin-right: 12px;
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.bmbp_app_user {
+  height: vars.$bmbp_header_height;
+  width: vars.$bmbp_header_height;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+
+.bmbp_center {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.bmbp_aside {
+  width: vars.$bmbp_aside_width;
+  height: 100%;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.bmbp_divider_v {
+  width: 1px;
+  height: 100%;
+  background-color: vars.$bmbp_border_color;
+}
+
+.bmbp_bottom {
+  width: 100%;
+  height: vars.$bmbp_bottom_height;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.bmbp_nav_menu {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+
+.arco-menu-vertical .arco-menu-inner {
+  padding: 0;
+}
+
+.bmbp_page_breadcrumb {
+  width: 100%;
+  height: vars.$bmbp_breadcrumb_height;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  background-color: vars.$bmbp_breadcrumb_background;
+}
+
+.bmbp_page_iframe {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  border: 0;
+}
+
+.bmbp_copy_right {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: vars.$bmbp_copyright_background;
+  color: vars.$bmbp_copyright_color;
+}

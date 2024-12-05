@@ -1,4 +1,4 @@
-use bmbp_orm::{RdbcDataSource, RdbcDbType, RdbcOrm, BMBP_ORM};
+use bmbp_orm::{init_bmbp_orm, RdbcDataSource, RdbcDbType, RdbcOrm, BMBP_ORM};
 use bmbp_vars::{set_ctx_var, BMBP_APP_HOME_URL, BMBP_APP_LOGIN_NAME, BMBP_APP_WHITE_LIST};
 use salvo::Router;
 use std::sync::Arc;
@@ -38,14 +38,8 @@ pub async fn initialize_orm() {
         charset: "utf8".to_string(),
         pool_config: Default::default(),
     };
-
-    let orm = RdbcOrm::new(Arc::new(ds))
-        .await
-        .expect("Failed to initialize ORM");
-    match BMBP_ORM.set(RwLock::new(orm)) {
-        Ok(v) => {}
-        Err(err) => {
-            println!("{}", "赋值失败¬")
-        }
+    let rs = init_bmbp_orm(ds).await;
+    if rs.is_err() {
+        panic!("{}", rs.err().unwrap().to_string())
     }
 }
