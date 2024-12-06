@@ -8,6 +8,7 @@
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  background-color: vars.$bmbp_page_background_color;
 }
 
 .bmbp_page_grid {
@@ -36,7 +37,6 @@
 }
 
 .bmbp_page_tree {
-  background: #165dff;
   height: 100%;
   width: 100%;
 
@@ -46,19 +46,90 @@
     display: flex;
     justify-content: start;
     align-items: center;
+    text-align: center;
+    background: #ffffff;
 
     .tree_title {
       height: 100%;
+      display: flex;
+      justify-content: start;
+      align-items: center;
+      padding: 0 10px;
+      font-size: 16px;
+      font-weight: bold;
+      box-sizing: border-box;
+      color: vars.$bmbp_font_color;
+      line-height: vars.$bmbp_tree_header_height;
       flex: 1;
     }
 
     .tree_action {
+      display: flex;
+      justify-content: end;
+      align-items: center;
+      height: 100%;
+      padding: 0 10px;
+      box-sizing: border-box;
+      flex: 1;
       width: 80px;
+      color: #165dff;
+      cursor: pointer;
     }
   }
 
-  .tree_body {
-
+  .tree_search {
+    width: 100%;
+    height: 48px;
+    padding: 5px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
+  .tree_body {
+    padding: 5px;
+    box-sizing: border-box;
+    overflow: auto;
+
+    .tree_node_action {
+      margin: auto;
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+
+      svg {
+        color: #165dff;
+        fill: #165dff;
+      }
+    }
+  }
+}
+
+.tree_node_action_menu {
+  width: 120px;
+  background: #f2f3f5;
+  padding: 5px;
+
+
+  .menu_item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 0;
+    height: 24px;
+    background: #f2f3f5;
+
+    &:hover {
+      background: #165dff;
+      color: #ffffff;
+    }
+
+    // 添加分隔线样式
+    &:not(:last-child) {
+      border-bottom: 1px solid #ccc;
+    }
+  }
 }

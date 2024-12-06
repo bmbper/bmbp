@@ -206,6 +206,7 @@ html, body, #app {
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  background-color: #fff;
 }
 
 .bmbp_page_grid {
@@ -214,23 +215,89 @@ html, body, #app {
   flex: auto;
 }
 .bmbp_page_tree {
-  background: #165dff;
   height: 100%;
   width: 100%;
 }
 .bmbp_page_tree .tree_header {
   width: 100%;
-  height: 48px;
+  height: 32px;
   display: flex;
   justify-content: start;
   align-items: center;
+  text-align: center;
+  background: #ffffff;
 }
 .bmbp_page_tree .tree_header .tree_title {
   height: 100%;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 16px;
+  font-weight: bold;
+  box-sizing: border-box;
+  color: #333333;
+  line-height: 32px;
   flex: 1;
 }
 .bmbp_page_tree .tree_header .tree_action {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  height: 100%;
+  padding: 0 10px;
+  box-sizing: border-box;
+  flex: 1;
   width: 80px;
+  color: #165dff;
+  cursor: pointer;
+}
+.bmbp_page_tree .tree_search {
+  width: 100%;
+  height: 48px;
+  padding: 5px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.bmbp_page_tree .tree_body {
+  padding: 5px;
+  box-sizing: border-box;
+  overflow: auto;
+}
+.bmbp_page_tree .tree_body .tree_node_action {
+  margin: auto;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.bmbp_page_tree .tree_body .tree_node_action svg {
+  color: #165dff;
+  fill: #165dff;
+}
+
+.tree_node_action_menu {
+  width: 120px;
+  background: #f2f3f5;
+  padding: 5px;
+}
+.tree_node_action_menu .menu_item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  padding: 0;
+  height: 24px;
+  background: #f2f3f5;
+}
+.tree_node_action_menu .menu_item:hover {
+  background: #165dff;
+  color: #ffffff;
+}
+.tree_node_action_menu .menu_item:not(:last-child) {
+  border-bottom: 1px solid #ccc;
 }
 
 /*# sourceMappingURL=index.css.map */
