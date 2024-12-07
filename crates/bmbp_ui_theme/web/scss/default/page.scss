@@ -12,24 +12,88 @@
 }
 
 .bmbp_page_grid {
-  background-color: #1e3768;
   height: 100%;
   flex: auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 5px;
 
-  .grid_search_form {
+  .search_form {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    box-sizing: border-box;
 
+    .search_body {
+      box-sizing: border-box;
+      height: 100%;
+      flex: 1;
+      padding: 0 5px;
+
+      .arco-form-item {
+        margin: 5px 0;
+      }
+    }
+
+    .search_action {
+      display: flex;
+      justify-content: end;
+      align-items: center;
+      padding: 0 5px;
+      gap: 8px;
+      border-left: 1px solid #F7F8FA;
+    }
   }
 
   .grid_tool_bar {
+    height: 48px;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 12px;
 
+    .left {
+      display: flex;
+      justify-content: start;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .right {
+      display: flex;
+      justify-content: end;
+      align-items: center;
+      gap: 12px;
+    }
   }
 
   .grid_table {
+    flex: 1;
+    width: 100%;
 
   }
 
-  .grid_page {
+  .grid_row_action {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
 
+    button {
+      padding: 4px;
+      margin: 0;
+    }
+  }
+
+  .grid_page {
+    width: 100%;
+    height: 48px;
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    padding: 0 10px;
   }
 }
 
