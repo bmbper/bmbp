@@ -25,9 +25,8 @@ bmbp_bean = { version = "0.0.1", path = "crates/bmbp_bean" }
 bmbp_auth = { version = "0.0.1", path = "crates/bmbp_auth" }
 bmbp_app_auth = { version = "0.0.1", path = "crates/bmbp_app_auth" }
 bmbp_rbac = { version = "0.0.1", path = "crates/bmbp_rbac" }
-bmbp_util = "0.0.6"
-bmbp_rdbc_type = "0.3.2"
-bmbp_marco_rdbc = "0.0.18"
+bmbp_util = { version = "0.0.7", path = "crates/bmbp_util" }
+bmbp_orm_marco = { version = "0.0.1", path = "crates/bmbp_orm_marco" }
 
 
 # web框架

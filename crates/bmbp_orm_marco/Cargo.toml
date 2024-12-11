@@ -9,6 +9,14 @@ readme.workspace = true
 homepage.workspace = true
 repository.workspace = true
 documentation.workspace = true
-
+[lib]
+proc-macro = true
 [dependencies]
 bmbp_sql = { workspace = true }
+bmbp_orm = { workspace = true }
+bmbp_util = { workspace = true }
+case_style = "0.2.1"
+serde = { version = "1.0.204", features = ["derive"] }
+syn = "2.0.72"
+quote = "1.0.36"
+proc-macro2 = "1.0.86"
