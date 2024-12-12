@@ -18,3 +18,4 @@ rust-embed = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 salvo = { workspace = true }
+bmbp_orm = { workspace = true }
