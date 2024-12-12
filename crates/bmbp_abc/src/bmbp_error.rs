@@ -1,4 +1,5 @@
 use bmbp_bean::RespVo;
+use salvo::prelude::Json;
 use salvo::prelude::Text::Plain;
 use salvo::{async_trait, Depot, Request, Response, Writer};
 use serde::{Deserialize, Serialize};

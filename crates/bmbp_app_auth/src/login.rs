@@ -28,7 +28,7 @@ pub async fn do_login(req: &mut Request, resp: &mut Response, depot: &mut Depot)
     {
         let token = BmbpAuthUtil::login_by_uid(login_user.username.clone());
         let resp_vo = RespVo::<BmbpToken> {
-            code: 0,
+            code: "0".to_string(),
             msg: "登录成功".to_string(),
             data: Some(token.clone()),
         };
@@ -42,7 +42,7 @@ pub async fn do_login(req: &mut Request, resp: &mut Response, depot: &mut Depot)
         resp.render(Json(resp_vo))
     } else {
         let resp_vo = RespVo::<String> {
-            code: -1,
+            code: "-1".to_string(),
             msg: "用户名或密码错误".to_string(),
             data: None,
         };
@@ -62,7 +62,7 @@ pub async fn login_out(
     let token = get_token_value(req);
     BmbpAuthUtil::logout_by_token(token);
     let resp_vo = RespVo::<String> {
-        code: 0,
+        code: "0".to_string(),
         msg: "退出成功".to_string(),
         data: None,
     };
