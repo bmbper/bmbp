@@ -1,8 +1,6 @@
 use bmbp_orm::{init_bmbp_orm, RdbcDataSource, RdbcDbType, RdbcOrm, BMBP_ORM};
 use bmbp_vars::{set_ctx_var, BMBP_APP_HOME_URL, BMBP_APP_LOGIN_NAME, BMBP_APP_WHITE_LIST};
 use salvo::Router;
-use std::sync::Arc;
-use tokio::sync::RwLock;
 
 pub fn init_app_router() -> Router {
     let mut router = Router::new()

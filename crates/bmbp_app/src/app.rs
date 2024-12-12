@@ -1,9 +1,7 @@
 use crate::init::{init_app_router, init_template, init_white_list, initialize_orm};
 use bmbp_vars::app_locale;
 use salvo::conn::TcpListener;
-use salvo::routing::get;
-use salvo::{handler, Listener, Router, Server};
-use tracing_subscriber::util::SubscriberInitExt;
+use salvo::{Listener, Server};
 
 pub struct BmbpApp {}
 impl BmbpApp {
