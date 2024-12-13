@@ -13,9 +13,9 @@ documentation.workspace = true
 [dependencies]
 bmbp_vars = { workspace = true }
 bmbp_bean = { workspace = true }
+bmbp_orm = { workspace = true }
 tera = { workspace = true }
 rust-embed = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 salvo = { workspace = true }
-bmbp_orm = { workspace = true }

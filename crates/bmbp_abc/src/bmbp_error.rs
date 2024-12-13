@@ -1,5 +1,5 @@
 use bmbp_bean::RespVo;
-use salvo::prelude::Json;
+use bmbp_orm::error::OrmError;
 use salvo::prelude::Text::Plain;
 use salvo::{async_trait, Depot, Request, Response, Writer};
 use serde::{Deserialize, Serialize};
@@ -80,6 +80,18 @@ impl From<salvo::Error> for BmbpError {
                 msg: "API".to_string(),
             },
             message: value.to_string(),
+        }
+    }
+}
+
+impl From<OrmError> for BmbpError {
+    fn from(value: OrmError) -> Self {
+        BmbpError {
+            kind: BmbpErrorKind::ORM {
+                code: "1000".to_string(),
+                msg: "ORM异常".to_string(),
+            },
+            message: value.msg,
         }
     }
 }
