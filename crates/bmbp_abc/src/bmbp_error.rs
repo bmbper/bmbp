@@ -52,6 +52,15 @@ impl BmbpError {
             message: msg,
         }
     }
+    pub fn valid(msg: &str) -> BmbpError {
+        BmbpError {
+            kind: BmbpErrorKind::Valid {
+                code: "1000".to_string(),
+                msg: "校验失败".to_string(),
+            },
+            message: msg.to_string(),
+        }
+    }
 }
 
 pub type BmbpResp<T> = Result<T, BmbpError>;
