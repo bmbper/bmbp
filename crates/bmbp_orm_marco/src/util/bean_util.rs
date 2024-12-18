@@ -241,7 +241,7 @@ pub(crate) fn build_impl_table_token(
 pub(crate) fn build_impl_tree_token(struct_ident: &Ident, tree_prefix: String) -> TokenStream {
     let tree_code = format_ident!("{}_code", tree_prefix);
     let parent_code = format_ident!("{}_parent_code", tree_prefix);
-    let children_code = format_ident!("{}_children", tree_prefix);
+    let children = format_ident!("{}_children", tree_prefix);
     let tree_sort = format_ident!("{}_sort", tree_prefix);
 
     quote! {
@@ -261,13 +261,13 @@ pub(crate) fn build_impl_tree_token(struct_ident: &Ident, tree_prefix: String) -
                 self
             }
             fn get_children(&self) -> &[#struct_ident] {
-                self.#children_code.as_slice()
+                self.#children.as_slice()
             }
             fn get_children_mut(&mut self) -> &mut [#struct_ident] {
-                self.#children_code.as_mut()
+                self.#children.as_mut()
             }
             fn set_children(&mut self, children: Vec<#struct_ident>) -> &mut Self {
-                self.#children_code = children;
+                self.#children = children;
                 self
             }
             fn get_order(&self) -> u64 {
